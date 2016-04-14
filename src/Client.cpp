@@ -61,16 +61,12 @@ Client::Client(QWidget *parent) : QMainWindow(parent), protocolClient(nullptr), 
 
 	OPENMITTSU_CONNECT(mc, newUnreadMessageAvailable(ChatTab*), this, messageCenterOnHasUnreadMessages(ChatTab*));
 
+	QString const apiServerRootCertificate = QStringLiteral("LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUVZVENDQTBtZ0F3SUJBZ0lKQU0xRFIvREJSRnBRTUEwR0NTcUdTSWIzRFFFQkJRVUFNSDB4Q3pBSkJnTlYKQkFZVEFrTklNUXN3Q1FZRFZRUUlFd0phU0RFUE1BMEdBMVVFQnhNR1duVnlhV05vTVJBd0RnWURWUVFLRXdkVQphSEpsWlcxaE1Rc3dDUVlEVlFRTEV3SkRRVEVUTUJFR0ExVUVBeE1LVkdoeVpXVnRZU0JEUVRFY01Cb0dDU3FHClNJYjNEUUVKQVJZTlkyRkFkR2h5WldWdFlTNWphREFlRncweE1qRXhNVE14TVRVNE5UaGFGdzB6TWpFeE1EZ3gKTVRVNE5UaGFNSDB4Q3pBSkJnTlZCQVlUQWtOSU1Rc3dDUVlEVlFRSUV3SmFTREVQTUEwR0ExVUVCeE1HV25WeQphV05vTVJBd0RnWURWUVFLRXdkVWFISmxaVzFoTVFzd0NRWURWUVFMRXdKRFFURVRNQkVHQTFVRUF4TUtWR2h5ClpXVnRZU0JEUVRFY01Cb0dDU3FHU0liM0RRRUpBUllOWTJGQWRHaHlaV1Z0WVM1amFEQ0NBU0l3RFFZSktvWkkKaHZjTkFRRUJCUUFEZ2dFUEFEQ0NBUW9DZ2dFQkFLOEdkb1Q3SXBOQzNEejdJVUdZVzlwT0J3eCs5RW5EWnJrTgpWRDhsM0tmQkhqR1RkaTlnUTZOaCttUTkveVE4MjU0VDJiaWc5cDBoY244a2pnRVFnSldIcE5oWW5PaHkzaTBqCmNtbHpiMU1GL2RlRmpKVnR1TVAzdHFUd2lNYXZwd2VvYTIwbEdEbi9DTFpvZHUwUmE4b0w3OGI2RlZ6dE5rV2cKUGRpV0NsTWswSlBQTWxmTEVpSzhoZkhFKzZtUlZYbWkxMml0SzFzZW1td3lIS2RqOWZHNFg5K3JRMnNLdUxmZQpqeDd1RnhuQUYrR2l2Q3VDbzh4Zk9lc0x3NzJ2eCtXN21tZFlzaGcvbFhPY3F2c3pRUS9MbUZFVlFZeE5hZWVWCm5QU0FzK2h0OHZVUFc0c1g5SWtYS1ZnQkpkMVIxaXNVcG9GNmRLbFVleG12THhFeWY1Y0NBd0VBQWFPQjR6Q0IKNERBZEJnTlZIUTRFRmdRVXc2TGFDNytKNjJyS2RhVEEzN2tBWVlVYnJrZ3dnYkFHQTFVZEl3U0JxRENCcFlBVQp3NkxhQzcrSjYycktkYVRBMzdrQVlZVWJya2loZ1lHa2Z6QjlNUXN3Q1FZRFZRUUdFd0pEU0RFTE1Ba0dBMVVFCkNCTUNXa2d4RHpBTkJnTlZCQWNUQmxwMWNtbGphREVRTUE0R0ExVUVDaE1IVkdoeVpXVnRZVEVMTUFrR0ExVUUKQ3hNQ1EwRXhFekFSQmdOVkJBTVRDbFJvY21WbGJXRWdRMEV4SERBYUJna3Foa2lHOXcwQkNRRVdEV05oUUhSbwpjbVZsYldFdVkyaUNDUUROUTBmd3dVUmFVREFNQmdOVkhSTUVCVEFEQVFIL01BMEdDU3FHU0liM0RRRUJCUVVBCkE0SUJBUUFSSE15SUhCREZ1bCtodmpBQ3Q2cjBFQUhZd1I5R1FTZ2hJUXNmSHQ4Y3lWY3ptRW5KSDlocnZoOVEKVml2bTdtcmZ2ZWlobU5YQW40V2xHd1ErQUN1VnRUTHh3OEVyYlNUN0lNQU94OW5wSGYva25nblo0blN3VVJGOQpyQ0V5SHExNzlwTlhwT3paMjU3RTVyMGF2TU5OWFhEd3VsdzAzaUJFMjFlYmQwMHBHMTFHVnEvSTI2cys4QmpuCkRLUlBxdUtyU080L2x1RUR2TDRuZ2lRalpwMzJTOVoxSzlzVk96cXRRN0k5enplVUFEbTNhVmEvQnBhdzRpTVIKMVNJN285YUpZaVJpMWd4WVAyQlVBMUlGcXI4Tnp5ZkdEN3RSSGRxN2JaT3hYQWx1djgxZGNiejBTQlg4U2dWMQo0SEVLYzZ4TUFObllzL2FZS2p2bVAwVnBPdlJVCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0=");
+	PublicKey const longTermServerPublicKey = PublicKey::fromHexString(QStringLiteral("b851ae1bf275ebe6851ca7f5206b495080927159787e9aaabbeb4e55af09d805"));
+
+	serverConfiguration = new ServerConfiguration(QStringLiteral("g-xx.0.threema.ch"), 5222, longTermServerPublicKey, QStringLiteral("https://api.threema.ch/identity/%1"), QStringLiteral("Threema/2.2A"), apiServerRootCertificate, QStringLiteral("https://%1.blob.threema.ch/%2"), QStringLiteral("https://%1.blob.threema.ch/%2/done"), QStringLiteral("https://upload.blob.threema.ch/upload"), QStringLiteral("Threema/2.2A"), apiServerRootCertificate);
+
 	// Load stored settings
-	if (settings->contains("serverConfigurationFile")) {
-		if (validateServerConfigurationFile(settings->value("serverConfigurationFile").toString(), true)) {
-			this->serverConfiguration = new ServerConfiguration(ServerConfiguration::fromFile(settings->value("serverConfigurationFile").toString()));
-			updateServerSettingsInfo(settings->value("serverConfigurationFile").toString());
-		} else {
-			LOGGER_DEBUG("Removing key \"serverConfigurationFile\" from stored settings as the file is not valid.");
-			settings->remove("serverConfigurationFile");
-		}
-	}
 	if (settings->contains("clientConfigurationFile")) {
 		if (validateClientConfigurationFile(settings->value("clientConfigurationFile").toString(), true)) {
 			this->clientConfiguration = new ClientConfiguration(ClientConfiguration::fromFile(settings->value("clientConfigurationFile").toString()));
@@ -93,7 +89,6 @@ Client::Client(QWidget *parent) : QMainWindow(parent), protocolClient(nullptr), 
 
 	OPENMITTSU_CONNECT(contactRegistry, identitiesChanged(), this, contactRegistryOnIdentitiesChanged());
 	OPENMITTSU_CONNECT(ui.btnConnect, clicked(), this, btnConnectOnClick());
-	OPENMITTSU_CONNECT(ui.btnOpenServerIni, clicked(), this, btnOpenServerIniOnClick());
 	OPENMITTSU_CONNECT(ui.btnOpenClientIni, clicked(), this, btnOpenClientIniOnClick());
 	OPENMITTSU_CONNECT(ui.btnOpenContacts, clicked(), this, btnOpenContactsOnClick());
 	OPENMITTSU_CONNECT(ui.listContacts, itemDoubleClicked(QListWidgetItem*), this, listContactsOnDoubleClick(QListWidgetItem*));
@@ -215,10 +210,6 @@ void Client::audioOutputOnStateChanged(QAudio::State state) {
 	}
 }
 
-void Client::updateServerSettingsInfo(QString const& currentFileName) {
-	ui.lblServerIni->setText(currentFileName);
-}
-
 void Client::updateClientSettingsInfo(QString const& currentFileName) {
 	ui.lblClientIni->setText(currentFileName);
 	if (clientConfiguration != nullptr) {
@@ -238,7 +229,7 @@ void Client::updateKnownContactsInfo(QString const& currentFileName) {
 void Client::btnConnectOnClick() {
 	if (connectionState == ConnectionState::STATE_DISCONNECTED) {
 		if ((serverConfiguration == nullptr) || (clientConfiguration == nullptr)) {
-			QMessageBox::warning(this, "Can not connect", "Please choose a valid server- and client configuration file first.");
+			QMessageBox::warning(this, "Can not connect", "Please choose a valid client configuration file first.");
 			return;
 		}
 
@@ -255,23 +246,6 @@ void Client::btnConnectOnClick() {
 		ui.btnConnect->setText("Disconnecting...");
 		QTimer::singleShot(0, protocolClient, SLOT(disconnectFromServer()));
 	}
-}
-
-bool Client::validateServerConfigurationFile(QString const& fileName, bool quiet) {
-	try {
-		QFile inputFile(fileName);
-		if (!inputFile.exists()) {
-			return false;
-		}
-
-		ServerConfiguration sc(ServerConfiguration::fromFile(fileName));
-		return true;
-	} catch (IllegalArgumentException& iax) {
-		if (!quiet) {
-			QMessageBox::warning(this, "Invalid Server Configuration file", QString("The selected file can not be used.\nReason: %1").arg(iax.what()));
-		}
-	}
-	return false;
 }
 
 bool Client::validateClientConfigurationFile(QString const& fileName, bool quiet) {
@@ -306,16 +280,6 @@ bool Client::validateKnownIdentitiesFile(QString const& fileName, bool quiet) {
 		}
 	}
 	return false;
-}
-
-void Client::btnOpenServerIniOnClick() {
-	QString fileName = QFileDialog::getOpenFileName(this, "Select a ServerConfiguration.ini file");
-	if (fileName.isNull() || fileName.isEmpty() || !validateServerConfigurationFile(fileName)) {
-		return;
-	} 
-	serverConfiguration = new ServerConfiguration(ServerConfiguration::fromFile(fileName));
-	settings->setValue("serverConfigurationFile", fileName);
-	updateServerSettingsInfo(fileName);
 }
 
 void Client::btnOpenClientIniOnClick() {
@@ -496,7 +460,7 @@ void Client::listContactsOnContextMenu(QPoint const& pos) {
 		QAction* selectedItem = listContactsContextMenu.exec(globalPos);
 		if (selectedItem != nullptr) {
 			if (selectedItem == actionEdit) {
-
+				showNotYetImplementedInfo();
 			} else if (selectedItem == actionOpenClose) {
 				if (isChatWindowOpen) {
 					if (isIdentityContact) {

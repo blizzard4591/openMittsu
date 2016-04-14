@@ -27,7 +27,6 @@ public:
 private slots:
 	// UI
 	void btnConnectOnClick();
-	void btnOpenServerIniOnClick();
 	void btnOpenClientIniOnClick();
 	void btnOpenContactsOnClick();
 	void listContactsOnDoubleClick(QListWidgetItem* item);
@@ -96,10 +95,8 @@ private:
 	ClientConfiguration* clientConfiguration;
 	ContactRegistry* contactRegistry;
 
-	bool validateServerConfigurationFile(QString const& fileName, bool quiet = false);
 	bool validateClientConfigurationFile(QString const& fileName, bool quiet = false);
 	bool validateKnownIdentitiesFile(QString const& fileName, bool quiet = false);
-	void updateServerSettingsInfo(QString const& currentFileName);
 	void updateClientSettingsInfo(QString const& currentFileName);
 	void updateKnownContactsInfo(QString const& currentFileName);
 	void uiFocusOnOverviewTab();

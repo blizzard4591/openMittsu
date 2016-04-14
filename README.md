@@ -14,6 +14,7 @@ openMittsu is governed by the GNU GPL v2.0 license, but includes works from diff
 Currently, the application has been built and tested on:
  - Windows 7 using Visual Studio 2013
  - Windows 7 using Visual Studio 2015
+ - Windows 10 using Visual Studio 2015
  - Debian 8 using GCC 4.8 (AMD64)
  - Debian 8 using GCC 4.9 (PPC)
  
@@ -57,23 +58,7 @@ ABCD1234 : aabbccddeeff00112233445566778899aabbccddeeff00112233445566778899 : Mr
    2. In openMittsu, click on Identity, Load Backup.
    3. Enter the exported backup and the password.
    4. Choose a suitable location and let the application save the generated client configuration there.
-  
- - The server configuration. This file contains the Server URL, the servers long term public key and accompanying certificates.
- The template of the server configuration file looks like this:
- ```
-[General]
-serverHost=example.com
-serverPort=12345
-serverLongTermPublicKey=aabbccddeeff00112233445566778899aabbccddeeff00112233445566778899
-identityRequestUrl="https://example.com/%1"
-identityRequestAgent="openMittsu/1.0A"
-identityServerCertificate="Base64-encoded PEM certificate"
-imageRequestDownloadUrl="https://%1.example.com/%2"
-imageRequestDownloadFinishedUrl="https://%1.example.com/%2/done"
-imageRequestUploadUrl="https://example.com/upload"
-imageRequestAgent="openMittsu/1.0A"
-imageServerCertificate="Base64-encoded PEM certificate"
- ```
+
  
 ## Acknowledgement
 Without the initial research and publication by [Jan Ahrens](http://blog.jan-ahrens.eu/2014/03/22/threema-protocol-analysis.html) this project would have been so much more difficult, if not impossible.
