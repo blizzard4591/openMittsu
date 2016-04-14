@@ -9,7 +9,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 
-SET(CMAKE_PREFIX_PATH "D:/Qt/Qt5.6.0/5.6/msvc2015_64/lib/cmake/")
 SET(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${PROJECT_SOURCE_DIR}/cmake/")
 
 # SpdLog base path, included via GIT Submodule
@@ -24,6 +23,9 @@ SET(CMAKEPORTABLEENDIAN_MODULE_BASEPATH "${PROJECT_SOURCE_DIR}/3rdparty/cmake-po
 option(OPENMITTSU_LINK_LIBCXXABI "Sets whether libc++abi should be linked." OFF)
 option(OPENMITTSU_USE_LIBCXX "Sets whether the standard library is libc++." OFF)
 option(OPENMITTSU_DEBUG "Sets whether debug checks, assertions and logging should be turned on. Has no effect on build under MSVC." OFF)
+SET(OPENMITTSU_CMAKE_SEARCH_PATH "D:/Qt/Qt5.6.0/5.6/msvc2015_64" CACHE PATH "Additional Qt5 search path" ) 
+
+SET(CMAKE_PREFIX_PATH "${OPENMITTSU_CMAKE_SEARCH_PATH}/lib/cmake/")
 
 if (OPENMITTSU_DEBUG)
 	SET(OPENMITTSU_CONFIG_DEBUG_FLAG_SET ON)
