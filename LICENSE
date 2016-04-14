@@ -1,4 +1,47 @@
-                    GNU GENERAL PUBLIC LICENSE
+openMittsu - An open source chat client for Threema-style end-to-end encrypted chat networks.
+
+	Copyright (C) 2015-16 by Philipp Berger
+
+	This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+This program incorporates work covered by the following copyright and
+permission notices:
+
+* DejaVu fonts included in /resources.
+> Fonts are © Bitstream. DejaVu changes are in public domain. Explanation of copyright is on Gnome page on Bitstream Vera fonts. Glyphs imported from Arev fonts are © Tavmjung Bah.
+See http://dejavu-fonts.org/wiki/License for more information.
+
+* Source Sans Pro fonts included in /resources.
+> Copyright 2010, 2012, 2014 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name 'Source'. All Rights Reserved. Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries.
+  This Font Software is licensed under the SIL Open Font License, Version 1.1.
+
+* OpenSansEmoji fonts included in /resources.
+> Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
+
+* Sound "NewMessage.mp3" as "receivedMessage.wav" in /resources, from https://freesound.org/people/melliug/sounds/221359/.
+> Licensed under the Creative Commons 0 License. See http://creativecommons.org/publicdomain/zero/1.0/.
+
+* LibQREncode, linked either statically or dynamically in most releases.
+> Copyright (C) 2006-2012 Kentaro Fukuchi (http://fukuchi.org/works/qrencode/).
+  Licensed under the GNU Lesser General Public License, version 2.1.
+  
+* LibSodium, linked either statically or dynamically in most releases.
+> Copyright (c) 2013-2015 Frank Denis <j at pureftpd dot org>.
+  Licensed under the ISC license.
+
+
+					GNU GENERAL PUBLIC LICENSE
                        Version 2, June 1991
 
  Copyright (C) 1989, 1991 Free Software Foundation, Inc., <http://fsf.org/>

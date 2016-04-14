@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ContactEditWizardPageInfo</class>
+ <widget class="QWizardPage" name="ContactEditWizardPageInfo">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Choose a contact to edit</string>
+  </property>
+  <property name="title">
+   <string>Edit Contact</string>
+  </property>
+  <property name="subTitle">
+   <string>Pick a name and choose the group members.</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QListWidget" name="listWidgetContacts">
+     <property name="selectionMode">
+      <enum>QAbstractItemView::MultiSelection</enum>
+     </property>
+     <item>
+      <property name="text">
+       <string>Contact 1</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Contact 2</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Contact 3</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

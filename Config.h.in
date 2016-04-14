@@ -1,0 +1,11 @@
+/*
+ * OpenMittsu - Build-in Options
+ *
+ * This file is parsed by CMake during makefile generation
+ */
+
+// Whether this is a debug build
+#cmakedefine OPENMITTSU_CONFIG_DEBUG_FLAG_SET
+ 
+// Whether support for QR Code generation is present
+#cmakedefine OPENMITTSU_CONFIG_HAVE_LIBQRENCODE

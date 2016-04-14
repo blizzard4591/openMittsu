@@ -1,0 +1,7 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="/fonts">
+    <file alias="SourceSansPro-Regular.ttf">SourceSansPro-Regular.ttf</file>
+	<file alias="DejaVuSans.ttf">DejaVuSans-2.34.ttf</file>
+	<file alias="OpenSansEmoji.ttf">OpenSansEmoji.ttf</file>
+</qresource>
+</RCC>

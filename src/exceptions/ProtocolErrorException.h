@@ -1,0 +1,9 @@
+#ifndef OPENMITTSU_EXCEPTIONS_PROTOCOLERROREXCEPTION_H_
+#define OPENMITTSU_EXCEPTIONS_PROTOCOLERROREXCEPTION_H_
+
+#include "exceptions/BaseException.h"
+#include "exceptions/ExceptionMacros.h"
+
+OPENMITTSU_NEW_EXCEPTION(ProtocolErrorException)
+
+#endif /* OPENMITTSU_EXCEPTIONS_PROTOCOLERROREXCEPTION_H_ */

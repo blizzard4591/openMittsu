@@ -26,3 +26,8 @@
 *.exe
 *.out
 *.app
+
+# Build Directories
+build/
+build-vc15/
+tmp/

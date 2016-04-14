@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>GroupCreationWizard</class>
+ <widget class="QWizard" name="GroupCreationWizard">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>404</width>
+    <height>387</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Group Creation Wizard</string>
+  </property>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

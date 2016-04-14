@@ -1,0 +1,9 @@
+#ifndef OPENMITTSU_EXCEPTIONS_INTERNALERROREXCEPTION_H_
+#define OPENMITTSU_EXCEPTIONS_INTERNALERROREXCEPTION_H_
+
+#include "exceptions/BaseException.h"
+#include "exceptions/ExceptionMacros.h"
+
+OPENMITTSU_NEW_EXCEPTION(InternalErrorException)
+ 
+#endif /* OPENMITTSU_EXCEPTIONS_INTERNALERROREXCEPTION_H_ */
