@@ -1,0 +1,13 @@
+# This is a comment line.
+# Format of this file: 
+# IDENTITY : PUBKEY : Nickname
+# where 
+# - IDENTITY is an eight character ID of the form [A-Z0-9]{8} and stands for a users public id,
+# - PUBKEY is an 64 character key of the form [a-fA-F0-9]{64} and stands for a users 32-Byte long-term public key,
+# - Nickname is an optional screen-name for the given identity.
+# GROUPID : IDENTITY, IDENTITY, IDENTITY : Group Name
+# where 
+# - IDENTITY is an eight character ID of the form [A-Z0-9]{8} and stands for a users public id,
+# - GROUPID is an 16 character key of the form [a-fA-F0-9]{16} and stands for a groups unique identifier,
+# - Group Name is the displayed title of the group.
+ECHOECHO : 4a6a1b34dcef15d43cb74de2fd36091be99fbbaf126d099d47d83d919712c72b : Echo Test
