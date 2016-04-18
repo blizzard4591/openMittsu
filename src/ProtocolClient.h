@@ -84,6 +84,7 @@ signals:
 
 	void groupSetupDone(GroupId const& groupId, bool successfull);
 
+	void duplicateIdUsageDetected();
 	void lostConnection();
 private slots:
 	void socketOnReadyRead();

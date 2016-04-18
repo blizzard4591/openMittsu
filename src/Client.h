@@ -64,6 +64,7 @@ public slots:
 	void protocolClientOnReadyConnect();
 	void protocolClientOnLostConnection();
 	void protocolClientOnConnectToFinished(int errCode, QString message);
+	void protocolClientOnDuplicateIdUsageDetected();
 
 	// Thread Handling
 	void threadFinished();

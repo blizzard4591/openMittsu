@@ -161,6 +161,7 @@ void Client::setupProtocolClient() {
 	OPENMITTSU_CONNECT(protocolClient, connectToFinished(int, QString), this, protocolClientOnConnectToFinished(int, QString));
 	OPENMITTSU_CONNECT(protocolClient, readyConnect(), this, protocolClientOnReadyConnect());
 	OPENMITTSU_CONNECT(protocolClient, lostConnection(), this, protocolClientOnLostConnection());
+	OPENMITTSU_CONNECT(protocolClient, duplicateIdUsageDetected(), this, protocolClientOnDuplicateIdUsageDetected());
 
 	QEventLoop eventLoop;
 
@@ -361,6 +362,11 @@ void Client::protocolClientOnLostConnection() {
 	ui.btnConnect->setText("Connect");
 	ui.btnConnect->setEnabled(true);
 	uiFocusOnOverviewTab();
+}
+
+void Client::protocolClientOnDuplicateIdUsageDetected() {
+	LOGGER_DEBUG("In Client: protocolClientOnDuplicateIdUsageDetected()");
+	QMessageBox::warning(this, "Duplicate ID Usage", "It seems that the ID you are using is also in use on a different device.\nEach ID can only be used on one endpoint at a time!\nTry using different IDs for each endpoints and building groups per contact containing all your IDs and those of the contact.\nUse the airplane mode on smart phones, if necessary.");
 }
 
 void Client::protocolClientOnConnectToFinished(int errCode, QString message) {

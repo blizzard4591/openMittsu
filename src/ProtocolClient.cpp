@@ -365,6 +365,10 @@ void ProtocolClient::socketOnReadyRead() {
 		isAllowedToSend = true;
 		keepAliveCounter = 1;
 		keepAliveTimer->start();
+	} else if (packetTypeByte == (PROTO_PACKET_SIGNATURE_CONNECTION_DUPLICATE)) {
+		LOGGER()->warn("Received a CONNECTION_DUPLICATE warning, we will be forcefully disconnected after this. Message from Server: {}", QString::fromUtf8(packetContents).toStdString());
+
+		emit duplicateIdUsageDetected();
 	} else {
 		LOGGER()->warn("Received an UNKNOWN packet with signature {} and payload {}.", QString(decodedPacket.left(PROTO_DATA_HEADER_TYPE_LENGTH_BYTES).toHex()).toStdString(), QString(decodedPacket.toHex()).toStdString());
 	}

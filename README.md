@@ -1,5 +1,5 @@
 # openMittsu
-An cross-platform open source implementation and desktop client of the Threema Messenger App.
+A cross-platform open source implementation and desktop client for the Threema Messenger App.
 
 ## License
 openMittsu is governed by the GNU GPL v2.0 license, but includes works from different people, licensed under different terms. See `LICENSE` for more information.
