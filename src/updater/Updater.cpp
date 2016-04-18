@@ -30,9 +30,6 @@ void Updater::run() {
 		return;
 	}
 
-
-	QString queryUrl(QStringLiteral("https://www.openmittsu.de/update.php?major=%1&amp;&minor=%2&amp;patch=%3&amp;commitsSinceTag=%4&amp;gitHash=%5&amp;os=%6&amp;bits=%7&amp;endianness=%8"));
-
 	QUrlQuery urlQuery;
 	urlQuery.addQueryItem("major", QString::number(Version::versionMajor));
 	urlQuery.addQueryItem("minor", QString::number(Version::versionMinor));
@@ -51,7 +48,7 @@ void Updater::run() {
 
 	// the HTTPs request
 	QNetworkRequest request;
-	QUrl url(QStringLiteral("https://www.openmittsu.de/update.php"));
+	QUrl url(QStringLiteral("https://update.openmittsu.de/update.php"));
 	url.setQuery(urlQuery);
 	request.setUrl(url);
 	LOGGER_DEBUG("Update query URL is {}.", url.toString().toStdString());
