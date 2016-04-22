@@ -22,6 +22,13 @@ Other platforms should work with no or minimal changes.
 
 ## How to build
 1. Clone this repository or extract the sources from the archive.
+	If you clone the repository, do not forget to intialize the submodules (i.e. external git repositories):
+```
+git submodule init
+git submodule sync
+git submodule update --init --recursive
+```
+
 2. Install or build both LibSodium and LibQrEncode
 3. Run CMake on the main directory. Point CMake to the installation locations of libSodium and LibQrEncode, if required. Use `LIBSODIUM_INCLUDE_DIRS`, `LIBSODIUM_LIBRARIES`, `LIBQRENCODE_INCLUDE_DIR` and `LIBQRENCODE_LIBRARY`, respectively.
 4. Once Makefiles or a solution has been successfully generated, start the build process.
