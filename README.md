@@ -66,6 +66,30 @@ ABCD1234 : aabbccddeeff00112233445566778899aabbccddeeff00112233445566778899 : Mr
    3. Enter the exported backup and the password.
    4. Choose a suitable location and let the application save the generated client configuration there.
 
- 
+## FAQ
+### What is openMittsu?
+openMittsu is a cross-platform open source implementation and desktop client for the Threema Messenger App. It has been created by reverse engineering the Threema mobile App and studying the publication from [Jan Ahrens](http://blog.jan-ahrens.eu/2014/03/22/threema-protocol-analysis.html) as well as the Threema Gateway.
+
+### Can I use the same ID for openMittsu and Threema?
+The protocol Threema uses doesn't provide multi-device functionality (yet) which means you can't be connected with more than one device using the same ID simultaneously. However, if you disconnect your phone before connecting with openMittsu, you can use the same Threema ID for your phone and openMittsu. Please beware that you will only receive messages on one device.
+Alternatively, consult the Threema FAQ-answer on this topic: [Can I install Threema on multiple devices?](https://threema.ch/en/faq/multidevice)
+
+### Can I generate a Threema ID using openMittsu?
+No, please use the Threema app you purchased for generating an ID. You can use Threema on a second user on your phone or in an emulator if you need to as long as you have a legally purchased Threema app.
+
+### Does the Threema GmbH allow this project?
+Yes, Threema tolerates the openMittsu project. However, if openMittsu will get abused, Threema may change their decision. Don't worry, your ID won't get banned just for using openMittsu (if you are using openMittsu just for instant messaging like you do with the Threema app).
+
+### Is the Threema GmbH involved in the development?
+No. The Threema GmbH is currently not interested in working on openMittsu.
+
+### Can I use openMittsu for automated messages?
+No, if you want to send or receive Threema messages automatically, please use the official [Threema Gateway API](https://gateway.threema.ch/).
+
+### Does openMittsu replace an official web client that Threema may be working on?
+No. While a web client will connect to Threema through your phone, openMittsu is a standalone client which does not rely on your phone for connecting to the Threema servers.
+If you are interested in how a Threema web client could work, read lgrahl's thesis about [SaltyRTC](http://lgrahl.de/pub/ba-thesis-saltyrtc-by-lennart-grahl-revised-v1.pdf).
+  
+  
 ## Acknowledgement
 Without the initial research and publication by [Jan Ahrens](http://blog.jan-ahrens.eu/2014/03/22/threema-protocol-analysis.html) this project would have been so much more difficult, if not impossible.
