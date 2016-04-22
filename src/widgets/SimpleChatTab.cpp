@@ -3,9 +3,11 @@
 #include <QDateTime>
 #include <QFile>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QMessageBox>
 #include <QImage>
 #include <QMenu>
+#include <QAction>
 #include <QClipboard>
 #include <QApplication>
 
@@ -20,6 +22,7 @@
 #include "MessageCenter.h"
 #include "exceptions/InternalErrorException.h"
 #include "exceptions/NotConnectedException.h"
+#include "tasks/FileDownloader.h"
 #include "utility/Logging.h"
 #include "utility/QObjectConnectionMacro.h"
 
@@ -162,7 +165,7 @@ void SimpleChatTab::onMessageReceiptDisagree(ContactId const& sender, MessageTim
 }
 
 void SimpleChatTab::onContactDataChanged() {
-	ui->lblDescription->setText(QString("Description: %1").arg(contact->getContactDescription()));
+	ui->lblDescription->setText(QString(tr("Description: %1")).arg(contact->getContactDescription()));
 	ui->chatWidget->onContactDataChanged();
 }
 
@@ -204,21 +207,6 @@ void SimpleChatTab::onMessageSendDone(MessageId const& messageId) {
 }
 
 void SimpleChatTab::btnInputSendOnClick() {
-#ifdef DEBUG_SCT
-	quint64 messageId = 0;
-	randombytes_buf(&messageId, sizeof(messageId));
-	QString messageText = "0";
-	quint64 messageTextLength = messageId % 120;
-	for (quint64 i = 1; i < messageTextLength; ++i) {
-		messageText.append(" ");
-		messageText.append(QString::number(i, 10));
-	}
-
-	TextChatWidgetItem* clwi = new TextChatWidgetItem(ContactRegistry::getInstance()->getSelfContact(), rand(), QDateTime::currentDateTime(), 0, 0, messageText);
-	ui->chatWidget->addItem(clwi);
-	return;
-#endif
-
 	QString const text = ui->edtInput->toPlainText();
 
 	if (!(text.isEmpty() || text.isNull())) {
@@ -243,38 +231,84 @@ void SimpleChatTab::btnInputSendOnClick() {
 }
 
 void SimpleChatTab::btnSendImageOnClick() {
+	QMenu menu;
+
+	QAction* actionFile = new QAction(tr("Load Image from File"), &menu);
+	QAction* actionUrl = new QAction(tr("Load Image from URL"), &menu);
+
+	menu.addAction(actionFile);
+	menu.addAction(actionUrl);
+
+	// Check Cursor Position:
+	// If the cursor is on the button, display the menu there, if not, display the menu on the right side of the button (approx. 0.8 * width).
+	QPoint const cursorPosition = QCursor::pos();
+
+	QPoint globalPos = cursorPosition;
+	if (!ui->btnSendImage->underMouse()) {
+		globalPos = ui->btnSendImage->mapToGlobal(QPoint(ui->btnSendImage->width() * 0.8, ui->btnSendImage->height() / 2));
+	}
+
+	QAction* selectedItem = menu.exec(globalPos);
+	if (selectedItem != nullptr) {
+		if (selectedItem == actionFile) {
+			ctxMenuImageFromFileOnClick();
+		} else if (selectedItem == actionUrl) {
+			ctxMenuImageFromUrlOnClick();
+		}
+	}
+}
+
+void SimpleChatTab::ctxMenuImageFromFileOnClick() {
 	QString filename = QFileDialog::getOpenFileName(this, "Select an Image to Send", QString(), "Images (*.png *.jpg)");
 	if (!filename.isNull() && !filename.isEmpty()) {
-		QImage image;
-		if (image.load(filename)) {
-			int width = image.width();
-			int height = image.height();
-			int maxSize = (width >= height) ? width : height;
-			if (maxSize > 1500) {
-				double factor = 1500.0 / maxSize;
-				image = image.scaled(width * factor, height * factor, Qt::AspectRatioMode::KeepAspectRatio, Qt::SmoothTransformation);
-			}
-
-			QByteArray imageBytes;
-			QBuffer buffer(&imageBytes);
-			buffer.open(QIODevice::WriteOnly);
-			image.save(&buffer, "JPG", 75);
-			buffer.close();
-
-			MessageId const messageId = getUniqueMessageId();
-			if (!sendImage(messageId, imageBytes)) {
-				QMessageBox::warning(this, "Not connected", "Could not send your message as you are currently not connected to a server.");
-				return;
-			}
-
-			ImageChatWidgetItem* clwi = new ImageChatWidgetItem(ContactRegistry::getInstance()->getSelfContact(), ContactIdWithMessageId(ContactRegistry::getInstance()->getSelfContact()->getContactId(), messageId), QPixmap::fromImage(image));
-			ui->chatWidget->addItem(clwi);
-			messageIdToItemIndex.insert(messageId, clwi);
-
+		QFile imageFile(filename);
+		if (imageFile.open(QFile::ReadOnly)) {
+			prepareAndSendImage(imageFile.readAll());
 		} else {
-			QMessageBox::warning(this, "Error loading image", "Could not load selected image.\nUnsupported format or I/O error.", QMessageBox::Ok, QMessageBox::NoButton);
+			QMessageBox::warning(this, "Error loading image", "Could not open selected image.\nInsufficient rights or I/O error.", QMessageBox::Ok, QMessageBox::NoButton);
+		}
+	}
+}
+
+void SimpleChatTab::ctxMenuImageFromUrlOnClick() {
+	bool ok = false;
+	QString urlString = QInputDialog::getText(this, tr("URL of Image to send"), tr("Please insert the URL of the Image you want to send:"), QLineEdit::Normal, QStringLiteral("http://www.example.com/exampleImage.jpg"), &ok);
+	if (ok && !urlString.isEmpty()) {
+		// Todo
+		QMessageBox::information(this, "Not yet implemented!", "Sorry!\nThis feature is not yet implemented.");
+	}
+}
+
+void SimpleChatTab::prepareAndSendImage(QByteArray const& imageData) {
+	QImage image;
+	if (image.loadFromData(imageData)) {
+		int width = image.width();
+		int height = image.height();
+		int maxSize = (width >= height) ? width : height;
+		if (maxSize > 1500) {
+			double factor = 1500.0 / maxSize;
+			image = image.scaled(width * factor, height * factor, Qt::AspectRatioMode::KeepAspectRatio, Qt::SmoothTransformation);
+		}
+
+		QByteArray imageBytes;
+		QBuffer buffer(&imageBytes);
+		buffer.open(QIODevice::WriteOnly);
+		image.save(&buffer, "JPG", 75);
+		buffer.close();
+
+		MessageId const messageId = getUniqueMessageId();
+		if (!sendImage(messageId, imageBytes)) {
+			QMessageBox::warning(this, "Not connected", "Could not send your message as you are currently not connected to a server.");
 			return;
 		}
+
+		ImageChatWidgetItem* clwi = new ImageChatWidgetItem(ContactRegistry::getInstance()->getSelfContact(), ContactIdWithMessageId(ContactRegistry::getInstance()->getSelfContact()->getContactId(), messageId), QPixmap::fromImage(image));
+		ui->chatWidget->addItem(clwi);
+		messageIdToItemIndex.insert(messageId, clwi);
+
+	} else {
+		QMessageBox::warning(this, "Error loading image", "Could not load selected image.\nUnsupported format or I/O error.", QMessageBox::Ok, QMessageBox::NoButton);
+		return;
 	}
 }
 

@@ -40,6 +40,10 @@ public:
 public slots:
 	void btnInputSendOnClick();
 	void btnSendImageOnClick();
+
+	void ctxMenuImageFromFileOnClick();
+	void ctxMenuImageFromUrlOnClick();
+
 	void edtInputOnReturnPressed();
 	void edtInputOnTextEdited();
 	void typingTimerOnTimer();
@@ -63,6 +67,7 @@ private:
 	QTimer typingTimer;
 
 	void handleFocus(bool hasNewMessage = false);
+	void prepareAndSendImage(QByteArray const& imageData);
 };
 
 #endif // OPENMITTSU_WIDGETS_SIMPLECHATTAB_H_
