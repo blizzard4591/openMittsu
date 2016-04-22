@@ -423,9 +423,11 @@ void Client::listContactsOnContextMenu(QPoint const& pos) {
 		QAction* actionHeadline = nullptr;
 		QAction* actionEdit = nullptr;
 		QAction* actionOpenClose = nullptr;
+		QAction* actionRequestSync = nullptr;
 
 		bool isChatWindowOpen = false;
 		bool isIdentityContact = false;
+		bool isGroupSelfOwned = false;
 		ChatTab* tab = nullptr;
 		if (clwi->getContact()->getContactType() == Contact::ContactType::CONTACT_IDENTITY) {
 			IdentityContact* ic = dynamic_cast<IdentityContact*>(clwi->getContact());
@@ -461,6 +463,17 @@ void Client::listContactsOnContextMenu(QPoint const& pos) {
 				actionOpenClose = new QAction("Open Chat Window", &listContactsContextMenu);
 			}
 			listContactsContextMenu.addAction(actionOpenClose);
+
+			if (gc->getGroupOwner() == ContactRegistry::getInstance()->getSelfContact()->getContactId()) {
+				isGroupSelfOwned = true;
+				actionRequestSync = new QAction("Force Group Sync", &listContactsContextMenu);
+			} else {
+				actionRequestSync = new QAction("Request Group Sync", &listContactsContextMenu);
+			}
+			listContactsContextMenu.addAction(actionRequestSync);
+			if (protocolClient == nullptr || !protocolClient->getIsConnected()) {
+				actionRequestSync->setDisabled(true);
+			}
 		}
 
 		QAction* selectedItem = listContactsContextMenu.exec(globalPos);
@@ -488,6 +501,17 @@ void Client::listContactsOnContextMenu(QPoint const& pos) {
 					if (tab != nullptr) {
 						ui.tabWidget->setCurrentWidget(tab);
 					}
+				}
+			} else if (!isIdentityContact && (selectedItem == actionRequestSync) && (actionRequestSync != nullptr)) {
+				if (protocolClient == nullptr || !protocolClient->getIsConnected()) {
+					return;
+				}
+
+				GroupContact* gc = dynamic_cast<GroupContact*>(clwi->getContact());
+				if (isGroupSelfOwned) {
+					QMetaObject::invokeMethod(protocolClient, "resendGroupSetup", Qt::QueuedConnection, Q_ARG(GroupId const&, gc->getGroupId()));
+				} else {
+					QMetaObject::invokeMethod(protocolClient, "requestGroupSync", Qt::QueuedConnection, Q_ARG(GroupId const&, gc->getGroupId()));
 				}
 			}
 		}

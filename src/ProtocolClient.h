@@ -70,6 +70,8 @@ public slots:
 	void addContact(ContactId const& contactId, PublicKey const& publicKey);
 
 	void sendGroupSetup(GroupId const& groupId, QSet<ContactId> const& members, QString const& title);
+	void resendGroupSetup(GroupId const& groupId);
+	void requestGroupSync(GroupId const& groupId);
 
 	quint64 getReceivedMessagesCount() const;
 	quint64 getSendMessagesCount() const;
