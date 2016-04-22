@@ -256,7 +256,7 @@
   </action>
   <action name="actionAdd_Group">
    <property name="text">
-    <string>Add Group</string>
+    <string>Create new Group</string>
    </property>
   </action>
   <action name="actionLeave_Group">
