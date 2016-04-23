@@ -500,9 +500,9 @@ bool ProtocolClient::validateGroupMembershipAndInfo(GroupId const& groupId, Cont
 
 void ProtocolClient::sendGroupSyncRequest(GroupId const& groupId) {
 	if (groupId.getOwner() == clientConfiguration.getClientIdentity()) {
-		LOGGER()->warn("Received a Message for Group {}. Can not request group data from self!", groupId.toString());
+		LOGGER()->warn("Can not request group data for group {} from self!", groupId.toString());
 	} else {
-		LOGGER()->info("Received a Message for Group {}. Requesting group sync from owner.", groupId.toString());
+		LOGGER()->info("Requesting group sync from owner of group {}.", groupId.toString());
 		
 		SpecializedGroupMessage groupSyncMessage(FullMessageHeader(groupId.getOwner(), MessageTime::now(), clientConfiguration.getClientIdentity(), uniqueMessageIdGenerator->getNextUniqueMessageId(groupId), MessageFlagsFactory::createGroupControlMessageFlags()), new GroupSyncMessageContent(groupId));
 		std::shared_ptr<AcknowledgmentProcessor> ap = std::make_shared<GroupCreationMessageAcknowledgmentProcessor>(groupId, QDateTime::currentDateTime().addSecs(15), groupSyncMessage.getMessageHeader().getMessageId(), false);
@@ -887,6 +887,25 @@ void ProtocolClient::sendGroupSetup(GroupId const& groupId, QSet<ContactId> cons
 	handleOutgoingMessage(&groupTitleMessage, apCreate);
 
 	LOGGER_DEBUG("Adding Group {} with {} members to GroupRegistry received from GUI.", groupId.toString(), members.size());
+}
+
+void ProtocolClient::resendGroupSetup(GroupId const& groupId) {
+	LOGGER_DEBUG("GUI requested resend of group setup for group {}.", groupId.toString());
+	if (!groupRegistry.hasGroup(groupId)) {
+		LOGGER()->warn("Ignoring GUI request for resend of group setup for unknown group {}.", groupId.toString());
+	} else {
+		UnspecializedGroupMessage groupCreationMessage(PreliminaryGroupMessage(new PreliminaryGroupMessageHeader(groupId, uniqueMessageIdGenerator->getNextUniqueMessageId(groupId), MessageFlagsFactory::createGroupControlMessageFlags()), new GroupCreationMessageContent(groupId, groupRegistry.getGroupMembers(groupId))), clientConfiguration.getClientIdentity());
+		std::shared_ptr<AcknowledgmentProcessor> apCreate = std::make_shared<GroupCreationMessageAcknowledgmentProcessor>(groupId, QDateTime::currentDateTime().addSecs(15), groupCreationMessage.getMessageHeader().getMessageId(), true);
+		handleOutgoingMessage(&groupCreationMessage, apCreate);
+
+		UnspecializedGroupMessage groupTitleMessage(PreliminaryGroupMessage(new PreliminaryGroupMessageHeader(groupId, uniqueMessageIdGenerator->getNextUniqueMessageId(groupId), MessageFlagsFactory::createGroupControlMessageFlags()), new GroupSetTitleMessageContent(groupId, groupRegistry.getGroupTitle(groupId))), clientConfiguration.getClientIdentity());
+		handleOutgoingMessage(&groupTitleMessage, apCreate);
+	}
+}
+
+void ProtocolClient::requestGroupSync(GroupId const& groupId) {
+	LOGGER_DEBUG("GUI requested a group sync for group {}.", groupId.toString());
+	sendGroupSyncRequest(groupId);
 }
 
 void ProtocolClient::enqeueCallbackTask(CallbackTask* callbackTask) {

@@ -29,7 +29,7 @@ void QrWidget::setQrDataString(QString const& newDataString) {
 	int newWidth = 0;
 	char* newData = nullptr;
 #ifdef OPENMITTSU_CONFIG_HAVE_LIBQRENCODE
-	QRcode *qr = QRcode_encodeString(newDataString.toStdString().c_str(), 1, QR_ECLEVEL_L, QR_MODE_8, 0);
+	QRcode *qr = QRcode_encodeString(newDataString.toStdString().c_str(), 1, QR_ECLEVEL_L, QR_MODE_8, 1);
 
 	if (qr != nullptr) {
 		newWidth = qr->width;
