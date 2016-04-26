@@ -18,6 +18,7 @@
 #include "PublicKey.h"
 #include "ServerConfiguration.h"
 #include "ClientConfiguration.h"
+#include "MissingIdentityProcessor.h"
 
 #include "acknowledgments/AcknowledgmentProcessor.h"
 
@@ -119,11 +120,14 @@ private:
 	QMutex outgoingMessagesMutex;
 
 	// List of Messages to be acknowledged by the server
-
 	QHash<MessageId, std::shared_ptr<AcknowledgmentProcessor>> acknowledgmentWaitingMessages;
 
 	QTimer* acknowledgmentWaitingTimer;
 	QMutex acknowledgmentWaitingMutex;
+
+	// List of Messages kept back because we are waiting for IdentityReceivers
+	QHash<ContactId, std::shared_ptr<MissingIdentityProcessor>> missingIdentityProcessors;
+	QHash<GroupId, std::shared_ptr<MissingIdentityProcessor>> groupsWithMissingIdentities;
 
 	// Connection Keep-Alive
 	QTimer* keepAliveTimer;
@@ -148,8 +152,8 @@ private:
 	void messageSendDone(ContactId const& contactId, MessageId const& messageId);
 
 	void handleIncomingMessage(MessageWithEncryptedPayload const& message);
-	void handleIncomingMessage(MessageWithPayload const& messageWithPayload);
-	void handleIncomingMessage(Message const*const message);
+	void handleIncomingMessage(MessageWithPayload const& messageWithPayload, MessageWithEncryptedPayload const*const message);
+	void handleIncomingMessage(Message const*const message, MessageWithEncryptedPayload const*const messageWithEncryptedPayload);
 	void handleIncomingMessage(FullMessageHeader const& messageHeader, std::shared_ptr<ContactTextMessageContent const> contactTextMessageContent);
 	void handleIncomingMessage(FullMessageHeader const& messageHeader, std::shared_ptr<ContactImageMessageContent const> contactImageMessageContent);
 	void handleIncomingMessage(FullMessageHeader const& messageHeader, std::shared_ptr<ContactLocationMessageContent const> contactLocationMessageContent);
@@ -159,7 +163,7 @@ private:
 	void handleIncomingMessage(FullMessageHeader const& messageHeader, std::shared_ptr<GroupImageMessageContent const> groupImageMessageContent);
 	void handleIncomingMessage(FullMessageHeader const& messageHeader, std::shared_ptr<GroupLocationMessageContent const> groupLocationMessageContent);
 	void handleIncomingMessage(FullMessageHeader const& messageHeader, std::shared_ptr<GroupFileMessageContent const> groupFileMessageContent);
-	void handleIncomingMessage(FullMessageHeader const& messageHeader, std::shared_ptr<GroupCreationMessageContent const> groupCreationMessageContent);
+	void handleIncomingMessage(FullMessageHeader const& messageHeader, std::shared_ptr<GroupCreationMessageContent const> groupCreationMessageContent, MessageWithEncryptedPayload const*const messageWithEncryptedPayload);
 	void handleIncomingMessage(FullMessageHeader const& messageHeader, std::shared_ptr<GroupSetPhotoMessageContent const> groupSetPhotoMessageContent);
 	void handleIncomingMessage(FullMessageHeader const& messageHeader, std::shared_ptr<GroupSetTitleMessageContent const> groupSetTitleMessageContent);
 	void handleIncomingMessage(FullMessageHeader const& messageHeader, std::shared_ptr<GroupSyncMessageContent const> groupSyncMessageContent);

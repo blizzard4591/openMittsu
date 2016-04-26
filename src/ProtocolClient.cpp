@@ -11,7 +11,7 @@
 #include "exceptions/IllegalArgumentException.h"
 #include "exceptions/ProtocolErrorException.h"
 #include "tasks/CallbackTask.h"
-#include "tasks/MessageBasedIdentityReceiverCallbackTask.h"
+#include "tasks/IdentityReceiverCallbackTask.h"
 #include "tasks/MessageCallbackTask.h"
 #include "utility/ByteArrayConversions.h"
 #include "utility/ByteArrayToHexString.h"
@@ -398,22 +398,26 @@ void ProtocolClient::handleIncomingMessage(MessageWithEncryptedPayload const& me
 		LOGGER()->critical("Received an incoming text message packet, but we are not the receiver.\nIt was intended for {} from sender {}.", receiver.toString(), sender.toString());
 	} else {
 		if ((!cryptoBox.getKeyRegistry().hasIdentity(sender))) {
-			CallbackTask* callbackTask = new MessageBasedIdentityReceiverCallbackTask(&serverConfiguration, message, sender);
+			std::shared_ptr<MissingIdentityProcessor> missingIdentityProcessor = std::make_shared<MissingIdentityProcessor>(sender);
+			missingIdentityProcessor->enqueueMessage(message);
+			missingIdentityProcessors.insert(sender, missingIdentityProcessor);
+
+			CallbackTask* callbackTask = new IdentityReceiverCallbackTask(&serverConfiguration, sender);
 
 			enqeueCallbackTask(callbackTask);
 			return;
 		}
 		
 		MessageWithPayload messageWithPayload(message.decrypt(&cryptoBox));
-		handleIncomingMessage(messageWithPayload);
+		handleIncomingMessage(messageWithPayload, &message);
 	}
 }
 
-void ProtocolClient::handleIncomingMessage(MessageWithPayload const& messageWithPayload) {
+void ProtocolClient::handleIncomingMessage(MessageWithPayload const& messageWithPayload, MessageWithEncryptedPayload const*const message) {
 	try {
 		std::shared_ptr<Message> messageSharedPtr = IncomingMessagesParser::parseMessageWithPayloadToMessage(messageWithPayload);
 		Message const* messagePtr = messageSharedPtr.get();
-		handleIncomingMessage(messagePtr);
+		handleIncomingMessage(messagePtr, message);
 	} catch (ProtocolErrorException& pee) {
 		LOGGER()->warn("Encountered an error while parsing payload of received message from {} with ID {}: {}", messageWithPayload.getMessageHeader().getSender().toString(), messageWithPayload.getMessageHeader().getMessageId().toString(), pee.what());
 	} catch (std::exception& e) {
@@ -421,7 +425,7 @@ void ProtocolClient::handleIncomingMessage(MessageWithPayload const& messageWith
 	}
 }
 
-void ProtocolClient::handleIncomingMessage(Message const*const message) {
+void ProtocolClient::handleIncomingMessage(Message const*const message, MessageWithEncryptedPayload const*const messageWithEncryptedPayload) {
 	if (dynamic_cast<ContactMessage const*>(message) != nullptr) {
 		ContactMessage const* contactMessage = dynamic_cast<ContactMessage const*>(message);
 		ContactMessageContent const* cmc = contactMessage->getContactMessageContent();
@@ -448,6 +452,18 @@ void ProtocolClient::handleIncomingMessage(Message const*const message) {
 	} else if (dynamic_cast<SpecializedGroupMessage const*>(message) != nullptr) {
 		SpecializedGroupMessage const* groupMessage = dynamic_cast<SpecializedGroupMessage const*>(message);
 		GroupMessageContent const* cmc = groupMessage->getGroupMessageContent();
+
+		if (groupsWithMissingIdentities.contains(cmc->getGroupId())) {
+			if (messageWithEncryptedPayload == nullptr) {
+				LOGGER()->warn("Trying to enqueue new message for group {} on existing MissingIdentityProcessor, but the encryptedPayload pointer is null.", cmc->getGroupId().toString());
+				return;
+			}
+
+			LOGGER_DEBUG("Enqueuing new message for group {} on existing MissingIdentityProcessor.", cmc->getGroupId().toString());
+			groupsWithMissingIdentities.constFind(cmc->getGroupId()).value()->enqueueMessage(*messageWithEncryptedPayload);
+			return;
+		}
+
 		if (cmc->hasPostReceiveCallbackTask()) {
 			CallbackTask* callbackTask = cmc->getPostReceiveCallbackTask(new SpecializedGroupMessage(*groupMessage), &serverConfiguration, &cryptoBox);
 
@@ -464,7 +480,7 @@ void ProtocolClient::handleIncomingMessage(Message const*const message) {
 		} else if (dynamic_cast<GroupFileMessageContent const*>(cmc) != nullptr) {
 			handleIncomingMessage(groupMessage->getMessageHeader(), std::shared_ptr<GroupFileMessageContent const>(dynamic_cast<GroupFileMessageContent const*>(cmc->clone())));
 		} else if (dynamic_cast<GroupCreationMessageContent const*>(cmc) != nullptr) {
-			handleIncomingMessage(groupMessage->getMessageHeader(), std::shared_ptr<GroupCreationMessageContent const>(dynamic_cast<GroupCreationMessageContent const*>(cmc->clone())));
+			handleIncomingMessage(groupMessage->getMessageHeader(), std::shared_ptr<GroupCreationMessageContent const>(dynamic_cast<GroupCreationMessageContent const*>(cmc->clone())), messageWithEncryptedPayload);
 		} else if (dynamic_cast<GroupSetTitleMessageContent const*>(cmc) != nullptr) {
 			handleIncomingMessage(groupMessage->getMessageHeader(), std::shared_ptr<GroupSetTitleMessageContent const>(dynamic_cast<GroupSetTitleMessageContent const*>(cmc->clone())));
 		} else if (dynamic_cast<GroupSetPhotoMessageContent const*>(cmc) != nullptr) {
@@ -559,7 +575,45 @@ void ProtocolClient::handleIncomingMessage(FullMessageHeader const& messageHeade
 	LOGGER_DEBUG("Received a file message from {} to group {}. THIS IS STILL UNSUPPORTED.", messageHeader.getSender().toString(), groupFileMessageContent->getGroupId().toString());
 }
 
-void ProtocolClient::handleIncomingMessage(FullMessageHeader const& messageHeader, std::shared_ptr<GroupCreationMessageContent const> groupCreationMessageContent) {
+void ProtocolClient::handleIncomingMessage(FullMessageHeader const& messageHeader, std::shared_ptr<GroupCreationMessageContent const> groupCreationMessageContent, MessageWithEncryptedPayload const*const messageWithEncryptedPayload) {
+	QSet<ContactId> const groupMembers = groupCreationMessageContent->getGroupMembers();
+	QSet<ContactId>::const_iterator it = groupMembers.constBegin();
+	QSet<ContactId>::const_iterator end = groupMembers.constEnd();
+
+	QSet<ContactId> missingIds;
+	for (; it != end; ++it) {
+		if (missingIdentityProcessors.contains(*it)) {
+			if (messageWithEncryptedPayload == nullptr) {
+				LOGGER()->warn("Trying to handle GroupCreationMessage for group {} on existing MissingIdentityProcessor, but the encryptedPayload pointer is null.", groupCreationMessageContent->getGroupId().toString());
+				return;
+			}
+
+			missingIdentityProcessors.constFind(*it).value()->enqueueMessage(*messageWithEncryptedPayload);
+			return;
+		} else if (!cryptoBox.getKeyRegistry().hasIdentity(*it)) {
+			missingIds.insert(*it);
+		}
+	}
+	if (!missingIds.isEmpty()) {
+		if (messageWithEncryptedPayload == nullptr) {
+			LOGGER()->warn("Trying to handle GroupCreationMessage for group {} with new MissingIdentityProcessor, but the encryptedPayload pointer is null.", groupCreationMessageContent->getGroupId().toString());
+			return;
+		}
+
+		std::shared_ptr<MissingIdentityProcessor> missingIdentityProcessor = std::make_shared<MissingIdentityProcessor>(groupCreationMessageContent->getGroupId(), missingIds);
+		missingIdentityProcessor->enqueueMessage(*messageWithEncryptedPayload);
+		groupsWithMissingIdentities.insert(groupCreationMessageContent->getGroupId(), missingIdentityProcessor);
+		QSet<ContactId>::const_iterator itMissing = missingIds.constBegin();
+		QSet<ContactId>::const_iterator endMissing = missingIds.constEnd();
+		for (; itMissing != endMissing; ++itMissing) {
+			missingIdentityProcessors.insert(*itMissing, missingIdentityProcessor);
+
+			CallbackTask* callbackTask = new IdentityReceiverCallbackTask(&serverConfiguration, *itMissing);
+			enqeueCallbackTask(callbackTask);
+		}
+		return;
+	}
+
 	if (groupRegistry.hasGroup(groupCreationMessageContent->getGroupId())) {
 		groupRegistry.updateGroupMembers(groupCreationMessageContent->getGroupId(), groupCreationMessageContent->getGroupMembers());
 		LOGGER_DEBUG("Received a group update message for group {}, group now has {} instead of {} members.", groupCreationMessageContent->getGroupId().toString(), groupCreationMessageContent->getGroupMembers().size(), groupRegistry.getGroupMembers(groupCreationMessageContent->getGroupId()).size());
@@ -920,22 +974,45 @@ void ProtocolClient::enqeueCallbackTask(CallbackTask* callbackTask) {
 }
 
 void ProtocolClient::callbackTaskFinished(CallbackTask* callbackTask) {
-	if (dynamic_cast<MessageBasedIdentityReceiverCallbackTask*>(callbackTask) != nullptr) {
-		MessageBasedIdentityReceiverCallbackTask* irct = dynamic_cast<MessageBasedIdentityReceiverCallbackTask*>(callbackTask);
-		if (!irct->hasFinishedSuccessfully()) {
-			LOGGER()->warn("Received a message from user {} that we can not decrypt since the Identity could not be retrieved. Error: {}", irct->getInitialMessage().getMessageHeader().getSender().toString(), irct->getErrorMessage().toStdString());
+	if (dynamic_cast<IdentityReceiverCallbackTask*>(callbackTask) != nullptr) {
+		IdentityReceiverCallbackTask* irct = dynamic_cast<IdentityReceiverCallbackTask*>(callbackTask);
+		if (!missingIdentityProcessors.contains(irct->getContactIdOfFetchedPublicKey())) {
+			LOGGER()->warn("IdentityReceiver CallbackTask finished for ID {}, but no MissingIdentityProcessor is registered for this ID.", irct->getContactIdOfFetchedPublicKey().toString());
 		} else {
-			if (cryptoBox.getKeyRegistry().hasIdentity(irct->getContactIdOfFetchedPublicKey())) {
-				LOGGER()->warn("Identity {} is already known to KeyRegistry, ignoring result of IdentityReceiverCallbackTask.", irct->getContactIdOfFetchedPublicKey().toString());
-			} else {
-				cryptoBox.getKeyRegistry().addIdentity(irct->getContactIdOfFetchedPublicKey(), irct->getFetchedPublicKey());
+			std::shared_ptr<MissingIdentityProcessor> missingIdentityProcessor = *missingIdentityProcessors.constFind(irct->getContactIdOfFetchedPublicKey());
+			missingIdentityProcessors.remove(irct->getContactIdOfFetchedPublicKey());
 
-				LOGGER_DEBUG("PublicKey for Identity {} is {}.", irct->getContactIdOfFetchedPublicKey().toString(), irct->getFetchedPublicKey().toString().toStdString());
-				QMetaObject::invokeMethod(messageCenter, "onFoundNewContact", Qt::QueuedConnection, Q_ARG(ContactId, irct->getContactIdOfFetchedPublicKey()), Q_ARG(PublicKey, irct->getFetchedPublicKey()));
+			if (!irct->hasFinishedSuccessfully()) {
+				LOGGER()->warn("Received a message from user {} that we can not decrypt since the Identity could not be retrieved. Error: {}", irct->getContactIdOfFetchedPublicKey().toString(), irct->getErrorMessage().toStdString());
+				missingIdentityProcessor->identityFetcherTaskFinished(irct->getContactIdOfFetchedPublicKey(), false);
+			} else {
+				missingIdentityProcessor->identityFetcherTaskFinished(irct->getContactIdOfFetchedPublicKey(), true);
+				if (cryptoBox.getKeyRegistry().hasIdentity(irct->getContactIdOfFetchedPublicKey())) {
+					LOGGER()->warn("Identity {} is already known to KeyRegistry, ignoring result of IdentityReceiverCallbackTask.", irct->getContactIdOfFetchedPublicKey().toString());
+				} else {
+					cryptoBox.getKeyRegistry().addIdentity(irct->getContactIdOfFetchedPublicKey(), irct->getFetchedPublicKey());
+
+					LOGGER_DEBUG("PublicKey for Identity {} is {}.", irct->getContactIdOfFetchedPublicKey().toString(), irct->getFetchedPublicKey().toString().toStdString());
+					QMetaObject::invokeMethod(messageCenter, "onFoundNewContact", Qt::QueuedConnection, Q_ARG(ContactId, irct->getContactIdOfFetchedPublicKey()), Q_ARG(PublicKey, irct->getFetchedPublicKey()));
+				}
 			}
 
-			MessageWithEncryptedPayload const messageWithEncryptedPayload(irct->getInitialMessage());
-			handleIncomingMessage(messageWithEncryptedPayload);
+			if (missingIdentityProcessor->hasFinished()) {
+				if (missingIdentityProcessor->hasAssociatedGroupId()) {
+					groupsWithMissingIdentities.remove(missingIdentityProcessor->getAssociatedGroupId());
+				}
+				if (missingIdentityProcessor->hasFinishedSuccessfully()) {
+					LOGGER()->info("MissingIdentityProcessor finished successfully, now processing {} queued messages.", missingIdentityProcessor->getQueuedMessages().size());
+					QList<MessageWithEncryptedPayload> queuedMessages = missingIdentityProcessor->getQueuedMessages();
+					QList<MessageWithEncryptedPayload>::const_iterator it = queuedMessages.constBegin();
+					QList<MessageWithEncryptedPayload>::const_iterator end = queuedMessages.constEnd();
+					for (; it != end; ++it) {
+						handleIncomingMessage(*it);
+					}
+				} else {
+					LOGGER()->warn("MissingIdentityProcessor failed, will now discard {} messages.", missingIdentityProcessor->getQueuedMessages().size());
+				}
+			}
 		}
 		irct->deleteLater();
 	} else if (dynamic_cast<MessageCallbackTask*>(callbackTask) != nullptr) {
@@ -963,7 +1040,7 @@ void ProtocolClient::callbackTaskFinished(CallbackTask* callbackTask) {
 				LOGGER()->warn("Received a message from user {} that triggered a Callback Task which did not succeed. Error: {}", messageCallbackTask->getInitialMessage()->getMessageHeader().getSender().toString(), messageCallbackTask->getErrorMessage().toStdString());
 			} else {
 				Message* nextMessage = messageCallbackTask->getResultMessage();
-				handleIncomingMessage(nextMessage);
+				handleIncomingMessage(nextMessage, nullptr);
 
 				delete nextMessage;
 			}
