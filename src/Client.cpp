@@ -565,7 +565,7 @@ void Client::menuAboutAboutQtOnClick() {
 void Client::menuGroupAddOnClick() {
 	if (clientConfiguration == nullptr) {
 		QMessageBox::warning(this, "No Identity loaded", "Before you can use this feature you need to load a \"client configuration\" from file (see main screen) or create one using a backup of your existing ID (see Identity -> Load Backup).");
-	} else if (!protocolClient->getIsConnected()) {
+	} else if (protocolClient == nullptr || !protocolClient->getIsConnected()) {
 		QMessageBox::warning(this, "Not connected to a server", "Before you can use this feature you need to connect to a server.");
 	} else {
 		GroupCreationWizard groupCreationWizard(clientConfiguration, protocolClient, this);
