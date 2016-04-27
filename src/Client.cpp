@@ -142,6 +142,18 @@ Client::Client(QWidget *parent) : QMainWindow(parent), protocolClient(nullptr), 
 	// Call the setup() function in the thread
 	QTimer::singleShot(0, protocolClient, SLOT(setup()));
 	contactRegistryOnIdentitiesChanged();
+
+	// Restore Window location and size
+	restoreGeometry(settings->value("clientMainWindowGeometry").toByteArray());
+	restoreState(settings->value("clientMainWindowState").toByteArray());
+}
+
+void Client::closeEvent(QCloseEvent* event) {
+	// Save location and size of window
+	settings->setValue("clientMainWindowGeometry", saveGeometry());
+	settings->setValue("clientMainWindowState", saveState());
+	
+	QMainWindow::closeEvent(event);
 }
 
 void Client::setupProtocolClient() {
@@ -533,7 +545,7 @@ void Client::chatTabWidgetOnCurrentTabChanged(int index) {
 */
 
 void Client::menuFileExitOnClick() {
-	QApplication::quit();
+	this->close();
 }
 
 void Client::menuAboutLicenseOnClick() {

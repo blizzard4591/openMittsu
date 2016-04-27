@@ -68,6 +68,8 @@ public slots:
 
 	// Thread Handling
 	void threadFinished();
+protected:
+	virtual void closeEvent(QCloseEvent* event) override;
 private:
 	Ui::MainWindow ui;
 	KeyRegistry* keyRegistry;
