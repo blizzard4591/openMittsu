@@ -19,9 +19,9 @@ class PreliminaryGroupMessageHeader;
 
 class FullMessageHeader {
 public:
-	FullMessageHeader(ContactId const& receiverId, MessageTime const& time, ContactId const& sender, MessageId const& messageId, MessageFlags const& flags);
-	FullMessageHeader(PreliminaryContactMessageHeader const* preliminaryHeader, ContactId const& sender);
-	FullMessageHeader(PreliminaryGroupMessageHeader const* preliminaryHeader, ContactId const& sender);
+	FullMessageHeader(ContactId const& receiverId, MessageTime const& time, ContactId const& sender, MessageId const& messageId, MessageFlags const& flags, PushFromId const& pushFromId);
+	FullMessageHeader(PreliminaryContactMessageHeader const* preliminaryHeader, ContactId const& sender, PushFromId const& pushFromId);
+	FullMessageHeader(PreliminaryGroupMessageHeader const* preliminaryHeader, ContactId const& sender, PushFromId const& pushFromId);
 	FullMessageHeader(FullMessageHeader const& messageHeader, ContactId const& replacementReceiver, MessageId const& replacementMessageId);
 	FullMessageHeader(FullMessageHeader const& other);
 	virtual ~FullMessageHeader();

@@ -13,6 +13,10 @@ PushFromId::PushFromId(ContactId const& contactId) : pushFromIdBytes(expandFromC
 	// Intentionally left empty.
 }
 
+PushFromId::PushFromId(QString const& selfNickname) : pushFromIdBytes(expandFromNickname(selfNickname)) {
+	// Intentionally left empty.
+}
+
 PushFromId::PushFromId(QByteArray const& pushFromId) : pushFromIdBytes(pushFromId) {
 	if (pushFromIdBytes.size() != (PROTO_MESSAGE_PUSH_FROM_LENGTH_BYTES)) {
 		throw IllegalArgumentException() << "Size of PushFromId is " << pushFromIdBytes.size() << " instead of " << (PROTO_MESSAGE_PUSH_FROM_LENGTH_BYTES) << " Bytes.";
@@ -51,6 +55,15 @@ QByteArray PushFromId::getPushFromIdAsByteArray() const {
 QByteArray PushFromId::expandFromContactId(ContactId const& contactId) {
 	QByteArray result = contactId.getContactIdAsByteArray();
 	result.append(QByteArray((PROTO_MESSAGE_PUSH_FROM_LENGTH_BYTES - result.size()), 0x00));
+
+	return result;
+}
+
+QByteArray PushFromId::expandFromNickname(QString const& nickname) {
+	QByteArray result = nickname.toUtf8().left(PROTO_MESSAGE_PUSH_FROM_LENGTH_BYTES);
+	if (result.size() < (PROTO_MESSAGE_PUSH_FROM_LENGTH_BYTES)) {
+		result.append(QByteArray((PROTO_MESSAGE_PUSH_FROM_LENGTH_BYTES - result.size()), 0x00));
+	}
 
 	return result;
 }

@@ -50,8 +50,8 @@ void ContactRegistry::fromFile(QString const& filename, bool dryRun) {
 	}
 
 	QRegExp commentRegExp("^\\s*#.*$", Qt::CaseInsensitive, QRegExp::RegExp2);
-	QRegExp identityRegExp("^\\s*([A-Z0-9]{8})\\s*:\\s*([a-fA-F0-9]{64})\\s*(?::\\s*(.*)\\s*)?$", Qt::CaseInsensitive, QRegExp::RegExp2);
-	QRegExp groupRegExp("^\\s*([a-fA-F0-9]{16})\\s*:\\s*([A-Z0-9]{8})\\s*:\\s*([A-Z0-9]{8}(?:\\s*,\\s*[A-Z0-9]{8})*)\\s*:\\s*(.*)\\s*$", Qt::CaseInsensitive, QRegExp::RegExp2);
+	QRegExp identityRegExp("^\\s*([A-Z0-9*][A-Z0-9]{7})\\s*:\\s*([a-fA-F0-9]{64})\\s*(?::\\s*(.*)\\s*)?$", Qt::CaseInsensitive, QRegExp::RegExp2);
+	QRegExp groupRegExp("^\\s*([a-fA-F0-9]{16})\\s*:\\s*([A-Z0-9*][A-Z0-9]{7})\\s*:\\s*([A-Z0-9*][A-Z0-9]{7}(?:\\s*,\\s*[A-Z0-9*][A-Z0-9]{7})*)\\s*:\\s*(.*)\\s*$", Qt::CaseInsensitive, QRegExp::RegExp2);
 
 	QTextStream in(&inputFile);
 	in.setCodec("UTF-8"); // change the file codec to UTF-8.
@@ -64,13 +64,44 @@ void ContactRegistry::fromFile(QString const& filename, bool dryRun) {
 				accessMutex.lock();
 
 				ContactId const contactId(identityRegExp.cap(1));
-				IdentityContact* iContact = new IdentityContact(contactId, PublicKey::fromHexString(identityRegExp.cap(2)));
-				if (!identityRegExp.cap(3).trimmed().isEmpty()) {
-					// Nickname given.
-					iContact->setNickname(identityRegExp.cap(3).trimmed());
+				PublicKey const publicKey = PublicKey::fromHexString(identityRegExp.cap(2));
+				QString const trimmedNickname = identityRegExp.cap(3).trimmed();
+				if (identityToIdentityContactHashMap.contains(contactId)) {
+					LOGGER_DEBUG("Contact {} already exists in ContactRegistry, updating instead of recreating.", contactId.toString());
+					IdentityContact* iContact = identityToIdentityContactHashMap.value(contactId);
+
+					if (!(iContact->getPublicKey() == publicKey)) {
+						LOGGER()->warn("Contact {} already exists in ContactRegistry, but with a different Public Key ({} vs. {})! Replacing contact.", contactId.toString(), iContact->getPublicKey().toString().toStdString(), publicKey.toString().toStdString());
+						
+						bool isSelfContact = false;
+						if (selfContact == iContact) {
+							selfContact = nullptr;
+							isSelfContact = true;
+						}
+						
+						disconnectContact(iContact);
+						identityToIdentityContactHashMap.remove(contactId);
+						delete iContact;
+
+						iContact = new IdentityContact(contactId, publicKey);
+						connectContact(iContact);
+						identityToIdentityContactHashMap.insert(contactId, iContact);
+
+						if (isSelfContact) {
+							selfContact = iContact;
+						}
+					}
+					if (!trimmedNickname.isEmpty()) {
+						iContact->setNickname(trimmedNickname);
+					}
+				} else {
+					IdentityContact* iContact = new IdentityContact(contactId, publicKey);
+					if (!trimmedNickname.isEmpty()) {
+						iContact->setNickname(trimmedNickname);
+					}
+					connectContact(iContact);
+					identityToIdentityContactHashMap.insert(contactId, iContact);
 				}
-				connectContact(iContact);
-				identityToIdentityContactHashMap.insert(contactId, iContact);
 
 				accessMutex.unlock();
 			}
@@ -78,28 +109,44 @@ void ContactRegistry::fromFile(QString const& filename, bool dryRun) {
 			if (!dryRun) {
 				accessMutex.lock();
 
-				quint64 groupIdentity = IdentityHelper::groupIdByteArrayToUint64(QByteArray::fromHex(groupRegExp.cap(1).toLatin1()));
-				quint64 groupOwner = IdentityHelper::identityStringToUint64(groupRegExp.cap(2));
-				GroupContact* gContact = new GroupContact(GroupId(groupOwner, groupIdentity));
-				if (!groupRegExp.cap(4).trimmed().isEmpty()) {
-					gContact->setGroupName(groupRegExp.cap(4).trimmed());
-				}
-
+				GroupId const groupId(IdentityHelper::identityStringToUint64(groupRegExp.cap(2)), IdentityHelper::groupIdByteArrayToUint64(QByteArray::fromHex(groupRegExp.cap(1).toLatin1())));
 				QStringList ids = groupRegExp.cap(3).split(',', QString::SkipEmptyParts);
 				if (ids.size() == 0) {
 					throw IllegalArgumentException() << QString("Invalid or ill-formated line in contacts file \"%1\".\nProblematic line: %2").arg(filename).arg(line).toStdString();
 				}
 
+				QSet<ContactId> groupMembers;
 				QStringList::const_iterator it = ids.constBegin();
 				QStringList::const_iterator end = ids.constEnd();
 				for (; it != end; ++it) {
 					QString trimmedId(it->trimmed());
 					ContactId const memberId(trimmedId);
-					gContact->addMember(memberId);
+					groupMembers.insert(memberId);
 				}
+				QString const groupName = groupRegExp.cap(4).trimmed();
 
-				connectContact(gContact);
-				identityToGroupContactHashMap.insert(GroupId(groupOwner, groupIdentity), gContact);
+				if (identityToGroupContactHashMap.contains(groupId)) {
+					LOGGER_DEBUG("Group {} already exists in ContactRegistry, updating instead of recreating.", groupId.toString());
+
+					GroupContact* gContact = identityToGroupContactHashMap.value(groupId);
+					if (gContact->getGroupMembers() != groupMembers) {
+						gContact->updateMembers(groupMembers);
+					}
+
+					if (!groupName.isEmpty()) {
+						gContact->setGroupName(groupName);
+					}
+				} else {
+					GroupContact* gContact = new GroupContact(groupId);
+					if (!groupName.isEmpty()) {
+						gContact->setGroupName(groupName);
+					}
+
+					gContact->updateMembers(groupMembers);
+
+					connectContact(gContact);
+					identityToGroupContactHashMap.insert(groupId, gContact);
+				}
 
 				accessMutex.unlock();
 			}
@@ -135,12 +182,12 @@ void ContactRegistry::toFile(QString const& filename) const {
 	outStream << "# Format of this file: \n";
 	outStream << "# IDENTITY : PUBKEY : Nickname\n";
 	outStream << "# where \n";
-	outStream << "# - IDENTITY is an eight character ID of the form [A-Z0-9]{8} and stands for a users public id,\n";
+	outStream << "# - IDENTITY is an eight character ID of the form [A-Z0-9*][A-Z0-9]{7} and stands for a users public id,\n";
 	outStream << "# - PUBKEY is an 64 character key of the form [a-fA-F0-9]{64} and stands for a users 32-Byte long-term public key,\n";
 	outStream << "# - Nickname is an optional screen-name for the given identity.\n";
 	outStream << "# GROUPID : GROUPOWNER : IDENTITY, IDENTITY, IDENTITY : Group Name\n";
 	outStream << "# where \n";
-	outStream << "# - IDENTITY is an eight character ID of the form [A-Z0-9]{8} and stands for a users public id,\n";
+	outStream << "# - IDENTITY is an eight character ID of the form [A-Z0-9*][A-Z0-9]{7} and stands for a users public id,\n";
 	outStream << "# - GROUPID is an 16 character key of the form [a-fA-F0-9]{16} and stands for a groups unique identifier,\n";
 	outStream << "# - GROUPOWNER is an IDENTITY and stands for a groups creator and owner,\n";
 	outStream << "# - Group Name is the displayed title of the group.\n";
@@ -308,6 +355,10 @@ QList<GroupId> ContactRegistry::getGroups() const {
 
 void ContactRegistry::connectContact(Contact* contact) {
 	OPENMITTSU_CONNECT(contact, dataChanged(), this, onContactDataChanged());
+}
+
+void ContactRegistry::disconnectContact(Contact* contact) {
+	OPENMITTSU_DISCONNECT(contact, dataChanged(), this, onContactDataChanged());
 }
 
 void ContactRegistry::onContactDataChanged() {

@@ -167,7 +167,15 @@ void Client::setupProtocolClient() {
 		protocolClient = nullptr;
 	}
 
-	protocolClient = new ProtocolClient(KeyRegistry(clientConfiguration->getClientLongTermKeyPair(), serverConfiguration->getServerLongTermPublicKey(), contactRegistry->getKnownIdentitiesWithPublicKeys()), GroupRegistry(contactRegistry->getKnownGroupsWithMembersAndTitles()), MessageCenter::getInstance()->getUniqueMessgeIdGenerator(), *serverConfiguration, *clientConfiguration, MessageCenter::getInstance());
+	QString const nickname = contactRegistry->getNickname(clientConfiguration->getClientIdentity());
+	if (nickname.compare(QStringLiteral("You"), Qt::CaseInsensitive) == 0) {
+		LOGGER()->info("Using only ID as PushFromID token (for iOS Push Receivers).");
+		protocolClient = new ProtocolClient(KeyRegistry(clientConfiguration->getClientLongTermKeyPair(), serverConfiguration->getServerLongTermPublicKey(), contactRegistry->getKnownIdentitiesWithPublicKeys()), GroupRegistry(contactRegistry->getKnownGroupsWithMembersAndTitles()), MessageCenter::getInstance()->getUniqueMessgeIdGenerator(), *serverConfiguration, *clientConfiguration, MessageCenter::getInstance(), PushFromId(clientConfiguration->getClientIdentity()));
+	} else {
+		protocolClient = new ProtocolClient(KeyRegistry(clientConfiguration->getClientLongTermKeyPair(), serverConfiguration->getServerLongTermPublicKey(), contactRegistry->getKnownIdentitiesWithPublicKeys()), GroupRegistry(contactRegistry->getKnownGroupsWithMembersAndTitles()), MessageCenter::getInstance()->getUniqueMessgeIdGenerator(), *serverConfiguration, *clientConfiguration, MessageCenter::getInstance(), PushFromId(nickname));
+		LOGGER()->info("Using nickname \"{}\" as PushFromID token (for iOS Push Receivers).", nickname.toStdString());
+	}
+
 	protocolClient->moveToThread(&protocolClientThread);
 
 	OPENMITTSU_CONNECT(protocolClient, connectToFinished(int, QString), this, protocolClientOnConnectToFinished(int, QString));
@@ -300,6 +308,12 @@ void Client::btnOpenClientIniOnClick() {
 	if (fileName.isNull() || fileName.isEmpty() || !validateClientConfigurationFile(fileName)) {
 		return;
 	}
+
+	if (clientConfiguration != nullptr) {
+		delete clientConfiguration;
+		clientConfiguration = nullptr;
+	}
+
 	clientConfiguration = new ClientConfiguration(ClientConfiguration::fromFile(fileName));
 	settings->setValue("clientConfigurationFile", fileName);
 	updateClientSettingsInfo(fileName);
@@ -316,6 +330,7 @@ void Client::btnOpenContactsOnClick() {
 }
 
 void Client::contactRegistryOnIdentitiesChanged() {
+	LOGGER_DEBUG("Updating contacts list on IdentitiesChanged() signal.");
 	ui.listContacts->clear();
 	
 	QList<ContactId> knownIdentities = contactRegistry->getIdentities();

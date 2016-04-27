@@ -9,7 +9,7 @@
 class UnspecializedGroupMessage : public Message {
 public:
 	UnspecializedGroupMessage(FullMessageHeader const& messageHeader, GroupMessageContent* messageContent);
-	UnspecializedGroupMessage(PreliminaryGroupMessage const& message, ContactId const& sender);
+	UnspecializedGroupMessage(PreliminaryGroupMessage const& message, ContactId const& sender, PushFromId const& pushFromId);
 	UnspecializedGroupMessage(UnspecializedGroupMessage const& other);
 	virtual ~UnspecializedGroupMessage();
 

@@ -70,6 +70,7 @@ private:
 	IdentityContact* selfContact;
 
 	void connectContact(Contact* contact);
+	void disconnectContact(Contact* contact);
 };
 
 #endif // OPENMITTSU_CONTACTREGISTRY_H_

@@ -10,7 +10,6 @@
 class ContactMessage : public Message {
 public:
 	ContactMessage(FullMessageHeader const& messageHeader, ContactMessageContent* messageContent);
-	ContactMessage(PreliminaryContactMessage const& message, ContactId const& sender);
 	ContactMessage(ContactMessage const& other);
 	virtual ~ContactMessage();
 

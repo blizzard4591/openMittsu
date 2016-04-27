@@ -18,15 +18,15 @@ FullMessageHeader::FullMessageHeader() : sender(0), receiver(0), messageId(0), t
 	throw;
 }
 
-FullMessageHeader::FullMessageHeader(ContactId const& receiverId, MessageTime const& time, ContactId const& sender, MessageId const& messageId, MessageFlags const& flags) : sender(sender), receiver(receiverId), messageId(messageId), time(time), flags(flags), pushFromName(sender) {
+FullMessageHeader::FullMessageHeader(ContactId const& receiverId, MessageTime const& time, ContactId const& sender, MessageId const& messageId, MessageFlags const& flags, PushFromId const& pushFromId) : sender(sender), receiver(receiverId), messageId(messageId), time(time), flags(flags), pushFromName(pushFromId) {
 	// Intentionally left empty.
 }
 
-FullMessageHeader::FullMessageHeader(PreliminaryContactMessageHeader const* preliminaryHeader, ContactId const& sender) : sender(sender), receiver(preliminaryHeader->getReceiver()), messageId(preliminaryHeader->getMessageId()), time(preliminaryHeader->getTime()), flags(preliminaryHeader->getFlags()), pushFromName(sender) {
+FullMessageHeader::FullMessageHeader(PreliminaryContactMessageHeader const* preliminaryHeader, ContactId const& sender, PushFromId const& pushFromId) : sender(sender), receiver(preliminaryHeader->getReceiver()), messageId(preliminaryHeader->getMessageId()), time(preliminaryHeader->getTime()), flags(preliminaryHeader->getFlags()), pushFromName(pushFromId) {
 	// Intentionally left empty.
 }
 
-FullMessageHeader::FullMessageHeader(PreliminaryGroupMessageHeader const* preliminaryHeader, ContactId const& sender) : sender(sender), receiver(ContactId(0)), messageId(preliminaryHeader->getMessageId()), time(preliminaryHeader->getTime()), flags(preliminaryHeader->getFlags()), pushFromName(sender) {
+FullMessageHeader::FullMessageHeader(PreliminaryGroupMessageHeader const* preliminaryHeader, ContactId const& sender, PushFromId const& pushFromId) : sender(sender), receiver(ContactId(0)), messageId(preliminaryHeader->getMessageId()), time(preliminaryHeader->getTime()), flags(preliminaryHeader->getFlags()), pushFromName(pushFromId) {
 	// Intentionally left empty.
 }
 
@@ -67,7 +67,7 @@ FullMessageHeader FullMessageHeader::fromHeaderData(QByteArray const& headerData
 	PushFromId const pushFromId(headerData.mid(startPosition, PROTO_MESSAGE_PUSH_FROM_LENGTH_BYTES));
 	startPosition += PROTO_MESSAGE_PUSH_FROM_LENGTH_BYTES;
 
-	return FullMessageHeader(receiverId, timestamp, senderId, messageId, flags);
+	return FullMessageHeader(receiverId, timestamp, senderId, messageId, flags, pushFromId);
 }
 
 ContactId const& FullMessageHeader::getSender() const {

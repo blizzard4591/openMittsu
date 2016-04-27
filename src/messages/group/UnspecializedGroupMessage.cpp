@@ -7,7 +7,7 @@ UnspecializedGroupMessage::UnspecializedGroupMessage(FullMessageHeader const& me
 	// Intentionally left empty.
 }
 
-UnspecializedGroupMessage::UnspecializedGroupMessage(PreliminaryGroupMessage const& message, ContactId const& sender) : Message(FullMessageHeader(message.getPreliminaryMessageHeader(), sender), message.getPreliminaryMessageContent()->clone()) {
+UnspecializedGroupMessage::UnspecializedGroupMessage(PreliminaryGroupMessage const& message, ContactId const& sender, PushFromId const& pushFromId) : Message(FullMessageHeader(message.getPreliminaryMessageHeader(), sender, pushFromId), message.getPreliminaryMessageContent()->clone()) {
 	// Intentionally left empty.
 }
 

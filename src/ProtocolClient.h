@@ -55,7 +55,7 @@ class ProtocolClient : public QObject {
 	Q_OBJECT
 
 public:
-	ProtocolClient(KeyRegistry const& keyRegistry, GroupRegistry const& groupRegistry, UniqueMessageIdGenerator* messageIdGenerator, ServerConfiguration const& serverConfiguration, ClientConfiguration const& clientConfiguration, MessageCenter* messageCenter);
+	ProtocolClient(KeyRegistry const& keyRegistry, GroupRegistry const& groupRegistry, UniqueMessageIdGenerator* messageIdGenerator, ServerConfiguration const& serverConfiguration, ClientConfiguration const& clientConfiguration, MessageCenter* messageCenter, PushFromId const& pushFromId);
 	virtual ~ProtocolClient();
 	bool getIsConnected() const;
 
@@ -69,6 +69,7 @@ public slots:
 	void sendGroupMessage(PreliminaryGroupMessage const& preliminaryMessage);
 
 	void addContact(ContactId const& contactId, PublicKey const& publicKey);
+	void newPushFromId(PushFromId const& newPushFromId);
 
 	void sendGroupSetup(GroupId const& groupId, QSet<ContactId> const& members, QString const& title);
 	void resendGroupSetup(GroupId const& groupId);
@@ -104,6 +105,8 @@ private:
 	GroupRegistry groupRegistry;
 	UniqueMessageIdGenerator* uniqueMessageIdGenerator;
 	MessageCenter* messageCenter;
+	std::unique_ptr<PushFromId> pushFromIdPtr;
+
 	bool isSetupDone;
 	bool isNetworkSessionReady;
 	bool isConnected;

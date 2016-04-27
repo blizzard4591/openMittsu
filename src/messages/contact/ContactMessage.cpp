@@ -7,10 +7,6 @@ ContactMessage::ContactMessage(FullMessageHeader const& messageHeader, ContactMe
 	// Intentionally left empty.
 }
 
-ContactMessage::ContactMessage(PreliminaryContactMessage const& message, ContactId const& sender) : Message(FullMessageHeader(message.getPreliminaryMessageHeader(), sender), message.getPreliminaryMessageContent()->clone()) {
-	// Intentionally left empty.
-}
-
 ContactMessage::ContactMessage(ContactMessage const& other) : Message(other.getMessageHeader(), other.getContactMessageContent()->clone()) {
 	// Intentionally left empty.
 }

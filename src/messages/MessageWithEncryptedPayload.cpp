@@ -7,7 +7,7 @@
 #include "protocol/MessageId.h"
 #include "protocol/ProtocolSpecs.h"
 
-MessageWithEncryptedPayload::MessageWithEncryptedPayload() : messageHeader(ContactId(0), MessageTime(0), ContactId(0), MessageId(0), MessageFlags(0x00)), nonce(), encryptedPayload() {
+MessageWithEncryptedPayload::MessageWithEncryptedPayload() : messageHeader(ContactId(0), MessageTime(0), ContactId(0), MessageId(0), MessageFlags(0x00), PushFromId(QStringLiteral(""))), nonce(), encryptedPayload() {
 	throw;
 }
 

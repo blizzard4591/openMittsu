@@ -9,6 +9,7 @@ class ContactId;
 class PushFromId : public Id {
 public:
 	PushFromId(ContactId const& contactId);
+	PushFromId(QString const& selfNickname);
 	PushFromId(QByteArray const& pushFromId);
 	PushFromId(PushFromId const& other);
 	virtual ~PushFromId();
@@ -25,6 +26,7 @@ private:
 	QByteArray const pushFromIdBytes;
 
 	static QByteArray expandFromContactId(ContactId const& contactId);
+	static QByteArray expandFromNickname(QString const& nickname);
 
 	// Disable the default constructor
 	PushFromId();
