@@ -42,7 +42,7 @@
 #include "sodium.h"
 
 ProtocolClient::ProtocolClient(KeyRegistry const& keyRegistry, GroupRegistry const& groupRegistry, UniqueMessageIdGenerator* messageIdGenerator, ServerConfiguration const& serverConfiguration, ClientConfiguration const& clientConfiguration, MessageCenter* messageCenter, PushFromId const& pushFromId)
-	: QObject(nullptr), cryptoBox(keyRegistry), groupRegistry(groupRegistry), uniqueMessageIdGenerator(messageIdGenerator), messageCenter(messageCenter), pushFromIdPtr(std::make_unique<PushFromId>(pushFromId)), isSetupDone(false), isNetworkSessionReady(false), isConnected(false), isAllowedToSend(false), socket(nullptr), networkSession(nullptr), serverConfiguration(serverConfiguration), clientConfiguration(clientConfiguration), outgoingMessagesTimer(nullptr), acknowledgmentWaitingTimer(nullptr), keepAliveTimer(nullptr), keepAliveCounter(0) {
+	: QObject(nullptr), cryptoBox(keyRegistry), groupRegistry(groupRegistry), uniqueMessageIdGenerator(messageIdGenerator), messageCenter(messageCenter), pushFromIdPtr(std::unique_ptr<PushFromId>(new PushFromId(pushFromId))), isSetupDone(false), isNetworkSessionReady(false), isConnected(false), isAllowedToSend(false), socket(nullptr), networkSession(nullptr), serverConfiguration(serverConfiguration), clientConfiguration(clientConfiguration), outgoingMessagesTimer(nullptr), acknowledgmentWaitingTimer(nullptr), keepAliveTimer(nullptr), keepAliveCounter(0) {
 	// Intentionally left empty.
 }
 
@@ -930,7 +930,7 @@ void ProtocolClient::addContact(ContactId const& contactId, PublicKey const& pub
 
 void ProtocolClient::newPushFromId(PushFromId const& newPushFromId) {
 	LOGGER_DEBUG("Setting new PushFromId {} received from GUI.", newPushFromId.toString());
-	pushFromIdPtr = std::make_unique<PushFromId>(newPushFromId);
+	pushFromIdPtr = std::unique_ptr<PushFromId>(new PushFromId(newPushFromId));
 }
 
 void ProtocolClient::sendGroupSetup(GroupId const& groupId, QSet<ContactId> const& members, QString const& title) {
@@ -984,7 +984,7 @@ void ProtocolClient::callbackTaskFinished(CallbackTask* callbackTask) {
 		if (!missingIdentityProcessors.contains(irct->getContactIdOfFetchedPublicKey())) {
 			LOGGER()->warn("IdentityReceiver CallbackTask finished for ID {}, but no MissingIdentityProcessor is registered for this ID.", irct->getContactIdOfFetchedPublicKey().toString());
 		} else {
-			std::shared_ptr<MissingIdentityProcessor> missingIdentityProcessor = *missingIdentityProcessors.constFind(irct->getContactIdOfFetchedPublicKey());
+			std::shared_ptr<MissingIdentityProcessor> missingIdentityProcessor = missingIdentityProcessors.value(irct->getContactIdOfFetchedPublicKey());
 			missingIdentityProcessors.remove(irct->getContactIdOfFetchedPublicKey());
 
 			if (!irct->hasFinishedSuccessfully()) {
@@ -1008,9 +1008,9 @@ void ProtocolClient::callbackTaskFinished(CallbackTask* callbackTask) {
 				}
 				if (missingIdentityProcessor->hasFinishedSuccessfully()) {
 					LOGGER()->info("MissingIdentityProcessor finished successfully, now processing {} queued messages.", missingIdentityProcessor->getQueuedMessages().size());
-					QList<MessageWithEncryptedPayload> queuedMessages = missingIdentityProcessor->getQueuedMessages();
-					QList<MessageWithEncryptedPayload>::const_iterator it = queuedMessages.constBegin();
-					QList<MessageWithEncryptedPayload>::const_iterator end = queuedMessages.constEnd();
+					std::list<MessageWithEncryptedPayload> queuedMessages(missingIdentityProcessor->getQueuedMessages());
+					std::list<MessageWithEncryptedPayload>::const_iterator it = queuedMessages.cbegin();
+					std::list<MessageWithEncryptedPayload>::const_iterator end = queuedMessages.cend();
 					for (; it != end; ++it) {
 						handleIncomingMessage(*it);
 					}

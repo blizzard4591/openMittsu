@@ -7,7 +7,7 @@ MissingIdentityProcessor::MissingIdentityProcessor(ContactId const& missingConta
 	missingContacts.insert(missingContact);
 }
 
-MissingIdentityProcessor::MissingIdentityProcessor(GroupId const& groupId, QSet<ContactId> const& missingContacts) : hasErrors(false), missingContacts(missingContacts), queuedMessages(), groupIdPtr(std::make_unique<GroupId>(groupId)) {
+MissingIdentityProcessor::MissingIdentityProcessor(GroupId const& groupId, QSet<ContactId> const& missingContacts) : hasErrors(false), missingContacts(missingContacts), queuedMessages(), groupIdPtr(std::unique_ptr<GroupId>(new GroupId(groupId))) {
 	// Intentionally left empty.
 }
 
@@ -27,12 +27,12 @@ bool MissingIdentityProcessor::hasFinished() const {
 	return missingContacts.isEmpty();
 }
 
-QList<MessageWithEncryptedPayload> const& MissingIdentityProcessor::getQueuedMessages() const {
+std::list<MessageWithEncryptedPayload> const& MissingIdentityProcessor::getQueuedMessages() const {
 	return queuedMessages;
 }
 
 void MissingIdentityProcessor::enqueueMessage(MessageWithEncryptedPayload const& message) {
-	queuedMessages.append(message);
+	queuedMessages.push_back(message);
 }
 
 void MissingIdentityProcessor::identityFetcherTaskFinished(ContactId const& contactId, bool successful) {

@@ -1,9 +1,9 @@
-#ifndef OPENMITTSU_GROUPMISSINGIDENTITYFETCHER_H_
-#define OPENMITTSU_GROUPMISSINGIDENTITYFETCHER_H_
+#ifndef OPENMITTSU_MISSINGIDENTITYPROCESSOR_H_
+#define OPENMITTSU_MISSINGIDENTITYPROCESSOR_H_
 
 #include <QObject>
 #include <QSet>
-#include <QList>
+#include <list>
 #include <memory>
 #include <utility>
 
@@ -22,7 +22,7 @@ public:
 	bool hasFinishedSuccessfully() const;
 	bool hasFinished() const;
 
-	QList<MessageWithEncryptedPayload> const& getQueuedMessages() const;
+	std::list<MessageWithEncryptedPayload> const& getQueuedMessages() const;
 	void enqueueMessage(MessageWithEncryptedPayload const& message);
 
 	void identityFetcherTaskFinished(ContactId const& contactId, bool successful);
@@ -32,8 +32,8 @@ public:
 private:
 	bool hasErrors;
 	QSet<ContactId> missingContacts;
-	QList<MessageWithEncryptedPayload> queuedMessages;
+	std::list<MessageWithEncryptedPayload> queuedMessages;
 	std::unique_ptr<GroupId> const groupIdPtr;
 };
 
-#endif // OPENMITTSU_GROUPMISSINGIDENTITYFETCHER_H_
+#endif // OPENMITTSU_MISSINGIDENTITYPROCESSOR_H_
