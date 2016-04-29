@@ -953,6 +953,7 @@ void ProtocolClient::resendGroupSetup(GroupId const& groupId) {
 	if (!groupRegistry.hasGroup(groupId)) {
 		LOGGER()->warn("Ignoring GUI request for resend of group setup for unknown group {}.", groupId.toString());
 	} else {
+		LOGGER()->info("Resending group setup for group {} with {} members and title \"{}\".", groupId.toString(), groupRegistry.getGroupMembers(groupId).size(), groupRegistry.getGroupTitle(groupId).toStdString());
 		UnspecializedGroupMessage groupCreationMessage(PreliminaryGroupMessage(new PreliminaryGroupMessageHeader(groupId, uniqueMessageIdGenerator->getNextUniqueMessageId(groupId), MessageFlagsFactory::createGroupControlMessageFlags()), new GroupCreationMessageContent(groupId, groupRegistry.getGroupMembers(groupId))), clientConfiguration.getClientIdentity(), *pushFromIdPtr);
 		std::shared_ptr<AcknowledgmentProcessor> apCreate = std::make_shared<GroupCreationMessageAcknowledgmentProcessor>(groupId, QDateTime::currentDateTime().addSecs(15), groupCreationMessage.getMessageHeader().getMessageId(), true);
 		handleOutgoingMessage(&groupCreationMessage, apCreate);

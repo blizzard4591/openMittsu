@@ -17,7 +17,7 @@ GroupRegistry::GroupRegistry(QHash<GroupId, std::pair<QSet<ContactId>, QString>>
 	}
 }
 
-GroupRegistry::GroupRegistry(GroupRegistry const& other) : knownGroups(other.knownGroups), mutex() {
+GroupRegistry::GroupRegistry(GroupRegistry const& other) : knownGroups(other.knownGroups), groupTitles(other.groupTitles), mutex() {
 	// Intentionally left empty.
 }
 
