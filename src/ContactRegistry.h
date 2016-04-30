@@ -61,6 +61,8 @@ private:
 	static ContactRegistry* instance;
 
 	mutable QMutex accessMutex;
+	bool identitiesChangedSignalLocked;
+
 	QHash<ContactId, IdentityContact*> identityToIdentityContactHashMap;
 	QHash<GroupId, GroupContact*> identityToGroupContactHashMap;
 

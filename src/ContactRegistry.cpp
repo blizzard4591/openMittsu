@@ -13,7 +13,7 @@
 // Static Initializers
 ContactRegistry* ContactRegistry::instance = nullptr;
 
-ContactRegistry::ContactRegistry() : identityToIdentityContactHashMap(), identityToGroupContactHashMap(), emptyString("") {
+ContactRegistry::ContactRegistry() : identitiesChangedSignalLocked(false), identityToIdentityContactHashMap(), identityToGroupContactHashMap(), emptyString("") {
 	//
 }
 
@@ -44,10 +44,14 @@ void ContactRegistry::fromFile(QString const& filename, bool dryRun) {
 	if (!QFile::exists(filename)) {
 		throw IllegalArgumentException() << QString("Could not open the specified contacts file as it does not exist: %1").arg(filename).toStdString();
 	}
+
 	QFile inputFile(filename);
 	if (!inputFile.open(QFile::ReadOnly | QFile::Text)) {
 		throw IllegalArgumentException() << QString("Could not open the specified contacts file for reading: %1").arg(filename).toStdString();
 	}
+
+	accessMutex.lock();
+	identitiesChangedSignalLocked = true;
 
 	QRegExp commentRegExp("^\\s*#.*$", Qt::CaseInsensitive, QRegExp::RegExp2);
 	QRegExp identityRegExp("^\\s*([A-Z0-9*][A-Z0-9]{7})\\s*:\\s*([a-fA-F0-9]{64})\\s*(?::\\s*(.*)\\s*)?$", Qt::CaseInsensitive, QRegExp::RegExp2);
@@ -61,8 +65,6 @@ void ContactRegistry::fromFile(QString const& filename, bool dryRun) {
 			continue;
 		} else if (identityRegExp.exactMatch(line)) {
 			if (!dryRun) {
-				accessMutex.lock();
-
 				ContactId const contactId(identityRegExp.cap(1));
 				PublicKey const publicKey = PublicKey::fromHexString(identityRegExp.cap(2));
 				QString const trimmedNickname = identityRegExp.cap(3).trimmed();
@@ -102,16 +104,14 @@ void ContactRegistry::fromFile(QString const& filename, bool dryRun) {
 					connectContact(iContact);
 					identityToIdentityContactHashMap.insert(contactId, iContact);
 				}
-
-				accessMutex.unlock();
 			}
 		} else if (groupRegExp.exactMatch(line)) {
 			if (!dryRun) {
-				accessMutex.lock();
-
 				GroupId const groupId(IdentityHelper::identityStringToUint64(groupRegExp.cap(2)), IdentityHelper::groupIdByteArrayToUint64(QByteArray::fromHex(groupRegExp.cap(1).toLatin1())));
 				QStringList ids = groupRegExp.cap(3).split(',', QString::SkipEmptyParts);
 				if (ids.size() == 0) {
+					identitiesChangedSignalLocked = false;
+					accessMutex.unlock();
 					throw IllegalArgumentException() << QString("Invalid or ill-formated line in contacts file \"%1\".\nProblematic line: %2").arg(filename).arg(line).toStdString();
 				}
 
@@ -147,15 +147,19 @@ void ContactRegistry::fromFile(QString const& filename, bool dryRun) {
 					connectContact(gContact);
 					identityToGroupContactHashMap.insert(groupId, gContact);
 				}
-
-				accessMutex.unlock();
 			}
 		} else {
+			identitiesChangedSignalLocked = false;
+			accessMutex.unlock();
 			throw IllegalArgumentException() << QString("Invalid or ill-formated line in contacts file \"%1\".\nProblematic line: %2").arg(filename).arg(line).toStdString();
 		}
 	}
 
 	inputFile.close();
+
+	identitiesChangedSignalLocked = false;
+	accessMutex.unlock();
+
 	if (!dryRun) {
 		emit identitiesChanged();
 	}
@@ -362,5 +366,8 @@ void ContactRegistry::disconnectContact(Contact* contact) {
 }
 
 void ContactRegistry::onContactDataChanged() {
-	emit identitiesChanged();
+	if (!identitiesChangedSignalLocked) {
+		LOGGER_DEBUG("Ignoring onContactDataChanged() since the internal lock is set.");
+		emit identitiesChanged();
+	}
 }
