@@ -1,12 +1,12 @@
 #include "ContactAddDialog.h"
 #include "ui_contactadddialog.h"
 
-#include <QRegExp>
+#include <QRegularExpression>
 
 ContactAddDialog::ContactAddDialog(QWidget *parent) : QDialog(parent), ui(new Ui::ContactAddDialog) {
     ui->setupUi(this);
 
-	identityValidator = new QRegExpValidator(QRegExp("[A-Z0-9*][A-Z0-9]{7}", Qt::CaseSensitive, QRegExp::RegExp2), ui->edtIdentity);
+	identityValidator = new QRegularExpressionValidator(QRegularExpression(QStringLiteral("[A-Z0-9*][A-Z0-9]{7}")), ui->edtIdentity);
 	ui->edtIdentity->setValidator(identityValidator);
 }
 

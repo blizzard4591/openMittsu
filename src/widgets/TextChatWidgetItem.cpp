@@ -4,6 +4,7 @@
 #include <QMenu>
 #include <QAction>
 #include <QClipboard>
+#include <QRegularExpression>
 
 TextChatWidgetItem::TextChatWidgetItem(Contact* contact, ContactIdWithMessageId const& senderAndMessageId, QString const& message, QWidget *parent) : ChatWidgetItem(contact, senderAndMessageId, parent), ui(new Ui::TextChatWidgetItem), message(message) {
 	ui->setupUi(this);
@@ -17,7 +18,7 @@ TextChatWidgetItem::TextChatWidgetItem(Contact* contact, ContactIdWithMessageId 
 	messagingFont.setStyleStrategy(QFont::PreferAntialias);
 	ui->lblMessageText->setFont(messagingFont);
 	
-	ui->lblMessageText->setText(message);
+	ui->lblMessageText->setText(preprocessLinks(message));
 	ui->lblMessageText->setWordWrap(true);
 	ui->lblFromTime->setWordWrap(true);
 
@@ -36,7 +37,7 @@ TextChatWidgetItem::TextChatWidgetItem(Contact* contact, ContactIdWithMessageId 
 	messagingFont.setStyleStrategy(QFont::PreferAntialias);
 	ui->lblMessageText->setFont(messagingFont);
 
-	ui->lblMessageText->setText(message);
+	ui->lblMessageText->setText(preprocessLinks(message));
 	ui->lblMessageText->setWordWrap(true);
 	ui->lblFromTime->setWordWrap(true);
 
@@ -76,4 +77,11 @@ bool TextChatWidgetItem::hasHeightForWidth() const {
 
 int TextChatWidgetItem::heightForWidth(int w) const {
 	return this->layout()->heightForWidth(w);
+}
+
+QString TextChatWidgetItem::preprocessLinks(QString const& text) {
+	QRegularExpression regExp(QStringLiteral("\\b((https?|ftp|file)://[-A-Z0-9+&@#/%?=~_|$!:,.;]*[A-Z0-9+&@#/%=~_|$])"), QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption);
+
+	QString result = text;
+	 return result.replace(regExp, QStringLiteral("<a href=\"\\1\">\\1</a>"));
 }

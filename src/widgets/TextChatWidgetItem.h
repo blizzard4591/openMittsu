@@ -24,6 +24,8 @@ protected:
 private:
 	Ui::TextChatWidgetItem *ui;
 	QString const message;
+
+	QString preprocessLinks(QString const& text);
 };
 
 #endif // OPENMITTSU_WIDGETS_TEXTCHATITEM_H_

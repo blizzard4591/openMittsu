@@ -2,7 +2,7 @@
 #define CONTACTADDDIALOG_H
 
 #include <QDialog>
-#include <QRegExpValidator>
+#include <QRegularExpressionValidator>
 
 namespace Ui {
 class ContactAddDialog;
@@ -19,7 +19,7 @@ public:
 	QString getNickname() const;
 private:
     Ui::ContactAddDialog *ui;
-	QRegExpValidator* identityValidator;
+	QRegularExpressionValidator* identityValidator;
 };
 
 #endif // CONTACTADDDIALOG_H
