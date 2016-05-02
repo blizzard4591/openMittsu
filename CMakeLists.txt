@@ -85,12 +85,10 @@ elseif(MSVC)
 	
 	add_definitions(/DSODIUM_STATIC)
 	add_definitions(/DNOMINMAX)
+	add_definitions(/DWIN32_LEAN_AND_MEAN)
 	
 	# Disable "C:\Program Files (x86)\Windows Kits\8.1\Include\um\DbgHelp.h(1544): warning C4091: 'typedef ': ignored on left of '' when no variable is declared"
 	add_definitions(/wd4091)
-	
-	# For the Windows header mess
-	add_definitions(/D_WINSOCKAPI_)
 else(CLANG)
     set(OPENMITTSU_COMPILED_BY "Clang (LLVM)")
 	# As CLANG is not set as a variable, we need to set it in case we have not matched another compiler.
@@ -228,6 +226,10 @@ QT5_WRAP_UI(OPENMITTSU_FORMS_HEADERS_DIALOGS ${OPENMITTSU_FORMS_DIALOGS})
 QT5_WRAP_UI(OPENMITTSU_FORMS_HEADERS_UPDATER ${OPENMITTSU_FORMS_UPDATER})
 QT5_ADD_RESOURCES(OPENMITTSU_RESOURCESOURCES ${OPENMITTSU_RESOURCES})
 
+# Sources of Build Tools
+file(GLOB_RECURSE OPENMITTSU_BUILDTOOLS_VERSIONINFO_HEADERS ${PROJECT_SOURCE_DIR}/buildTools/versionInfo/*.h)
+file(GLOB_RECURSE OPENMITTSU_BUILDTOOLS_VERSIONINFO_SOURCES_CPP ${PROJECT_SOURCE_DIR}/buildTools/versionInfo/*.cpp)
+
 # Main Grouping
 source_group(Headers FILES ${OPENMITTSU_HEADERS} ${OPENMITTSU_FORMS_HEADERS} ${OPENMITTSU_HEADERS_GENERATED})
 source_group(Sources FILES ${OPENMITTSU_SOURCES_C} ${OPENMITTSU_SOURCES_CPP} ${OPENMITTSU_SOURCES_GENERATED})
@@ -263,6 +265,7 @@ add_executable(openMittsu ${OPENMITTSU_HEADERS} ${OPENMITTSU_SOURCES_C} ${OPENMI
 	${OPENMITTSU_HEADERS_UPDATER} ${OPENMITTSU_SOURCES_UPDATER} ${OPENMITTSU_FORMS_HEADERS_UPDATER}
 )
 
+add_executable(openMittsuVersionInfo ${OPENMITTSU_BUILDTOOLS_VERSIONINFO_HEADERS} ${OPENMITTSU_BUILDTOOLS_VERSIONINFO_SOURCES_CPP} ${OPENMITTSU_HEADERS_GENERATED} ${OPENMITTSU_SOURCES_GENERATED})
 
 if (MSVC)
 	set_target_properties(openMittsu PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
@@ -273,6 +276,7 @@ target_link_libraries(openMittsu ${LIBSODIUM_LIBRARIES})
 target_link_libraries(openMittsu ${LIBQRENCODE_LIBRARY})
 message(STATUS "Linking ENDIAN libs: ${ENDIANNESS_LINK_LIBRARIES}")
 target_link_libraries(openMittsu "${ENDIANNESS_LINK_LIBRARIES}")
+target_link_libraries(openMittsuVersionInfo "${ENDIANNESS_LINK_LIBRARIES}")
 
 # Use the required modules from Qt 5.
 target_link_libraries(openMittsu Qt5::Core)
@@ -284,6 +288,7 @@ target_link_libraries(openMittsu Qt5::Multimedia)
 # Link against libc++abi if requested.
 if (OPENMITTSU_LINK_LIBCXXABI)
 	target_link_libraries(openMittsu "c++abi")
+	target_link_libraries(openMittsuVersionInfo "c++abi")
 endif(OPENMITTSU_LINK_LIBCXXABI)
 
 # Targets, CPACK...
