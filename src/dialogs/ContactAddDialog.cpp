@@ -6,7 +6,7 @@
 ContactAddDialog::ContactAddDialog(QWidget *parent) : QDialog(parent), ui(new Ui::ContactAddDialog) {
     ui->setupUi(this);
 
-	identityValidator = new QRegExpValidator(QRegExp("[A-Z0-9]{8}", Qt::CaseSensitive, QRegExp::RegExp2), ui->edtIdentity);
+	identityValidator = new QRegExpValidator(QRegExp("[A-Z0-9*][A-Z0-9]{7}", Qt::CaseSensitive, QRegExp::RegExp2), ui->edtIdentity);
 	ui->edtIdentity->setValidator(identityValidator);
 }
 
