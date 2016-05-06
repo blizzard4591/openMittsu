@@ -18,7 +18,8 @@ LocationChatWidgetItem::LocationChatWidgetItem(Contact* contact, ContactIdWithMe
 	ui->lblMessageText->setFont(messagingFont);
 	
 	ui->lblMessageText->setOpenExternalLinks(true);
-	ui->lblMessageText->setText(QString("Location: https://maps.google.com/?q=%1,%2 - %3").arg(latitude).arg(longitude).arg(description));
+	QString const locationUrl = QString(QStringLiteral("https://maps.google.com/?q=%1,%2")).arg(latitude).arg(longitude);
+	ui->lblMessageText->setText(QString("Location: <a href=\"%1\">%1</a> - %2").arg(locationUrl).arg(description));
 	ui->lblMessageText->setWordWrap(true);
 	ui->lblFromTime->setWordWrap(true);
 
@@ -37,7 +38,8 @@ LocationChatWidgetItem::LocationChatWidgetItem(Contact* contact, ContactIdWithMe
 	messagingFont.setStyleStrategy(QFont::PreferAntialias);
 	ui->lblMessageText->setFont(messagingFont);
 
-	ui->lblMessageText->setText(QString("Location: https://maps.google.com/?q=%1,%2 - %3").arg(latitude).arg(longitude).arg(description));
+	QString const locationUrl = QString(QStringLiteral("https://maps.google.com/?q=%1,%2")).arg(latitude).arg(longitude);
+	ui->lblMessageText->setText(QString("Location: <a href=\"%1\">%1</a> - %2").arg(locationUrl).arg(description));
 	ui->lblMessageText->setWordWrap(true);
 	ui->lblFromTime->setWordWrap(true);
 

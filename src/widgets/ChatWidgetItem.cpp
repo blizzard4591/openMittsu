@@ -3,6 +3,7 @@
 #include "exceptions/InternalErrorException.h"
 
 #include <QDateTime>
+#include <QRegularExpression>
 
 ChatWidgetItem::ChatWidgetItem(Contact* contact, ContactIdWithMessageId const& senderAndMessageId, QWidget* parent)
 	: QWidget(parent), contact(contact), senderAndMessageId(senderAndMessageId), hasTimeSendSet(false), timeSend(), hasTimeReceivedSet(false), timeReceived(), hasTimeSeenSet(false), timeSeen(), hasTimeAgreeSet(false), timeAgree(), messageState(MessageState::STATE_ENQUEUED), messageAgreeState(MessageAgreeState::STATE_NONE), messageType(MessageType::TYPE_TEXT) {
@@ -244,4 +245,11 @@ bool ChatWidgetItem::handleCustomContextMenuEntrySelection(QAction* selectedActi
 
 void ChatWidgetItem::copyToClipboard() {
 	// Empty base definition, override in subclass if needed.
+}
+
+QString ChatWidgetItem::preprocessLinks(QString const& text) {
+	QRegularExpression regExp(QStringLiteral("\\b((https?|ftp|file)://[-A-Z0-9+&@#/%?=~_|$!:,.;]*[A-Z0-9+&@#/%=~_|$])"), QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption);
+
+	QString result = text;
+	return result.replace(regExp, QStringLiteral("<a href=\"\\1\">\\1</a>"));
 }

@@ -4,7 +4,6 @@
 #include <QMenu>
 #include <QAction>
 #include <QClipboard>
-#include <QRegularExpression>
 
 TextChatWidgetItem::TextChatWidgetItem(Contact* contact, ContactIdWithMessageId const& senderAndMessageId, QString const& message, QWidget *parent) : ChatWidgetItem(contact, senderAndMessageId, parent), ui(new Ui::TextChatWidgetItem), message(message) {
 	ui->setupUi(this);
@@ -79,9 +78,3 @@ int TextChatWidgetItem::heightForWidth(int w) const {
 	return this->layout()->heightForWidth(w);
 }
 
-QString TextChatWidgetItem::preprocessLinks(QString const& text) {
-	QRegularExpression regExp(QStringLiteral("\\b((https?|ftp|file)://[-A-Z0-9+&@#/%?=~_|$!:,.;]*[A-Z0-9+&@#/%=~_|$])"), QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption);
-
-	QString result = text;
-	 return result.replace(regExp, QStringLiteral("<a href=\"\\1\">\\1</a>"));
-}
