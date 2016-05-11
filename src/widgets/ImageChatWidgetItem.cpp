@@ -7,7 +7,10 @@
 
 ImageChatWidgetItem::ImageChatWidgetItem(Contact* contact, ContactIdWithMessageId const& senderAndMessageId, QPixmap const& image, QWidget *parent) : ChatWidgetItem(contact, senderAndMessageId, parent), ui(new Ui::ImageChatWidgetItem), image(image) {
 	ui->setupUi(this);
-	
+
+	QFont fromTimeFont(QStringLiteral("Source Sans Pro"), 11, -1, true);
+	ui->lblFromTime->setFont(fromTimeFont);
+
 	ui->lblImage->setPixmap(image);
 	ui->lblFromTime->setWordWrap(true);
 	onDataUpdated();
@@ -15,6 +18,9 @@ ImageChatWidgetItem::ImageChatWidgetItem(Contact* contact, ContactIdWithMessageI
 
 ImageChatWidgetItem::ImageChatWidgetItem(Contact* contact, ContactIdWithMessageId const& senderAndMessageId, QDateTime const& timeSend, QDateTime const& timeReceived, QPixmap const& image, QWidget *parent) : ChatWidgetItem(contact, senderAndMessageId, timeSend, timeReceived, parent), ui(new Ui::ImageChatWidgetItem), image(image) {
 	ui->setupUi(this);
+
+	QFont fromTimeFont(QStringLiteral("Source Sans Pro"), 11, -1, true);
+	ui->lblFromTime->setFont(fromTimeFont);
 
 	ui->lblImage->setPixmap(image);
 	ui->lblFromTime->setWordWrap(true);
