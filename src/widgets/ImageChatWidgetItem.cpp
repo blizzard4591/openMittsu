@@ -7,7 +7,7 @@
 
 ImageChatWidgetItem::ImageChatWidgetItem(Contact* contact, ContactIdWithMessageId const& senderAndMessageId, QPixmap const& image, QWidget *parent) : ChatWidgetItem(contact, senderAndMessageId, parent), ui(new Ui::ImageChatWidgetItem), image(image) {
 	ui->setupUi(this);
-
+	
 	ui->lblImage->setPixmap(image);
 	ui->lblFromTime->setWordWrap(true);
 	onDataUpdated();
