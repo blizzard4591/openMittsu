@@ -39,6 +39,8 @@
      </property>
      <property name="font">
       <font>
+       <family>Source Sans Pro</family>
+       <pointsize>13</pointsize>
        <stylestrategy>PreferAntialias</stylestrategy>
       </font>
      </property>
@@ -74,12 +76,14 @@ border-top-left-radius:5px;</string>
      <property name="maximumSize">
       <size>
        <width>16777215</width>
-       <height>30</height>
+       <height>50</height>
       </size>
      </property>
      <property name="font">
       <font>
+       <family>Source Sans Pro</family>
        <pointsize>11</pointsize>
+       <italic>true</italic>
        <stylestrategy>PreferAntialias</stylestrategy>
       </font>
      </property>

@@ -12,14 +12,6 @@ TextChatWidgetItem::TextChatWidgetItem(Contact* contact, ContactIdWithMessageId 
 	sp.setHeightForWidth(true);
 	this->setSizePolicy(sp);
 
-	// Set Font with UTF-8 capabilities
-	QFont messagingFont(QStringLiteral("Source Sans Pro"), 13);
-	QFont fromTimeFont(QStringLiteral("Source Sans Pro"), 11, -1, true);
-	messagingFont.setStyleStrategy(QFont::PreferAntialias);
-	fromTimeFont.setStyleStrategy(QFont::PreferAntialias);
-	ui->lblMessageText->setFont(messagingFont);
-	ui->lblFromTime->setFont(fromTimeFont);
-
 	ui->lblMessageText->setText(preprocessLinks(message));
 	ui->lblMessageText->setWordWrap(true);
 	ui->lblFromTime->setWordWrap(true);
@@ -33,14 +25,6 @@ TextChatWidgetItem::TextChatWidgetItem(Contact* contact, ContactIdWithMessageId 
 	QSizePolicy sp = this->sizePolicy();
 	sp.setHeightForWidth(true);
 	this->setSizePolicy(sp);
-
-	// Set Font with UTF-8 capabilities
-	QFont messagingFont(QStringLiteral("Source Sans Pro"), 13);
-	QFont fromTimeFont(QStringLiteral("Source Sans Pro"), 11, -1, true);
-	messagingFont.setStyleStrategy(QFont::PreferAntialias);
-	fromTimeFont.setStyleStrategy(QFont::PreferAntialias);
-	ui->lblMessageText->setFont(messagingFont);
-	ui->lblFromTime->setFont(fromTimeFont);
 
 	ui->lblMessageText->setText(preprocessLinks(message));
 	ui->lblMessageText->setWordWrap(true);
