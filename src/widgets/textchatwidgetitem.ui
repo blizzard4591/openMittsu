@@ -43,7 +43,8 @@
       </font>
      </property>
      <property name="styleSheet">
-      <string notr="true"/>
+      <string notr="true">border-top-right-radius:5px;
+border-top-left-radius:5px;</string>
      </property>
      <property name="text">
       <string notr="true">Message Text</string>
@@ -81,6 +82,10 @@
        <pointsize>11</pointsize>
        <stylestrategy>PreferAntialias</stylestrategy>
       </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border-bottom-right-radius:5px;
+border-bottom-left-radius:5px;</string>
      </property>
      <property name="text">
       <string>From @, sent on @. Status: Acknowledged.</string>

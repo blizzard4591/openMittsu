@@ -52,7 +52,8 @@
       </font>
      </property>
      <property name="styleSheet">
-      <string notr="true"/>
+      <string notr="true">border-top-right-radius:5px;
+border-top-left-radius:5px;</string>
      </property>
      <property name="text">
       <string notr="true">IMAGE HERE</string>
@@ -85,11 +86,18 @@
        <stylestrategy>PreferAntialias</stylestrategy>
       </font>
      </property>
+     <property name="styleSheet">
+      <string notr="true">border-bottom-right-radius:5px;
+border-bottom-left-radius:5px;</string>
+     </property>
      <property name="text">
       <string>From @, sent on @. Status: Acknowledged.</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
