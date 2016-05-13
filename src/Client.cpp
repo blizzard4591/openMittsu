@@ -45,7 +45,6 @@
 
 Client::Client(QWidget *parent) : QMainWindow(parent), protocolClient(nullptr), settings(nullptr), audioOutput(nullptr), connectionState(ConnectionState::STATE_DISCONNECTED), serverConfiguration(nullptr), clientConfiguration(nullptr), contactRegistry(ContactRegistry::getInstance()) {
 	ui.setupUi(this);
-	ui.menubar->setNativeMenuBar(false);
 	ui.listContacts->setContextMenuPolicy(Qt::CustomContextMenu);
 	connectionTimer.start(500);
 	OPENMITTSU_CONNECT(&connectionTimer, timeout(), this, connectionTimerOnTimer());

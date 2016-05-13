@@ -140,7 +140,7 @@ QString ChatWidgetItem::getFormattedContactName() const {
 }
 
 void ChatWidgetItem::onDataUpdated() {
-	static const QString templateString(QStringLiteral("From %1, sent on %2. Status: %3"));
+	static const QString templateString(QStringLiteral("From %1, sent on %2. Status: %3 "));
 
 	QString text(templateString.arg(getFormattedContactName()).arg(timeSend.toString(QStringLiteral("HH:mm:ss, on dd.MM.yyyy"))));
 	switch (messageState) {
@@ -165,9 +165,9 @@ void ChatWidgetItem::onDataUpdated() {
 	}
 
 	if (messageAgreeState == MessageAgreeState::STATE_AGREE) {
-		text = text.append(QStringLiteral(" (Agreed)"));
+		text = text.append(QStringLiteral("(Agreed) "));
 	} else if (messageAgreeState == MessageAgreeState::STATE_DISAGREE) {
-		text = text.append(QStringLiteral(" (Disagreed)"));
+		text = text.append(QStringLiteral("(Disagreed) "));
 	}
 
 	setFromTimeString(text);
