@@ -11,11 +11,6 @@ LocationChatWidgetItem::LocationChatWidgetItem(Contact* contact, ContactIdWithMe
 	QSizePolicy sp = this->sizePolicy();
 	sp.setHeightForWidth(true);
 	this->setSizePolicy(sp);
-
-	// Set Font with UTF-8 capabilities
-	QFont messagingFont(QStringLiteral("Source Sans Pro"), 12);
-	messagingFont.setStyleStrategy(QFont::PreferAntialias);
-	ui->lblMessageText->setFont(messagingFont);
 	
 	ui->lblMessageText->setOpenExternalLinks(true);
 	QString const locationUrl = QString(QStringLiteral("https://maps.google.com/?q=%1,%2")).arg(latitude).arg(longitude);
@@ -32,11 +27,6 @@ LocationChatWidgetItem::LocationChatWidgetItem(Contact* contact, ContactIdWithMe
 	QSizePolicy sp = this->sizePolicy();
 	sp.setHeightForWidth(true);
 	this->setSizePolicy(sp);
-
-	// Set Font with UTF-8 capabilities
-	QFont messagingFont(QStringLiteral("Source Sans Pro"), 12);
-	messagingFont.setStyleStrategy(QFont::PreferAntialias);
-	ui->lblMessageText->setFont(messagingFont);
 
 	QString const locationUrl = QString(QStringLiteral("https://maps.google.com/?q=%1,%2")).arg(latitude).arg(longitude);
 	ui->lblMessageText->setText(QString("Location: <a href=\"%1\">%1</a> - %2").arg(locationUrl).arg(description));

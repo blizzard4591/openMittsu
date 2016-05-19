@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>283</width>
+    <width>285</width>
     <height>267</height>
    </rect>
   </property>
@@ -19,7 +19,16 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <property name="autoFillBackground">
+   <bool>false</bool>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QLabel" name="lblMessageText">
      <property name="sizePolicy">
@@ -30,8 +39,14 @@
      </property>
      <property name="font">
       <font>
+       <family>Source Sans Pro</family>
+       <pointsize>13</pointsize>
        <stylestrategy>PreferAntialias</stylestrategy>
       </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border-top-right-radius:5px;
+border-top-left-radius:5px;</string>
      </property>
      <property name="text">
       <string notr="true">Message Text</string>
@@ -51,13 +66,6 @@
     </widget>
    </item>
    <item>
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
     <widget class="QLabel" name="lblFromTime">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
@@ -68,19 +76,29 @@
      <property name="maximumSize">
       <size>
        <width>16777215</width>
-       <height>30</height>
+       <height>50</height>
       </size>
      </property>
      <property name="font">
       <font>
+       <family>Source Sans Pro</family>
+       <pointsize>11</pointsize>
+       <italic>true</italic>
        <stylestrategy>PreferAntialias</stylestrategy>
       </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border-bottom-right-radius:5px;
+border-bottom-left-radius:5px;</string>
      </property>
      <property name="text">
       <string>From @, sent on @. Status: Acknowledged.</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
      </property>
      <property name="textInteractionFlags">
       <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>

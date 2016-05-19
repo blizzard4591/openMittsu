@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>283</width>
+    <width>285</width>
     <height>267</height>
    </rect>
   </property>
@@ -16,10 +16,22 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
+  <property name="maximumSize">
+   <size>
+    <width>410</width>
+    <height>435</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>ImageChatWidgetItem</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">padding:5px;</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>0</number>
+   </property>
    <item>
     <widget class="PixmapLabel" name="lblImage">
      <property name="sizePolicy">
@@ -28,10 +40,20 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="maximumSize">
+      <size>
+       <width>400</width>
+       <height>400</height>
+      </size>
+     </property>
      <property name="font">
       <font>
        <stylestrategy>PreferAntialias</stylestrategy>
       </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border-top-right-radius:5px;
+border-top-left-radius:5px;</string>
      </property>
      <property name="text">
       <string notr="true">IMAGE HERE</string>
@@ -42,15 +64,11 @@
      <property name="wordWrap">
       <bool>true</bool>
      </property>
+     <property name="margin">
+      <number>0</number>
+     </property>
      <property name="openExternalLinks">
       <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>
@@ -59,19 +77,29 @@
      <property name="maximumSize">
       <size>
        <width>16777215</width>
-       <height>25</height>
+       <height>50</height>
       </size>
      </property>
      <property name="font">
       <font>
+       <family>Source Sans Pro</family>
+       <pointsize>11</pointsize>
+       <italic>true</italic>
        <stylestrategy>PreferAntialias</stylestrategy>
       </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border-bottom-right-radius:5px;
+border-bottom-left-radius:5px;</string>
      </property>
      <property name="text">
       <string>From @, sent on @. Status: Acknowledged.</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
      </property>
     </widget>
    </item>

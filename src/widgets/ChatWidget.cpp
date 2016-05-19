@@ -83,17 +83,19 @@ void ChatWidget::informAllOfSize() {
 void ChatWidget::addItem(ChatWidgetItem* item) {
 	if (ContactRegistry::getInstance()->getSelfContact() == item->getContact()) {
 		QHBoxLayout* hboxLayout = new QHBoxLayout();
-		QSpacerItem* spacerItem = new QSpacerItem(100, 1, QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
-		hboxLayout->addItem(spacerItem);
+		//QSpacerItem* spacerItem = new QSpacerItem(100, 1, QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
+		//hboxLayout->addItem(spacerItem);
 		hboxLayout->addWidget(item, 0, Qt::AlignRight);
 		item->setInnerAlignment(false);
+		item->setStyleSheet("background-color:#f7ffe8;padding:5px;");
 		topLayout->addLayout(hboxLayout);
 	} else {
 		QHBoxLayout* hboxLayout = new QHBoxLayout();
-		QSpacerItem* spacerItem = new QSpacerItem(100, 1, QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
+		//QSpacerItem* spacerItem = new QSpacerItem(100, 1, QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
 		hboxLayout->addWidget(item, 0, Qt::AlignLeft);
-		hboxLayout->addItem(spacerItem);
+		//hboxLayout->addItem(spacerItem);
 		item->setInnerAlignment(true);
+		item->setStyleSheet("background-color:white;padding:5px;");
 		topLayout->addLayout(hboxLayout);
 	}
 	items.append(item);
