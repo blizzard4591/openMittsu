@@ -13,8 +13,6 @@ TextChatWidgetItem::TextChatWidgetItem(Contact* contact, ContactIdWithMessageId 
 	this->setSizePolicy(sp);
 
 	ui->lblMessageText->setText(preprocessLinks(message));
-	ui->lblMessageText->setWordWrap(true);
-	ui->lblFromTime->setWordWrap(true);
 
 	onDataUpdated();
 }
@@ -27,8 +25,6 @@ TextChatWidgetItem::TextChatWidgetItem(Contact* contact, ContactIdWithMessageId 
 	this->setSizePolicy(sp);
 
 	ui->lblMessageText->setText(preprocessLinks(message));
-	ui->lblMessageText->setWordWrap(true);
-	ui->lblFromTime->setWordWrap(true);
 
 	onDataUpdated();
 }
@@ -42,17 +38,23 @@ void TextChatWidgetItem::copyToClipboard() {
 	clipboard->setText(message);
 }
 
-void TextChatWidgetItem::setFromTimeString(QString const& text) {
-	ui->lblFromTime->setText(text);
+void TextChatWidgetItem::setFromString(QString const& fromString) {
+	ui->lblFrom->setText(fromString);
+}
+
+void TextChatWidgetItem::setTimeAndStatusString(QString const& timeAndStatusString) {
+	ui->lblTimeAndStatus->setText(timeAndStatusString);
 }
 
 void TextChatWidgetItem::setInnerAlignment(bool alignLeft) {
 	if (alignLeft) {
+		ui->lblFrom->setAlignment(Qt::AlignLeft);
 		ui->lblMessageText->setAlignment(Qt::AlignLeft);
-		ui->lblFromTime->setAlignment(Qt::AlignLeft);
+		ui->lblTimeAndStatus->setAlignment(Qt::AlignLeft);
 	} else {
+		ui->lblFrom->setAlignment(Qt::AlignRight);
 		ui->lblMessageText->setAlignment(Qt::AlignRight);
-		ui->lblFromTime->setAlignment(Qt::AlignRight);
+		ui->lblTimeAndStatus->setAlignment(Qt::AlignRight);
 	}
 }
 

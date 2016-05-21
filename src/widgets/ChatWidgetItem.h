@@ -81,7 +81,9 @@ protected:
 	QString getFormattedContactName() const;
 	QSize mySizeHint;
 
-	virtual void setFromTimeString(QString const& text) = 0;
+	virtual void setFromString(QString const& fromString) = 0;
+	virtual void setTimeAndStatusString(QString const& timeAndStatusString) = 0;
+
 	virtual void appendCustomContextMenuEntries(QPoint const& pos, QMenu& menu);
 	virtual bool handleCustomContextMenuEntrySelection(QAction* selectedAction);
 	virtual void copyToClipboard();

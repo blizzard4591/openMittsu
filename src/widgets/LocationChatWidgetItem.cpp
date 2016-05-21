@@ -14,9 +14,7 @@ LocationChatWidgetItem::LocationChatWidgetItem(Contact* contact, ContactIdWithMe
 	
 	ui->lblMessageText->setOpenExternalLinks(true);
 	QString const locationUrl = QString(QStringLiteral("https://maps.google.com/?q=%1,%2")).arg(latitude).arg(longitude);
-	ui->lblMessageText->setText(QString("Location: <a href=\"%1\">%1</a> - %2").arg(locationUrl).arg(description));
-	ui->lblMessageText->setWordWrap(true);
-	ui->lblFromTime->setWordWrap(true);
+	ui->lblMessageText->setText(QString(tr("Location: <a href=\"%1\">%1</a> - %2")).arg(locationUrl).arg(description));
 
 	onDataUpdated();
 }
@@ -29,9 +27,7 @@ LocationChatWidgetItem::LocationChatWidgetItem(Contact* contact, ContactIdWithMe
 	this->setSizePolicy(sp);
 
 	QString const locationUrl = QString(QStringLiteral("https://maps.google.com/?q=%1,%2")).arg(latitude).arg(longitude);
-	ui->lblMessageText->setText(QString("Location: <a href=\"%1\">%1</a> - %2").arg(locationUrl).arg(description));
-	ui->lblMessageText->setWordWrap(true);
-	ui->lblFromTime->setWordWrap(true);
+	ui->lblMessageText->setText(QString(tr("Location: <a href=\"%1\">%1</a> - %2")).arg(locationUrl).arg(description));
 
 	onDataUpdated();
 }
@@ -42,20 +38,26 @@ LocationChatWidgetItem::~LocationChatWidgetItem() {
 
 void LocationChatWidgetItem::copyToClipboard() {
 	QClipboard *clipboard = QApplication::clipboard();
-	clipboard->setText(QString("Location: https://maps.google.com/?q=%1,%2 - %3").arg(latitude).arg(longitude).arg(description));
+	clipboard->setText(QString(tr("Location: https://maps.google.com/?q=%1,%2 - %3")).arg(latitude).arg(longitude).arg(description));
 }
 
-void LocationChatWidgetItem::setFromTimeString(QString const& text) {
-	ui->lblFromTime->setText(text);
+void LocationChatWidgetItem::setFromString(QString const& fromString) {
+	ui->lblFrom->setText(fromString);
+}
+
+void LocationChatWidgetItem::setTimeAndStatusString(QString const& timeAndStatusString) {
+	ui->lblTimeAndStatus->setText(timeAndStatusString);
 }
 
 void LocationChatWidgetItem::setInnerAlignment(bool alignLeft) {
 	if (alignLeft) {
+		ui->lblFrom->setAlignment(Qt::AlignLeft);
 		ui->lblMessageText->setAlignment(Qt::AlignLeft);
-		ui->lblFromTime->setAlignment(Qt::AlignLeft);
+		ui->lblTimeAndStatus->setAlignment(Qt::AlignLeft);
 	} else {
+		ui->lblFrom->setAlignment(Qt::AlignRight);
 		ui->lblMessageText->setAlignment(Qt::AlignRight);
-		ui->lblFromTime->setAlignment(Qt::AlignRight);
+		ui->lblTimeAndStatus->setAlignment(Qt::AlignRight);
 	}
 }
 

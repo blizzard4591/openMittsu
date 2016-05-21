@@ -17,7 +17,8 @@ public:
 
 	virtual void setInnerAlignment(bool alignLeft) override;
 protected:
-	virtual void setFromTimeString(QString const& text) override;
+	virtual void setFromString(QString const& fromString) override;
+	virtual void setTimeAndStatusString(QString const& timeAndStatusString) override;
 	virtual void copyToClipboard() override;
 private:
 	Ui::ImageChatWidgetItem *ui;

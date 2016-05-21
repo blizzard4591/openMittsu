@@ -19,7 +19,9 @@ public:
 	virtual int heightForWidth(int w) const override;
 	virtual bool hasHeightForWidth() const;
 protected:
-	virtual void setFromTimeString(QString const& text) override;
+	virtual void setFromString(QString const& fromString) override;
+	virtual void setTimeAndStatusString(QString const& timeAndStatusString) override;
+
 	virtual void copyToClipboard() override;
 private:
 	Ui::TextChatWidgetItem *ui;

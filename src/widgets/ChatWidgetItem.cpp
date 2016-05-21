@@ -140,37 +140,38 @@ QString ChatWidgetItem::getFormattedContactName() const {
 }
 
 void ChatWidgetItem::onDataUpdated() {
-	static const QString templateString(QStringLiteral("From %1, sent on %2. Status: %3 "));
+	static const QString templateTimeAndStatusString(tr("%1 - Status: %2"));
 
-	QString text(templateString.arg(getFormattedContactName()).arg(timeSend.toString(QStringLiteral("HH:mm:ss, on dd.MM.yyyy"))));
+	QString textTimeAndStatus(templateTimeAndStatusString.arg(timeSend.toString(tr("HH:mm:ss, on dd.MM.yyyy"))));
 	switch (messageState) {
 	case MessageState::STATE_ENQUEUED:
-		text = text.arg(QStringLiteral("Sending"));
+		textTimeAndStatus = textTimeAndStatus.arg(tr("Sending"));
 		break;
 	case MessageState::STATE_FAILED:
-		text = text.arg(QStringLiteral("FAILED"));
+		textTimeAndStatus = textTimeAndStatus.arg(tr("FAILED"));
 		break;
 	case MessageState::STATE_SEND:
-		text = text.arg(QStringLiteral("Sent"));
+		textTimeAndStatus = textTimeAndStatus.arg(tr("Sent"));
 		break;
 	case MessageState::STATE_RECEIVED:
-		text = text.arg(QStringLiteral("Received"));
+		textTimeAndStatus = textTimeAndStatus.arg(tr("Received"));
 		break;
 	case MessageState::STATE_READ:
-		text = text.arg(QStringLiteral("Read"));
+		textTimeAndStatus = textTimeAndStatus.arg(tr("Read"));
 		break;
 	default:
-		text = text.arg(QStringLiteral("ERROR"));
+		textTimeAndStatus = textTimeAndStatus.arg(tr("ERROR"));
 		break;
 	}
 
 	if (messageAgreeState == MessageAgreeState::STATE_AGREE) {
-		text = text.append(QStringLiteral("(Agreed) "));
+		textTimeAndStatus = textTimeAndStatus.append(tr("(Agreed) "));
 	} else if (messageAgreeState == MessageAgreeState::STATE_DISAGREE) {
-		text = text.append(QStringLiteral("(Disagreed) "));
+		textTimeAndStatus = textTimeAndStatus.append(tr("(Disagreed) "));
 	}
 
-	setFromTimeString(text);
+	setFromString(getFormattedContactName());
+	setTimeAndStatusString(textTimeAndStatus);
 }
 
 void ChatWidgetItem::showContextMenu(const QPoint& pos) {

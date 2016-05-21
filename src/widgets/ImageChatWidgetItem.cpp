@@ -9,7 +9,6 @@ ImageChatWidgetItem::ImageChatWidgetItem(Contact* contact, ContactIdWithMessageI
 	ui->setupUi(this);
 	
 	ui->lblImage->setPixmap(image);
-	ui->lblFromTime->setWordWrap(true);
 	onDataUpdated();
 }
 
@@ -17,7 +16,6 @@ ImageChatWidgetItem::ImageChatWidgetItem(Contact* contact, ContactIdWithMessageI
 	ui->setupUi(this);
 
 	ui->lblImage->setPixmap(image);
-	ui->lblFromTime->setWordWrap(true);
 	onDataUpdated();
 }
 
@@ -30,16 +28,22 @@ void ImageChatWidgetItem::copyToClipboard() {
 	clipboard->setPixmap(image);
 }
 
-void ImageChatWidgetItem::setFromTimeString(QString const& text) {
-	ui->lblFromTime->setText(text);
+void ImageChatWidgetItem::setFromString(QString const& fromString) {
+	ui->lblFrom->setText(fromString);
+}
+
+void ImageChatWidgetItem::setTimeAndStatusString(QString const& timeAndStatusString) {
+	ui->lblTimeAndStatus->setText(timeAndStatusString);
 }
 
 void ImageChatWidgetItem::setInnerAlignment(bool alignLeft) {
 	if (alignLeft) {
+		ui->lblFrom->setAlignment(Qt::AlignLeft);
 		ui->lblImage->setAlignment(Qt::AlignLeft);
-		ui->lblFromTime->setAlignment(Qt::AlignLeft);
+		ui->lblTimeAndStatus->setAlignment(Qt::AlignLeft);
 	} else {
+		ui->lblFrom->setAlignment(Qt::AlignRight);
 		ui->lblImage->setAlignment(Qt::AlignRight);
-		ui->lblFromTime->setAlignment(Qt::AlignRight);
+		ui->lblTimeAndStatus->setAlignment(Qt::AlignRight);
 	}
 }

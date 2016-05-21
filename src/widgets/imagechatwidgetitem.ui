@@ -29,9 +29,41 @@
    <string notr="true">padding:5px;</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="spacing">
-    <number>0</number>
-   </property>
+   <item>
+    <widget class="QLabel" name="lblFrom">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <family>Source Sans Pro</family>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+       <stylestrategy>PreferAntialias</stylestrategy>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border-top-right-radius:5px;
+border-top-left-radius:5px;</string>
+     </property>
+     <property name="text">
+      <string>Some Client (ECHOECHO)</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+     <property name="textInteractionFlags">
+      <set>Qt::NoTextInteraction</set>
+     </property>
+    </widget>
+   </item>
    <item>
     <widget class="PixmapLabel" name="lblImage">
      <property name="sizePolicy">
@@ -52,8 +84,7 @@
       </font>
      </property>
      <property name="styleSheet">
-      <string notr="true">border-top-right-radius:5px;
-border-top-left-radius:5px;</string>
+      <string notr="true"/>
      </property>
      <property name="text">
       <string notr="true">IMAGE HERE</string>
@@ -73,7 +104,7 @@ border-top-left-radius:5px;</string>
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="lblFromTime">
+    <widget class="QLabel" name="lblTimeAndStatus">
      <property name="maximumSize">
       <size>
        <width>16777215</width>
@@ -93,13 +124,16 @@ border-top-left-radius:5px;</string>
 border-bottom-left-radius:5px;</string>
      </property>
      <property name="text">
-      <string>From @, sent on @. Status: Acknowledged.</string>
+      <string>@ - Status: Acknowledged.</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
+     </property>
+     <property name="textInteractionFlags">
+      <set>Qt::NoTextInteraction</set>
      </property>
     </widget>
    </item>
