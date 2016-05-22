@@ -10,6 +10,7 @@
 #include "ContactRegistry.h"
 #include "messages/contact/ReceiptMessageContent.h"
 #include "protocol/UniqueMessageIdGenerator.h"
+#include "tasks/FileDownloaderCallbackTask.h"
 #include "widgets/ChatWidget.h"
 
 namespace Ui {
@@ -48,12 +49,15 @@ public slots:
 	void edtInputOnTextEdited();
 	void typingTimerOnTimer();
 	void scrollDownChatWidget();
+
+	void fileDownloaderCallbackTaskFinished(CallbackTask* callbackTask);
 protected:
 	virtual bool sendText(MessageId const& uniqueMessageId, QString const& text) = 0;
 	virtual bool sendImage(MessageId const& uniqueMessageId, QByteArray const& image) = 0;
 	virtual bool sendUserTypingStatus(bool isTyping) = 0;
 	virtual bool sendReceipt(MessageId const& receiptedMessageId, ReceiptMessageContent::ReceiptType const& receiptType) = 0;
 	virtual MessageId getUniqueMessageId() = 0;
+	virtual void setStatusLine(QString const& newStatus);
 
 	UniqueMessageIdGenerator* const uniqueMessageIdGenerator;
 private:

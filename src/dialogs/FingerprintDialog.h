@@ -13,7 +13,7 @@ class FingerprintDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit FingerprintDialog(ClientConfiguration* clientConfiguration, QWidget *parent = 0);
+    explicit FingerprintDialog(ClientConfiguration* clientConfiguration, QWidget *parent = nullptr);
     ~FingerprintDialog();
 
 private:

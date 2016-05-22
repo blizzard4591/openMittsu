@@ -6,6 +6,7 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QImage>
+#include <QThread>
 #include <QMenu>
 #include <QAction>
 #include <QClipboard>
@@ -22,7 +23,6 @@
 #include "MessageCenter.h"
 #include "exceptions/InternalErrorException.h"
 #include "exceptions/NotConnectedException.h"
-#include "tasks/FileDownloader.h"
 #include "utility/Logging.h"
 #include "utility/QObjectConnectionMacro.h"
 
@@ -118,7 +118,7 @@ void SimpleChatTab::onReceivedImage(ContactId const& sender, MessageTime const& 
 
 void SimpleChatTab::onMessageReceiptReceived(ContactId const& sender, MessageTime const& timeSend, MessageId const& messageId) {
 	if (messageIdToItemIndex.contains(messageId)) {
-		ui->lblStatus->setText("Status: User received a Message.");
+		setStatusLine(tr("User received a Message."));
 		ChatWidgetItem* clwi = messageIdToItemIndex.value(messageId);
 		if (clwi != nullptr) {
 			clwi->setMessageState(ChatWidgetItem::MessageState::STATE_RECEIVED, timeSend.getTime());
@@ -130,7 +130,7 @@ void SimpleChatTab::onMessageReceiptReceived(ContactId const& sender, MessageTim
 
 void SimpleChatTab::onMessageReceiptSeen(ContactId const& sender, MessageTime const& timeSend, MessageId const& messageId) {
 	if (messageIdToItemIndex.contains(messageId)) {
-		ui->lblStatus->setText("Status: User saw a Message.");
+		setStatusLine(tr("User saw a Message."));
 		ChatWidgetItem* clwi = messageIdToItemIndex.value(messageId);
 		if (clwi != nullptr) {
 			clwi->setMessageState(ChatWidgetItem::MessageState::STATE_READ, timeSend.getTime());
@@ -142,7 +142,7 @@ void SimpleChatTab::onMessageReceiptSeen(ContactId const& sender, MessageTime co
 
 void SimpleChatTab::onMessageReceiptAgree(ContactId const& sender, MessageTime const& timeSend, MessageId const& messageId) {
 	if (messageIdToItemIndex.contains(messageId)) {
-		ui->lblStatus->setText("Status: User agreed with a Message.");
+		setStatusLine(tr("User agreed with a Message."));
 		ChatWidgetItem* clwi = messageIdToItemIndex.value(messageId);
 		if (clwi != nullptr) {
 			clwi->setMessageAgreeState(ChatWidgetItem::MessageAgreeState::STATE_AGREE, timeSend.getTime());
@@ -154,7 +154,7 @@ void SimpleChatTab::onMessageReceiptAgree(ContactId const& sender, MessageTime c
 
 void SimpleChatTab::onMessageReceiptDisagree(ContactId const& sender, MessageTime const& timeSend, MessageId const& messageId) {
 	if (messageIdToItemIndex.contains(messageId)) {
-		ui->lblStatus->setText("Status: User disagreed with a Message.");
+		setStatusLine(tr("User disagreed with a Message."));
 		ChatWidgetItem* clwi = messageIdToItemIndex.value(messageId);
 		if (clwi != nullptr) {
 			clwi->setMessageAgreeState(ChatWidgetItem::MessageAgreeState::STATE_DISAGREE, timeSend.getTime());
@@ -170,13 +170,13 @@ void SimpleChatTab::onContactDataChanged() {
 }
 
 void SimpleChatTab::onUserStartedTypingNotification() {
-	ui->lblStatus->setText("Status: User is typing...");
+	setStatusLine(tr("User is typing..."));
 
 	handleFocus();
 }
 
 void SimpleChatTab::onUserStoppedTypingNotification() {
-	ui->lblStatus->setText("Status: User stopped typing.");
+	setStatusLine(tr("User stopped typing."));
 
 	handleFocus();
 }
@@ -212,7 +212,7 @@ void SimpleChatTab::btnInputSendOnClick() {
 	if (!(text.isEmpty() || text.isNull())) {
 		MessageId const messageId = getUniqueMessageId();
 		if (!sendText(messageId, text)) {
-			QMessageBox::warning(this, "Not connected", "Could not send your message as you are currently not connected to a server.");
+			QMessageBox::warning(this, tr("Not connected"), tr("Could not send your message as you are currently not connected to a server."));
 			return;
 		}
 
@@ -259,13 +259,13 @@ void SimpleChatTab::btnSendImageOnClick() {
 }
 
 void SimpleChatTab::ctxMenuImageFromFileOnClick() {
-	QString filename = QFileDialog::getOpenFileName(this, "Select an Image to Send", QString(), "Images (*.png *.jpg)");
+	QString filename = QFileDialog::getOpenFileName(this, tr("Select an Image to Send"), QString(), tr("Images (*.png *.jpg)"));
 	if (!filename.isNull() && !filename.isEmpty()) {
 		QFile imageFile(filename);
 		if (imageFile.open(QFile::ReadOnly)) {
 			prepareAndSendImage(imageFile.readAll());
 		} else {
-			QMessageBox::warning(this, "Error loading image", "Could not open selected image.\nInsufficient rights or I/O error.", QMessageBox::Ok, QMessageBox::NoButton);
+			QMessageBox::warning(this, tr("Error loading image"), tr("Could not open selected image.\nInsufficient rights or I/O error."), QMessageBox::Ok, QMessageBox::NoButton);
 		}
 	}
 }
@@ -274,8 +274,10 @@ void SimpleChatTab::ctxMenuImageFromUrlOnClick() {
 	bool ok = false;
 	QString urlString = QInputDialog::getText(this, tr("URL of Image to send"), tr("Please insert the URL of the Image you want to send:"), QLineEdit::Normal, QStringLiteral("http://www.example.com/exampleImage.jpg"), &ok);
 	if (ok && !urlString.isEmpty()) {
-		// Todo
-		QMessageBox::information(this, "Not yet implemented!", "Sorry!\nThis feature is not yet implemented.");
+		FileDownloaderCallbackTask* fileDownloaderCallbackTask = new FileDownloaderCallbackTask(QUrl(urlString));
+		OPENMITTSU_CONNECT(fileDownloaderCallbackTask, finished(CallbackTask*), this, fileDownloaderCallbackTaskFinished(CallbackTask*));
+		
+		QMetaObject::invokeMethod(fileDownloaderCallbackTask, "start", Qt::QueuedConnection);
 	}
 }
 
@@ -298,7 +300,7 @@ void SimpleChatTab::prepareAndSendImage(QByteArray const& imageData) {
 
 		MessageId const messageId = getUniqueMessageId();
 		if (!sendImage(messageId, imageBytes)) {
-			QMessageBox::warning(this, "Not connected", "Could not send your message as you are currently not connected to a server.");
+			QMessageBox::warning(this, tr("Not connected"), tr("Could not send your message as you are currently not connected to a server."));
 			return;
 		}
 
@@ -307,7 +309,7 @@ void SimpleChatTab::prepareAndSendImage(QByteArray const& imageData) {
 		messageIdToItemIndex.insert(messageId, clwi);
 
 	} else {
-		QMessageBox::warning(this, "Error loading image", "Could not load selected image.\nUnsupported format or I/O error.", QMessageBox::Ok, QMessageBox::NoButton);
+		QMessageBox::warning(this, tr("Error loading image"), tr("Could not load selected image.\nUnsupported format or I/O error."), QMessageBox::Ok, QMessageBox::NoButton);
 		return;
 	}
 }
@@ -380,7 +382,7 @@ void SimpleChatTab::handleFocus(bool hasNewMessage) {
 				}
 			}
 		} catch (NotConnectedException&) {
-			QMessageBox::warning(this, "Not connected", "Could not send your message as you are currently not connected to a server.");
+			QMessageBox::warning(this, tr("Not connected"), tr("Could not send your message as you are currently not connected to a server."));
 			return;
 		}
 		unseenMessages.clear();
@@ -391,5 +393,28 @@ void SimpleChatTab::handleFocus(bool hasNewMessage) {
 		if (hasNewMessage) {
 			MessageCenter::getInstance()->chatTabHasNewUnreadMessageAvailable(this);
 		}
+	}
+}
+
+void SimpleChatTab::setStatusLine(QString const& newStatus) {
+	static const QString statusTemplate = tr("Status: %1");
+
+	ui->lblStatus->setText(statusTemplate.arg(newStatus));
+}
+
+void SimpleChatTab::fileDownloaderCallbackTaskFinished(CallbackTask* callbackTask) {
+	if (dynamic_cast<FileDownloaderCallbackTask*>(callbackTask) == nullptr) {
+		LOGGER()->warn("SimpleChatTab::fileDownloaderCallbackTaskFinished(CallbackTask* callbackTask) called with a CallbackTask that is not a FileDownloaderCallbackTask. Ignoring.");
+		delete callbackTask;
+	} else {
+		FileDownloaderCallbackTask* fileDownloaderCallbackTask = dynamic_cast<FileDownloaderCallbackTask*>(callbackTask);
+
+		if (!fileDownloaderCallbackTask->hasFinishedSuccessfully()) {
+			QMessageBox::warning(this, tr("Download failed"), tr("Downloading from the given URL failed.\nThe error message was:\n").append(fileDownloaderCallbackTask->getErrorMessage()));
+		} else {
+			prepareAndSendImage(fileDownloaderCallbackTask->getDownloadedFile());
+		}
+
+		delete fileDownloaderCallbackTask;
 	}
 }
