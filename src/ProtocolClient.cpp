@@ -398,7 +398,7 @@ void ProtocolClient::handleIncomingMessage(MessageWithEncryptedPayload const& me
 		LOGGER()->critical("Received an incoming text message packet, but we are not the receiver.\nIt was intended for {} from sender {}.", receiver.toString(), sender.toString());
 	} else {
 		if (missingIdentityProcessors.contains(sender)) {
-			LOGGER_DEBUG("Enqueing new message on existing MissingIdentityProcessor for ID {}.", sender);
+			LOGGER_DEBUG("Enqueing new message on existing MissingIdentityProcessor for ID {}.", sender.toString());
 			missingIdentityProcessors.constFind(sender).value()->enqueueMessage(message);
 			return;
 		} else if ((!cryptoBox.getKeyRegistry().hasIdentity(sender))) {
