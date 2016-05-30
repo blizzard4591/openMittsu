@@ -2,7 +2,6 @@
 #include "ui_contacteditwizardpagedone.h"
 
 #include "ContactRegistry.h"
-#include "ContactListWidgetItem.h"
 
 ContactEditWizardPageDone::ContactEditWizardPageDone(ProtocolClient* protocolClient, ClientConfiguration* clientConfiguration, QWidget *parent) : QWizardPage(parent), ui(new Ui::ContactEditWizardPageDone), protocolClient(protocolClient), clientConfiguration(clientConfiguration) {
     ui->setupUi(this);

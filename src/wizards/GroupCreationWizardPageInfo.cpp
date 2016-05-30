@@ -2,7 +2,7 @@
 #include "ui_groupcreationwizardpageinfo.h"
 
 #include "ContactRegistry.h"
-#include "ContactListWidgetItem.h"
+#include "widgets/ContactListWidgetItem.h"
 #include "exceptions/InternalErrorException.h"
 #include "utility/QObjectConnectionMacro.h"
 

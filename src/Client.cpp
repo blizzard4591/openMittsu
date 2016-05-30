@@ -4,6 +4,7 @@
 #include <QFileDialog>
 #include <QIcon>
 
+#include <algorithm>
 #include <iostream>
 #include <iomanip>
 
@@ -23,7 +24,7 @@
 
 #include "widgets/SimpleContactChatTab.h"
 #include "widgets/SimpleGroupChatTab.h"
-#include "ContactListWidgetItem.h"
+#include "widgets/ContactListWidgetItem.h"
 
 #include "utility/Version.h"
 #include "utility/Logging.h"

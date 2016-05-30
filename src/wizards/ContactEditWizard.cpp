@@ -2,7 +2,6 @@
 #include "ui_contacteditwizard.h"
 
 #include "ContactRegistry.h"
-#include "ContactListWidgetItem.h"
 #include "exceptions/InternalErrorException.h"
 #include "utility/QObjectConnectionMacro.h"
 

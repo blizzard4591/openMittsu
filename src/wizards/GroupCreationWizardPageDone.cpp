@@ -2,7 +2,7 @@
 #include "ui_groupcreationwizardpagedone.h"
 
 #include "ContactRegistry.h"
-#include "ContactListWidgetItem.h"
+#include "widgets/ContactListWidgetItem.h"
 #include "protocol/ContactId.h"
 #include "protocol/GroupId.h"
 

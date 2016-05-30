@@ -2,7 +2,6 @@
 #include "ui_contacteditwizardpageselectcontact.h"
 
 #include "ContactRegistry.h"
-#include "ContactListWidgetItem.h"
 #include "exceptions/InternalErrorException.h"
 
 
