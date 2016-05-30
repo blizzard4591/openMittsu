@@ -131,6 +131,7 @@ private:
 	// List of Messages kept back because we are waiting for IdentityReceivers
 	QHash<ContactId, std::shared_ptr<MissingIdentityProcessor>> missingIdentityProcessors;
 	QHash<GroupId, std::shared_ptr<MissingIdentityProcessor>> groupsWithMissingIdentities;
+	QHash<GroupId, std::list<MessageWithEncryptedPayload>> groupsWaitingForSync;
 
 	// Connection Keep-Alive
 	QTimer* keepAliveTimer;

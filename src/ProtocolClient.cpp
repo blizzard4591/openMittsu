@@ -458,7 +458,11 @@ void ProtocolClient::handleIncomingMessage(Message const*const message, MessageW
 		SpecializedGroupMessage const* groupMessage = dynamic_cast<SpecializedGroupMessage const*>(message);
 		GroupMessageContent const* cmc = groupMessage->getGroupMessageContent();
 
-		if (groupsWithMissingIdentities.contains(cmc->getGroupId())) {
+		if (groupsWaitingForSync.contains(cmc->getGroupId()) && (dynamic_cast<GroupCreationMessageContent const*>(cmc) == nullptr)) {
+			groupsWaitingForSync.find(cmc->getGroupId()).value().push_back(*messageWithEncryptedPayload);
+			LOGGER_DEBUG("Enqueing message to group {} on existing WaitingForSync Queue.", cmc->getGroupId().toString());
+			return;
+		} else if (groupsWithMissingIdentities.contains(cmc->getGroupId())) {
 			if (messageWithEncryptedPayload == nullptr) {
 				LOGGER()->warn("Trying to enqueue new message for group {} on existing MissingIdentityProcessor, but the encryptedPayload pointer is null.", cmc->getGroupId().toString());
 				return;
@@ -466,6 +470,14 @@ void ProtocolClient::handleIncomingMessage(Message const*const message, MessageW
 
 			LOGGER_DEBUG("Enqueuing new message for group {} on existing MissingIdentityProcessor.", cmc->getGroupId().toString());
 			groupsWithMissingIdentities.constFind(cmc->getGroupId()).value()->enqueueMessage(*messageWithEncryptedPayload);
+			return;
+		} else if (!groupRegistry.hasGroup(cmc->getGroupId()) && (dynamic_cast<GroupCreationMessageContent const*>(cmc) == nullptr)) {
+			sendGroupSyncRequest(cmc->getGroupId());
+
+			std::list<MessageWithEncryptedPayload> messageList;
+			messageList.push_back(*messageWithEncryptedPayload);
+			groupsWaitingForSync.insert(cmc->getGroupId(), messageList);
+			LOGGER_DEBUG("Enqueing message to group {} on new WaitingForSync Queue.", cmc->getGroupId().toString());
 			return;
 		}
 
@@ -629,6 +641,16 @@ void ProtocolClient::handleIncomingMessage(FullMessageHeader const& messageHeade
 		groupRegistry.addGroup(groupCreationMessageContent->getGroupId(), groupCreationMessageContent->getGroupMembers(), "");
 		LOGGER_DEBUG("Received a group creation message for group {} with {} members.", groupCreationMessageContent->getGroupId().toString(), groupCreationMessageContent->getGroupMembers().size());
 		QMetaObject::invokeMethod(messageCenter, "onFoundNewGroup", Qt::QueuedConnection, Q_ARG(GroupId, groupCreationMessageContent->getGroupId()), Q_ARG(QSet<ContactId>, groupCreationMessageContent->getGroupMembers()));
+	}
+
+	if (groupsWaitingForSync.contains(groupCreationMessageContent->getGroupId())) {
+		std::list<MessageWithEncryptedPayload> messages = groupsWaitingForSync.find(groupCreationMessageContent->getGroupId()).value();
+		groupsWaitingForSync.remove(groupCreationMessageContent->getGroupId());
+
+		for (std::list<MessageWithEncryptedPayload>::iterator it = messages.begin(); it != messages.end(); ++it) {
+			LOGGER_DEBUG("Handling message from WaitingForSync Queue for group {}.", groupCreationMessageContent->getGroupId().toString());
+			handleIncomingMessage(*it);
+		}
 	}
 }
 
