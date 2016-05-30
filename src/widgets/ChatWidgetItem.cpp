@@ -249,12 +249,19 @@ void ChatWidgetItem::copyToClipboard() {
 }
 
 QString ChatWidgetItem::preprocessLinks(QString const& text) {
-	static QRegularExpression regExpBold(QStringLiteral("\\*([^\\*]+)\\*"), QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption | QRegularExpression::OptimizeOnFirstUsageOption);
-	static QRegularExpression regExpItalic(QStringLiteral("_([^_]+)_"), QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption | QRegularExpression::OptimizeOnFirstUsageOption);
-	static QRegularExpression regExpStrikethrough(QStringLiteral("~([^~]+)~"), QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption | QRegularExpression::OptimizeOnFirstUsageOption);
+	// Qt 5.4 and later support the QRegularExpression::OptimizeOnFirstUsageOption option.
+#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
+	static const QRegularExpression::PatternOptions patternOptions = QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption | QRegularExpression::OptimizeOnFirstUsageOption;
+#else
+	static const QRegularExpression::PatternOptions patternOptions = QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption;
+#endif
 
-	static QRegularExpression regExpLinks(QStringLiteral("\\b((https?|ftp|file)://[-A-Z0-9+&@#/%?=~_|$!:,.;]*[A-Z0-9+&@#/%=~_|$])"), QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption | QRegularExpression::OptimizeOnFirstUsageOption);
-	static QRegularExpression regExpNewline(QStringLiteral("\\R"), QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption | QRegularExpression::OptimizeOnFirstUsageOption);
+	static QRegularExpression regExpBold(QStringLiteral("\\*([^\\*]+)\\*"), patternOptions);
+	static QRegularExpression regExpItalic(QStringLiteral("_([^_]+)_"), patternOptions);
+	static QRegularExpression regExpStrikethrough(QStringLiteral("~([^~]+)~"), patternOptions);
+
+	static QRegularExpression regExpLinks(QStringLiteral("\\b((https?|ftp|file)://[-A-Z0-9+&@#/%?=~_|$!:,.;]*[A-Z0-9+&@#/%=~_|$])"), patternOptions);
+	static QRegularExpression regExpNewline(QStringLiteral("\\R"), patternOptions);
 
 	QString result = text;
 	result.replace(regExpBold, QStringLiteral("<span style=\"font-weight: bold;\">\\1</span>"));
