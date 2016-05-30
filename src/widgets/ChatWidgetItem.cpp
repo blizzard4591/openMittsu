@@ -249,8 +249,20 @@ void ChatWidgetItem::copyToClipboard() {
 }
 
 QString ChatWidgetItem::preprocessLinks(QString const& text) {
-	QRegularExpression regExp(QStringLiteral("\\b((https?|ftp|file)://[-A-Z0-9+&@#/%?=~_|$!:,.;]*[A-Z0-9+&@#/%=~_|$])"), QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption);
+	static QRegularExpression regExpBold(QStringLiteral("\\*([^\\*]+)\\*"), QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption | QRegularExpression::OptimizeOnFirstUsageOption);
+	static QRegularExpression regExpItalic(QStringLiteral("_([^_]+)_"), QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption | QRegularExpression::OptimizeOnFirstUsageOption);
+	static QRegularExpression regExpStrikethrough(QStringLiteral("~([^~]+)~"), QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption | QRegularExpression::OptimizeOnFirstUsageOption);
+
+	static QRegularExpression regExpLinks(QStringLiteral("\\b((https?|ftp|file)://[-A-Z0-9+&@#/%?=~_|$!:,.;]*[A-Z0-9+&@#/%=~_|$])"), QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption | QRegularExpression::OptimizeOnFirstUsageOption);
+	static QRegularExpression regExpNewline(QStringLiteral("\\R"), QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption | QRegularExpression::OptimizeOnFirstUsageOption);
 
 	QString result = text;
-	return result.replace(regExp, QStringLiteral("<a href=\"\\1\">\\1</a>"));
+	result.replace(regExpBold, QStringLiteral("<span style=\"font-weight: bold;\">\\1</span>"));
+	result.replace(regExpItalic, QStringLiteral("<span style=\"font-style: italic;\">\\1</span>"));
+	result.replace(regExpStrikethrough, QStringLiteral("<span style=\"text-decoration: line-through;\">\\1</span>"));
+
+	result.replace(regExpLinks, QStringLiteral("<a href=\"\\1\">\\1</a>"));
+	result.replace(regExpNewline, QStringLiteral("<br>"));
+
+	return result;
 }

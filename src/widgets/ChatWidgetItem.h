@@ -88,7 +88,7 @@ protected:
 	virtual bool handleCustomContextMenuEntrySelection(QAction* selectedAction);
 	virtual void copyToClipboard();
 
-	QString preprocessLinks(QString const& text);
+	static QString preprocessLinks(QString const& text);
 };
 
 #endif // OPENMITTSU_WIDGETS_CHATWIDGETITEM_H_

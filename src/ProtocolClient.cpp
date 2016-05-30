@@ -397,10 +397,15 @@ void ProtocolClient::handleIncomingMessage(MessageWithEncryptedPayload const& me
 	if (!(receiver == clientConfiguration.getClientIdentity())) {
 		LOGGER()->critical("Received an incoming text message packet, but we are not the receiver.\nIt was intended for {} from sender {}.", receiver.toString(), sender.toString());
 	} else {
-		if ((!cryptoBox.getKeyRegistry().hasIdentity(sender))) {
+		if (missingIdentityProcessors.contains(sender)) {
+			LOGGER_DEBUG("Enqueing new message on existing MissingIdentityProcessor for ID {}.", sender);
+			missingIdentityProcessors.constFind(sender).value()->enqueueMessage(message);
+			return;
+		} else if ((!cryptoBox.getKeyRegistry().hasIdentity(sender))) {
 			std::shared_ptr<MissingIdentityProcessor> missingIdentityProcessor = std::make_shared<MissingIdentityProcessor>(sender);
 			missingIdentityProcessor->enqueueMessage(message);
 			missingIdentityProcessors.insert(sender, missingIdentityProcessor);
+			LOGGER_DEBUG("Enqueing MissingIdentityProcessor for ID {}.", sender.toString());
 
 			CallbackTask* callbackTask = new IdentityReceiverCallbackTask(&serverConfiguration, sender);
 
@@ -588,6 +593,7 @@ void ProtocolClient::handleIncomingMessage(FullMessageHeader const& messageHeade
 				return;
 			}
 
+			LOGGER_DEBUG("Enqueing group creation message into existing MissingIdentityProcessor for ID {}.", it->toString());
 			missingIdentityProcessors.constFind(*it).value()->enqueueMessage(*messageWithEncryptedPayload);
 			return;
 		} else if (!cryptoBox.getKeyRegistry().hasIdentity(*it)) {
@@ -606,6 +612,7 @@ void ProtocolClient::handleIncomingMessage(FullMessageHeader const& messageHeade
 		QSet<ContactId>::const_iterator itMissing = missingIds.constBegin();
 		QSet<ContactId>::const_iterator endMissing = missingIds.constEnd();
 		for (; itMissing != endMissing; ++itMissing) {
+			LOGGER_DEBUG("Enqueing MissingIdentityProcessor for group member with ID {}.", itMissing->toString());
 			missingIdentityProcessors.insert(*itMissing, missingIdentityProcessor);
 
 			CallbackTask* callbackTask = new IdentityReceiverCallbackTask(&serverConfiguration, *itMissing);
@@ -987,6 +994,7 @@ void ProtocolClient::callbackTaskFinished(CallbackTask* callbackTask) {
 		} else {
 			std::shared_ptr<MissingIdentityProcessor> missingIdentityProcessor = missingIdentityProcessors.value(irct->getContactIdOfFetchedPublicKey());
 			missingIdentityProcessors.remove(irct->getContactIdOfFetchedPublicKey());
+			LOGGER_DEBUG("IdentityReceiverCallbackTask finished for ID {}, removing related MissingIdentityProcessor.", irct->getContactIdOfFetchedPublicKey().toString());
 
 			if (!irct->hasFinishedSuccessfully()) {
 				LOGGER()->warn("Received a message from user {} that we can not decrypt since the Identity could not be retrieved. Error: {}", irct->getContactIdOfFetchedPublicKey().toString(), irct->getErrorMessage().toStdString());

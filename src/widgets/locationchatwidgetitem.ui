@@ -76,6 +76,9 @@ border-top-left-radius:5px;</string>
      <property name="text">
       <string notr="true">Message Text</string>
      </property>
+     <property name="textFormat">
+      <enum>Qt::RichText</enum>
+     </property>
      <property name="alignment">
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
      </property>
