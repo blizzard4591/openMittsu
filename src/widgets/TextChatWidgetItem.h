@@ -17,7 +17,7 @@ public:
 	virtual void setInnerAlignment(bool alignLeft) override;
 	virtual void resizeEvent(QResizeEvent * event) override;
 	virtual int heightForWidth(int w) const override;
-	virtual bool hasHeightForWidth() const;
+	virtual bool hasHeightForWidth() const override;
 protected:
 	virtual void setFromString(QString const& fromString) override;
 	virtual void setTimeAndStatusString(QString const& timeAndStatusString) override;
