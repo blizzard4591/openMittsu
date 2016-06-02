@@ -256,14 +256,14 @@ QString ChatWidgetItem::preprocessLinks(QString const& text) {
 	static const QRegularExpression::PatternOptions patternOptions = QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption;
 #endif
 
-	static QRegularExpression regExpBold(QStringLiteral("\\*([^\\*]+)\\*"), patternOptions);
-	static QRegularExpression regExpItalic(QStringLiteral("_([^_]+)_"), patternOptions);
-	static QRegularExpression regExpStrikethrough(QStringLiteral("~([^~]+)~"), patternOptions);
+	static QRegularExpression regExpBold(QStringLiteral("\\*([^\\*\r\n]+)\\*"), patternOptions);
+	static QRegularExpression regExpItalic(QStringLiteral("_([^_\r\n]+)_"), patternOptions);
+	static QRegularExpression regExpStrikethrough(QStringLiteral("~([^~\r\n]+)~"), patternOptions);
 
 	static QRegularExpression regExpLinks(QStringLiteral("\\b((https?|ftp|file)://[-A-Z0-9+&@#/%?=~_|$!:,.;]*[A-Z0-9+&@#/%=~_|$])"), patternOptions);
 	static QRegularExpression regExpNewline(QStringLiteral("\\R"), patternOptions);
 
-	QString result = text;
+	QString result = text.toHtmlEscaped();
 	result.replace(regExpBold, QStringLiteral("<span style=\"font-weight: bold;\">\\1</span>"));
 	result.replace(regExpItalic, QStringLiteral("<span style=\"font-style: italic;\">\\1</span>"));
 	result.replace(regExpStrikethrough, QStringLiteral("<span style=\"text-decoration: line-through;\">\\1</span>"));
