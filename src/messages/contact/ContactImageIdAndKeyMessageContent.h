@@ -15,7 +15,7 @@ public:
 
 	virtual ContactMessageContent* clone() const override;
 
-	virtual bool hasPostReceiveCallbackTask() const;
+	virtual bool hasPostReceiveCallbackTask() const override;
 
 	virtual CallbackTask* getPostReceiveCallbackTask(Message* message, ServerConfiguration* serverConfiguration, CryptoBox* cryptoBox) const override;
 	virtual MessageContent* integrateCallbackTaskResult(CallbackTask const* callbackTask) const override;
