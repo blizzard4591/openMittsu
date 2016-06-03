@@ -182,6 +182,9 @@ private:
 	// Groups
 	bool validateGroupMembershipAndInfo(GroupId const& groupId, ContactId const& sender);
 	void sendGroupSyncRequest(GroupId const& groupId);
+
+	bool needToWaitForMissingIdentity(ContactId const& contactId, MessageWithEncryptedPayload const*const messageWithEncryptedPayload);
+	bool needToWaitForGroupData(GroupId const& groupId, MessageWithEncryptedPayload const*const messageWithEncryptedPayload, bool isGroupCreationMessage);
 };
 
 #endif // OPENMITTSU_PROTOCOLCLIENT_H_

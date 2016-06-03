@@ -397,19 +397,7 @@ void ProtocolClient::handleIncomingMessage(MessageWithEncryptedPayload const& me
 	if (!(receiver == clientConfiguration.getClientIdentity())) {
 		LOGGER()->critical("Received an incoming text message packet, but we are not the receiver.\nIt was intended for {} from sender {}.", receiver.toString(), sender.toString());
 	} else {
-		if (missingIdentityProcessors.contains(sender)) {
-			LOGGER_DEBUG("Enqueing new message on existing MissingIdentityProcessor for ID {}.", sender.toString());
-			missingIdentityProcessors.constFind(sender).value()->enqueueMessage(message);
-			return;
-		} else if ((!cryptoBox.getKeyRegistry().hasIdentity(sender))) {
-			std::shared_ptr<MissingIdentityProcessor> missingIdentityProcessor = std::make_shared<MissingIdentityProcessor>(sender);
-			missingIdentityProcessor->enqueueMessage(message);
-			missingIdentityProcessors.insert(sender, missingIdentityProcessor);
-			LOGGER_DEBUG("Enqueing MissingIdentityProcessor for ID {}.", sender.toString());
-
-			CallbackTask* callbackTask = new IdentityReceiverCallbackTask(&serverConfiguration, sender);
-
-			enqeueCallbackTask(callbackTask);
+		if (needToWaitForMissingIdentity(sender, &message)) {
 			return;
 		}
 		
@@ -460,42 +448,8 @@ void ProtocolClient::handleIncomingMessage(Message const*const message, MessageW
 
 		bool const isGroupCreationMessage = (dynamic_cast<GroupCreationMessageContent const*>(cmc) != nullptr);
 		GroupId const groupId = cmc->getGroupId();
-		ContactId const& groupOwner = groupId.getOwner();
-
-		if (missingIdentityProcessors.contains(groupOwner)) {
-			LOGGER_DEBUG("Enqueing new group message on existing MissingIdentityProcessor for ID {} (can not request group sync from unknown owner).", groupOwner.toString());
-			missingIdentityProcessors.constFind(groupOwner).value()->enqueueMessage(*messageWithEncryptedPayload);
-			return;
-		} else if ((!cryptoBox.getKeyRegistry().hasIdentity(groupOwner))) {
-			std::shared_ptr<MissingIdentityProcessor> missingIdentityProcessor = std::make_shared<MissingIdentityProcessor>(groupOwner);
-			missingIdentityProcessor->enqueueMessage(*messageWithEncryptedPayload);
-			missingIdentityProcessors.insert(groupOwner, missingIdentityProcessor);
-			LOGGER_DEBUG("Enqueing MissingIdentityProcessor for ID {} (can not request group sync from unknown owner).", groupOwner.toString());
-
-			CallbackTask* callbackTask = new IdentityReceiverCallbackTask(&serverConfiguration, groupOwner);
-
-			enqeueCallbackTask(callbackTask);
-			return;
-		} else if (groupsWaitingForSync.contains(groupId) && !isGroupCreationMessage) {
-			groupsWaitingForSync.find(groupId).value().push_back(std::make_shared<MessageWithEncryptedPayload>(*messageWithEncryptedPayload));
-			LOGGER_DEBUG("Enqueing message to group {} on existing WaitingForSync Queue.", groupId.toString());
-			return;
-		} else if (groupsWithMissingIdentities.contains(groupId)) {
-			if (messageWithEncryptedPayload == nullptr) {
-				LOGGER()->warn("Trying to enqueue new message for group {} on existing MissingIdentityProcessor, but the encryptedPayload pointer is null.", groupId.toString());
-				return;
-			}
-
-			LOGGER_DEBUG("Enqueuing new message for group {} on existing MissingIdentityProcessor.", groupId.toString());
-			groupsWithMissingIdentities.constFind(groupId).value()->enqueueMessage(*messageWithEncryptedPayload);
-			return;
-		} else if (!groupRegistry.hasGroup(groupId) && !isGroupCreationMessage) {
-			sendGroupSyncRequest(groupId);
-
-			std::list<std::shared_ptr<MessageWithEncryptedPayload>> messageList;
-			messageList.push_back(std::make_shared<MessageWithEncryptedPayload>(*messageWithEncryptedPayload));
-			groupsWaitingForSync.insert(groupId, messageList);
-			LOGGER_DEBUG("Enqueing message to group {} on new WaitingForSync Queue.", groupId.toString());
+		
+		if (needToWaitForGroupData(groupId, messageWithEncryptedPayload, isGroupCreationMessage)) {
 			return;
 		}
 
@@ -530,6 +484,60 @@ void ProtocolClient::handleIncomingMessage(Message const*const message, MessageW
 	} else {
 		LOGGER()->critical("Not a contact message, failed to parse message from {}.", message->getMessageHeader().getSender().toString());
 	}
+}
+
+bool ProtocolClient::needToWaitForMissingIdentity(ContactId const& contactId, MessageWithEncryptedPayload const*const messageWithEncryptedPayload) {
+	if (missingIdentityProcessors.contains(contactId)) {
+		LOGGER_DEBUG("Enqueing message on existing MissingIdentityProcessor for ID {}.", contactId.toString());
+		missingIdentityProcessors.constFind(contactId).value()->enqueueMessage(*messageWithEncryptedPayload);
+		return true;
+	} else if ((!cryptoBox.getKeyRegistry().hasIdentity(contactId))) {
+		std::shared_ptr<MissingIdentityProcessor> missingIdentityProcessor = std::make_shared<MissingIdentityProcessor>(contactId);
+		missingIdentityProcessor->enqueueMessage(*messageWithEncryptedPayload);
+		missingIdentityProcessors.insert(contactId, missingIdentityProcessor);
+		LOGGER_DEBUG("Enqueing MissingIdentityProcessor for ID {}.", contactId.toString());
+
+		CallbackTask* callbackTask = new IdentityReceiverCallbackTask(&serverConfiguration, contactId);
+
+		enqeueCallbackTask(callbackTask);
+		return true;
+	}
+
+	return false;
+}
+
+bool ProtocolClient::needToWaitForGroupData(GroupId const& groupId, MessageWithEncryptedPayload const*const messageWithEncryptedPayload, bool isGroupCreationMessage) {
+	if (isGroupCreationMessage) {
+		return needToWaitForMissingIdentity(groupId.getOwner(), messageWithEncryptedPayload);
+	}
+	if (needToWaitForMissingIdentity(groupId.getOwner(), messageWithEncryptedPayload)) {
+		return true;
+	} else if (groupsWaitingForSync.contains(groupId)) {
+		std::shared_ptr<MessageWithEncryptedPayload> messageSharedPtr = std::make_shared<MessageWithEncryptedPayload>(*messageWithEncryptedPayload);
+		groupsWaitingForSync.find(groupId).value().push_back(messageSharedPtr);
+		LOGGER_DEBUG("Enqueing message to group {} on existing WaitingForSync Queue.", groupId.toString());
+		return;
+	} else if (groupsWithMissingIdentities.contains(groupId)) {
+		if (messageWithEncryptedPayload == nullptr) {
+			LOGGER()->warn("Trying to enqueue new message for group {} on existing MissingIdentityProcessor, but the encryptedPayload pointer is null.", groupId.toString());
+			return true;
+		}
+
+		LOGGER_DEBUG("Enqueuing new message for group {} on existing MissingIdentityProcessor.", groupId.toString());
+		groupsWithMissingIdentities.constFind(groupId).value()->enqueueMessage(*messageWithEncryptedPayload);
+		return true;
+	} else if (!groupRegistry.hasGroup(groupId)) {
+		sendGroupSyncRequest(groupId);
+
+		std::list<std::shared_ptr<MessageWithEncryptedPayload>> messageList;
+		std::shared_ptr<MessageWithEncryptedPayload> messageSharedPtr = std::make_shared<MessageWithEncryptedPayload>(*messageWithEncryptedPayload);
+		messageList.push_back(messageSharedPtr);
+		groupsWaitingForSync.insert(groupId, messageList);
+		LOGGER_DEBUG("Enqueing message to group {} on new WaitingForSync Queue.", groupId.toString());
+		return true;
+	}
+
+	return false;
 }
 
 void ProtocolClient::handleIncomingMessage(FullMessageHeader const& messageHeader, std::shared_ptr<ContactTextMessageContent const> contactTextMessageContent) {
@@ -662,7 +670,7 @@ void ProtocolClient::handleIncomingMessage(FullMessageHeader const& messageHeade
 	}
 
 	if (groupsWaitingForSync.contains(groupCreationMessageContent->getGroupId())) {
-		std::list<std::shared_ptr<MessageWithEncryptedPayload>> const& messages = groupsWaitingForSync.constFind(groupCreationMessageContent->getGroupId()).value();
+		std::list<std::shared_ptr<MessageWithEncryptedPayload>> const messages = groupsWaitingForSync.constFind(groupCreationMessageContent->getGroupId()).value();
 		groupsWaitingForSync.remove(groupCreationMessageContent->getGroupId());
 
 		for (std::list<std::shared_ptr<MessageWithEncryptedPayload>>::const_iterator it = messages.cbegin(); it != messages.cend(); ++it) {
