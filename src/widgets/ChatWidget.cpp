@@ -81,24 +81,42 @@ void ChatWidget::informAllOfSize() {
 }
 
 void ChatWidget::addItem(ChatWidgetItem* item) {
+	QHBoxLayout* hboxLayout = new QHBoxLayout();
+	QDateTime compareTime = QDateTime::currentDateTime();
+
 	if (ContactRegistry::getInstance()->getSelfContact() == item->getContact()) {
-		QHBoxLayout* hboxLayout = new QHBoxLayout();
 		//QSpacerItem* spacerItem = new QSpacerItem(100, 1, QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
 		//hboxLayout->addItem(spacerItem);
 		hboxLayout->addWidget(item, 0, Qt::AlignRight);
 		item->setInnerAlignment(false);
 		item->setStyleSheet("background-color:#f7ffe8;padding:5px;");
-		topLayout->addLayout(hboxLayout);
+
+		if (item->getIsMessageTimeSendSet()) {
+			compareTime = item->getMessageTimeSend();
+		}
 	} else {
-		QHBoxLayout* hboxLayout = new QHBoxLayout();
 		//QSpacerItem* spacerItem = new QSpacerItem(100, 1, QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
 		hboxLayout->addWidget(item, 0, Qt::AlignLeft);
 		//hboxLayout->addItem(spacerItem);
 		item->setInnerAlignment(true);
 		item->setStyleSheet("background-color:white;padding:5px;");
-		topLayout->addLayout(hboxLayout);
+
+		compareTime = item->getMessageTimeReceived();
 	}
-	items.append(item);
+
+	
+	
+	int index = 0;
+	for (int i = items.size() - 1; i >= 0; --i) {
+		if (items.at(i)->getMessageTimeSend() <= compareTime) {
+			index = i + 1;
+			break;
+		}
+	}
+
+	topLayout->insertLayout(index, hboxLayout);
+	items.insert(index, item);
+
 	this->update();
 	informAllOfSize();
 	this->updateGeometry();

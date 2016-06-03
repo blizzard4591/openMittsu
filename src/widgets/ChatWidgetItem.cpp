@@ -49,6 +49,10 @@ ContactIdWithMessageId const& ChatWidgetItem::getSenderAndMessageId() const {
 	return senderAndMessageId;
 }
 
+bool ChatWidgetItem::getIsMessageTimeSendSet() const {
+	return hasTimeSendSet;
+}
+
 QDateTime const& ChatWidgetItem::getMessageTimeSend() const {
 	return timeSend;
 }

@@ -516,7 +516,7 @@ bool ProtocolClient::needToWaitForGroupData(GroupId const& groupId, MessageWithE
 		std::shared_ptr<MessageWithEncryptedPayload> messageSharedPtr = std::make_shared<MessageWithEncryptedPayload>(*messageWithEncryptedPayload);
 		groupsWaitingForSync.find(groupId).value().push_back(messageSharedPtr);
 		LOGGER_DEBUG("Enqueing message to group {} on existing WaitingForSync Queue.", groupId.toString());
-		return;
+		return true;
 	} else if (groupsWithMissingIdentities.contains(groupId)) {
 		if (messageWithEncryptedPayload == nullptr) {
 			LOGGER()->warn("Trying to enqueue new message for group {} on existing MissingIdentityProcessor, but the encryptedPayload pointer is null.", groupId.toString());

@@ -59,6 +59,8 @@ public:
 
 	virtual void setInnerAlignment(bool alignLeft) = 0;
 	virtual QSize sizeHint() const override;
+
+	virtual bool getIsMessageTimeSendSet() const;
 public slots:
 	virtual void showContextMenu(const QPoint& pos);
 	virtual void onDataUpdated();
