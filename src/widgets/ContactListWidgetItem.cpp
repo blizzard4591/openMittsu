@@ -27,9 +27,6 @@ bool ContactListWidgetItem::operator <(QListWidgetItem const& other) const {
 		IdentityContact const * const b = dynamic_cast<IdentityContact const*>(otherPtr->contact);
 		return (a->getContactId().operator<(b->getContactId()));
 	} else {
-		GroupContact const * const a = dynamic_cast<GroupContact const*>(contact);
-		GroupContact const * const b = dynamic_cast<GroupContact const*>(otherPtr->contact);
-
 		return (this->text().localeAwareCompare(other.text()) < 0);
 	}
 }
