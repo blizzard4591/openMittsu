@@ -19,6 +19,7 @@
 #include "wizards/LoadBackupWizard.h"
 #include "dialogs/ShowIdentityAndPublicKeyDialog.h"
 #include "dialogs/ContactAddDialog.h"
+#include "dialogs/ContactEditDialog.h"
 #include "dialogs/FingerprintDialog.h"
 #include "dialogs/UpdaterDialog.h"
 
@@ -506,7 +507,26 @@ void Client::listContactsOnContextMenu(QPoint const& pos) {
 		QAction* selectedItem = listContactsContextMenu.exec(globalPos);
 		if (selectedItem != nullptr) {
 			if (selectedItem == actionEdit) {
-				showNotYetImplementedInfo();
+				if (isIdentityContact) {
+					IdentityContact* ic = dynamic_cast<IdentityContact*>(clwi->getContact());
+
+					QString const id = ic->getContactId().toQString();
+					QString const pubKey = ic->getPublicKey().toString();
+					QString const nickname = ic->getNickname();
+
+					ContactEditDialog contactEditDialog(id, pubKey, nickname, this);
+					
+					int result = contactEditDialog.exec();
+
+					if (result == QDialog::DialogCode::Accepted) {
+						QString const newNickname = contactEditDialog.getNickname();
+						if (nickname != newNickname) {
+							ic->setNickname(newNickname);
+						}
+					}
+				} else {
+					showNotYetImplementedInfo();
+				}
 			} else if (selectedItem == actionOpenClose) {
 				if (isChatWindowOpen) {
 					if (isIdentityContact) {

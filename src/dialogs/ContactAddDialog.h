@@ -1,5 +1,5 @@
-#ifndef CONTACTADDDIALOG_H
-#define CONTACTADDDIALOG_H
+#ifndef OPENMITTSU_DIALOGS_CONTACTADDDIALOG_H_
+#define OPENMITTSU_DIALOGS_CONTACTADDDIALOG_H_
 
 #include <QDialog>
 #include <QRegularExpressionValidator>
@@ -22,4 +22,4 @@ private:
 	QRegularExpressionValidator* identityValidator;
 };
 
-#endif // CONTACTADDDIALOG_H
+#endif // OPENMITTSU_DIALOGS_CONTACTADDDIALOG_H_
