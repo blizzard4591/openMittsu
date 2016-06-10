@@ -1,7 +1,16 @@
 #include "ImageViewer.h"
-#include "ui_imageviewer.h"
+#include "ui_ImageViewer.h"
 
 #include <QtWidgets>
+
+// Qt 5.4 and later define QByteArrayList.
+#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
+#include <QByteArrayList>
+#else
+#include <QList>
+#include <QByteArray>
+typedef QList<QByteArray> QByteArrayList;
+#endif
 
 #include "utility/QObjectConnectionMacro.h"
 
