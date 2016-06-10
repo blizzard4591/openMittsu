@@ -20,6 +20,8 @@ protected:
 	virtual void setFromString(QString const& fromString) override;
 	virtual void setTimeAndStatusString(QString const& timeAndStatusString) override;
 	virtual void copyToClipboard() override;
+private slots:
+	void lblImageOnClick();
 private:
 	Ui::ImageChatWidgetItem *ui;
 	QPixmap const image;
