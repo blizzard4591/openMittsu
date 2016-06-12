@@ -32,13 +32,14 @@ ImageViewer::ImageViewer(QImage const& img) : ui(new Ui::ImageViewerWindow), ima
 	ui->lblImage->setPixmap(QPixmap::fromImage(image));
 
     ui->lblImage->setBackgroundRole(QPalette::Base);
-
 	ui->scrollArea->setBackgroundRole(QPalette::Dark);
 
     resize(QGuiApplication::primaryScreen()->availableSize() * 3.0 / 5.0);
 
 	QString const message = tr("Image: %2x%3, Depth: %4").arg(image.width()).arg(image.height()).arg(image.depth());
 	statusBar()->showMessage(message);
+
+	ui->actionFit_to_Window->setChecked(true);
 	actionFitToWindowOnChange();
 }
 
@@ -99,6 +100,14 @@ void ImageViewer::actionNormalSizeOnClick() {
 	if (!fitToWindow) {
 		scaleFactor = 1.0;
 		scaleImage(1.0);
+	} else {
+		QSize const requiredSize = image.size();
+		QSize const availableSize = QGuiApplication::primaryScreen()->availableSize();
+		if ((requiredSize.width() > availableSize.width()) || (requiredSize.height() > availableSize.height())) {
+			this->resize(availableSize);
+		} else {
+			this->resize(requiredSize);
+		}
 	}
 }
 
