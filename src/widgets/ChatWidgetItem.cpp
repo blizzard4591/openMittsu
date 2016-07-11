@@ -260,9 +260,9 @@ QString ChatWidgetItem::preprocessLinks(QString const& text) {
 	static const QRegularExpression::PatternOptions patternOptions = QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption;
 #endif
 
-	static QRegularExpression regExpBold(QStringLiteral("\\*([^\\*\r\n]+)\\*"), patternOptions);
-	static QRegularExpression regExpItalic(QStringLiteral("_([^_\r\n]+)_"), patternOptions);
-	static QRegularExpression regExpStrikethrough(QStringLiteral("~([^~\r\n]+)~"), patternOptions);
+	static QRegularExpression regExpBold(QStringLiteral("(?:\\b|_|~)\\*([^\\*\r\n]+)\\*(?:\\b|_|~)"), patternOptions);
+	static QRegularExpression regExpItalic(QStringLiteral("(?:\\b|\\*|~)_([^_\r\n]+)_(?:\\b|\\*|~)"), patternOptions);
+	static QRegularExpression regExpStrikethrough(QStringLiteral("(?:\\b|\\*|_)~([^~\r\n]+)~(?:\\b|\\*|_)"), patternOptions);
 
 	static QRegularExpression regExpLinks(QStringLiteral("\\b((https?|ftp|file)://[-A-Z0-9+&@#/%?=~_|$!:,.;]*[A-Z0-9+&@#/%=~_|$])"), patternOptions);
 	static QRegularExpression regExpNewline(QStringLiteral("\\R"), patternOptions);
