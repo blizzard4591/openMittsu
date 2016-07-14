@@ -87,12 +87,16 @@ int main(int argc, char *argv[]) {
 		return -2;
 	}
 
+	// Activate Scaling on High-DPI Devices.
+	qputenv("QT_AUTO_SCREEN_SCALE_FACTOR", "1");
+
 	LOGGER()->info("Starting OpenMittsu {}...", Version::longVersionString());
 
 	int result = 0;
 	try {
 		ExceptionHandlingApplication app(argc, argv);
 		app.setAttribute(Qt::AA_UseHighDpiPixmaps, true);
+		app.setAttribute(Qt::AA_EnableHighDpiScaling, true);
 		qRegisterMetaType<PublicKey>();
 		qRegisterMetaType<ContactId>();
 		qRegisterMetaType<QSet<ContactId>>();
