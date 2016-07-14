@@ -26,6 +26,7 @@
 #include "widgets/SimpleContactChatTab.h"
 #include "widgets/SimpleGroupChatTab.h"
 #include "widgets/ContactListWidgetItem.h"
+#include "widgets/LicenseDialog.h"
 
 #include "utility/Version.h"
 #include "utility/Logging.h"
@@ -584,21 +585,8 @@ void Client::menuFileExitOnClick() {
 }
 
 void Client::menuAboutLicenseOnClick() {
-	QMessageBox::about(this, "OpenMittsu - License", QString("<h2>OpenMittsu</h2><br><br>An open source chat client for Threema-style end-to-end encrypted chat networks.")
-		.append(QStringLiteral("<br><br>Copyright (C) 2015-16 by Philipp Berger"))
-		.append(QStringLiteral("<br>This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version."))
-		.append(QStringLiteral("<br><br>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the GNU General Public License for more details."))
-		.append(QStringLiteral("<br><br>You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/."))
-		.append(QStringLiteral("<br><br><br>This program incorporates work covered by the following copyright and permission notices: "))
-		.append(QStringLiteral("<br> - The DejaVu fonts. Copyright by Bitstream. DejaVu changes are in public domain. Explanation of copyright is on Gnome page on Bitstream Vera fonts. Glyphs imported from Arev fonts are Copyright by Tavmjung Bah.	See http://dejavu-fonts.org/wiki/License for more information."))
-		.append(QStringLiteral("<br> - The Source Sans Pro fonts. Copyright 2010, 2012, 2014 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name 'Source'. All Rights Reserved. Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries. This Font Software is licensed under the SIL Open Font License, Version 1.1."))
-		.append(QStringLiteral("<br> - The OpenSansEmoji font. Licensed under the Apache License, Version 2.0 (the \"License\"); you may not use this file except in compliance with the License."))
-		.append(QStringLiteral("<br> - Sound \"NewMessage.mp3\", from https://freesound.org/people/melliug/sounds/221359/. Licensed under the Creative Commons 0 License.See http://creativecommons.org/publicdomain/zero/1.0/."))
-		.append(QStringLiteral("<br> - LibQREncode, linked either statically or dynamically in most releases. Copyright (C) 2006-2012 Kentaro Fukuchi (http://fukuchi.org/works/qrencode/). Licensed under the GNU Lesser General Public License, version 2.1."))
-		.append(QStringLiteral("<br> - LibSodium, linked either statically or dynamically in most releases. Copyright(c) 2013 - 2015 Frank Denis (j at pureftpd dot org). Licensed under the ISC license."))
-		.append(QStringLiteral("<br> - SpdLog (https://github.com/gabime/spdlog). Licensed under the The MIT License (MIT). Copyright(c) 2015 Gabi Melman. Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files(the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and / or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software."))
-		.append(QStringLiteral("<br><br>"))
-	);
+	LicenseDialog* licenseDialog = new LicenseDialog(this);
+	licenseDialog->exec();
 }
 
 void Client::menuAboutAboutOnClick() {
