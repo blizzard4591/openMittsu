@@ -22,7 +22,8 @@ SET(CMAKEPORTABLEENDIAN_MODULE_BASEPATH "${PROJECT_SOURCE_DIR}/3rdparty/cmake-po
 
 option(OPENMITTSU_LINK_LIBCXXABI "Sets whether libc++abi should be linked." OFF)
 option(OPENMITTSU_USE_LIBCXX "Sets whether the standard library is libc++." OFF)
-option(OPENMITTSU_DEBUG "Sets whether debug checks, assertions and logging should be turned on. Has no effect on build under MSVC." OFF)
+option(OPENMITTSU_DEBUG "Sets whether debug checks, assertions and logging should be turned on. Has no effect on builds under MSVC besides turning on debug logging level." OFF)
+option(OPENMITTSU_DISABLE_VERSION_UPDATE_CHECK "Disables the version check on start-up. Useful for custom builds or added privacy." OFF)
 SET(OPENMITTSU_CMAKE_SEARCH_PATH "D:/Qt/Qt5.7.0/5.7/msvc2015_64" CACHE PATH "Additional Qt5 search path" ) 
 
 SET(CMAKE_PREFIX_PATH "${OPENMITTSU_CMAKE_SEARCH_PATH}/lib/cmake/")
@@ -30,12 +31,19 @@ SET(CMAKE_PREFIX_PATH "${OPENMITTSU_CMAKE_SEARCH_PATH}/lib/cmake/")
 if (OPENMITTSU_DEBUG)
 	SET(OPENMITTSU_CONFIG_DEBUG_FLAG_SET ON)
 	if (MSVC)
-		message(WARNING "Setting the DEBUG flag has no effect on MSVC")
+		message(WARNING "Setting the DEBUG flag has no effect on MSVC besides turning on DEBUG logging.")
 	endif(MSVC)
 	message(STATUS "Configuring OpenMittsu to be build in debug mode.")
 else(OPENMITTSU_DEBUG)
 	SET(OPENMITTSU_CONFIG_DEBUG_FLAG_SET OFF)
 endif(OPENMITTSU_DEBUG)
+
+if (OPENMITTSU_DISABLE_VERSION_UPDATE_CHECK)
+	SET(OPENMITTSU_CONFIG_DISABLE_VERSION_UPDATE_CHECK ON)
+	message(STATUS "Version update checks on start-up will be disabled.")
+else(OPENMITTSU_DISABLE_VERSION_UPDATE_CHECK)
+	SET(OPENMITTSU_CONFIG_DISABLE_VERSION_UPDATE_CHECK OFF)
+endif(OPENMITTSU_DISABLE_VERSION_UPDATE_CHECK)
 
 # Find the Qt library
 find_package(Qt5Core REQUIRED)

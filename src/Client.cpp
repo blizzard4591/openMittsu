@@ -45,6 +45,7 @@
 
 #include "IdentityHelper.h"
 #include "MessageCenter.h"
+#include "Config.h"
 
 Client::Client(QWidget *parent) : QMainWindow(parent), protocolClient(nullptr), settings(nullptr), audioOutput(nullptr), connectionState(ConnectionState::STATE_DISCONNECTED), serverConfiguration(nullptr), clientConfiguration(nullptr), contactRegistry(ContactRegistry::getInstance()) {
 	ui.setupUi(this);
@@ -136,10 +137,11 @@ Client::Client(QWidget *parent) : QMainWindow(parent), protocolClient(nullptr), 
 		throw InternalErrorException() << "Could not load audio file ReceivedMessage.wav in the Client.";
 	}
 
+#ifndef OPENMITTSU_CONFIG_DISABLE_VERSION_UPDATE_CHECK
 	// Call Updater
 	OPENMITTSU_CONNECT_QUEUED(&updater, foundNewVersion(int, int, int, int, QString, QString, QString), this, updaterFoundNewVersion(int, int, int, int, QString, QString, QString));
 	QTimer::singleShot(0, &updater, SLOT(start()));
-
+#endif
 
 	// Call the setup() function in the thread
 	QTimer::singleShot(0, protocolClient, SLOT(setup()));

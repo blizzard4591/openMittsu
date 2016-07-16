@@ -6,11 +6,14 @@
 
 #include "utility/Logging.h"
 #include "utility/QObjectConnectionMacro.h"
+#include "utility/Version.h"
 
 UpdaterDialog::UpdaterDialog(int versionMajor, int versionMinor, int versionPatch, int commitsSinceTag, QString const& gitHash, QString const& channel, QString const& link, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::UpdaterDialog), link(link) {
     ui->setupUi(this);
+
+	ui->edtYourVersion->setText(QString::fromStdString(Version::versionWithTagString()));
 
 	QString versionString("%1.%2.%3");
 	versionString = versionString.arg(versionMajor).arg(versionMinor).arg(versionPatch);

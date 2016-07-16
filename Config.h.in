@@ -9,3 +9,6 @@
  
 // Whether support for QR Code generation is present
 #cmakedefine OPENMITTSU_CONFIG_HAVE_LIBQRENCODE
+
+// Whether version update checks are disabled
+#cmakedefine OPENMITTSU_CONFIG_DISABLE_VERSION_UPDATE_CHECK

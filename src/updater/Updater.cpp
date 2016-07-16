@@ -11,6 +11,7 @@
 #include <QJsonValue>
 #include <QString>
 
+#include "Config.h"
 #include "Endian.h"
 #include "utility/Logging.h"
 #include "utility/QObjectConnectionMacro.h"
@@ -25,6 +26,9 @@ Updater::~Updater() {
 }
 
 void Updater::run() {
+#ifdef OPENMITTSU_CONFIG_DISABLE_VERSION_UPDATE_CHECK
+	LOGGER()->error("The update checker was disabled at built time.");
+#else
 	if ((Version::versionMajor == 0) && (Version::versionMinor == 0) && (Version::versionPatch == 0)) {
 		LOGGER()->info("This is not an official build of OpenMittsu, can not check for updates.");
 		return;
@@ -103,4 +107,5 @@ void Updater::run() {
 		delete reply;
 		LOGGER()->warn("Update check failed, query error: {}", errorString.toStdString());
 	}
+#endif // OPENMITTSU_CONFIG_DISABLE_VERSION_UPDATE_CHECK
 }
