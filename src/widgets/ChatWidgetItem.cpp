@@ -1,6 +1,7 @@
 #include "ChatWidgetItem.h"
 #include "ContactRegistry.h"
 #include "exceptions/InternalErrorException.h"
+#include "utility/TextFormatter.h"
 
 #include <QDateTime>
 #include <QRegularExpression>
@@ -253,27 +254,7 @@ void ChatWidgetItem::copyToClipboard() {
 }
 
 QString ChatWidgetItem::preprocessLinks(QString const& text) {
-	// Qt 5.4 and later support the QRegularExpression::OptimizeOnFirstUsageOption option.
-#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
-	static const QRegularExpression::PatternOptions patternOptions = QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption | QRegularExpression::OptimizeOnFirstUsageOption;
-#else
-	static const QRegularExpression::PatternOptions patternOptions = QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption;
-#endif
-
-	static QRegularExpression regExpBold(QStringLiteral("(?:\\b|_|~)\\*([^\\*\r\n]+)\\*(?:\\b|_|~)"), patternOptions);
-	static QRegularExpression regExpItalic(QStringLiteral("(?:\\b|\\*|~)_([^_\r\n]+)_(?:\\b|\\*|~)"), patternOptions);
-	static QRegularExpression regExpStrikethrough(QStringLiteral("(?:\\b|\\*|_)~([^~\r\n]+)~(?:\\b|\\*|_)"), patternOptions);
-
-	static QRegularExpression regExpLinks(QStringLiteral("\\b((https?|ftp|file)://[-A-Z0-9+&@#/%?=~_|$!:,.;]*[A-Z0-9+&@#/%=~_|$])"), patternOptions);
-	static QRegularExpression regExpNewline(QStringLiteral("\\R"), patternOptions);
-
-	QString result = text.toHtmlEscaped();
-	result.replace(regExpBold, QStringLiteral("<span style=\"font-weight: bold;\">\\1</span>"));
-	result.replace(regExpItalic, QStringLiteral("<span style=\"font-style: italic;\">\\1</span>"));
-	result.replace(regExpStrikethrough, QStringLiteral("<span style=\"text-decoration: line-through;\">\\1</span>"));
-
-	result.replace(regExpLinks, QStringLiteral("<a href=\"\\1\">\\1</a>"));
-	result.replace(regExpNewline, QStringLiteral("<br>"));
+	QString result = TextFormatter::format(text.toHtmlEscaped());
 
 	return result;
 }
