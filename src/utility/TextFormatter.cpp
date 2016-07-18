@@ -2,9 +2,8 @@
 
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
-#include <QList>
+#include <QRegularExpressionMatchIterator>
 #include <QStringList>
-#include <utility>
 
 #include "exceptions/InternalErrorException.h"
 
@@ -17,26 +16,26 @@ QString TextFormatter::format(QString const& input) {
 #endif
 	static QRegularExpression regExpLinks(QStringLiteral("\\b((https?|ftp|file)://[-A-Z0-9+&@#/%?=~_|$!:,.;]*[A-Z0-9+&@#/%=~_|$])"), patternOptions);
 
-	QList<std::pair<int, int>> linkPositions;
 	QStringList linkList;
 	QStringList remainingParts;
 
 	int start = 0;
 	int position = 0;
-	QRegularExpressionMatch match;
-
+	
+	QRegularExpressionMatchIterator matchIterator = regExpLinks.globalMatch(input);
 	while (true) {
-		position = input.indexOf(regExpLinks, start, &match);
-		if (position == -1) {
+		if (!matchIterator.hasNext()) {
 			remainingParts.append(input.mid(start));
 			break;
 		} else {
+			QRegularExpressionMatch match = matchIterator.next();
+			position = match.capturedStart(1);
+
 			remainingParts.append(input.mid(start, position - start));
 			QString const matchedLink = match.captured(1);
 			int const matchedLinkLength = matchedLink.length();
 
 			linkList.append(matchedLink);
-			linkPositions.append(std::make_pair(position, matchedLinkLength));
 
 			start = position + matchedLinkLength;
 		}
