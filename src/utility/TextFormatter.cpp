@@ -48,9 +48,9 @@ QString TextFormatter::format(QString const& input) {
 		throw InternalErrorException() << "Error on text- vs. link counts, we have " << remainingParts.size() << " text parts and " << linkList.size() << " links.";
 	}
 
-	static QRegularExpression regExpBold(QStringLiteral("\\*([^\\*\r\n]+)\\*"), patternOptions);
-	static QRegularExpression regExpItalic(QStringLiteral("_([^_\r\n]+)_"), patternOptions);
-	static QRegularExpression regExpStrikethrough(QStringLiteral("~([^~\r\n]+)~"), patternOptions);
+	static QRegularExpression regExpBold(QStringLiteral("\\B\\*([^\\r\\n]+?)\\*\\B"), patternOptions);
+	static QRegularExpression regExpItalic(QStringLiteral("\\b_([^\\r\\n]+?)_\\b"), patternOptions);
+	static QRegularExpression regExpStrikethrough(QStringLiteral("\\B~([^\\r\\n]+?)~\\B"), patternOptions);
 	static QRegularExpression regExpNewline(QStringLiteral("\\R"), patternOptions);
 
 	QString output;
