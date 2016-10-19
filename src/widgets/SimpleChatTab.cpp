@@ -97,10 +97,13 @@ void SimpleChatTab::onReceivedImage(ContactId const& sender, MessageTime const& 
 		QString filename(QStringLiteral("failed-image-from-%1.bin"));
 		filename = filename.arg(QDateTime::currentDateTime().toString("HH-mm-ss-dd-MM-yyyy"));
 		QFile tempFile(filename);
-		tempFile.open(QFile::WriteOnly);
-		tempFile.write(picture);
-		tempFile.close();
-		LOGGER()->critical("Could not load image, wrote raw image to {}.", filename.toStdString());
+		if (tempFile.open(QFile::WriteOnly)) {
+			tempFile.write(picture);
+			tempFile.close();
+			LOGGER()->critical("Could not load image, wrote raw image to {}.", filename.toStdString());
+		} else {
+			LOGGER()->critical("Could not load image AND failed to write raw image to {}.", filename.toStdString());
+		}
 	} else {
 		ImageChatWidgetItem* clwi = new ImageChatWidgetItem(contactRegistry->getIdentity(sender), ContactIdWithMessageId(sender, messageId), timeSend.getTime(), QDateTime::currentDateTime(), p);
 		ui->chatWidget->addItem(clwi);
@@ -365,6 +368,8 @@ void SimpleChatTab::handleFocus(bool hasNewMessage) {
 		return;
 	}
 
+	LOGGER_DEBUG("Handling Focus for {}. Has new message: {}. Is this the current widget? {}. QApplication::activeWindow is nullptr? {}.", this->getAssociatedContact()->getContactName().toStdString(), (hasNewMessage ? "true" : "false"), ((tabWidget->currentWidget() == this) ? "yes" : "no"), ((QApplication::activeWindow() == nullptr) ? "yes" : "no"));
+
 	if ((tabWidget->currentWidget() == this) && (QApplication::activeWindow() != nullptr)) {
 		QVector<MessageId>::const_iterator it = unseenMessages.constBegin();
 		QVector<MessageId>::const_iterator end = unseenMessages.constEnd();
@@ -388,11 +393,13 @@ void SimpleChatTab::handleFocus(bool hasNewMessage) {
 		unseenMessages.clear();
 
 		tabWidget->setTabBlinking(tabWidget->indexOf(this), false);
+		LOGGER_DEBUG("Deactivating blinking for this tab, cleared unread message queue.");
 	} else if (unseenMessages.size() > 0) {
 		tabWidget->setTabBlinking(tabWidget->indexOf(this), true);
 		if (hasNewMessage) {
 			MessageCenter::getInstance()->chatTabHasNewUnreadMessageAvailable(this);
 		}
+		LOGGER_DEBUG("Activating blinking for this tab.");
 	}
 }
 
