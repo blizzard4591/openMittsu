@@ -40,7 +40,22 @@ Prerequisites on Debian/Ubuntu:
 ```
 apt-get install libqt5core5a libqt5gui5 libqt5multimedia5 libqt5multimedia5-plugins libqt5sql5 libqt5sql5-sqlite libqt5widgets5 qt5-qmake qtbase5-dev qtbase5-dev-tools qtmultimedia5-dev libsodium-dev libqrencode-dev git
 ```
-	
+
+### Detailed steps
+
+Adjust the paths to your system. The ones below are a current qt version installed on OSX view brew.
+```bash
+cd openMittsu
+export Qt5Core_DIR=/usr/local/Cellar/qt5/5.7.0/lib/cmake/Qt5Core/
+export Qt5Gui_DIR=/usr/local/Cellar/qt5/5.7.0/lib/cmake/Qt5Gui/
+export Qt5Widgets_DIR=/usr/local/Cellar/qt5/5.7.0/lib/cmake/Qt5Widgets/
+export Qt5Network_DIR=/usr/local/Cellar/qt5/5.7.0/lib/cmake/Qt5Network/
+export Qt5Multimedia_DIR=/usr/local/Cellar/qt5/5.7.0/lib/cmake/Qt5Multimedia
+rm CMakeCache.txt; cmake .
+make
+./openMittsu <args see below>
+```
+
 ## How to use
 The application requires three input files.
  - The contact database. This is a simple text file of the format:
