@@ -21,6 +21,8 @@
 
 #include "IdentityHelper.h"
 #include "MessageCenter.h"
+#include "IdentityContact.h"
+#include "GroupContact.h"
 #include "exceptions/InternalErrorException.h"
 #include "exceptions/NotConnectedException.h"
 #include "utility/Logging.h"
@@ -29,7 +31,7 @@
 #include "ui_simplechattab.h"
 
 
-SimpleChatTab::SimpleChatTab(Contact* contact, UniqueMessageIdGenerator* idGenerator, QWidget* parent) : ChatTab(parent), uniqueMessageIdGenerator(idGenerator), ui(new Ui::SimpleChatTab), contact(contact) {
+SimpleChatTab::SimpleChatTab(Contact* contact, UniqueMessageIdGenerator* idGenerator, QWidget* parent) : ChatTab(parent), uniqueMessageIdGenerator(idGenerator), ui(new Ui::SimpleChatTab), contact(contact), messageIdToItemIndex(), unseenMessages(), writeMessagesToLog(true), messageLogFilename(QString("MessageLog-for-%1.txt").arg(getContactPrintableId(contact))) {
 	ui->setupUi(this);
 
 	OPENMITTSU_CONNECT(ui->edtInput, textChanged(), this, edtInputOnTextEdited());
@@ -47,12 +49,45 @@ SimpleChatTab::~SimpleChatTab() {
 	delete ui;
 }
 
+QString SimpleChatTab::getContactPrintableId(Contact const* const c) {
+	if (c == nullptr) {
+		return QString("INVALID-PTR");
+	}
+	if (c->getContactType() == Contact::ContactType::CONTACT_IDENTITY) {
+		IdentityContact const* const identityContact = static_cast<IdentityContact const*>(c);
+		return identityContact->getContactId().toQString();
+	} else {
+		GroupContact const* const groupContact = static_cast<GroupContact const*>(c);
+		return groupContact->getGroupId().toQString();
+	}
+}
+
+void SimpleChatTab::writeMessageToLog(QString const& message) {
+	QFile logFile(messageLogFilename);
+	if (logFile.open(QFile::WriteOnly | QIODevice::Append | QFile::Text)) {
+		{
+			QTextStream out(&logFile);
+			out.setCodec("UTF-8");
+			out << message << endl;
+
+			out.flush();
+		}
+		logFile.close();
+	} else {
+		LOGGER()->critical("Could not write message log to {}.", messageLogFilename.toStdString());
+	}
+}
+
 Contact* SimpleChatTab::getAssociatedContact() const {
 	return contact;
 }
 
 void SimpleChatTab::onReceivedMessage(ContactId const& sender, MessageTime const& timeSend, MessageId const& messageId, QString const& message) {
-	LOGGER_DEBUG("SimpleChatTab received a text message from {} with ID #{}, send on {}.", sender.toString(), messageId.toString(), timeSend.toString());
+	LOGGER_DEBUG("SimpleChatTab received a text message from {} with ID #{}, sent on {}.", sender.toString(), messageId.toString(), timeSend.toString());
+	if (writeMessagesToLog) {
+		writeMessageToLog(QString(tr("Received a TEXT message from %1 with ID #%2 sent on %3: %4")).arg(sender.toQString()).arg(messageId.toQString()).arg(timeSend.toQString()).arg(message));
+	}
+
 	ContactRegistry* contactRegistry = ContactRegistry::getInstance();
 
 	QDateTime const currentTime = QDateTime::currentDateTime();
@@ -71,7 +106,11 @@ void SimpleChatTab::onReceivedMessage(ContactId const& sender, MessageTime const
 }
 
 void SimpleChatTab::onReceivedLocation(ContactId const& sender, MessageTime const& timeSend, MessageId const& messageId, double latitude, double longitude, double height, QString const& description) {
-	LOGGER_DEBUG("SimpleChatTab received a location message from {} with ID #{}, send on {}.", sender.toString(), messageId.toString(), timeSend.toString());
+	LOGGER_DEBUG("SimpleChatTab received a location message from {} with ID #{}, sent on {}.", sender.toString(), messageId.toString(), timeSend.toString());
+	if (writeMessagesToLog) {
+		writeMessageToLog(QString(tr("Received a LOCATION message from %1 with ID #%2 sent on %3: Latitude = %4, Longitude = %5, Height = %6, Description = %7")).arg(sender.toQString()).arg(messageId.toQString()).arg(timeSend.toQString()).arg(latitude).arg(longitude).arg(height).arg(description));
+	}
+
 	ContactRegistry* contactRegistry = ContactRegistry::getInstance();
 
 	LocationChatWidgetItem* lcwi = new LocationChatWidgetItem(contactRegistry->getIdentity(sender), ContactIdWithMessageId(sender, messageId), timeSend.getTime(), QDateTime::currentDateTime(), latitude, longitude, height, description);
@@ -89,7 +128,11 @@ void SimpleChatTab::onReceivedLocation(ContactId const& sender, MessageTime cons
 }
 
 void SimpleChatTab::onReceivedImage(ContactId const& sender, MessageTime const& timeSend, MessageId const& messageId, QByteArray const& picture) {
-	LOGGER_DEBUG("SimpleChatTab received an Image of size {} Bytes from {}, send on {}.", picture.size(), sender.toString(), timeSend.toString());
+	LOGGER_DEBUG("SimpleChatTab received an Image of size {} Bytes from {}, sent on {}.", picture.size(), sender.toString(), timeSend.toString());
+	if (writeMessagesToLog) {
+		writeMessageToLog(QString(tr("Received an IMAGE message from %1 with ID #%2 sent on %3: %4")).arg(sender.toQString()).arg(messageId.toQString()).arg(timeSend.toQString()).arg(QString(picture.toBase64())));
+	}
+
 	ContactRegistry* contactRegistry = ContactRegistry::getInstance();
 
 	QPixmap p;
@@ -188,6 +231,10 @@ void SimpleChatTab::onMessageSendFailed(MessageId const& messageId) {
 	if (messageIdToItemIndex.contains(messageId)) {
 		ChatWidgetItem* clwi = messageIdToItemIndex.value(messageId);
 		clwi->setMessageState(ChatWidgetItem::MessageState::STATE_FAILED, QDateTime::currentDateTime());
+
+		if (writeMessagesToLog) {
+			writeMessageToLog(QString(tr("Failed to send message with ID #%2.")).arg(messageId.toQString()));
+		}
 	}
 
 	handleFocus();
@@ -217,6 +264,11 @@ void SimpleChatTab::btnInputSendOnClick() {
 		if (!sendText(messageId, text)) {
 			QMessageBox::warning(this, tr("Not connected"), tr("Could not send your message as you are currently not connected to a server."));
 			return;
+		}
+
+		if (writeMessagesToLog) {
+			MessageTime mt = MessageTime::now();
+			writeMessageToLog(QString(tr("Send a TEXT message with ID #%2 sent on %3: %4")).arg(messageId.toQString()).arg(mt.toQString()).arg(text));
 		}
 
 		TextChatWidgetItem* clwi = new TextChatWidgetItem(ContactRegistry::getInstance()->getSelfContact(), ContactIdWithMessageId(ContactRegistry::getInstance()->getSelfContact()->getContactId(), messageId), text);
@@ -305,6 +357,11 @@ void SimpleChatTab::prepareAndSendImage(QByteArray const& imageData) {
 		if (!sendImage(messageId, imageBytes)) {
 			QMessageBox::warning(this, tr("Not connected"), tr("Could not send your message as you are currently not connected to a server."));
 			return;
+		}
+
+		if (writeMessagesToLog) {
+			MessageTime mt = MessageTime::now();
+			writeMessageToLog(QString(tr("Send an IMAGE message with ID #%2 sent on %3: %4")).arg(messageId.toQString()).arg(mt.toQString()).arg(QString(imageBytes.toBase64())));
 		}
 
 		ImageChatWidgetItem* clwi = new ImageChatWidgetItem(ContactRegistry::getInstance()->getSelfContact(), ContactIdWithMessageId(ContactRegistry::getInstance()->getSelfContact()->getContactId(), messageId), QPixmap::fromImage(image));
