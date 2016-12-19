@@ -8,21 +8,31 @@
 #include <QAction>
 #include <QClipboard>
 
-ImageChatWidgetItem::ImageChatWidgetItem(Contact* contact, ContactIdWithMessageId const& senderAndMessageId, QPixmap const& image, QWidget *parent) : ChatWidgetItem(contact, senderAndMessageId, parent), ui(new Ui::ImageChatWidgetItem), image(image) {
+ImageChatWidgetItem::ImageChatWidgetItem(Contact* contact, ContactIdWithMessageId const& senderAndMessageId, QPixmap const& image, QString const& imageText, QWidget *parent) : ChatWidgetItem(contact, senderAndMessageId, parent), ui(new Ui::ImageChatWidgetItem), image(image), imageText(imageText) {
 	ui->setupUi(this);
 	
 	OPENMITTSU_CONNECT(ui->lblImage, clicked(), this, lblImageOnClick());
 
 	ui->lblImage->setPixmap(image);
+	ui->lblImageText->setText(preprocessLinks(imageText));
+	if (imageText.isEmpty()) {
+		ui->lblImageText->setFixedHeight(1);
+	}
+
 	onDataUpdated();
 }
 
-ImageChatWidgetItem::ImageChatWidgetItem(Contact* contact, ContactIdWithMessageId const& senderAndMessageId, QDateTime const& timeSend, QDateTime const& timeReceived, QPixmap const& image, QWidget *parent) : ChatWidgetItem(contact, senderAndMessageId, timeSend, timeReceived, parent), ui(new Ui::ImageChatWidgetItem), image(image) {
+ImageChatWidgetItem::ImageChatWidgetItem(Contact* contact, ContactIdWithMessageId const& senderAndMessageId, QDateTime const& timeSend, QDateTime const& timeReceived, QPixmap const& image, QString const& imageText, QWidget *parent) : ChatWidgetItem(contact, senderAndMessageId, timeSend, timeReceived, parent), ui(new Ui::ImageChatWidgetItem), image(image), imageText(imageText) {
 	ui->setupUi(this);
 
 	OPENMITTSU_CONNECT(ui->lblImage, clicked(), this, lblImageOnClick());
 
 	ui->lblImage->setPixmap(image);
+	ui->lblImageText->setText(preprocessLinks(imageText));
+	if (imageText.isEmpty()) {
+		ui->lblImageText->setFixedHeight(1);
+	}
+
 	onDataUpdated();
 }
 
@@ -52,10 +62,12 @@ void ImageChatWidgetItem::setInnerAlignment(bool alignLeft) {
 	if (alignLeft) {
 		ui->lblFrom->setAlignment(Qt::AlignLeft);
 		ui->lblImage->setAlignment(Qt::AlignLeft);
+		ui->lblImageText->setAlignment(Qt::AlignLeft);
 		ui->lblTimeAndStatus->setAlignment(Qt::AlignLeft);
 	} else {
 		ui->lblFrom->setAlignment(Qt::AlignRight);
 		ui->lblImage->setAlignment(Qt::AlignRight);
+		ui->lblImageText->setAlignment(Qt::AlignLeft);
 		ui->lblTimeAndStatus->setAlignment(Qt::AlignRight);
 	}
 }

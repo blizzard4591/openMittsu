@@ -26,6 +26,7 @@
 #include "exceptions/InternalErrorException.h"
 #include "exceptions/NotConnectedException.h"
 #include "utility/Logging.h"
+#include "utility/QExifImageHeader.h"
 #include "utility/QObjectConnectionMacro.h"
 
 #include "ui_simplechattab.h"
@@ -148,7 +149,27 @@ void SimpleChatTab::onReceivedImage(ContactId const& sender, MessageTime const& 
 			LOGGER()->critical("Could not load image AND failed to write raw image to {}.", filename.toStdString());
 		}
 	} else {
-		ImageChatWidgetItem* clwi = new ImageChatWidgetItem(contactRegistry->getIdentity(sender), ContactIdWithMessageId(sender, messageId), timeSend.getTime(), QDateTime::currentDateTime(), p);
+		QExifImageHeader header;
+		QBuffer buffer;
+		buffer.setData(picture);
+		buffer.open(QBuffer::ReadOnly);
+
+		QString imageText;
+		if (header.loadFromJpeg(&buffer)) {
+			if (header.contains(QExifImageHeader::Artist)) {
+				LOGGER_DEBUG("Image has Artist Tag: {}", header.value(QExifImageHeader::Artist).toString().toStdString());
+				imageText = header.value(QExifImageHeader::Artist).toString();
+			} else if (header.contains(QExifImageHeader::UserComment)) {
+				LOGGER_DEBUG("Image has UserComment Tag: {}", header.value(QExifImageHeader::UserComment).toString().toStdString());
+				imageText = header.value(QExifImageHeader::UserComment).toString();
+			} else {
+				LOGGER_DEBUG("Image does not have Artist or UserComment Tag.");
+			}
+		} else {
+			LOGGER_DEBUG("Image does not have an EXIF Tag.");
+		}
+
+		ImageChatWidgetItem* clwi = new ImageChatWidgetItem(contactRegistry->getIdentity(sender), ContactIdWithMessageId(sender, messageId), timeSend.getTime(), QDateTime::currentDateTime(), p, imageText);
 		ui->chatWidget->addItem(clwi);
 		messageIdToItemIndex.insert(messageId, clwi);
 		//listWidget->scrollToBottom();
@@ -349,8 +370,18 @@ void SimpleChatTab::prepareAndSendImage(QByteArray const& imageData) {
 
 		QByteArray imageBytes;
 		QBuffer buffer(&imageBytes);
-		buffer.open(QIODevice::WriteOnly);
+		buffer.open(QIODevice::ReadWrite);
 		image.save(&buffer, "JPG", 75);
+
+		// Insert Text if available
+		QString const text = ui->edtInput->toPlainText();
+		if (!text.isEmpty()) {
+			QExifImageHeader header;
+			header.setValue(QExifImageHeader::UserComment, QExifValue(text));
+			buffer.seek(0);
+			header.saveToJpeg(&buffer);
+		}
+
 		buffer.close();
 
 		MessageId const messageId = getUniqueMessageId();
@@ -359,12 +390,16 @@ void SimpleChatTab::prepareAndSendImage(QByteArray const& imageData) {
 			return;
 		}
 
+		if (!text.isEmpty()) {
+			ui->edtInput->setPlainText("");
+		}
+
 		if (writeMessagesToLog) {
 			MessageTime mt = MessageTime::now();
 			writeMessageToLog(QString(tr("Send an IMAGE message with ID #%2 sent on %3: %4")).arg(messageId.toQString()).arg(mt.toQString()).arg(QString(imageBytes.toBase64())));
 		}
 
-		ImageChatWidgetItem* clwi = new ImageChatWidgetItem(ContactRegistry::getInstance()->getSelfContact(), ContactIdWithMessageId(ContactRegistry::getInstance()->getSelfContact()->getContactId(), messageId), QPixmap::fromImage(image));
+		ImageChatWidgetItem* clwi = new ImageChatWidgetItem(ContactRegistry::getInstance()->getSelfContact(), ContactIdWithMessageId(ContactRegistry::getInstance()->getSelfContact()->getContactId(), messageId), QPixmap::fromImage(image), text);
 		ui->chatWidget->addItem(clwi);
 		messageIdToItemIndex.insert(messageId, clwi);
 
@@ -425,8 +460,6 @@ void SimpleChatTab::handleFocus(bool hasNewMessage) {
 		return;
 	}
 
-	LOGGER_DEBUG("Handling Focus for {}. Has new message: {}. Is this the current widget? {}. QApplication::activeWindow is nullptr? {}.", this->getAssociatedContact()->getContactName().toStdString(), (hasNewMessage ? "true" : "false"), ((tabWidget->currentWidget() == this) ? "yes" : "no"), ((QApplication::activeWindow() == nullptr) ? "yes" : "no"));
-
 	if ((tabWidget->currentWidget() == this) && (QApplication::activeWindow() != nullptr)) {
 		QVector<MessageId>::const_iterator it = unseenMessages.constBegin();
 		QVector<MessageId>::const_iterator end = unseenMessages.constEnd();
@@ -450,13 +483,11 @@ void SimpleChatTab::handleFocus(bool hasNewMessage) {
 		unseenMessages.clear();
 
 		tabWidget->setTabBlinking(tabWidget->indexOf(this), false);
-		LOGGER_DEBUG("Deactivating blinking for this tab, cleared unread message queue.");
 	} else if (unseenMessages.size() > 0) {
 		tabWidget->setTabBlinking(tabWidget->indexOf(this), true);
 		if (hasNewMessage) {
 			MessageCenter::getInstance()->chatTabHasNewUnreadMessageAvailable(this);
 		}
-		LOGGER_DEBUG("Activating blinking for this tab.");
 	}
 }
 

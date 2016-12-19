@@ -3,6 +3,7 @@
 
 #include "ChatWidgetItem.h"
 #include <QPixmap>
+#include <QString>
 
 namespace Ui {
 	class ImageChatWidgetItem;
@@ -11,8 +12,8 @@ namespace Ui {
 class ImageChatWidgetItem : public ChatWidgetItem {
     Q_OBJECT
 public:
-	explicit ImageChatWidgetItem(Contact* contact, ContactIdWithMessageId const& senderAndMessageId, QPixmap const& image, QWidget *parent = nullptr);
-	explicit ImageChatWidgetItem(Contact* contact, ContactIdWithMessageId const& senderAndMessageId, QDateTime const& timeSend, QDateTime const& timeReceived, QPixmap const& image, QWidget *parent = nullptr);
+	explicit ImageChatWidgetItem(Contact* contact, ContactIdWithMessageId const& senderAndMessageId, QPixmap const& image, QString const& imageText, QWidget *parent = nullptr);
+	explicit ImageChatWidgetItem(Contact* contact, ContactIdWithMessageId const& senderAndMessageId, QDateTime const& timeSend, QDateTime const& timeReceived, QPixmap const& image, QString const& imageText, QWidget *parent = nullptr);
 	~ImageChatWidgetItem();
 
 	virtual void setInnerAlignment(bool alignLeft) override;
@@ -25,6 +26,7 @@ private slots:
 private:
 	Ui::ImageChatWidgetItem *ui;
 	QPixmap const image;
+	QString const imageText;
 };
 
 #endif // OPENMITTSU_WIDGETS_IMAGECHATITEM_H_
