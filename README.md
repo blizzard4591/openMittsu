@@ -40,7 +40,27 @@ Prerequisites on Debian/Ubuntu:
 ```
 apt-get install libqt5core5a libqt5gui5 libqt5multimedia5 libqt5multimedia5-plugins libqt5sql5 libqt5sql5-sqlite libqt5widgets5 qt5-qmake qtbase5-dev qtbase5-dev-tools qtmultimedia5-dev libsodium-dev libqrencode-dev git
 ```
-	
+
+### Detailed steps
+
+Adjust the paths to your system. The ones below are a current qt version installed on OSX view brew.
+```bash
+cd my-projects/ # or wherever you want to clone this
+git checkout https://github.com/blizzard4591/openMittsu.git
+cd openMittsu
+mkdir build
+cd build
+export Qt5Core_DIR=/usr/local/Cellar/qt5/5.7.0/lib/cmake/Qt5Core/
+export Qt5Gui_DIR=/usr/local/Cellar/qt5/5.7.0/lib/cmake/Qt5Gui/
+export Qt5Widgets_DIR=/usr/local/Cellar/qt5/5.7.0/lib/cmake/Qt5Widgets/
+export Qt5Network_DIR=/usr/local/Cellar/qt5/5.7.0/lib/cmake/Qt5Network/
+export Qt5Multimedia_DIR=/usr/local/Cellar/qt5/5.7.0/lib/cmake/Qt5Multimedia
+rm CMakeCache.txt
+cmake .. # or cmake .. -G Xcode, optionally add -DOPENMITTSU_DEBUG=On
+make # optionally add -j 4 for threaded compilation on with 4 threads
+./openMittsu
+```
+
 ## How to use
 The application requires three input files.
  - The contact database. This is a simple text file of the format:
@@ -52,13 +72,17 @@ The application requires three input files.
 # - IDENTITY is an eight character ID of the form [A-Z0-9]{8} and stands for a users public id,
 # - PUBKEY is an 64 character key of the form [a-fA-F0-9]{64} and stands for a users 32-Byte long-term public key,
 # - Nickname is an optional screen-name for the given identity.
+# You can find IDENTITY and PUBKEY of your contacts in the contacts.csv of a Threema data backup.
+
+ABCD1234 : aabbccddeeff00112233445566778899aabbccddeeff00112233445566778899 : Mr. Smith
+
 # GROUPID : GROUPOWNER_IDENTITY : IDENTITY, IDENTITY, IDENTITY : Group Name
 # where 
 # - IDENTITY is an eight character ID of the form [A-Z0-9]{8} and stands for a users public id,
 # - GROUPID is an 16 character key of the form [a-fA-F0-9]{16} and stands for a groups unique identifier,
 # - GROUPOWNER_IDENTITY is an eight character ID of the form [A-Z0-9]{8} and stands for the group owners public id,
 # - Group Name is the displayed title of the group.
-ABCD1234 : aabbccddeeff00112233445566778899aabbccddeeff00112233445566778899 : Mr. Smith
+# You can IDENTITY, GROUPID and GROUPOWNER_IDENTITY in the groups.csv of a Threema data backup.
 ```
  - The client configuration, containing the ID and private key used by this client.
  It can easily be generated using the application.
