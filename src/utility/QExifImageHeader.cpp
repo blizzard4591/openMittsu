@@ -1909,11 +1909,8 @@ template <typename T> quint32 QExifImageHeader::writeExifValues(QDataStream &str
 
     Returns the total number of bytes written.
 */
-qint64 QExifImageHeader::write(QIODevice *device) const
-{
-#ifndef QT_NO_DEBUG
+qint64 QExifImageHeader::write(QIODevice *device) const {
     qint64 startPos = device->pos();
-#endif
 
 	quint32 bytesWritten = 0;
     QDataStream stream( device );
