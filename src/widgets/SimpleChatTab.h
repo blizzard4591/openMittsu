@@ -50,6 +50,8 @@ public slots:
 	void typingTimerOnTimer();
 	void scrollDownChatWidget();
 
+	void emojiDoubleClicked(QString const& emoji);
+
 	void fileDownloaderCallbackTaskFinished(CallbackTask* callbackTask);
 protected:
 	virtual bool sendText(MessageId const& uniqueMessageId, QString const& text) = 0;

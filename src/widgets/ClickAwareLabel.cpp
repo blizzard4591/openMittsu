@@ -17,3 +17,11 @@ void ClickAwareLabel::mousePressEvent(QMouseEvent* event) {
 
 	QLabel::mousePressEvent(event);
 }
+
+void ClickAwareLabel::mouseDoubleClickEvent(QMouseEvent *event) {
+	QLabel::mouseDoubleClickEvent(event);
+
+	if (this->hasSelectedText()) {
+		emit doubleClickSelectedText(this->selectedText());
+	}
+}

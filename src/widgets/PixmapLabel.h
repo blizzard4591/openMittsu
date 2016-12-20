@@ -1,12 +1,12 @@
 #ifndef OPENMITTSU_WIDGETS_PIXMAPLABEL_H_
 #define OPENMITTSU_WIDGETS_PIXMAPLABEL_H_
 
-#include "widgets/ClickableLabel.h"
+#include "widgets/ClickAwareLabel.h"
 
 #include <QPixmap>
 #include <QResizeEvent>
 
-class PixmapLabel : public ClickableLabel {
+class PixmapLabel : public ClickAwareLabel {
 	Q_OBJECT
 public:
 	enum class Mode {

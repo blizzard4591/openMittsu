@@ -13,8 +13,10 @@ public:
 	virtual ~ClickAwareLabel();
 signals:
 	void clicked();
+	void doubleClickSelectedText(QString const& selectedText);
 protected:
-	void mousePressEvent(QMouseEvent* event);
+	virtual void mousePressEvent(QMouseEvent* event) override;
+	virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
 };
 
 #endif // OPENMITTSU_WIDGETS_CLICKAWARELABEL_H_

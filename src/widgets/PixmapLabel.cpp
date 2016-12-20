@@ -2,7 +2,7 @@
 
 #include "utility/Logging.h"
 
-PixmapLabel::PixmapLabel(QWidget *parent) : ClickableLabel(parent), mode(Mode::HeightForWidth), scalingFactor(1.0) {
+PixmapLabel::PixmapLabel(QWidget *parent) : ClickAwareLabel(parent), mode(Mode::HeightForWidth), scalingFactor(1.0) {
 	this->setMinimumSize(1, 1);
 
 	QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);

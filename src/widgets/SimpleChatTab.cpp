@@ -39,6 +39,7 @@ SimpleChatTab::SimpleChatTab(Contact* contact, UniqueMessageIdGenerator* idGener
 	OPENMITTSU_CONNECT(ui->edtInput, returnPressed(), this, edtInputOnReturnPressed());
 	OPENMITTSU_CONNECT(ui->btnInputSend, clicked(), this, btnInputSendOnClick());
 	OPENMITTSU_CONNECT(ui->btnSendImage, clicked(), this, btnSendImageOnClick());
+	OPENMITTSU_CONNECT(ui->emojiSelector, emojiDoubleClicked(QString const&), this, emojiDoubleClicked(QString const&));
 
 	onContactDataChanged();
 
@@ -512,4 +513,9 @@ void SimpleChatTab::fileDownloaderCallbackTaskFinished(CallbackTask* callbackTas
 
 		delete fileDownloaderCallbackTask;
 	}
+}
+
+void SimpleChatTab::emojiDoubleClicked(QString const& emoji) {
+	QTextCursor cursor = ui->edtInput->textCursor();
+	cursor.insertText(emoji);
 }
