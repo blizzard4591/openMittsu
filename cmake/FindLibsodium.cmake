@@ -24,14 +24,14 @@ else()
 	IF (WIN32)
 		IF (MINGW)
 			SET (LIB_PREFIX "lib")
-			SET (LIB_POSTFIX "a")
+			SET (LIB_POSTFIX "so")
 		ELSEIF (MSVC)
 			SET (LIB_PREFIX "lib")
 			SET (LIB_POSTFIX "lib")
 		ENDIF(MINGW)   
 	ELSE (UNIX)
 		SET (LIB_PREFIX "lib")
-		SET (LIB_POSTFIX "a")
+		SET (LIB_POSTFIX "so")
 	ENDIF (WIN32)
  
 	find_path(SODIUM_INCLUDE_DIR
@@ -39,19 +39,19 @@ else()
 		HINTS
 			ENV sodiumPath
 			${_SODIUM_INCLUDE_DIRS}
-			/usr/include /usr/local/inculde /opt/local/include /sw/include
+			/usr/include /usr/local/include /opt/local/include /sw/include
 	)
 	
 	set(_hints "")
  
 	find_library(SODIUM_LIB
 		NAMES ${LIB_PREFIX}sodium.${LIB_POSTFIX}
-		HINTS ${SODIUM_INCLUDE_DIR}/../lib ${SODIUM_INCLUDE_DIR}/lib${_lib_suffix} ${SODIUM_INCLUDE_DIR}/../Build/Release/${_lib_suffix_win} ${_SODIUM_LIBRARY_DIRS} /usr/lib /usr/local/lib /opt/local/lib /sw/lib
+		HINTS ${SODIUM_INCLUDE_DIR}/../lib ${SODIUM_INCLUDE_DIR}/../lib64 ${SODIUM_INCLUDE_DIR}/lib${_lib_suffix} ${SODIUM_INCLUDE_DIR}/../Build/Release/${_lib_suffix_win} ${_SODIUM_LIBRARY_DIRS} /usr/lib /usr/local/lib /opt/local/lib /sw/lib
 	)
 	
 	find_library(SODIUM_LIB_DEBUG
 		NAMES ${LIB_PREFIX}sodium.${LIB_POSTFIX}
-		HINTS ${SODIUM_INCLUDE_DIR}/../lib ${SODIUM_INCLUDE_DIR}/lib${_lib_suffix} ${SODIUM_INCLUDE_DIR}/../Build/Debug/${_lib_suffix_win} ${_SODIUM_LIBRARY_DIRS} /usr/lib /usr/local/lib /opt/local/lib /sw/lib
+		HINTS ${SODIUM_INCLUDE_DIR}/../lib ${SODIUM_INCLUDE_DIR}/../lib64 ${SODIUM_INCLUDE_DIR}/lib${_lib_suffix} ${SODIUM_INCLUDE_DIR}/../Build/Debug/${_lib_suffix_win} ${_SODIUM_LIBRARY_DIRS} /usr/lib /usr/local/lib /opt/local/lib /sw/lib
 	)
  
 	set(LIBSODIUM_INCLUDE_DIRS ${SODIUM_INCLUDE_DIR} CACHE PATH "libSodium include dir")

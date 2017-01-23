@@ -31,7 +31,7 @@ git submodule sync
 git submodule update --init --recursive
 ```
 
-2. Install or build both LibSodium (```apt-get install libsodium-dev```) and LibQrEncode (```apt-get install libqrencode-dev```)
+2. Install or build both LibSodium (for example ```apt-get install libsodium-dev```) and LibQrEncode (for example ```apt-get install libqrencode-dev```)
 3. Run CMake on the main directory. Point CMake to the installation locations of libSodium and LibQrEncode, if required, using `LIBSODIUM_INCLUDE_DIRS`, `LIBSODIUM_LIBRARIES`, `LIBQRENCODE_INCLUDE_DIR` and `LIBQRENCODE_LIBRARY`, respectively.
 4. Once Makefiles or a solution (MSVS) has been successfully generated, start the build process.
 	On Windows, choosing a DEBUG configuration causes the application to show an additional terminal window containinig run-time debug information and logs.
@@ -39,6 +39,11 @@ git submodule update --init --recursive
 Prerequisites on Debian/Ubuntu: 
 ```
 apt-get install libqt5core5a libqt5gui5 libqt5multimedia5 libqt5multimedia5-plugins libqt5sql5 libqt5sql5-sqlite libqt5widgets5 qt5-qmake qtbase5-dev qtbase5-dev-tools qtmultimedia5-dev libsodium-dev libqrencode-dev git
+```
+
+Prerequisites on openSuse: 
+```
+sudo zypper install libqt5-qtbase-devel libqt5-qtmultimedia-devel libsodium-devel qrencode-devel git
 ```
 
 ### Detailed steps
