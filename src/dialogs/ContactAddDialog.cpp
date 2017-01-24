@@ -6,7 +6,7 @@
 ContactAddDialog::ContactAddDialog(QWidget *parent) : QDialog(parent), ui(new Ui::ContactAddDialog) {
     ui->setupUi(this);
 
-	identityValidator = new QRegularExpressionValidator(QRegularExpression(QStringLiteral("[A-Z0-9*][A-Z0-9]{7}")), ui->edtIdentity);
+	identityValidator = new QRegularExpressionValidator(QRegularExpression(QStringLiteral("[a-zA-Z0-9*][a-zA-Z0-9]{7}")), ui->edtIdentity);
 	ui->edtIdentity->setValidator(identityValidator);
 }
 
@@ -15,7 +15,7 @@ ContactAddDialog::~ContactAddDialog() {
 }
 
 QString ContactAddDialog::getIdentity() const {
-	return ui->edtIdentity->text();
+	return ui->edtIdentity->text().toUpper();
 }
 
 QString ContactAddDialog::getNickname() const {

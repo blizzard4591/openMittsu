@@ -30,7 +30,7 @@ LoadBackupWizard::~LoadBackupWizard() {
 
 void LoadBackupWizard::pageNextOnClick(int pageId) {
 	if (page(pageId) == loadBackupWizardPageSaveIdentity) {
-		QString const backupString = field("edtBackupString").toString();
+		QString const backupString = field("edtBackupString").toString().toUpper();
 		QString const passwordString = field("edtPassword").toString();
 
 		try {
@@ -40,7 +40,7 @@ void LoadBackupWizard::pageNextOnClick(int pageId) {
 			QMessageBox::warning(this, "Incorrect Password or Backup", "Either the password is incorrect or you mistyped the Backup string!");
 		}
 	} else if (page(pageId) == loadBackupWizardPageDone) {
-		QString const backupString = field("edtBackupString").toString();
+		QString const backupString = field("edtBackupString").toString().toUpper();
 		QString const passwordString = field("edtPassword").toString();
 		if (!ClientConfiguration::toFile(field("edtFilename").toString(), backupString, passwordString)) {
 			back();

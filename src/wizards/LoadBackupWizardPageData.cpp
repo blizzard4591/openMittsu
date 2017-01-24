@@ -9,7 +9,7 @@ LoadBackupWizardPageData::LoadBackupWizardPageData(QWidget *parent) : QWizardPag
     ui->setupUi(this);
 
 	// Suitable format
-	backupStringValidator = new QRegExpValidator(QRegExp("^[A-Z2-7]{4}(?:-[A-Z2-7]{4})*$", Qt::CaseSensitive, QRegExp::RegExp2), ui->edtBackupString);
+	backupStringValidator = new QRegExpValidator(QRegExp("^[a-zA-Z2-7]{4}(?:-[a-zA-Z2-7]{4})*$", Qt::CaseSensitive, QRegExp::RegExp2), ui->edtBackupString);
 	ui->edtBackupString->setValidator(backupStringValidator);
 
 	// At least one character
