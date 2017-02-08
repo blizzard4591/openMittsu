@@ -7,7 +7,8 @@
 #include <sodium.h>
 
 NonceGenerator::NonceGenerator() : prefix(PROTO_NONCE_PREFIX_LENGTH_BYTES, 0x00), counter(0)  {
-	// Intentionally left empty.
+	// Generate a random Prefix
+	randombytes_buf(prefix.data(), PROTO_NONCE_PREFIX_LENGTH_BYTES);
 }
 
 NonceGenerator::NonceGenerator(QByteArray const& noncePrefix) : prefix(noncePrefix), counter(0) {

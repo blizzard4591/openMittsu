@@ -1200,8 +1200,11 @@ void ProtocolClient::sendClientAcknowlegmentForMessage(MessageWithEncryptedPaylo
 }
 
 void ProtocolClient::encryptAndSendDataPacketToServer(QByteArray const& dataPacket) {
+	QByteArray const encryptedDataPacket = cryptoBox.encryptForServer(dataPacket);
+	LOGGER_DEBUG("Writing Message with {} Bytes to outbound queue.", encryptedDataPacket.size());
+
 	outgoingMessagesMutex.lock();
-	outgoingMessages.append(cryptoBox.encryptForServer(dataPacket));
+	outgoingMessages.append(encryptedDataPacket);
 	outgoingMessagesTimer->start(0);
 	outgoingMessagesMutex.unlock();
 }
@@ -1284,7 +1287,7 @@ void ProtocolClient::socketConnected() {
 		emit connectToFinished(-6, "Could not write the client nonce prefix to server.");
 		return;
 	}
-	LOGGER_DEBUG("Client Nonce Prefix: ", QString(clientNoncePrefix.toHex()).toStdString());
+	LOGGER_DEBUG("Client Nonce Prefix: {}", QString(clientNoncePrefix.toHex()).toStdString());
 
 	socket->flush();
 	LOGGER_DEBUG("Wrote Client Hello.");
