@@ -1986,11 +1986,17 @@ qint64 QExifImageHeader::write(QIODevice *device) const {
 
     quint32 const bytesWrittenImageIfd = writeExifValues( stream, d->imageIfdValues );
 	Q_ASSERT(bytesWrittenImageIfd == dataOffsetImageIfdValues);
+	// Fix "unused variable" warning when assertions are disables
+	(void)dataOffsetImageIfdValues;
+
 	bytesWritten += bytesWrittenImageIfd;
 
 	qint64 currentPos = device->pos();
+
 	Q_ASSERT(startPos + exifIfdOffset == currentPos);
 	Q_ASSERT(startPos + bytesWritten == currentPos);
+	// Fix "unused variable" warning when assertions are disables
+	(void)currentPos;
 
 	// Next: The Exif Sub-IFD
 	stream << quint16(d->exifIfdValues.count());
@@ -2007,7 +2013,13 @@ qint64 QExifImageHeader::write(QIODevice *device) const {
 
     quint32 const bytesWrittenExifIfd = writeExifValues(stream, d->exifIfdValues);
 	Q_ASSERT(bytesWrittenExifIfd == exifIfdValuesDataOffset);
+	// Fix "unused variable" warning when assertions are disables
+	(void)exifIfdValuesDataOffset;
+
 	Q_ASSERT(bytesWrittenExifIfd == dataOffsetExifIfdValues);
+	// Fix "unused variable" warning when assertions are disables
+	(void)dataOffsetExifIfdValues;
+
 	bytesWritten += bytesWrittenExifIfd;
 
 	currentPos = device->pos();
@@ -2022,6 +2034,9 @@ qint64 QExifImageHeader::write(QIODevice *device) const {
 
 		quint32 const bytesWrittenGpsIfd = writeExifValues(stream, d->gpsIfdValues);
 		Q_ASSERT(bytesWrittenGpsIfd == gpsIfdValuesDataOffset);
+		// Fix "unused variable" warning when assertions are disables
+		(void)bytesWrittenGpsIfd;
+		(void)gpsIfdValuesDataOffset;
     }
 
     Q_ASSERT(startPos + offset == device->pos());
