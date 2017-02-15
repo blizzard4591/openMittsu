@@ -728,28 +728,30 @@ void ProtocolClient::handleIncomingMessage(FullMessageHeader const& messageHeade
 
 void ProtocolClient::handleIncomingMessage(FullMessageHeader const& messageHeader, std::shared_ptr<ReceiptMessageContent const> receiptMessageContent) {
 	ReceiptMessageContent::ReceiptType receiptType = receiptMessageContent->getReceiptType();
-	MessageId const refMessageId = receiptMessageContent->getReferredMessageId();
+	std::vector<MessageId> const refMessageIds = receiptMessageContent->getReferredMessageIds();
 
-	switch (receiptType) {
-	case ReceiptMessageContent::ReceiptType::RECEIVED:
-		LOGGER_DEBUG("User {} has received message #{}.", messageHeader.getSender().toString(), refMessageId.toString());
-		QMetaObject::invokeMethod(messageCenter, "onReceivedIdentityContactMessageReceiptReceived", Qt::QueuedConnection, Q_ARG(FullMessageHeader, messageHeader), Q_ARG(MessageId, refMessageId));
-		break;
-	case ReceiptMessageContent::ReceiptType::SEEN:
-		LOGGER_DEBUG("User {} has seen message #{}.", messageHeader.getSender().toString(), refMessageId.toString());
-		QMetaObject::invokeMethod(messageCenter, "onReceivedIdentityContactMessageReceiptSeen", Qt::QueuedConnection, Q_ARG(FullMessageHeader, messageHeader), Q_ARG(MessageId, refMessageId));
-		break;
-	case ReceiptMessageContent::ReceiptType::AGREE:
-		LOGGER_DEBUG("User {} has agreed with message #{}.", messageHeader.getSender().toString(), refMessageId.toString());
-		QMetaObject::invokeMethod(messageCenter, "onReceivedIdentityContactMessageReceiptAgree", Qt::QueuedConnection, Q_ARG(FullMessageHeader, messageHeader), Q_ARG(MessageId, refMessageId));
-		break;
-	case ReceiptMessageContent::ReceiptType::DISAGREE:
-		LOGGER_DEBUG("User {} has disagreed with message #{}.", messageHeader.getSender().toString(), refMessageId.toString());
-		QMetaObject::invokeMethod(messageCenter, "onReceivedIdentityContactMessageReceiptDisagree", Qt::QueuedConnection, Q_ARG(FullMessageHeader, messageHeader), Q_ARG(MessageId, refMessageId));
-		break;
-	default:
-		throw InternalErrorException() << "Unknown ReceiptType in handleIncomingMessage(receiptMessageContent)!";
-		break;
+	for (MessageId refMessageId: refMessageIds) {
+		switch (receiptType) {
+		case ReceiptMessageContent::ReceiptType::RECEIVED:
+			LOGGER_DEBUG("User {} has received message #{}.", messageHeader.getSender().toString(), refMessageId.toString());
+			QMetaObject::invokeMethod(messageCenter, "onReceivedIdentityContactMessageReceiptReceived", Qt::QueuedConnection, Q_ARG(FullMessageHeader, messageHeader), Q_ARG(MessageId, refMessageId));
+			break;
+		case ReceiptMessageContent::ReceiptType::SEEN:
+			LOGGER_DEBUG("User {} has seen message #{}.", messageHeader.getSender().toString(), refMessageId.toString());
+			QMetaObject::invokeMethod(messageCenter, "onReceivedIdentityContactMessageReceiptSeen", Qt::QueuedConnection, Q_ARG(FullMessageHeader, messageHeader), Q_ARG(MessageId, refMessageId));
+			break;
+		case ReceiptMessageContent::ReceiptType::AGREE:
+			LOGGER_DEBUG("User {} has agreed with message #{}.", messageHeader.getSender().toString(), refMessageId.toString());
+			QMetaObject::invokeMethod(messageCenter, "onReceivedIdentityContactMessageReceiptAgree", Qt::QueuedConnection, Q_ARG(FullMessageHeader, messageHeader), Q_ARG(MessageId, refMessageId));
+			break;
+		case ReceiptMessageContent::ReceiptType::DISAGREE:
+			LOGGER_DEBUG("User {} has disagreed with message #{}.", messageHeader.getSender().toString(), refMessageId.toString());
+			QMetaObject::invokeMethod(messageCenter, "onReceivedIdentityContactMessageReceiptDisagree", Qt::QueuedConnection, Q_ARG(FullMessageHeader, messageHeader), Q_ARG(MessageId, refMessageId));
+			break;
+		default:
+			throw InternalErrorException() << "Unknown ReceiptType in handleIncomingMessage(receiptMessageContent)!";
+			break;
+		}
 	}
 }
 

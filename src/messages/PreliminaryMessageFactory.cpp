@@ -41,7 +41,7 @@ PreliminaryContactMessage PreliminaryMessageFactory::createPreliminaryContactUse
 }
 
 PreliminaryContactMessage PreliminaryMessageFactory::createPreliminaryContactMessageReceipt(ContactId const& receiverId, MessageId const& messageId, MessageId const& relatedMessage, ReceiptMessageContent::ReceiptType const& receiptType) {
-	return PreliminaryContactMessage(new PreliminaryContactMessageHeader(receiverId, messageId, MessageFlagsFactory::createReceiptMessageFlags()), new ReceiptMessageContent(relatedMessage, receiptType));
+	return PreliminaryContactMessage(new PreliminaryContactMessageHeader(receiverId, messageId, MessageFlagsFactory::createReceiptMessageFlags()), new ReceiptMessageContent({ relatedMessage }, receiptType));
 }
 
 PreliminaryGroupMessage PreliminaryMessageFactory::createPreliminaryGroupTextMessage(GroupId const& groupId, MessageId const& messageId, QString const& text) {

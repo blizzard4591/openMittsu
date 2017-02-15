@@ -1,6 +1,7 @@
 #include "messages/contact/ReceiptMessageContent.h"
 
 #include "exceptions/InternalErrorException.h"
+#include "exceptions/IllegalArgumentException.h"
 #include "exceptions/ProtocolErrorException.h"
 #include "messages/MessageContentRegistry.h"
 #include "protocol/ProtocolSpecs.h"
@@ -10,11 +11,11 @@
 bool ReceiptMessageContent::registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_RECEIPT, new TypedMessageContentFactory<ReceiptMessageContent>());
 
 
-ReceiptMessageContent::ReceiptMessageContent() : ContactMessageContent(), messageId(0), receiptType(ReceiptType::RECEIVED) {
+ReceiptMessageContent::ReceiptMessageContent() : ContactMessageContent(), messageIds(), receiptType(ReceiptType::RECEIVED) {
 	// Only accessible and used by the MessageContentFactory.
 }
 
-ReceiptMessageContent::ReceiptMessageContent(MessageId const& relatedMessage, ReceiptType const& receiptType) : ContactMessageContent(), messageId(relatedMessage), receiptType(receiptType) {
+ReceiptMessageContent::ReceiptMessageContent(std::vector<MessageId> const& relatedMessages, ReceiptType const& receiptType) : ContactMessageContent(), messageIds(relatedMessages), receiptType(receiptType) {
 	// Intentionally left empty.
 }
 
@@ -23,24 +24,38 @@ ReceiptMessageContent::~ReceiptMessageContent() {
 }
 
 ContactMessageContent* ReceiptMessageContent::clone() const {
-	return new ReceiptMessageContent(messageId, receiptType);
+	return new ReceiptMessageContent(messageIds, receiptType);
 }
 
 ReceiptMessageContent::ReceiptType const& ReceiptMessageContent::getReceiptType() const {
 	return receiptType;
 }
 
-MessageId const& ReceiptMessageContent::getReferredMessageId() const {
-	return messageId;
+std::vector<MessageId> const& ReceiptMessageContent::getReferredMessageIds() const {
+	return messageIds;
 }
 
 MessageContent* ReceiptMessageContent::fromPacketPayload(FullMessageHeader const& messageHeader, QByteArray const& payload) const {
-	verifyPayloadMinSizeAndSignatureByte(PROTO_MESSAGE_SIGNATURE_RECEIPT, 2 + (PROTO_MESSAGE_MESSAGEID_LENGTH_BYTES), payload, true);
+	verifyPayloadMinSizeAndSignatureByte(PROTO_MESSAGE_SIGNATURE_RECEIPT, 2 + (PROTO_MESSAGE_MESSAGEID_LENGTH_BYTES), payload, false);
+
+	int remainingBytes = payload.size() - 2;
+	if ((remainingBytes % (PROTO_MESSAGE_MESSAGEID_LENGTH_BYTES)) != 0) {
+		throw IllegalArgumentException() << "Can not create MessageContent from payload with size " << payload.size() << " Bytes, which is not divisable by " << (PROTO_MESSAGE_MESSAGEID_LENGTH_BYTES);
+	}
 
 	ReceiptType type = charToReceiptType(payload.at(1));
-	MessageId id(payload.mid(2, PROTO_MESSAGE_MESSAGEID_LENGTH_BYTES));
+	std::vector<MessageId> ids;
 
-	return new ReceiptMessageContent(id, type);
+	int idCount = remainingBytes / (PROTO_MESSAGE_MESSAGEID_LENGTH_BYTES);
+	int position = 2;
+	for (int i = 0; i < idCount; ++i) {
+		MessageId id(payload.mid(position, PROTO_MESSAGE_MESSAGEID_LENGTH_BYTES));
+		ids.push_back(id);
+
+		position += (PROTO_MESSAGE_MESSAGEID_LENGTH_BYTES);
+	}
+
+	return new ReceiptMessageContent(ids, type);
 }
 
 QByteArray ReceiptMessageContent::toPacketPayload() const {
@@ -49,7 +64,9 @@ QByteArray ReceiptMessageContent::toPacketPayload() const {
 	result[0] = PROTO_MESSAGE_SIGNATURE_RECEIPT;
 	result[1] = receiptTypeToChar(receiptType);
 
-	result.append(messageId.getMessageIdAsByteArray());
+	for (MessageId id: messageIds) {
+		result.append(id.getMessageIdAsByteArray());
+	}
 
 	return result;
 }

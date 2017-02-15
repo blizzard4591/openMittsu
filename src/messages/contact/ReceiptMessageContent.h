@@ -7,6 +7,8 @@
 
 #include <QByteArray>
 
+#include <vector>
+
 class ReceiptMessageContent : public ContactMessageContent {
 public:
 	enum class ReceiptType {
@@ -16,11 +18,11 @@ public:
 		DISAGREE
 	};
 
-	ReceiptMessageContent(MessageId const& relatedMessage, ReceiptType const& receiptType);
+	ReceiptMessageContent(std::vector<MessageId> const& relatedMessages, ReceiptType const& receiptType);
 	virtual ~ReceiptMessageContent();
 
 	virtual ReceiptType const& getReceiptType() const;
-	virtual MessageId const& getReferredMessageId() const;
+	virtual std::vector<MessageId> const& getReferredMessageIds() const;
 
 	virtual ContactMessageContent* clone() const override;
 
@@ -30,7 +32,7 @@ public:
 
 	friend class TypedMessageContentFactory<ReceiptMessageContent>;
 private:
-	MessageId const messageId;
+	std::vector<MessageId> const messageIds;
 	ReceiptType const receiptType;
 
 	char receiptTypeToChar(ReceiptType const& receiptType) const;
