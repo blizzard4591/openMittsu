@@ -1947,6 +1947,8 @@ qint64 QExifImageHeader::write(QIODevice *device) const {
 	quint32 dataOffsetImageIfdValues = (offset - oldOffset) - (d->imageIfdValues.count() * 12);
 	bytesWritten += (d->imageIfdValues.count() * 12);
 	Q_ASSERT(startPos + bytesWritten == device->pos());
+	// Fix "unused variable" warning when assertions are disables
+	(void)startPos;
 
     quint32 exifIfdOffset = offset;
 
