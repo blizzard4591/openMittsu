@@ -33,6 +33,7 @@ private slots:
 	void listContactsOnContextMenu(QPoint const& pos);
 	void chatTabWidgetOnCurrentTabChanged(int index);
 
+	void menuFileOptionsOnClick();
 	void menuFileExitOnClick();
 	void menuAboutLicenseOnClick();
 	void menuAboutAboutOnClick();

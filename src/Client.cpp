@@ -21,6 +21,7 @@
 #include "dialogs/ContactAddDialog.h"
 #include "dialogs/ContactEditDialog.h"
 #include "dialogs/FingerprintDialog.h"
+#include "dialogs/OptionsDialog.h"
 #include "dialogs/UpdaterDialog.h"
 
 #include "widgets/SimpleContactChatTab.h"
@@ -58,6 +59,7 @@ Client::Client(QWidget *parent) : QMainWindow(parent), protocolClient(nullptr), 
 	QCoreApplication::setApplicationName("OpenMittsu");
 
 	this->settings = new QSettings(this);
+
 	// Initialize in the right thread
 	MessageCenter* mc = MessageCenter::getInstance();
 	mc->setTabContainer(ui.tabWidget);
@@ -114,6 +116,7 @@ Client::Client(QWidget *parent) : QMainWindow(parent), protocolClient(nullptr), 
 	OPENMITTSU_CONNECT(ui.actionShow_Fingerprint, triggered(), this, menuIdentityShowFingerprintOnClick());
 	OPENMITTSU_CONNECT(ui.actionShow_Public_Key, triggered(), this, menuIdentityShowPublicKeyOnClick());
 	OPENMITTSU_CONNECT(ui.actionStatistics, triggered(), this, menuAboutStatisticsOnClick());
+	OPENMITTSU_CONNECT(ui.actionOptions, triggered(), this, menuFileOptionsOnClick());
 	OPENMITTSU_CONNECT(ui.actionExit, triggered(), this, menuFileExitOnClick());
 
 	protocolClientThread.start();
@@ -581,6 +584,11 @@ void Client::chatTabWidgetOnCurrentTabChanged(int index) {
 /*
 	MENU ENTRIES & HANDLING
 */
+
+void Client::menuFileOptionsOnClick() {
+	OptionsDialog optionsDialog(this);
+	int result = optionsDialog.exec();
+}
 
 void Client::menuFileExitOnClick() {
 	this->close();
