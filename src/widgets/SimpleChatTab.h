@@ -45,6 +45,7 @@ public slots:
 
 	void ctxMenuImageFromFileOnClick();
 	void ctxMenuImageFromUrlOnClick();
+	void ctxMenuImageFromClipboardOnClick();
 
 	void edtInputOnReturnPressed();
 	void edtInputOnTextEdited();
@@ -81,6 +82,7 @@ private:
 	QTimer typingTimer;
 
 	void handleFocus(bool hasNewMessage = false);
+	void prepareAndSendImage(QImage image);
 	void prepareAndSendImage(QByteArray const& imageData);
 	QStringList splitMessageForSending(QString const& message);
 };

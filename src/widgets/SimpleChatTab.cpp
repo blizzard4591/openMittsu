@@ -368,9 +368,11 @@ void SimpleChatTab::btnInputSendOnClick() {
 void SimpleChatTab::btnSendImageOnClick() {
 	QMenu menu;
 
+	QAction* actionClipboard = new QAction(tr("Load Image from Clipboard"), &menu);
 	QAction* actionFile = new QAction(tr("Load Image from File"), &menu);
 	QAction* actionUrl = new QAction(tr("Load Image from URL"), &menu);
 
+	menu.addAction(actionClipboard);
 	menu.addAction(actionFile);
 	menu.addAction(actionUrl);
 
@@ -389,6 +391,8 @@ void SimpleChatTab::btnSendImageOnClick() {
 			ctxMenuImageFromFileOnClick();
 		} else if (selectedItem == actionUrl) {
 			ctxMenuImageFromUrlOnClick();
+		} else if (selectedItem == actionClipboard) {
+			ctxMenuImageFromClipboardOnClick();
 		}
 	}
 }
@@ -416,55 +420,66 @@ void SimpleChatTab::ctxMenuImageFromUrlOnClick() {
 	}
 }
 
+void SimpleChatTab::ctxMenuImageFromClipboardOnClick() {
+	QClipboard *clipboard = QApplication::clipboard();
+
+	QImage clipboardImage = clipboard->image();
+	if (!clipboardImage.isNull()) {
+		prepareAndSendImage(clipboardImage);
+	}
+}
+
+void SimpleChatTab::prepareAndSendImage(QImage image) {
+	int width = image.width();
+	int height = image.height();
+	int maxSize = std::max(width, height);
+	if (maxSize > 1500) {
+		double factor = 1500.0 / maxSize;
+		image = image.scaled(width * factor, height * factor, Qt::AspectRatioMode::KeepAspectRatio, Qt::SmoothTransformation);
+	}
+
+	QByteArray imageBytes;
+	QBuffer buffer(&imageBytes);
+	buffer.open(QIODevice::ReadWrite);
+	image.save(&buffer, "JPG", 75);
+
+	// Insert Text if available
+	QString const text = ui->edtInput->toPlainText();
+	if (!text.isEmpty()) {
+		QExifImageHeader header;
+		header.setValue(QExifImageHeader::UserComment, QExifValue(text));
+		buffer.seek(0);
+		header.saveToJpeg(&buffer);
+	}
+
+	buffer.close();
+
+	MessageId const messageId = getUniqueMessageId();
+	if (!sendImage(messageId, imageBytes)) {
+		QMessageBox::warning(this, tr("Not connected"), tr("Could not send your message as you are currently not connected to a server."));
+		return;
+	}
+
+	if (!text.isEmpty()) {
+		ui->edtInput->setPlainText("");
+	}
+
+	if (writeMessagesToLog) {
+		MessageTime mt = MessageTime::now();
+		writeMessageToLog(QString(tr("Send an IMAGE message with ID #%2 sent on %3: %4")).arg(messageId.toQString()).arg(mt.toQString()).arg(QString(imageBytes.toBase64())));
+	}
+
+	ImageChatWidgetItem* clwi = new ImageChatWidgetItem(ContactRegistry::getInstance()->getSelfContact(), ContactIdWithMessageId(ContactRegistry::getInstance()->getSelfContact()->getContactId(), messageId), QPixmap::fromImage(image), text);
+	ui->chatWidget->addItem(clwi);
+	messageIdToItemIndex.insert(messageId, clwi);
+}
+
 void SimpleChatTab::prepareAndSendImage(QByteArray const& imageData) {
 	QImage image;
 	if (image.loadFromData(imageData)) {
-		int width = image.width();
-		int height = image.height();
-		int maxSize = (width >= height) ? width : height;
-		if (maxSize > 1500) {
-			double factor = 1500.0 / maxSize;
-			image = image.scaled(width * factor, height * factor, Qt::AspectRatioMode::KeepAspectRatio, Qt::SmoothTransformation);
-		}
-
-		QByteArray imageBytes;
-		QBuffer buffer(&imageBytes);
-		buffer.open(QIODevice::ReadWrite);
-		image.save(&buffer, "JPG", 75);
-
-		// Insert Text if available
-		QString const text = ui->edtInput->toPlainText();
-		if (!text.isEmpty()) {
-			QExifImageHeader header;
-			header.setValue(QExifImageHeader::UserComment, QExifValue(text));
-			buffer.seek(0);
-			header.saveToJpeg(&buffer);
-		}
-
-		buffer.close();
-
-		MessageId const messageId = getUniqueMessageId();
-		if (!sendImage(messageId, imageBytes)) {
-			QMessageBox::warning(this, tr("Not connected"), tr("Could not send your message as you are currently not connected to a server."));
-			return;
-		}
-
-		if (!text.isEmpty()) {
-			ui->edtInput->setPlainText("");
-		}
-
-		if (writeMessagesToLog) {
-			MessageTime mt = MessageTime::now();
-			writeMessageToLog(QString(tr("Send an IMAGE message with ID #%2 sent on %3: %4")).arg(messageId.toQString()).arg(mt.toQString()).arg(QString(imageBytes.toBase64())));
-		}
-
-		ImageChatWidgetItem* clwi = new ImageChatWidgetItem(ContactRegistry::getInstance()->getSelfContact(), ContactIdWithMessageId(ContactRegistry::getInstance()->getSelfContact()->getContactId(), messageId), QPixmap::fromImage(image), text);
-		ui->chatWidget->addItem(clwi);
-		messageIdToItemIndex.insert(messageId, clwi);
-
+		prepareAndSendImage(image);
 	} else {
 		QMessageBox::warning(this, tr("Error loading image"), tr("Could not load selected image.\nUnsupported format or I/O error."), QMessageBox::Ok, QMessageBox::NoButton);
-		return;
 	}
 }
 
