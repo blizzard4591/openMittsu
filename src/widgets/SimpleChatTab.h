@@ -5,6 +5,7 @@
 #include <QTimer>
 #include <QVector>
 #include <QPoint>
+#include <QStringList>
 #include <cstdint>
 #include "ChatTab.h"
 #include "ContactRegistry.h"
@@ -81,6 +82,7 @@ private:
 
 	void handleFocus(bool hasNewMessage = false);
 	void prepareAndSendImage(QByteArray const& imageData);
+	QStringList splitMessageForSending(QString const& message);
 };
 
 #endif // OPENMITTSU_WIDGETS_SIMPLECHATTAB_H_
