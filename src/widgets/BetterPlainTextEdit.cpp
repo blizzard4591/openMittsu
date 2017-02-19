@@ -13,6 +13,7 @@ void BetterPlainTextEdit::keyPressEvent(QKeyEvent* e) {
 		QPlainTextEdit::keyPressEvent(e);
 		return;
 	}
+
 	if ((!(e->modifiers() & Qt::KeyboardModifier::ShiftModifier)) && (e->key() == Qt::Key::Key_Return)) {
 		e->accept();
 		emit returnPressed();

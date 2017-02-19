@@ -40,7 +40,6 @@ QSize PixmapLabel::sizeHint() const {
 		return size;
 	} else if (mode == Mode::HeightForWidth) {
 		int const w = this->width();
-		int const h = this->height();
 		int const hfW = ((qreal)_pixmap.height()*w) / _pixmap.width();
 
 		return QSize(w, hfW);
