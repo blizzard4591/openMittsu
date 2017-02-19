@@ -118,9 +118,9 @@ No. The Threema GmbH is currently not interested in working on openMittsu.
 ### Can I use openMittsu for automated messages?
 No, if you want to send or receive Threema messages automatically, please use the official [Threema Gateway API](https://gateway.threema.ch/).
 
-### Does openMittsu replace an official web client that Threema may be working on?
-No. While a web client will connect to Threema through your phone, openMittsu is a standalone client which does not rely on your phone for connecting to the Threema servers.
-If you are interested in how a Threema web client could work, read lgrahl's thesis about [SaltyRTC](http://lgrahl.de/pub/ba-thesis-saltyrtc-by-lennart-grahl-revised-v1.pdf).
+### What's the difference between openMittsu and [Threema Web](https://github.com/threema-ch/threema-web)?
+While [Threema Web](https://github.com/threema-ch/threema-web) relies on a working connection to your Android smartphone running Threema, openMittsu acts as a standalone client. You can use openMittsu without a phone.
+Also, openMittsu is a native application, not a JavaScript / browser based web application.
   
   
 ## Acknowledgement
