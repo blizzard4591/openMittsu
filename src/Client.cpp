@@ -57,7 +57,7 @@ Client::Client(QWidget *parent) : QMainWindow(parent), protocolClient(nullptr), 
 	QCoreApplication::setOrganizationDomain("philippberger.de");
 	QCoreApplication::setApplicationName("OpenMittsu");
 
-	this->settings = new QSettings(this);
+	settings = std::make_unique<QSettings>(this);
 	// Initialize in the right thread
 	MessageCenter* mc = MessageCenter::getInstance();
 	mc->setTabContainer(ui.tabWidget);
@@ -67,12 +67,12 @@ Client::Client(QWidget *parent) : QMainWindow(parent), protocolClient(nullptr), 
 	QString const apiServerRootCertificate = QStringLiteral("LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUVZVENDQTBtZ0F3SUJBZ0lKQU0xRFIvREJSRnBRTUEwR0NTcUdTSWIzRFFFQkJRVUFNSDB4Q3pBSkJnTlYKQkFZVEFrTklNUXN3Q1FZRFZRUUlFd0phU0RFUE1BMEdBMVVFQnhNR1duVnlhV05vTVJBd0RnWURWUVFLRXdkVQphSEpsWlcxaE1Rc3dDUVlEVlFRTEV3SkRRVEVUTUJFR0ExVUVBeE1LVkdoeVpXVnRZU0JEUVRFY01Cb0dDU3FHClNJYjNEUUVKQVJZTlkyRkFkR2h5WldWdFlTNWphREFlRncweE1qRXhNVE14TVRVNE5UaGFGdzB6TWpFeE1EZ3gKTVRVNE5UaGFNSDB4Q3pBSkJnTlZCQVlUQWtOSU1Rc3dDUVlEVlFRSUV3SmFTREVQTUEwR0ExVUVCeE1HV25WeQphV05vTVJBd0RnWURWUVFLRXdkVWFISmxaVzFoTVFzd0NRWURWUVFMRXdKRFFURVRNQkVHQTFVRUF4TUtWR2h5ClpXVnRZU0JEUVRFY01Cb0dDU3FHU0liM0RRRUpBUllOWTJGQWRHaHlaV1Z0WVM1amFEQ0NBU0l3RFFZSktvWkkKaHZjTkFRRUJCUUFEZ2dFUEFEQ0NBUW9DZ2dFQkFLOEdkb1Q3SXBOQzNEejdJVUdZVzlwT0J3eCs5RW5EWnJrTgpWRDhsM0tmQkhqR1RkaTlnUTZOaCttUTkveVE4MjU0VDJiaWc5cDBoY244a2pnRVFnSldIcE5oWW5PaHkzaTBqCmNtbHpiMU1GL2RlRmpKVnR1TVAzdHFUd2lNYXZwd2VvYTIwbEdEbi9DTFpvZHUwUmE4b0w3OGI2RlZ6dE5rV2cKUGRpV0NsTWswSlBQTWxmTEVpSzhoZkhFKzZtUlZYbWkxMml0SzFzZW1td3lIS2RqOWZHNFg5K3JRMnNLdUxmZQpqeDd1RnhuQUYrR2l2Q3VDbzh4Zk9lc0x3NzJ2eCtXN21tZFlzaGcvbFhPY3F2c3pRUS9MbUZFVlFZeE5hZWVWCm5QU0FzK2h0OHZVUFc0c1g5SWtYS1ZnQkpkMVIxaXNVcG9GNmRLbFVleG12THhFeWY1Y0NBd0VBQWFPQjR6Q0IKNERBZEJnTlZIUTRFRmdRVXc2TGFDNytKNjJyS2RhVEEzN2tBWVlVYnJrZ3dnYkFHQTFVZEl3U0JxRENCcFlBVQp3NkxhQzcrSjYycktkYVRBMzdrQVlZVWJya2loZ1lHa2Z6QjlNUXN3Q1FZRFZRUUdFd0pEU0RFTE1Ba0dBMVVFCkNCTUNXa2d4RHpBTkJnTlZCQWNUQmxwMWNtbGphREVRTUE0R0ExVUVDaE1IVkdoeVpXVnRZVEVMTUFrR0ExVUUKQ3hNQ1EwRXhFekFSQmdOVkJBTVRDbFJvY21WbGJXRWdRMEV4SERBYUJna3Foa2lHOXcwQkNRRVdEV05oUUhSbwpjbVZsYldFdVkyaUNDUUROUTBmd3dVUmFVREFNQmdOVkhSTUVCVEFEQVFIL01BMEdDU3FHU0liM0RRRUJCUVVBCkE0SUJBUUFSSE15SUhCREZ1bCtodmpBQ3Q2cjBFQUhZd1I5R1FTZ2hJUXNmSHQ4Y3lWY3ptRW5KSDlocnZoOVEKVml2bTdtcmZ2ZWlobU5YQW40V2xHd1ErQUN1VnRUTHh3OEVyYlNUN0lNQU94OW5wSGYva25nblo0blN3VVJGOQpyQ0V5SHExNzlwTlhwT3paMjU3RTVyMGF2TU5OWFhEd3VsdzAzaUJFMjFlYmQwMHBHMTFHVnEvSTI2cys4QmpuCkRLUlBxdUtyU080L2x1RUR2TDRuZ2lRalpwMzJTOVoxSzlzVk96cXRRN0k5enplVUFEbTNhVmEvQnBhdzRpTVIKMVNJN285YUpZaVJpMWd4WVAyQlVBMUlGcXI4Tnp5ZkdEN3RSSGRxN2JaT3hYQWx1djgxZGNiejBTQlg4U2dWMQo0SEVLYzZ4TUFObllzL2FZS2p2bVAwVnBPdlJVCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0=");
 	PublicKey const longTermServerPublicKey = PublicKey::fromHexString(QStringLiteral("b851ae1bf275ebe6851ca7f5206b495080927159787e9aaabbeb4e55af09d805"));
 
-	serverConfiguration = new ServerConfiguration(QStringLiteral("g-xx.0.threema.ch"), 5222, longTermServerPublicKey, QStringLiteral("https://api.threema.ch/identity/%1"), QStringLiteral("Threema/2.2A"), apiServerRootCertificate, QStringLiteral("https://%1.blob.threema.ch/%2"), QStringLiteral("https://%1.blob.threema.ch/%2/done"), QStringLiteral("https://upload.blob.threema.ch/upload"), QStringLiteral("Threema/2.2A"), apiServerRootCertificate);
+	serverConfiguration = std::make_unique<ServerConfiguration>(QStringLiteral("g-xx.0.threema.ch"), 5222, longTermServerPublicKey, QStringLiteral("https://api.threema.ch/identity/%1"), QStringLiteral("Threema/2.2A"), apiServerRootCertificate, QStringLiteral("https://%1.blob.threema.ch/%2"), QStringLiteral("https://%1.blob.threema.ch/%2/done"), QStringLiteral("https://upload.blob.threema.ch/upload"), QStringLiteral("Threema/2.2A"), apiServerRootCertificate);
 
 	// Load stored settings
 	if (settings->contains("clientConfigurationFile")) {
 		if (validateClientConfigurationFile(settings->value("clientConfigurationFile").toString(), true)) {
-			this->clientConfiguration = new ClientConfiguration(ClientConfiguration::fromFile(settings->value("clientConfigurationFile").toString()));
+			clientConfiguration = std::make_unique<ClientConfiguration>(ClientConfiguration::fromFile(settings->value("clientConfigurationFile").toString()));
 			updateClientSettingsInfo(settings->value("clientConfigurationFile").toString());
 		} else {
 			LOGGER_DEBUG("Removing key \"clientConfigurationFile\" from stored settings as the file is not valid.");
@@ -90,7 +90,7 @@ Client::Client(QWidget *parent) : QMainWindow(parent), protocolClient(nullptr), 
 		}
 	}
 
-	OPENMITTSU_CONNECT(contactRegistry, identitiesChanged(), this, contactRegistryOnIdentitiesChanged());
+	OPENMITTSU_CONNECT(contactRegistry.get(), identitiesChanged(), this, contactRegistryOnIdentitiesChanged());
 	OPENMITTSU_CONNECT(ui.btnConnect, clicked(), this, btnConnectOnClick());
 	OPENMITTSU_CONNECT(ui.btnOpenClientIni, clicked(), this, btnOpenClientIniOnClick());
 	OPENMITTSU_CONNECT(ui.btnOpenContacts, clicked(), this, btnOpenContactsOnClick());
@@ -128,9 +128,9 @@ Client::Client(QWidget *parent) : QMainWindow(parent), protocolClient(nullptr), 
 	format.setCodec("audio/pcm");
 	format.setByteOrder(QAudioFormat::LittleEndian);
 	format.setSampleType(QAudioFormat::UnSignedInt);
-	audioOutput = new QAudioOutput(format, this);
+	audioOutput = std::make_unique<QAudioOutput>(format, this);
 
-	OPENMITTSU_CONNECT(audioOutput, stateChanged(QAudio::State), this, audioOutputOnStateChanged(QAudio::State));
+	OPENMITTSU_CONNECT(audioOutput.get(), stateChanged(QAudio::State), this, audioOutputOnStateChanged(QAudio::State));
 
 	receivedMessageAudioFile.setFileName(":/audio/ReceivedMessage.wav");
 	if (!receivedMessageAudioFile.open(QFile::ReadOnly)) {
@@ -144,12 +144,26 @@ Client::Client(QWidget *parent) : QMainWindow(parent), protocolClient(nullptr), 
 #endif
 
 	// Call the setup() function in the thread
-	QTimer::singleShot(0, protocolClient, SLOT(setup()));
+	QTimer::singleShot(0, protocolClient.get(), SLOT(setup()));
 	contactRegistryOnIdentitiesChanged();
 
 	// Restore Window location and size
 	restoreGeometry(settings->value("clientMainWindowGeometry").toByteArray());
 	restoreState(settings->value("clientMainWindowState").toByteArray());
+}
+
+Client::~Client() {
+	if (receivedMessageAudioFile.isOpen()) {
+		receivedMessageAudioFile.close();
+	}
+
+	if (protocolClient != nullptr) {
+		QMetaObject::invokeMethod(protocolClient.get(), "teardown", Qt::QueuedConnection);
+		protocolClient->deleteLater();
+		protocolClient.release();
+		protocolClient = nullptr;
+	}
+	protocolClientThread.quit();
 }
 
 void Client::closeEvent(QCloseEvent* event) {
@@ -166,43 +180,43 @@ void Client::setupProtocolClient() {
 		if (protocolClient->getIsConnected()) {
 			protocolClient->disconnectFromServer();
 		}
-		QMetaObject::invokeMethod(protocolClient, "teardown", Qt::QueuedConnection);
+		QMetaObject::invokeMethod(protocolClient.get(), "teardown", Qt::QueuedConnection);
 		protocolClient->deleteLater();
-		protocolClient = nullptr;
+		protocolClient.release();
 	}
 
 	QString const nickname = contactRegistry->getNickname(clientConfiguration->getClientIdentity());
 	if (nickname.compare(QStringLiteral("You"), Qt::CaseInsensitive) == 0) {
 		LOGGER()->info("Using only ID as PushFromID token (for iOS Push Receivers).");
-		protocolClient = new ProtocolClient(KeyRegistry(clientConfiguration->getClientLongTermKeyPair(), serverConfiguration->getServerLongTermPublicKey(), contactRegistry->getKnownIdentitiesWithPublicKeys()), GroupRegistry(contactRegistry->getKnownGroupsWithMembersAndTitles()), MessageCenter::getInstance()->getUniqueMessgeIdGenerator(), *serverConfiguration, *clientConfiguration, MessageCenter::getInstance(), PushFromId(clientConfiguration->getClientIdentity()));
+		protocolClient = std::make_unique<ProtocolClient>(KeyRegistry(clientConfiguration->getClientLongTermKeyPair(), serverConfiguration->getServerLongTermPublicKey(), contactRegistry->getKnownIdentitiesWithPublicKeys()), GroupRegistry(contactRegistry->getKnownGroupsWithMembersAndTitles()), MessageCenter::getInstance()->getUniqueMessgeIdGenerator(), *serverConfiguration, *clientConfiguration, MessageCenter::getInstance(), PushFromId(clientConfiguration->getClientIdentity()));
 	} else {
-		protocolClient = new ProtocolClient(KeyRegistry(clientConfiguration->getClientLongTermKeyPair(), serverConfiguration->getServerLongTermPublicKey(), contactRegistry->getKnownIdentitiesWithPublicKeys()), GroupRegistry(contactRegistry->getKnownGroupsWithMembersAndTitles()), MessageCenter::getInstance()->getUniqueMessgeIdGenerator(), *serverConfiguration, *clientConfiguration, MessageCenter::getInstance(), PushFromId(nickname));
+		protocolClient = std::make_unique<ProtocolClient>(KeyRegistry(clientConfiguration->getClientLongTermKeyPair(), serverConfiguration->getServerLongTermPublicKey(), contactRegistry->getKnownIdentitiesWithPublicKeys()), GroupRegistry(contactRegistry->getKnownGroupsWithMembersAndTitles()), MessageCenter::getInstance()->getUniqueMessgeIdGenerator(), *serverConfiguration, *clientConfiguration, MessageCenter::getInstance(), PushFromId(nickname));
 		LOGGER()->info("Using nickname \"{}\" as PushFromID token (for iOS Push Receivers).", nickname.toStdString());
 	}
 
 	protocolClient->moveToThread(&protocolClientThread);
 
-	OPENMITTSU_CONNECT(protocolClient, connectToFinished(int, QString), this, protocolClientOnConnectToFinished(int, QString));
-	OPENMITTSU_CONNECT(protocolClient, readyConnect(), this, protocolClientOnReadyConnect());
-	OPENMITTSU_CONNECT(protocolClient, lostConnection(), this, protocolClientOnLostConnection());
-	OPENMITTSU_CONNECT(protocolClient, duplicateIdUsageDetected(), this, protocolClientOnDuplicateIdUsageDetected());
+	OPENMITTSU_CONNECT(protocolClient.get(), connectToFinished(int, QString), this, protocolClientOnConnectToFinished(int, QString));
+	OPENMITTSU_CONNECT(protocolClient.get(), readyConnect(), this, protocolClientOnReadyConnect());
+	OPENMITTSU_CONNECT(protocolClient.get(), lostConnection(), this, protocolClientOnLostConnection());
+	OPENMITTSU_CONNECT(protocolClient.get(), duplicateIdUsageDetected(), this, protocolClientOnDuplicateIdUsageDetected());
 
 	QEventLoop eventLoop;
 
-	OPENMITTSU_CONNECT(protocolClient, setupDone(), &eventLoop, quit());
+	OPENMITTSU_CONNECT(protocolClient.get(), setupDone(), &eventLoop, quit());
 
-	QMetaObject::invokeMethod(protocolClient, "setup", Qt::QueuedConnection);
+	QMetaObject::invokeMethod(protocolClient.get(), "setup", Qt::QueuedConnection);
 	eventLoop.exec(); // blocks until "finished()" has been called
 
-	MessageCenter::getInstance()->setProtocolClient(protocolClient);
+	MessageCenter::getInstance()->setProtocolClient(protocolClient.get());
 }
 
 void Client::threadFinished() {
 	LOGGER_DEBUG("Client::threadFinished - the worker thread finished.");
 	if (protocolClient != nullptr) {
-		QMetaObject::invokeMethod(protocolClient, "teardown", Qt::QueuedConnection);
+		QMetaObject::invokeMethod(protocolClient.get(), "teardown", Qt::QueuedConnection);
 		protocolClient->deleteLater();
-		protocolClient = nullptr;
+		protocolClient.release();
 	}
 	LOGGER()->critical("Since the worker thread just terminated, everything will close now.");
 	this->close();
@@ -262,14 +276,14 @@ void Client::btnConnectOnClick() {
 
 		ui.btnConnect->setEnabled(false);
 		ui.btnConnect->setText("Connecting...");
-		QTimer::singleShot(0, protocolClient, SLOT(connectToServer()));
+		QTimer::singleShot(0, protocolClient.get(), SLOT(connectToServer()));
 	} else if (connectionState == ConnectionState::STATE_CONNECTING) {
 		// No click should be possible in this state
 		ui.btnConnect->setEnabled(false);
 	} else if (connectionState == ConnectionState::STATE_CONNECTED) {
 		ui.btnConnect->setEnabled(false);
 		ui.btnConnect->setText("Disconnecting...");
-		QTimer::singleShot(0, protocolClient, SLOT(disconnectFromServer()));
+		QTimer::singleShot(0, protocolClient.get(), SLOT(disconnectFromServer()));
 	}
 }
 
@@ -313,12 +327,7 @@ void Client::btnOpenClientIniOnClick() {
 		return;
 	}
 
-	if (clientConfiguration != nullptr) {
-		delete clientConfiguration;
-		clientConfiguration = nullptr;
-	}
-
-	clientConfiguration = new ClientConfiguration(ClientConfiguration::fromFile(fileName));
+	clientConfiguration = std::make_unique<ClientConfiguration>(ClientConfiguration::fromFile(fileName));
 	settings->setValue("clientConfigurationFile", fileName);
 	updateClientSettingsInfo(fileName);
 }
@@ -559,9 +568,9 @@ void Client::listContactsOnContextMenu(QPoint const& pos) {
 
 				GroupContact* gc = dynamic_cast<GroupContact*>(clwi->getContact());
 				if (isGroupSelfOwned) {
-					QMetaObject::invokeMethod(protocolClient, "resendGroupSetup", Qt::QueuedConnection, Q_ARG(GroupId const&, gc->getGroupId()));
+					QMetaObject::invokeMethod(protocolClient.get(), "resendGroupSetup", Qt::QueuedConnection, Q_ARG(GroupId const&, gc->getGroupId()));
 				} else {
-					QMetaObject::invokeMethod(protocolClient, "requestGroupSync", Qt::QueuedConnection, Q_ARG(GroupId const&, gc->getGroupId()));
+					QMetaObject::invokeMethod(protocolClient.get(), "requestGroupSync", Qt::QueuedConnection, Q_ARG(GroupId const&, gc->getGroupId()));
 				}
 			}
 		}
@@ -605,7 +614,7 @@ void Client::menuGroupAddOnClick() {
 	} else if (protocolClient == nullptr || !protocolClient->getIsConnected()) {
 		QMessageBox::warning(this, "Not connected to a server", "Before you can use this feature you need to connect to a server.");
 	} else {
-		GroupCreationWizard groupCreationWizard(clientConfiguration, protocolClient, this);
+		GroupCreationWizard groupCreationWizard(clientConfiguration.get(), protocolClient.get(), this);
 		groupCreationWizard.exec();
 	}
 }
@@ -642,7 +651,7 @@ void Client::menuContactAddOnClick() {
 		} else {
 			try {
 				ContactId const contactId(identityString.toUtf8());
-				IdentityReceiverCallbackTask ir(serverConfiguration, contactId);
+				IdentityReceiverCallbackTask ir(serverConfiguration.get(), contactId);
 				
 				QEventLoop eventLoop;
 				OPENMITTSU_CONNECT(&ir, finished(CallbackTask*), &eventLoop, quit());
@@ -659,7 +668,7 @@ void Client::menuContactAddOnClick() {
 					}
 
 					if (protocolClient != nullptr) {
-						QMetaObject::invokeMethod(protocolClient, "addContact", Qt::QueuedConnection, Q_ARG(ContactId, contactId), Q_ARG(PublicKey, ir.getFetchedPublicKey()));
+						QMetaObject::invokeMethod(protocolClient.get(), "addContact", Qt::QueuedConnection, Q_ARG(ContactId, contactId), Q_ARG(PublicKey, ir.getFetchedPublicKey()));
 					}
 
 					QMessageBox::information(this, "Contact added", QString("Contact successfully added!\nIdentity: %1\nPublic Key: %2\n").arg(contactId.toQString()).arg(ir.getFetchedPublicKey().toString()));
@@ -687,7 +696,7 @@ void Client::menuIdentityShowFingerprintOnClick() {
 	if (clientConfiguration == nullptr) {
 		QMessageBox::warning(this, "No Identity loaded", "Before you can use this feature you need to load a \"client configuration\" from file (see main screen) or create one using a backup of your existing ID (see Identity -> Load Backup).");
 	} else {
-		FingerprintDialog fingerprintDialog(clientConfiguration, this);
+		FingerprintDialog fingerprintDialog(clientConfiguration.get(), this);
 		fingerprintDialog.exec();
 	}
 }
@@ -696,7 +705,7 @@ void Client::menuIdentityShowPublicKeyOnClick() {
 	if (clientConfiguration == nullptr) {
 		QMessageBox::warning(this, "No Identity loaded", "Before you can use this feature you need to load a \"client configuration\" from file (see main screen) or create one using a backup of your existing ID (see Identity -> Load Backup).");
 	} else {
-		ShowIdentityAndPublicKeyDialog showIdentityAndPublicKeyDialog(clientConfiguration, this);
+		ShowIdentityAndPublicKeyDialog showIdentityAndPublicKeyDialog(clientConfiguration.get(), this);
 		showIdentityAndPublicKeyDialog.exec();
 	}
 }
@@ -705,7 +714,7 @@ void Client::menuIdentityCreateBackupOnClick() {
 	if (clientConfiguration == nullptr) {
 		QMessageBox::warning(this, "No Identity loaded", "Before you can use this feature you need to load a \"client configuration\" from file (see main screen) or create one using a backup of your existing ID (see Identity -> Load Backup).");
 	} else {
-		BackupCreationWizard backupCreationWizard(clientConfiguration, this);
+		BackupCreationWizard backupCreationWizard(clientConfiguration.get(), this);
 		backupCreationWizard.exec();
 	}
 }

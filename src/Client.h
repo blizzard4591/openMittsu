@@ -10,6 +10,8 @@
 #include <QFile>
 #include <QAudioOutput>
 
+#include <memory>
+
 #include "ui_main.h"
 #include "ProtocolClient.h"
 #include "ContactRegistry.h"
@@ -24,6 +26,7 @@ class Client : public QMainWindow {
 
 public:
     Client(QWidget *parent = 0);
+	~Client();
 private slots:
 	// UI
 	void btnConnectOnClick();
@@ -72,16 +75,14 @@ protected:
 	virtual void closeEvent(QCloseEvent* event) override;
 private:
 	Ui::MainWindow ui;
-	KeyRegistry* keyRegistry;
-	GroupRegistry* groupRegistry;
-	ProtocolClient *protocolClient;
-	QSettings *settings;
+	std::unique_ptr<ProtocolClient> protocolClient;
+	std::unique_ptr<QSettings> settings;
 	QThread protocolClientThread;
 	QTimer connectionTimer;
 
 	// Audio playing
 	QFile receivedMessageAudioFile;
-	QAudioOutput* audioOutput;
+	std::unique_ptr<QAudioOutput> audioOutput;
 
 	// Update functionality
 	Updater updater;
@@ -94,9 +95,9 @@ private:
 	};
 
 	ConnectionState connectionState;
-	ServerConfiguration* serverConfiguration;
-	ClientConfiguration* clientConfiguration;
-	ContactRegistry* contactRegistry;
+	std::unique_ptr<ServerConfiguration> serverConfiguration;
+	std::unique_ptr<ClientConfiguration> clientConfiguration;
+	std::unique_ptr<ContactRegistry> contactRegistry;
 
 	bool validateClientConfigurationFile(QString const& fileName, bool quiet = false);
 	bool validateKnownIdentitiesFile(QString const& fileName, bool quiet = false);
