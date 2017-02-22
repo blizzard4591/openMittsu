@@ -88,7 +88,7 @@ if(CMAKE_COMPILER_IS_GNUCC)
     set(OPENMITTSU_COMPILED_BY "GCC")
     # Set standard flags for GCC
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -funroll-loops")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pedantic")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -pedantic")
 elseif(MSVC)
     set(OPENMITTSU_COMPILED_BY "MSVC")
 	
@@ -112,10 +112,10 @@ else(CLANG)
     else()
 		set(CLANG_STDLIB libc++)
 		# Set up some Xcode specific settings
-		set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++11")
+		set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++14")
 		set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
     endif()
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=${CLANG_STDLIB} -Wall -pedantic -Wno-unused-variable -ftemplate-depth=1024")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -stdlib=${CLANG_STDLIB} -Wall -pedantic -Wno-unused-variable -ftemplate-depth=1024")
 endif()
 
 #
@@ -173,6 +173,19 @@ elseif(${OPENMITTSU_POINTER_SIZE_TEST_RUN_RESULT} LESS 0 OR ${OPENMITTSU_POINTER
 else()
 	set(OPENMITTSU_CPP_POINTER_SIZE "${OPENMITTSU_POINTER_SIZE_TEST_RUN_OUTPUT}")
 	message(STATUS "Collected pointer size information (pointer has ${OPENMITTSU_POINTER_SIZE_TEST_RUN_OUTPUT} Bits)")
+endif()
+
+# Check for std::make_unique support
+try_run(OPENMITTSU_MAKE_UNIQUE_TEST_RUN_RESULT OPENMITTSU_MAKE_UNIQUE_TEST_COMPILE_RESULT "${PROJECT_BINARY_DIR}/testMakeUnique" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_make_unique.cpp" COMPILE_OUTPUT_VARIABLE OPENMITTSU_MAKE_UNIQUE_TEST_COMPILE_OUTPUT RUN_OUTPUT_VARIABLE OPENMITTSU_MAKE_UNIQUE_TEST_RUN_OUTPUT)
+if (NOT ${OPENMITTSU_MAKE_UNIQUE_TEST_COMPILE_RESULT})
+	set(OPENMITTSU_CONFIG_HAVE_MAKE_UNIQUE OFF)
+	message(STATUS "Compiler does NOT support std::make_unique, using replacement. ${OPENMITTSU_MAKE_UNIQUE_TEST_COMPILE_OUTPUT}") 
+elseif(${OPENMITTSU_MAKE_UNIQUE_TEST_RUN_RESULT} EQUAL 0)
+	set(OPENMITTSU_CONFIG_HAVE_MAKE_UNIQUE ON)
+	message(STATUS "Compiler does support std::make_unique.") 
+else()
+	set(OPENMITTSU_CONFIG_HAVE_MAKE_UNIQUE OFF)
+	message(FATAL_ERROR "Failed to run std::make_unique testing program, please contact a developer! Extended Information: ${OPENMITTSU_MAKE_UNIQUE_TEST_RUN_RESULT} - ${OPENMITTSU_MAKE_UNIQUE_TEST_RUN_OUTPUT}") 
 endif()
 
 # Configure a file to pass the OpenMittsu version to the source code

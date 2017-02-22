@@ -28,8 +28,9 @@
 #include "widgets/ContactListWidgetItem.h"
 #include "widgets/LicenseDialog.h"
 
-#include "utility/Version.h"
 #include "utility/Logging.h"
+#include "utility/MakeUnique.h"
+#include "utility/Version.h"
 #include "utility/QObjectConnectionMacro.h"
 
 #include "exceptions/InternalErrorException.h"

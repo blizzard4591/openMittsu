@@ -12,3 +12,6 @@
 
 // Whether version update checks are disabled
 #cmakedefine OPENMITTSU_CONFIG_DISABLE_VERSION_UPDATE_CHECK
+
+// Whether std::make_unique is supported by the compiler
+#cmakedefine OPENMITTSU_CONFIG_HAVE_MAKE_UNIQUE
