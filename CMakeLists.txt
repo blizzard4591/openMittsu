@@ -24,7 +24,8 @@ option(OPENMITTSU_LINK_LIBCXXABI "Sets whether libc++abi should be linked." OFF)
 option(OPENMITTSU_USE_LIBCXX "Sets whether the standard library is libc++." OFF)
 option(OPENMITTSU_DEBUG "Sets whether debug checks, assertions and logging should be turned on. Has no effect on builds under MSVC besides turning on debug logging level." OFF)
 option(OPENMITTSU_DISABLE_VERSION_UPDATE_CHECK "Disables the version check on start-up. Useful for custom builds or added privacy." OFF)
-SET(OPENMITTSU_CMAKE_SEARCH_PATH "D:/Qt/Qt5.7.0/5.7/msvc2015_64" CACHE PATH "Additional Qt5 search path" ) 
+SET(OPENMITTSU_CMAKE_SEARCH_PATH "D:/Qt/Qt5.7.0/5.7/msvc2015_64" CACHE PATH "Additional Qt5 search path" )
+set(OPENMITTSU_CUSTOM_VERSION_STRING "" CACHE STRING "Disables Git version number checking and uses the custom string instead. Should be of the form 0.1.2-34-567890ab, i.e. major.minor.patch-commitsSinceTag-shortHash")
 
 SET(CMAKE_PREFIX_PATH "${OPENMITTSU_CMAKE_SEARCH_PATH}/lib/cmake/")
 
@@ -120,8 +121,24 @@ endif()
 #
 # Make a version file containing the current version from git.
 #
-include(GetGitRevisionDescription)
-git_describe_checkout(OPENMITTSU_GIT_VERSION_STRING)
+
+# First check if this is a Git checkout or if a custom version tag should be used.
+if ((NOT "${OPENMITTSU_CUSTOM_VERSION_STRING}" STREQUAL "") AND (NOT "${OPENMITTSU_CUSTOM_VERSION_STRING}" MATCHES "^[0-9]+\\.[0-9]+\\.[0-9]+\\-[0-9]+\\-[a-z0-9]+(\\-.*)?$"))
+	message(FATAL_ERROR "Builtin version information: A custom version string is set, but it is malformed. Should be: 0.1.2-34-567890ab, i.e. major.minor.patch-commitsSinceTag-shortHash")
+endif()
+
+set(OPENMITTSU_GIT_VERSION_STRING "")
+if (NOT "${OPENMITTSU_CUSTOM_VERSION_STRING}" STREQUAL "")
+	message(STATUS "Builtin version information: custom version string set, using ${OPENMITTSU_CUSTOM_VERSION_STRING}")
+	set(OPENMITTSU_GIT_VERSION_STRING "${OPENMITTSU_CUSTOM_VERSION_STRING}")
+elseif (NOT EXISTS "${PROJECT_SOURCE_DIR}/.git")
+	message(STATUS "Builtin version information: .git folder non-existant, falling back to 0.0.0-0-00000000")
+	set(OPENMITTSU_GIT_VERSION_STRING "0.0.0-0-00000000")
+else()
+	message(STATUS "Builtin version information: .git folder exists, using git_describe_checkout")
+	include(GetGitRevisionDescription)
+	git_describe_checkout(OPENMITTSU_GIT_VERSION_STRING)
+endif()
 
 if ("${OPENMITTSU_GIT_VERSION_STRING}" MATCHES "^[0-9]+\\.[0-9]+\\.[0-9]+\\-[0-9]+\\-[a-z0-9]+(\\-.*)?$")
 	# Parse the git Tag into variables
