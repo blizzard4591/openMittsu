@@ -4,6 +4,10 @@
 #include <QObject>
 #include <QSettings>
 #include <QVariant>
+#include <QMetaType>
+#include <QString>
+#include <QByteArray>
+#include <QHash>
 
 class OptionMaster : public QObject {
 	Q_OBJECT
@@ -22,16 +26,32 @@ public:
 		BINARY_MAINWINDOW_GEOMETRY,
 		BINARY_MAINWINDOW_STATE
 	};
+	
+	bool getOptionAsBool(Options const& option) const;
+	QString getOptionAsQString(Options const& option) const;
+	QByteArray getOptionAsQByteArray(Options const& option) const;
+	
+	void setOption(Options const& option, QVariant const& value);
 private:
 	OptionMaster();
 	virtual ~OptionMaster();
 
 	void ensureOptionsExist();
-	void ensureOptionExists(Options const& option, QVariant const& defaultValue);
-	static QString getOptionKeyForOption(Options const& option);
+	QString getOptionKeyForOption(Options const& option) const;
+	QMetaType::Type getOptionTypeForOption(Options const& option) const;
+
+	bool registerOption(QString const& optionName, Options const& option, QVariant const& defaultValue, QMetaType::Type optionType);
 
 	static OptionMaster* instance;
 	QSettings settings;
+	QHash<QString, Options> nameToOptionMap;
+	QHash<Options, QString> optionToNameMap;
+	QHash<Options, QVariant> optionToDefaultValueMap;
+	QHash<Options, QMetaType::Type> optionToTypeMap;
 };
+
+uint qHash(OptionMaster::Options const& key, uint seed);
+
+Q_DECLARE_METATYPE(OptionMaster::Options)
 
 #endif // OPENMITTSU_UTILITY_OPTIONMASTER_H_
