@@ -10,7 +10,7 @@
 #include <QNetworkReply>
 #include <QHttpMultiPart>
 
-BlobUploaderCallbackTask::BlobUploaderCallbackTask(ServerConfiguration* serverConfiguration, Message* message, std::shared_ptr<AcknowledgmentProcessor> const& acknowledgmentProcessor, QByteArray const& dataToUpload) : CertificateBasedCallbackTask(serverConfiguration->getImageServerCertificateAsBase64()), MessageCallbackTask(message, acknowledgmentProcessor), urlString(serverConfiguration->getImageServerRequestUploadUrl()), agentString(serverConfiguration->getImageServerRequestAgent()), dataToUpload(dataToUpload) {
+BlobUploaderCallbackTask::BlobUploaderCallbackTask(ServerConfiguration* serverConfiguration, Message* message, std::shared_ptr<AcknowledgmentProcessor> const& acknowledgmentProcessor, QByteArray const& dataToUpload) : CertificateBasedCallbackTask(serverConfiguration->getBlobServerCertificateAsBase64()), MessageCallbackTask(message, acknowledgmentProcessor), urlString(serverConfiguration->getBlobServerRequestUploadUrl()), agentString(serverConfiguration->getBlobServerRequestAgent()), dataToUpload(dataToUpload) {
 	if (urlString.isEmpty() || urlString.isNull()) {
 		throw IllegalArgumentException() << "No image upload URL available from server configuration.";
 	}

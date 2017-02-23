@@ -19,7 +19,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
-IdentityReceiverCallbackTask::IdentityReceiverCallbackTask(ServerConfiguration* serverConfiguration, ContactId const& identityToFetch) : CertificateBasedCallbackTask(serverConfiguration->getIdentityServerCertificateAsBase64()), urlString(serverConfiguration->getIdentityServerRequestUrl()), agentString(serverConfiguration->getIdentityServerRequestAgent()), identityToFetch(identityToFetch) {
+IdentityReceiverCallbackTask::IdentityReceiverCallbackTask(ServerConfiguration* serverConfiguration, ContactId const& identityToFetch) : CertificateBasedCallbackTask(serverConfiguration->getApiServerCertificateAsBase64()), urlString(serverConfiguration->getApiServerFetchPublicKeyForIdUrl()), agentString(serverConfiguration->getApiServerAgent()), identityToFetch(identityToFetch) {
 	if (urlString.isEmpty() || urlString.isNull()) {
 		throw IllegalArgumentException() << "No identity download URL available from server configuration.";
 	}
