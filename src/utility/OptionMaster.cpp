@@ -2,7 +2,7 @@
 
 #include "exceptions/InternalErrorException.h"
 #include "utility/Logging.h"
-//#include "utility/MakeUnique.h"
+#include "utility/MakeUnique.h"
 
 #include <QByteArray>
 #include <QCoreApplication>

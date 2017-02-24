@@ -21,7 +21,8 @@ class OptionsDialog : public QDialog
 public:
     explicit OptionsDialog(QWidget *parent = 0);
     ~OptionsDialog();
-
+public slots:
+	virtual void accept() override;
 private:
     Ui::OptionsDialog *ui;
 
@@ -34,6 +35,7 @@ private:
 	};
 
 	QHash<OptionMaster::Options, OptionWidget> optionToWidgetMap;
+	void saveOptions();
 };
 
 #endif // OPTIONSDIALOG_H

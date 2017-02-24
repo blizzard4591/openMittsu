@@ -168,6 +168,9 @@ Client::~Client() {
 		protocolClient = nullptr;
 	}
 	protocolClientThread.quit();
+	while (!protocolClientThread.isFinished()) {
+		QThread::currentThread()->wait(10);
+	}
 }
 
 void Client::importLegacyOptions() {
@@ -410,15 +413,23 @@ void Client::contactRegistryOnIdentitiesChanged() {
 
 void Client::messageCenterOnHasUnreadMessages(ChatTab* tab) {
 	LOGGER_DEBUG("Activating window for unread messages...");
-	this->activateWindow();
-	// Do not restart audio, let it play.
-	if (audioOutput->state() != QAudio::State::IdleState) {
-		return;
+	OptionMaster* optionMaster = OptionMaster::getInstance();
+
+	if (optionMaster->getOptionAsBool(OptionMaster::Options::BOOLEAN_FORCE_FOREGROUND_ON_MESSAGE_RECEIVED)) {
+		this->activateWindow();
 	}
 
-	// Play audio for incoming and unseen message.
-	receivedMessageAudioFile.reset();
-	audioOutput->start(&receivedMessageAudioFile);
+	if (optionMaster->getOptionAsBool(OptionMaster::Options::BOOLEAN_PLAY_SOUND_ON_MESSAGE_RECEIVED)) {
+		// Do not restart audio, let it play.
+		if (audioOutput->state() != QAudio::State::IdleState) {
+			LOGGER_DEBUG("Wanted to play audio for new message, but it was not idle.");
+			return;
+		}
+
+		// Play audio for incoming and unseen message.
+		receivedMessageAudioFile.reset();
+		audioOutput->start(&receivedMessageAudioFile);
+	}
 }
 
 void Client::protocolClientOnReadyConnect() {
@@ -683,9 +694,9 @@ void Client::menuContactAddOnClick() {
 		QString const identityString = contactAddDialog.getIdentity();
 		QString const nickname = contactAddDialog.getNickname();
 		if (identityString.isEmpty() || (identityString.size() != 8)) {
-			QMessageBox::warning(this, "Could not add Contact", "The identity entered is not well formed.\nNo Contact has been added.");
+			QMessageBox::warning(this, "Could not add Contact", "The identity entered is not well formed.\nNo contact has been added.");
 		} else if (contactRegistry->hasIdentity(ContactId(identityString.toUtf8()))) {
-			QMessageBox::warning(this, "Could not add Contact", "The identity entered is already known.\nNo Contact has been changed.");
+			QMessageBox::warning(this, "Could not add Contact", "The identity entered is already known.\nThe contact has not been changed.");
 		} else {
 			try {
 				ContactId const contactId(identityString.toUtf8());

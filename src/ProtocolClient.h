@@ -13,6 +13,7 @@
 #include <QDateTime>
 #include <cstdint>
 #include <utility>
+#include <memory>
 
 #include "KeyPair.h"
 #include "PublicKey.h"
@@ -111,21 +112,22 @@ private:
 	bool isNetworkSessionReady;
 	bool isConnected;
 	bool isAllowedToSend;
+	bool isDisconnecting;
 	QByteArray readyReadRemainingData;
-	QTcpSocket* socket;
-	QNetworkSession *networkSession;
+	std::unique_ptr<QTcpSocket> socket;
+	std::unique_ptr<QNetworkSession> networkSession;
 	ServerConfiguration serverConfiguration;
 	ClientConfiguration clientConfiguration;
 
 	// Outgoing Message List
 	QList<QByteArray> outgoingMessages;
-	QTimer* outgoingMessagesTimer;
+	std::unique_ptr<QTimer> outgoingMessagesTimer;
 	QMutex outgoingMessagesMutex;
 
 	// List of Messages to be acknowledged by the server
 	QHash<MessageId, std::shared_ptr<AcknowledgmentProcessor>> acknowledgmentWaitingMessages;
 
-	QTimer* acknowledgmentWaitingTimer;
+	std::unique_ptr<QTimer> acknowledgmentWaitingTimer;
 	QMutex acknowledgmentWaitingMutex;
 
 	// List of Messages kept back because we are waiting for IdentityReceivers
@@ -134,7 +136,7 @@ private:
 	QHash<GroupId, std::list<std::shared_ptr<MessageWithEncryptedPayload>>> groupsWaitingForSync;
 
 	// Connection Keep-Alive
-	QTimer* keepAliveTimer;
+	std::unique_ptr<QTimer> keepAliveTimer;
 	uint32_t keepAliveCounter;
 
 	// Statistics

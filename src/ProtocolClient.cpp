@@ -16,6 +16,8 @@
 #include "utility/ByteArrayConversions.h"
 #include "utility/ByteArrayToHexString.h"
 #include "utility/Logging.h"
+#include "utility/MakeUnique.h"
+#include "utility/OptionMaster.h"
 #include "utility/QObjectConnectionMacro.h"
 
 #include "messages/Message.h"
@@ -42,7 +44,7 @@
 #include "sodium.h"
 
 ProtocolClient::ProtocolClient(KeyRegistry const& keyRegistry, GroupRegistry const& groupRegistry, UniqueMessageIdGenerator* messageIdGenerator, ServerConfiguration const& serverConfiguration, ClientConfiguration const& clientConfiguration, MessageCenter* messageCenter, PushFromId const& pushFromId)
-	: QObject(nullptr), cryptoBox(keyRegistry), groupRegistry(groupRegistry), uniqueMessageIdGenerator(messageIdGenerator), messageCenter(messageCenter), pushFromIdPtr(std::unique_ptr<PushFromId>(new PushFromId(pushFromId))), isSetupDone(false), isNetworkSessionReady(false), isConnected(false), isAllowedToSend(false), socket(nullptr), networkSession(nullptr), serverConfiguration(serverConfiguration), clientConfiguration(clientConfiguration), outgoingMessagesTimer(nullptr), acknowledgmentWaitingTimer(nullptr), keepAliveTimer(nullptr), keepAliveCounter(0) {
+	: QObject(nullptr), cryptoBox(keyRegistry), groupRegistry(groupRegistry), uniqueMessageIdGenerator(messageIdGenerator), messageCenter(messageCenter), pushFromIdPtr(std::unique_ptr<PushFromId>(new PushFromId(pushFromId))), isSetupDone(false), isNetworkSessionReady(false), isConnected(false), isAllowedToSend(false), isDisconnecting(false), socket(nullptr), networkSession(nullptr), serverConfiguration(serverConfiguration), clientConfiguration(clientConfiguration), outgoingMessagesTimer(nullptr), acknowledgmentWaitingTimer(nullptr), keepAliveTimer(nullptr), keepAliveCounter(0) {
 	// Intentionally left empty.
 }
 
@@ -72,14 +74,16 @@ void ProtocolClient::connectToServer() {
 	// Clear socket
 	socket->abort();
 
+	isDisconnecting = false;
+
 	// Reset stats
 	messagesReceived = 0;
 	messagesSend = 0;
 	bytesSend = 0;
 	bytesReceived = 0;
-	acknowledgmentWaitingMutex.lock();
-	acknowledgmentWaitingMessages.clear();
-	acknowledgmentWaitingMutex.unlock();
+	//acknowledgmentWaitingMutex.lock();
+	//acknowledgmentWaitingMessages.clear();
+	//acknowledgmentWaitingMutex.unlock();
 
 	LOGGER()->info("Now connecting to {} on port {}.", serverConfiguration.getServerHost().toStdString(), serverConfiguration.getServerPort());
 	socket->connectToHost(serverConfiguration.getServerHost(), serverConfiguration.getServerPort());
@@ -91,6 +95,12 @@ void ProtocolClient::socketDisconnected(bool emitSignal) {
 	isAllowedToSend = false;
 	keepAliveTimer->stop();
 	outgoingMessagesTimer->stop();
+
+	if (!isDisconnecting && OptionMaster::getInstance()->getOptionAsBool(OptionMaster::Options::BOOLEAN_RECONNECT_ON_CONNECTION_LOSS)) {
+		LOGGER()->info("Trying to reconnect...");
+		connectToServer();
+		return;
+	}
 
 	if (emitSignal) {
 		emit lostConnection();
@@ -104,6 +114,7 @@ bool ProtocolClient::getIsConnected() const {
 void ProtocolClient::disconnectFromServer() {
 	if (getIsConnected()) {
 		LOGGER_DEBUG("Closing socket.");
+		isDisconnecting = true;
 		socket->close();
 	}
 }
@@ -111,30 +122,30 @@ void ProtocolClient::disconnectFromServer() {
 void ProtocolClient::setup() {
 	if (!isSetupDone) {
 		if (socket == nullptr) {
-			socket = new QTcpSocket();
+			socket = std::make_unique<QTcpSocket>();
 			if (socket == nullptr) {
 				return;
 			}
 		}
 
-		OPENMITTSU_CONNECT(socket, readyRead(), this, socketOnReadyRead());
-		OPENMITTSU_CONNECT(socket, error(QAbstractSocket::SocketError), this, socketOnError(QAbstractSocket::SocketError));
-		OPENMITTSU_CONNECT(socket, connected(), this, socketConnected());
-		OPENMITTSU_CONNECT(socket, disconnected(), this, socketDisconnected());
+		OPENMITTSU_CONNECT(socket.get(), readyRead(), this, socketOnReadyRead());
+		OPENMITTSU_CONNECT(socket.get(), error(QAbstractSocket::SocketError), this, socketOnError(QAbstractSocket::SocketError));
+		OPENMITTSU_CONNECT(socket.get(), connected(), this, socketConnected());
+		OPENMITTSU_CONNECT(socket.get(), disconnected(), this, socketDisconnected());
 
-		outgoingMessagesTimer = new QTimer(this);
+		outgoingMessagesTimer = std::make_unique<QTimer>();
 		outgoingMessagesTimer->setInterval(500);
-		OPENMITTSU_CONNECT(outgoingMessagesTimer, timeout(), this, outgoingMessagesTimerOnTimer());
+		OPENMITTSU_CONNECT(outgoingMessagesTimer.get(), timeout(), this, outgoingMessagesTimerOnTimer());
 
-		acknowledgmentWaitingTimer = new QTimer(this);
+		acknowledgmentWaitingTimer = std::make_unique<QTimer>();
 		acknowledgmentWaitingTimer->setInterval(5000);
-		OPENMITTSU_CONNECT(acknowledgmentWaitingTimer, timeout(), this, acknowledgmentWaitingTimerOnTimer());
+		OPENMITTSU_CONNECT(acknowledgmentWaitingTimer.get(), timeout(), this, acknowledgmentWaitingTimerOnTimer());
 		acknowledgmentWaitingTimer->start();
 
-		keepAliveTimer = new QTimer(this);
+		keepAliveTimer = std::make_unique<QTimer>();
 		keepAliveTimer->setInterval(3 * 60 * 1000);
 		keepAliveCounter = 1;
-		OPENMITTSU_CONNECT(keepAliveTimer, timeout(), this, keepAliveTimerOnTimer());
+		OPENMITTSU_CONNECT(keepAliveTimer.get(), timeout(), this, keepAliveTimerOnTimer());
 
 		QNetworkConfigurationManager manager;
 		if (manager.capabilities() & QNetworkConfigurationManager::NetworkSessionRequired) {
@@ -151,8 +162,8 @@ void ProtocolClient::setup() {
 				config = manager.defaultConfiguration();
 			}
 
-			networkSession = new QNetworkSession(config, this);
-			OPENMITTSU_CONNECT(networkSession, opened(), this, networkSessionOnIsOpen());
+			networkSession = std::make_unique<QNetworkSession>(config);
+			OPENMITTSU_CONNECT(networkSession.get(), opened(), this, networkSessionOnIsOpen());
 
 			isNetworkSessionReady = false;
 			networkSession->open();
@@ -170,41 +181,37 @@ void ProtocolClient::setup() {
 
 void ProtocolClient::teardown() {
 	if (isSetupDone) {
-		OPENMITTSU_DISCONNECT(socket, readyRead(), this, socketOnReadyRead());
-		OPENMITTSU_DISCONNECT(socket, error(QAbstractSocket::SocketError), this, socketOnError(QAbstractSocket::SocketError));
-		OPENMITTSU_DISCONNECT(socket, connected(), this, socketConnected());
-		OPENMITTSU_DISCONNECT(socket, disconnected(), this, socketDisconnected());
+		OPENMITTSU_DISCONNECT(socket.get(), readyRead(), this, socketOnReadyRead());
+		OPENMITTSU_DISCONNECT(socket.get(), error(QAbstractSocket::SocketError), this, socketOnError(QAbstractSocket::SocketError));
+		OPENMITTSU_DISCONNECT(socket.get(), connected(), this, socketConnected());
+		OPENMITTSU_DISCONNECT(socket.get(), disconnected(), this, socketDisconnected());
 
-		OPENMITTSU_DISCONNECT(outgoingMessagesTimer, timeout(), this, outgoingMessagesTimerOnTimer());
-		OPENMITTSU_DISCONNECT(acknowledgmentWaitingTimer, timeout(), this, acknowledgmentWaitingTimerOnTimer());
-		OPENMITTSU_DISCONNECT(keepAliveTimer, timeout(), this, keepAliveTimerOnTimer());
+		OPENMITTSU_DISCONNECT(outgoingMessagesTimer.get(), timeout(), this, outgoingMessagesTimerOnTimer());
+		OPENMITTSU_DISCONNECT(acknowledgmentWaitingTimer.get(), timeout(), this, acknowledgmentWaitingTimerOnTimer());
+		OPENMITTSU_DISCONNECT(keepAliveTimer.get(), timeout(), this, keepAliveTimerOnTimer());
 
 		if (isConnected) {
 			LOGGER()->info("Disconnecting from Server on teardown.");
+			isDisconnecting = true;
 			socket->close();
 			isConnected = false;
 		}
 
-		socket->deleteLater();
 		socket = nullptr;
 
 		isNetworkSessionReady = false;
 		if (networkSession != nullptr) {
-			OPENMITTSU_DISCONNECT(networkSession, opened(), this, networkSessionOnIsOpen());
-			networkSession->deleteLater();
+			OPENMITTSU_DISCONNECT(networkSession.get(), opened(), this, networkSessionOnIsOpen());
 			networkSession = nullptr;
 		}
 
 		outgoingMessagesTimer->stop();
-		outgoingMessagesTimer->deleteLater();
 		outgoingMessagesTimer = nullptr;
 		
 		acknowledgmentWaitingTimer->stop();
-		acknowledgmentWaitingTimer->deleteLater();
 		acknowledgmentWaitingTimer = nullptr;
 		
 		keepAliveTimer->stop();
-		keepAliveTimer->deleteLater();
 		keepAliveTimer = nullptr;
 
 		isSetupDone = false;
@@ -1078,7 +1085,7 @@ void ProtocolClient::callbackTaskFinished(CallbackTask* callbackTask) {
 				}
 			}
 		}
-		irct->deleteLater();
+		delete irct;
 	} else if (dynamic_cast<MessageCallbackTask*>(callbackTask) != nullptr) {
 		MessageCallbackTask* messageCallbackTask = dynamic_cast<MessageCallbackTask*>(callbackTask);
 		if (messageCallbackTask->getInitialMessage()->getMessageHeader().getSender() == clientConfiguration.getClientIdentity()) {
@@ -1111,90 +1118,17 @@ void ProtocolClient::callbackTaskFinished(CallbackTask* callbackTask) {
 		}
 		
 		if (messageCallbackTask->isFinished()) {
-			LOGGER_DEBUG("CallbaskTask::isFinished() is true, calling deleteLater() directly.");
-			QMetaObject::invokeMethod(messageCallbackTask, "deleteLater", Qt::QueuedConnection);
+			LOGGER_DEBUG("CallbaskTask::isFinished() is true, deleting.");
+			delete messageCallbackTask;
 		} else {
 			LOGGER_DEBUG("CallbackTask::isFinished() is false, connection signal.");
 			OPENMITTSU_CONNECT_QUEUED(callbackTask, finished(), callbackTask, deleteLater());
 		}
 	} else {
 		LOGGER()->warn("Unhandled callback task of unknown type?!");
-		callbackTask->deleteLater();
+		delete callbackTask;
 	}
 }
-
-/*
-void ProtocolClient::sendGroupMessage(quint64 groupId, QString const& message) {
-	ContactRegistry* contactRegistry = ContactRegistry::getInstance();
-	if (contactRegistry->hasGroup(groupId)) {
-		GroupContact* gc = contactRegistry->getGroup(groupId);
-		quint64 groupOwner = gc->getGroupOwner();
-		QSet<quint64>::const_iterator it = gc->getGroupMembers().constBegin();
-		QSet<quint64>::const_iterator end = gc->getGroupMembers().constEnd();
-		for (; it != end; ++it) {
-			if (*it == clientConfiguration.getClientIdentity()) {
-				continue;
-			}
-			TextMessage tm(TextMessage::buildGroupTextMessage(clientConfiguration.getClientIdentity(), *it, groupId, groupOwner, message));
-			EncryptedTextMessage etm(tm.encryptMessage(ContactRegistry::getInstance()->getPublicKey(tm.getReceiver()), clientConfiguration.getClientLongTermKeyPair()));
-
-			encryptAndSendDataPacketToServer(etm.toPacket());
-		}
-	} else {
-		throw InternalErrorException() << QString("Can not send a message to unknown group %1").arg(QString(IdentityHelper::uint64ToGroupIdByteArray(groupId).toHex())).toStdString();
-	}
-}
-
-void ProtocolClient::sendGroupCreation(quint64 groupId, bool isInitialCreation) {
-	ContactRegistry* contactRegistry = ContactRegistry::getInstance();
-	if (contactRegistry->hasGroup(groupId)) {
-		GroupContact* gc = contactRegistry->getGroup(groupId);
-		quint64 groupOwner = gc->getGroupOwner();
-
-		QSet<quint64> members(gc->getGroupMembers());
-		if (isInitialCreation) {
-			members.remove(groupOwner);
-		}
-
-		QSet<quint64>::const_iterator it = members.constBegin();
-		QSet<quint64>::const_iterator end = members.constEnd();
-		for (; it != end; ++it) {
-			if (*it == clientConfiguration.getClientIdentity()) {
-				continue;
-			}
-			TextMessage tm(TextMessage::buildGroupCreationMessage(clientConfiguration.getClientIdentity(), *it, groupId, members));
-			EncryptedTextMessage etm(tm.encryptMessage(ContactRegistry::getInstance()->getPublicKey(tm.getReceiver()), clientConfiguration.getClientLongTermKeyPair()));
-
-			encryptAndSendDataPacketToServer(etm.toPacket());
-		}
-	} else {
-		throw InternalErrorException() << QString("Can not send group creation message to unknown group %1").arg(QString(IdentityHelper::uint64ToGroupIdByteArray(groupId).toHex())).toStdString();
-	}
-}
-
-void ProtocolClient::sendGroupTitle(quint64 groupId, QString const& groupTitle) {
-	ContactRegistry* contactRegistry = ContactRegistry::getInstance();
-	if (contactRegistry->hasGroup(groupId)) {
-		GroupContact* gc = contactRegistry->getGroup(groupId);
-		quint64 groupOwner = gc->getGroupOwner();
-
-		QSet<quint64>::const_iterator it = gc->getGroupMembers().constBegin();
-		QSet<quint64>::const_iterator end = gc->getGroupMembers().constEnd();
-		for (; it != end; ++it) {
-			if (*it == clientConfiguration.getClientIdentity()) {
-				continue;
-			}
-			TextMessage tm(TextMessage::buildGroupTitleChangeMessage(clientConfiguration.getClientIdentity(), *it, groupId, groupTitle));
-			EncryptedTextMessage etm(tm.encryptMessage(ContactRegistry::getInstance()->getPublicKey(tm.getReceiver()), clientConfiguration.getClientLongTermKeyPair()));
-
-			encryptAndSendDataPacketToServer(etm.toPacket());
-		}
-	} else {
-		throw InternalErrorException() << QString("Can not send group title change message to unknown group %1").arg(QString(IdentityHelper::uint64ToGroupIdByteArray(groupId).toHex())).toStdString();
-	}
-}
-
-*/
 
 void ProtocolClient::sendClientAcknowlegmentForMessage(MessageWithEncryptedPayload const& message) {
 	LOGGER_DEBUG("Sending client acknowledgment to server for message #{}.", message.getMessageHeader().getMessageId().toString());

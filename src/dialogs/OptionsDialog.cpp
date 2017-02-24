@@ -7,6 +7,7 @@
 #include <QCheckBox>
 #include <QVBoxLayout>
 
+#include "exceptions/InternalErrorException.h"
 #include "utility/Logging.h"
 
 OptionsDialog::OptionsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::OptionsDialog) {
@@ -75,6 +76,8 @@ OptionsDialog::OptionsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Opti
 
 				optionToWidgetMap.insert(option, ow);
 				layout->addWidget(edt);
+			} else {
+				throw InternalErrorException() << "Unknown option type!";
 			}
 		}
 
@@ -87,4 +90,28 @@ OptionsDialog::OptionsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Opti
 
 OptionsDialog::~OptionsDialog() {
     delete ui;
+}
+
+void OptionsDialog::saveOptions() {
+	OptionMaster* optionMaster = OptionMaster::getInstance();
+	QHash<OptionMaster::Options, OptionWidget>::const_iterator i = optionToWidgetMap.constBegin();
+	while (i != optionToWidgetMap.constEnd()) {
+		if (i.value().type == OptionMaster::OptionTypes::TYPE_BOOL) {
+			bool const value = i.value().cboxPtr->isChecked();
+			optionMaster->setOption(i.key(), value);
+		} else if (i.value().type == OptionMaster::OptionTypes::TYPE_FILEPATH) {
+			QString const value = i.value().edtPtr->text();
+			optionMaster->setOption(i.key(), value);
+		} else {
+			throw InternalErrorException() << "Unknown option type!";
+		}
+		++i;
+	}
+}
+
+void OptionsDialog::accept() {
+	LOGGER_DEBUG("OptionsDialog accepted, saving options.");
+	saveOptions();
+
+	QDialog::accept();
 }

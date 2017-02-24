@@ -4,6 +4,8 @@
 #include "protocol/ContactId.h"
 #include "messages/PreliminaryMessageFactory.h"
 
+#include "utility/OptionMaster.h"
+
 SimpleContactChatTab::SimpleContactChatTab(IdentityContact* contact, UniqueMessageIdGenerator* idGenerator, QWidget* parent) : SimpleChatTab(contact, idGenerator, parent), identityContact(contact) {
 	//
 }
@@ -25,6 +27,11 @@ bool SimpleContactChatTab::sendImage(MessageId const& uniqueMessageId, QByteArra
 }
 
 bool SimpleContactChatTab::sendUserTypingStatus(bool isTyping) {
+	OptionMaster* optionMaster = OptionMaster::getInstance();
+	if (!optionMaster->getOptionAsBool(OptionMaster::Options::BOOLEAN_SEND_TYPING_NOTIFICATION)) {
+		return true;
+	}
+
 	if (isTyping) {
 		MessageCenter::getInstance()->sendMessageToContact(PreliminaryMessageFactory::createPreliminaryContactUserTypingStartedMessage(identityContact->getContactId(), getUniqueMessageId()));
 	} else {
@@ -35,6 +42,11 @@ bool SimpleContactChatTab::sendUserTypingStatus(bool isTyping) {
 }
 
 bool SimpleContactChatTab::sendReceipt(MessageId const& receiptedMessageId, ReceiptMessageContent::ReceiptType const& receiptType) {
+	OptionMaster* optionMaster = OptionMaster::getInstance();
+	if (!optionMaster->getOptionAsBool(OptionMaster::Options::BOOLEAN_SEND_READ_NOTIFICATION) && receiptType == ReceiptMessageContent::ReceiptType::SEEN) {
+		return true;
+	}
+	
 	MessageCenter::getInstance()->sendMessageToContact(PreliminaryMessageFactory::createPreliminaryContactMessageReceipt(identityContact->getContactId(), getUniqueMessageId(), receiptedMessageId, receiptType));
 
 	return true;
