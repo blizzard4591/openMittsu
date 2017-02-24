@@ -48,17 +48,14 @@
 #include "MessageCenter.h"
 #include "Config.h"
 
-Client::Client(QWidget *parent) : QMainWindow(parent), protocolClient(nullptr), settings(nullptr), audioOutput(nullptr), connectionState(ConnectionState::STATE_DISCONNECTED), serverConfiguration(nullptr), clientConfiguration(nullptr), contactRegistry(ContactRegistry::getInstance()) {
+Client::Client(QWidget *parent) : QMainWindow(parent), protocolClient(nullptr), audioOutput(nullptr), connectionState(ConnectionState::STATE_DISCONNECTED), serverConfiguration(nullptr), clientConfiguration(nullptr), contactRegistry(ContactRegistry::getInstance()) {
 	ui.setupUi(this);
 	ui.listContacts->setContextMenuPolicy(Qt::CustomContextMenu);
 	connectionTimer.start(500);
 	OPENMITTSU_CONNECT(&connectionTimer, timeout(), this, connectionTimerOnTimer());
 
-	QCoreApplication::setOrganizationName("BliZZarD");
-	QCoreApplication::setOrganizationDomain("philippberger.de");
-	QCoreApplication::setApplicationName("OpenMittsu");
-
-	this->settings = new QSettings(this);
+	// import legacy options if available
+	importLegacyOptions();
 
 	// Initialize in the right thread
 	MessageCenter* mc = MessageCenter::getInstance();
@@ -72,23 +69,26 @@ Client::Client(QWidget *parent) : QMainWindow(parent), protocolClient(nullptr), 
 	serverConfiguration = new ServerConfiguration(QStringLiteral("g-xx.0.threema.ch"), 5222, longTermServerPublicKey, QStringLiteral("https://api.threema.ch/identity/%1"), QStringLiteral("Threema/2.2A"), apiServerRootCertificate, QStringLiteral("https://%1.blob.threema.ch/%2"), QStringLiteral("https://%1.blob.threema.ch/%2/done"), QStringLiteral("https://upload.blob.threema.ch/upload"), QStringLiteral("Threema/2.2A"), apiServerRootCertificate);
 
 	// Load stored settings
-	if (settings->contains("clientConfigurationFile")) {
-		if (validateClientConfigurationFile(settings->value("clientConfigurationFile").toString(), true)) {
-			this->clientConfiguration = new ClientConfiguration(ClientConfiguration::fromFile(settings->value("clientConfigurationFile").toString()));
-			updateClientSettingsInfo(settings->value("clientConfigurationFile").toString());
+	OptionMaster* optionMaster = OptionMaster::getInstance();
+	QString const clientConfigFile = optionMaster->getOptionAsQString(OptionMaster::Options::FILEPATH_CLIENT_CONFIGURATION);
+	if (!clientConfigFile.isEmpty()) {
+		if (validateClientConfigurationFile(clientConfigFile, true)) {
+			this->clientConfiguration = new ClientConfiguration(ClientConfiguration::fromFile(clientConfigFile));
+			updateClientSettingsInfo(clientConfigFile);
 		} else {
-			LOGGER_DEBUG("Removing key \"clientConfigurationFile\" from stored settings as the file is not valid.");
-			settings->remove("clientConfigurationFile");
+			LOGGER_DEBUG("Removing key \"FILEPATH_CLIENT_CONFIGURATION\" from stored settings as the file is not valid.");
+			optionMaster->setOption(OptionMaster::Options::FILEPATH_CLIENT_CONFIGURATION, "");
 		}
 	}
 	// Load Contacts
-	if (settings->contains("contactsFile")) {
-		if (validateKnownIdentitiesFile(settings->value("contactsFile").toString(), true)) {
-			contactRegistry->fromFile(settings->value("contactsFile").toString());
-			updateKnownContactsInfo(settings->value("contactsFile").toString());
+	QString const contactsFile = optionMaster->getOptionAsQString(OptionMaster::Options::FILEPATH_CONTACTS_DATABASE);
+	if (!contactsFile.isEmpty()) {
+		if (validateKnownIdentitiesFile(contactsFile, true)) {
+			contactRegistry->fromFile(contactsFile);
+			updateKnownContactsInfo(contactsFile);
 		} else {
-			LOGGER_DEBUG("Removing key \"contactsFile\" from stored settings as the file is not valid.");
-			settings->remove("contactsFile");
+			LOGGER_DEBUG("Removing key \"FILEPATH_CONTACTS_DATABASE\" from stored settings as the file is not valid.");
+			optionMaster->setOption(OptionMaster::Options::FILEPATH_CONTACTS_DATABASE, "");
 		}
 	}
 
@@ -151,14 +151,42 @@ Client::Client(QWidget *parent) : QMainWindow(parent), protocolClient(nullptr), 
 	contactRegistryOnIdentitiesChanged();
 
 	// Restore Window location and size
-	restoreGeometry(settings->value("clientMainWindowGeometry").toByteArray());
-	restoreState(settings->value("clientMainWindowState").toByteArray());
+	restoreGeometry(optionMaster->getOptionAsQByteArray(OptionMaster::Options::BINARY_MAINWINDOW_GEOMETRY));
+	restoreState(optionMaster->getOptionAsQByteArray(OptionMaster::Options::BINARY_MAINWINDOW_STATE));
+}
+
+void Client::importLegacyOptions() {
+	// Import legacy options
+	QSettings *settings = new QSettings("BliZZarD", "OpenMittsu");
+	OptionMaster* optionMaster = OptionMaster::getInstance();
+	if (settings->contains("clientConfigurationFile")) {
+		LOGGER()->info("Migrating clientConfigurationFile into new Settings.");
+		optionMaster->setOption(OptionMaster::Options::FILEPATH_CLIENT_CONFIGURATION, settings->value("clientConfigurationFile"));
+		settings->remove("clientConfigurationFile");
+	}
+	if (settings->contains("contactsFile")) {
+		LOGGER()->info("Migrating contactsFile into new Settings.");
+		optionMaster->setOption(OptionMaster::Options::FILEPATH_CONTACTS_DATABASE, settings->value("contactsFile"));
+		settings->remove("contactsFile");
+	}
+	if (settings->contains("clientMainWindowGeometry")) {
+		LOGGER()->info("Migrating clientMainWindowGeometry into new Settings.");
+		optionMaster->setOption(OptionMaster::Options::BINARY_MAINWINDOW_GEOMETRY, settings->value("clientMainWindowGeometry"));
+		settings->remove("clientMainWindowGeometry");
+	}
+	if (settings->contains("clientMainWindowState")) {
+		LOGGER()->info("Migrating clientMainWindowState into new Settings.");
+		optionMaster->setOption(OptionMaster::Options::BINARY_MAINWINDOW_STATE, settings->value("clientMainWindowState"));
+		settings->remove("clientMainWindowState");
+	}
+	delete settings;
 }
 
 void Client::closeEvent(QCloseEvent* event) {
 	// Save location and size of window
-	settings->setValue("clientMainWindowGeometry", saveGeometry());
-	settings->setValue("clientMainWindowState", saveState());
+	OptionMaster* optionMaster = OptionMaster::getInstance();
+	optionMaster->setOption(OptionMaster::Options::BINARY_MAINWINDOW_GEOMETRY, saveGeometry());
+	optionMaster->setOption(OptionMaster::Options::BINARY_MAINWINDOW_STATE, saveState());
 	
 	QMainWindow::closeEvent(event);
 }
@@ -322,7 +350,7 @@ void Client::btnOpenClientIniOnClick() {
 	}
 
 	clientConfiguration = new ClientConfiguration(ClientConfiguration::fromFile(fileName));
-	settings->setValue("clientConfigurationFile", fileName);
+	OptionMaster::getInstance()->setOption(OptionMaster::Options::FILEPATH_CLIENT_CONFIGURATION, fileName);
 	updateClientSettingsInfo(fileName);
 }
 
@@ -332,7 +360,7 @@ void Client::btnOpenContactsOnClick() {
 		return;
 	}
 	contactRegistry->fromFile(fileName);
-	settings->setValue("contactsFile", fileName);
+	OptionMaster::getInstance()->setOption(OptionMaster::Options::FILEPATH_CONTACTS_DATABASE, fileName);
 	updateKnownContactsInfo(fileName);
 }
 
@@ -364,8 +392,9 @@ void Client::contactRegistryOnIdentitiesChanged() {
 	}
 
 	// Save to file
-	if (settings->contains("contactsFile")) {
-		contactRegistry->toFile(settings->value("contactsFile").toString());
+	QString const contactsFile = OptionMaster::getInstance()->getOptionAsQString(OptionMaster::Options::FILEPATH_CONTACTS_DATABASE);
+	if (!contactsFile.isEmpty()) {
+		contactRegistry->toFile(contactsFile);
 	}
 }
 

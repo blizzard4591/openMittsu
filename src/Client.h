@@ -76,7 +76,6 @@ private:
 	KeyRegistry* keyRegistry;
 	GroupRegistry* groupRegistry;
 	ProtocolClient *protocolClient;
-	QSettings *settings;
 	QThread protocolClientThread;
 	QTimer connectionTimer;
 
@@ -108,6 +107,7 @@ private:
 	void setupProtocolClient();
 
 	QString formatDuration(quint64 duration) const;
+	void importLegacyOptions();
 };
 
 #endif

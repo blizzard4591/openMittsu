@@ -11,6 +11,7 @@
 #include "Client.h"
 #include "utility/Version.h"
 #include "utility/Logging.h"
+#include "utility/OptionMaster.h"
 #include "ExceptionHandlingApplication.h"
 
 // For Type registration
@@ -121,6 +122,9 @@ int main(int argc, char *argv[]) {
 		if (!initializeFonts()) {
 			return -4;
 		}
+
+		// Initialize the OptionMaster
+		OptionMaster::getInstance()->registerOptions();
 
 		// Load the app icon
 		QIcon appIcon(":/icons/icon.png");
