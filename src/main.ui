@@ -248,6 +248,8 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionOptions"/>
+    <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuContacts">
@@ -369,6 +371,11 @@
   <action name="actionLicense">
    <property name="text">
     <string>License</string>
+   </property>
+  </action>
+  <action name="actionOptions">
+   <property name="text">
+    <string>Options...</string>
    </property>
   </action>
  </widget>

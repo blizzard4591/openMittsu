@@ -36,6 +36,7 @@ private slots:
 	void listContactsOnContextMenu(QPoint const& pos);
 	void chatTabWidgetOnCurrentTabChanged(int index);
 
+	void menuFileOptionsOnClick();
 	void menuFileExitOnClick();
 	void menuAboutLicenseOnClick();
 	void menuAboutAboutOnClick();
@@ -76,7 +77,6 @@ protected:
 private:
 	Ui::MainWindow ui;
 	std::unique_ptr<ProtocolClient> protocolClient;
-	std::unique_ptr<QSettings> settings;
 	QThread protocolClientThread;
 	QTimer connectionTimer;
 
@@ -108,6 +108,7 @@ private:
 	void setupProtocolClient();
 
 	QString formatDuration(quint64 duration) const;
+	void importLegacyOptions();
 };
 
 #endif
