@@ -70,6 +70,9 @@ public slots:
 	void protocolClientOnConnectToFinished(int errCode, QString message);
 	void protocolClientOnDuplicateIdUsageDetected();
 
+	// Tasks
+	void callbackTaskFinished(CallbackTask* callbackTask);
+
 	// Thread Handling
 	void threadFinished();
 protected:

@@ -18,7 +18,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
-BlobDownloaderCallbackTask::BlobDownloaderCallbackTask(ServerConfiguration* serverConfiguration, Message* message, std::shared_ptr<AcknowledgmentProcessor> const& acknowledgmentProcessor, QByteArray const& blobId) : CertificateBasedCallbackTask(serverConfiguration->getImageServerCertificateAsBase64()), MessageCallbackTask(message, acknowledgmentProcessor), urlString(serverConfiguration->getImageServerRequestDownloadUrl()), agentString(serverConfiguration->getImageServerRequestAgent()), blobId(blobId) {
+BlobDownloaderCallbackTask::BlobDownloaderCallbackTask(ServerConfiguration* serverConfiguration, Message* message, std::shared_ptr<AcknowledgmentProcessor> const& acknowledgmentProcessor, QByteArray const& blobId) : CertificateBasedCallbackTask(serverConfiguration->getBlobServerCertificateAsBase64()), MessageCallbackTask(message, acknowledgmentProcessor), urlString(serverConfiguration->getBlobServerRequestDownloadUrl()), agentString(serverConfiguration->getBlobServerRequestAgent()), blobId(blobId) {
 	if (urlString.isEmpty() || urlString.isNull()) {
 		throw IllegalArgumentException() << "No blob download URL available from server configuration.";
 	}
@@ -47,7 +47,7 @@ void BlobDownloaderCallbackTask::taskRun() {
 
 	if (reply->error() == QNetworkReply::NoError) {
 		// success
-		 result = reply->readAll();
+		result = reply->readAll();
 		delete reply;
 
 		finishedWithNoError();

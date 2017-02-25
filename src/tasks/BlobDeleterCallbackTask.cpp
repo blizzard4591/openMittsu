@@ -15,7 +15,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
-BlobDeleterCallbackTask::BlobDeleterCallbackTask(ServerConfiguration* serverConfiguration, Message* message, std::shared_ptr<AcknowledgmentProcessor> const& acknowledgmentProcessor, QByteArray const& blobId) : CertificateBasedCallbackTask(serverConfiguration->getImageServerCertificateAsBase64()), MessageCallbackTask(message, acknowledgmentProcessor), urlFinishedString(serverConfiguration->getImageServerRequestDownloadFinishedUrl()), agentString(serverConfiguration->getImageServerRequestAgent()), blobId(blobId) {
+BlobDeleterCallbackTask::BlobDeleterCallbackTask(ServerConfiguration* serverConfiguration, Message* message, std::shared_ptr<AcknowledgmentProcessor> const& acknowledgmentProcessor, QByteArray const& blobId) : CertificateBasedCallbackTask(serverConfiguration->getBlobServerCertificateAsBase64()), MessageCallbackTask(message, acknowledgmentProcessor), urlFinishedString(serverConfiguration->getBlobServerRequestDownloadFinishedUrl()), agentString(serverConfiguration->getBlobServerRequestAgent()), blobId(blobId) {
 	if (urlFinishedString.isEmpty() || urlFinishedString.isNull()) {
 		throw IllegalArgumentException() << "No blob deletion URL available from server configuration.";
 	}
