@@ -39,10 +39,12 @@ void CallbackTask::run() {
 
 void CallbackTask::finishedWithNoError() {
 	// The Error Code and Message are in the success state by default.
-	this->cb_isFinished = true;
-	this->cb_finishedSuccessfully = true;
+	if (!this->cb_isFinished) {
+		this->cb_isFinished = true;
+		this->cb_finishedSuccessfully = true;
 
-	emit finished(this);
+		emit finished(this);
+	}
 }
 
 void CallbackTask::finishedWithError(int errorCode, QString const & errorMessage) {

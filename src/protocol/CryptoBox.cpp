@@ -12,18 +12,22 @@ CryptoBox::~CryptoBox() {
 	// Intentionally left empty.
 }
 
+std::pair<Nonce, QByteArray> CryptoBox::encrypt(QByteArray const& data, PublicKey const& targetIdentityPublicKey) {
+	Nonce nonce;
+	QByteArray encryptedData(data.size() + crypto_box_MACBYTES, 0x00);
+	if (crypto_box_easy(reinterpret_cast<unsigned char*>(encryptedData.data()), reinterpret_cast<unsigned char const*>(data.data()), data.size(), nonce.getNonceAsCharPtr(), reinterpret_cast<unsigned char const*>(targetIdentityPublicKey.getPublicKey().data()), reinterpret_cast<unsigned char const*>(keyRegistry.getClientLongTermKeyPair().getPrivateKey().data())) != 0) {
+		throw CryptoException() << "Failed to encrypt data.";
+	}
+
+	return std::make_pair(nonce, encryptedData);
+}
+
 std::pair<Nonce, QByteArray> CryptoBox::encrypt(QByteArray const& data, ContactId const& targetIdentity) {
 	if (!keyRegistry.hasIdentity(targetIdentity)) {
 		throw CryptoException() << "Can not encrypt for unknown identity.";
 	}
 
-	Nonce nonce;
-	QByteArray encryptedData(data.size() + crypto_box_MACBYTES, 0x00);
-	if (crypto_box_easy(reinterpret_cast<unsigned char*>(encryptedData.data()), reinterpret_cast<unsigned char const*>(data.data()), data.size(), nonce.getNonceAsCharPtr(), reinterpret_cast<unsigned char const*>(keyRegistry.getPublicKeyForIdentity(targetIdentity).getPublicKey().data()), reinterpret_cast<unsigned char const*>(keyRegistry.getClientLongTermKeyPair().getPrivateKey().data())) != 0) {
-		throw CryptoException() << "Failed to encrypt data.";
-	}
-
-	return std::make_pair(nonce, encryptedData);
+	return encrypt(data, keyRegistry.getPublicKeyForIdentity(targetIdentity));
 }
 
 QByteArray CryptoBox::decrypt(QByteArray const& encryptedData, Nonce const& nonce, ContactId const& sourceIdentity) {

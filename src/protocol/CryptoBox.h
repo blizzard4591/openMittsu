@@ -19,6 +19,7 @@ public:
 	CryptoBox(KeyRegistry const& keyRegistry);
 	virtual ~CryptoBox();
 
+	std::pair<Nonce, QByteArray> encrypt(QByteArray const& data, PublicKey const& targetIdentityPublicKey);
 	std::pair<Nonce, QByteArray> encrypt(QByteArray const& data, ContactId const& targetIdentity);
 	QByteArray decrypt(QByteArray const& encryptedData, Nonce const& nonce, ContactId const& sourceIdentity);
 

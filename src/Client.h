@@ -98,9 +98,9 @@ private:
 	};
 
 	ConnectionState connectionState;
-	std::unique_ptr<ServerConfiguration> serverConfiguration;
-	std::unique_ptr<ClientConfiguration> clientConfiguration;
-	std::unique_ptr<ContactRegistry> contactRegistry;
+	std::shared_ptr<ServerConfiguration> serverConfiguration;
+	std::shared_ptr<ClientConfiguration> clientConfiguration;
+	std::shared_ptr<ContactRegistry> contactRegistry;
 
 	bool validateClientConfigurationFile(QString const& fileName, bool quiet = false);
 	bool validateKnownIdentitiesFile(QString const& fileName, bool quiet = false);

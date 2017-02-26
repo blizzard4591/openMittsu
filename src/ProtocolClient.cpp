@@ -19,6 +19,7 @@
 #include "utility/MakeUnique.h"
 #include "utility/OptionMaster.h"
 #include "utility/QObjectConnectionMacro.h"
+#include "utility/ThreadDeleter.h"
 
 #include "messages/Message.h"
 #include "messages/MessageFlagsFactory.h"
@@ -44,7 +45,7 @@
 #include "sodium.h"
 
 ProtocolClient::ProtocolClient(KeyRegistry const& keyRegistry, GroupRegistry const& groupRegistry, UniqueMessageIdGenerator* messageIdGenerator, ServerConfiguration const& serverConfiguration, ClientConfiguration const& clientConfiguration, MessageCenter* messageCenter, PushFromId const& pushFromId)
-	: QObject(nullptr), cryptoBox(keyRegistry), groupRegistry(groupRegistry), uniqueMessageIdGenerator(messageIdGenerator), messageCenter(messageCenter), pushFromIdPtr(std::unique_ptr<PushFromId>(new PushFromId(pushFromId))), isSetupDone(false), isNetworkSessionReady(false), isConnected(false), isAllowedToSend(false), isDisconnecting(false), socket(nullptr), networkSession(nullptr), serverConfiguration(serverConfiguration), clientConfiguration(clientConfiguration), outgoingMessagesTimer(nullptr), acknowledgmentWaitingTimer(nullptr), keepAliveTimer(nullptr), keepAliveCounter(0) {
+	: QObject(nullptr), cryptoBox(keyRegistry), groupRegistry(groupRegistry), uniqueMessageIdGenerator(messageIdGenerator), messageCenter(messageCenter), pushFromIdPtr(std::make_unique<PushFromId>(pushFromId)), isSetupDone(false), isNetworkSessionReady(false), isConnected(false), isAllowedToSend(false), isDisconnecting(false), socket(nullptr), networkSession(nullptr), serverConfiguration(serverConfiguration), clientConfiguration(clientConfiguration), outgoingMessagesTimer(nullptr), acknowledgmentWaitingTimer(nullptr), keepAliveTimer(nullptr), keepAliveCounter(0) {
 	// Intentionally left empty.
 }
 
@@ -994,7 +995,7 @@ void ProtocolClient::addContact(ContactId const& contactId, PublicKey const& pub
 
 void ProtocolClient::newPushFromId(PushFromId const& newPushFromId) {
 	LOGGER_DEBUG("Setting new PushFromId {} received from GUI.", newPushFromId.toString());
-	pushFromIdPtr = std::unique_ptr<PushFromId>(new PushFromId(newPushFromId));
+	pushFromIdPtr = std::make_unique<PushFromId>(newPushFromId);
 }
 
 void ProtocolClient::sendGroupSetup(GroupId const& groupId, QSet<ContactId> const& members, QString const& title) {
@@ -1045,7 +1046,7 @@ void ProtocolClient::enqeueCallbackTask(CallbackTask* callbackTask) {
 
 void ProtocolClient::callbackTaskFinished(CallbackTask* callbackTask) {
 	if (dynamic_cast<IdentityReceiverCallbackTask*>(callbackTask) != nullptr) {
-		IdentityReceiverCallbackTask* irct = dynamic_cast<IdentityReceiverCallbackTask*>(callbackTask);
+		UniquePtrWithDelayedThreadDeletion<IdentityReceiverCallbackTask> irct(dynamic_cast<IdentityReceiverCallbackTask*>(callbackTask));
 		if (!missingIdentityProcessors.contains(irct->getContactIdOfFetchedPublicKey())) {
 			LOGGER()->warn("IdentityReceiver CallbackTask finished for ID {}, but no MissingIdentityProcessor is registered for this ID.", irct->getContactIdOfFetchedPublicKey().toString());
 		} else {
@@ -1085,9 +1086,8 @@ void ProtocolClient::callbackTaskFinished(CallbackTask* callbackTask) {
 				}
 			}
 		}
-		delete irct;
 	} else if (dynamic_cast<MessageCallbackTask*>(callbackTask) != nullptr) {
-		MessageCallbackTask* messageCallbackTask = dynamic_cast<MessageCallbackTask*>(callbackTask);
+		UniquePtrWithDelayedThreadDeletion<MessageCallbackTask> messageCallbackTask(dynamic_cast<MessageCallbackTask*>(callbackTask));
 		if (messageCallbackTask->getInitialMessage()->getMessageHeader().getSender() == clientConfiguration.getClientIdentity()) {
 			// Sending
 			if (!messageCallbackTask->hasFinishedSuccessfully()) {
@@ -1115,14 +1115,6 @@ void ProtocolClient::callbackTaskFinished(CallbackTask* callbackTask) {
 
 				delete nextMessage;
 			}
-		}
-		
-		if (messageCallbackTask->isFinished()) {
-			LOGGER_DEBUG("CallbaskTask::isFinished() is true, deleting.");
-			delete messageCallbackTask;
-		} else {
-			LOGGER_DEBUG("CallbackTask::isFinished() is false, connection signal.");
-			OPENMITTSU_CONNECT_QUEUED(callbackTask, finished(), callbackTask, deleteLater());
 		}
 	} else {
 		LOGGER()->warn("Unhandled callback task of unknown type?!");

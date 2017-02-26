@@ -33,6 +33,7 @@
 #include "utility/MakeUnique.h"
 #include "utility/Version.h"
 #include "utility/QObjectConnectionMacro.h"
+#include "utility/ThreadDeleter.h"
 
 #include "exceptions/InternalErrorException.h"
 #include "exceptions/IllegalArgumentException.h"
@@ -41,6 +42,7 @@
 #include "tasks/IdentityReceiverCallbackTask.h"
 #include "tasks/CheckFeatureLevelCallbackTask.h"
 #include "tasks/CheckContactIdStatusCallbackTask.h"
+#include "tasks/SetFeatureLevelCallbackTask.h"
 
 #include "protocol/ContactId.h"
 #include "protocol/GroupId.h"
@@ -69,14 +71,14 @@ Client::Client(QWidget *parent) : QMainWindow(parent), protocolClient(nullptr), 
 	QString const apiServerRootCertificate = QStringLiteral("LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUVZVENDQTBtZ0F3SUJBZ0lKQU0xRFIvREJSRnBRTUEwR0NTcUdTSWIzRFFFQkJRVUFNSDB4Q3pBSkJnTlYKQkFZVEFrTklNUXN3Q1FZRFZRUUlFd0phU0RFUE1BMEdBMVVFQnhNR1duVnlhV05vTVJBd0RnWURWUVFLRXdkVQphSEpsWlcxaE1Rc3dDUVlEVlFRTEV3SkRRVEVUTUJFR0ExVUVBeE1LVkdoeVpXVnRZU0JEUVRFY01Cb0dDU3FHClNJYjNEUUVKQVJZTlkyRkFkR2h5WldWdFlTNWphREFlRncweE1qRXhNVE14TVRVNE5UaGFGdzB6TWpFeE1EZ3gKTVRVNE5UaGFNSDB4Q3pBSkJnTlZCQVlUQWtOSU1Rc3dDUVlEVlFRSUV3SmFTREVQTUEwR0ExVUVCeE1HV25WeQphV05vTVJBd0RnWURWUVFLRXdkVWFISmxaVzFoTVFzd0NRWURWUVFMRXdKRFFURVRNQkVHQTFVRUF4TUtWR2h5ClpXVnRZU0JEUVRFY01Cb0dDU3FHU0liM0RRRUpBUllOWTJGQWRHaHlaV1Z0WVM1amFEQ0NBU0l3RFFZSktvWkkKaHZjTkFRRUJCUUFEZ2dFUEFEQ0NBUW9DZ2dFQkFLOEdkb1Q3SXBOQzNEejdJVUdZVzlwT0J3eCs5RW5EWnJrTgpWRDhsM0tmQkhqR1RkaTlnUTZOaCttUTkveVE4MjU0VDJiaWc5cDBoY244a2pnRVFnSldIcE5oWW5PaHkzaTBqCmNtbHpiMU1GL2RlRmpKVnR1TVAzdHFUd2lNYXZwd2VvYTIwbEdEbi9DTFpvZHUwUmE4b0w3OGI2RlZ6dE5rV2cKUGRpV0NsTWswSlBQTWxmTEVpSzhoZkhFKzZtUlZYbWkxMml0SzFzZW1td3lIS2RqOWZHNFg5K3JRMnNLdUxmZQpqeDd1RnhuQUYrR2l2Q3VDbzh4Zk9lc0x3NzJ2eCtXN21tZFlzaGcvbFhPY3F2c3pRUS9MbUZFVlFZeE5hZWVWCm5QU0FzK2h0OHZVUFc0c1g5SWtYS1ZnQkpkMVIxaXNVcG9GNmRLbFVleG12THhFeWY1Y0NBd0VBQWFPQjR6Q0IKNERBZEJnTlZIUTRFRmdRVXc2TGFDNytKNjJyS2RhVEEzN2tBWVlVYnJrZ3dnYkFHQTFVZEl3U0JxRENCcFlBVQp3NkxhQzcrSjYycktkYVRBMzdrQVlZVWJya2loZ1lHa2Z6QjlNUXN3Q1FZRFZRUUdFd0pEU0RFTE1Ba0dBMVVFCkNCTUNXa2d4RHpBTkJnTlZCQWNUQmxwMWNtbGphREVRTUE0R0ExVUVDaE1IVkdoeVpXVnRZVEVMTUFrR0ExVUUKQ3hNQ1EwRXhFekFSQmdOVkJBTVRDbFJvY21WbGJXRWdRMEV4SERBYUJna3Foa2lHOXcwQkNRRVdEV05oUUhSbwpjbVZsYldFdVkyaUNDUUROUTBmd3dVUmFVREFNQmdOVkhSTUVCVEFEQVFIL01BMEdDU3FHU0liM0RRRUJCUVVBCkE0SUJBUUFSSE15SUhCREZ1bCtodmpBQ3Q2cjBFQUhZd1I5R1FTZ2hJUXNmSHQ4Y3lWY3ptRW5KSDlocnZoOVEKVml2bTdtcmZ2ZWlobU5YQW40V2xHd1ErQUN1VnRUTHh3OEVyYlNUN0lNQU94OW5wSGYva25nblo0blN3VVJGOQpyQ0V5SHExNzlwTlhwT3paMjU3RTVyMGF2TU5OWFhEd3VsdzAzaUJFMjFlYmQwMHBHMTFHVnEvSTI2cys4QmpuCkRLUlBxdUtyU080L2x1RUR2TDRuZ2lRalpwMzJTOVoxSzlzVk96cXRRN0k5enplVUFEbTNhVmEvQnBhdzRpTVIKMVNJN285YUpZaVJpMWd4WVAyQlVBMUlGcXI4Tnp5ZkdEN3RSSGRxN2JaT3hYQWx1djgxZGNiejBTQlg4U2dWMQo0SEVLYzZ4TUFObllzL2FZS2p2bVAwVnBPdlJVCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0=");
 	PublicKey const longTermServerPublicKey = PublicKey::fromHexString(QStringLiteral("b851ae1bf275ebe6851ca7f5206b495080927159787e9aaabbeb4e55af09d805"));
 
-	serverConfiguration = std::make_unique<ServerConfiguration>(QStringLiteral("g-xx.0.threema.ch"), 5222, longTermServerPublicKey, QStringLiteral("https://api.threema.ch"), QStringLiteral("Threema/openMittsu"), apiServerRootCertificate, QStringLiteral("https://%1.blob.threema.ch/%2"), QStringLiteral("https://%1.blob.threema.ch/%2/done"), QStringLiteral("https://upload.blob.threema.ch/upload"), QStringLiteral("Threema/openMittsu"), apiServerRootCertificate);
+	serverConfiguration = std::make_shared<ServerConfiguration>(QStringLiteral("g-xx.0.threema.ch"), 5222, longTermServerPublicKey, QStringLiteral("https://api.threema.ch"), QStringLiteral("Threema/openMittsu"), apiServerRootCertificate, QStringLiteral("https://%1.blob.threema.ch/%2"), QStringLiteral("https://%1.blob.threema.ch/%2/done"), QStringLiteral("https://upload.blob.threema.ch/upload"), QStringLiteral("Threema/openMittsu"), apiServerRootCertificate);
 
 	// Load stored settings
 	OptionMaster* optionMaster = OptionMaster::getInstance();
 	QString const clientConfigFile = optionMaster->getOptionAsQString(OptionMaster::Options::FILEPATH_CLIENT_CONFIGURATION);
 	if (!clientConfigFile.isEmpty()) {
 		if (validateClientConfigurationFile(clientConfigFile, true)) {
-			this->clientConfiguration = std::make_unique<ClientConfiguration>(ClientConfiguration::fromFile(clientConfigFile));
+			this->clientConfiguration = std::make_shared<ClientConfiguration>(ClientConfiguration::fromFile(clientConfigFile));
 			updateClientSettingsInfo(clientConfigFile);
 		} else {
 			LOGGER_DEBUG("Removing key \"FILEPATH_CLIENT_CONFIGURATION\" from stored settings as the file is not valid.");
@@ -372,7 +374,7 @@ void Client::btnOpenClientIniOnClick() {
 		return;
 	}
 
-	clientConfiguration = std::make_unique<ClientConfiguration>(ClientConfiguration::fromFile(fileName));
+	clientConfiguration = std::make_shared<ClientConfiguration>(ClientConfiguration::fromFile(fileName));
 	OptionMaster::getInstance()->setOption(OptionMaster::Options::FILEPATH_CLIENT_CONFIGURATION, fileName);
 	updateClientSettingsInfo(fileName);
 }
@@ -438,8 +440,8 @@ void Client::messageCenterOnHasUnreadMessages(ChatTab* tab) {
 
 	if (optionMaster->getOptionAsBool(OptionMaster::Options::BOOLEAN_PLAY_SOUND_ON_MESSAGE_RECEIVED)) {
 		// Do not restart audio, let it play.
-		if (audioOutput->state() != QAudio::State::IdleState) {
-			LOGGER_DEBUG("Wanted to play audio for new message, but it was not idle.");
+		if (audioOutput->state() == QAudio::State::ActiveState) {
+			LOGGER_DEBUG("Wanted to play audio for new message, but it was active.");
 			return;
 		}
 
@@ -477,6 +479,16 @@ void Client::protocolClientOnConnectToFinished(int errCode, QString message) {
 		connectionState = ConnectionState::STATE_CONNECTED;
 		ui.btnConnect->setText("Disconnect");
 		ui.btnConnect->setEnabled(true);
+
+		// Start checking feature levels and statuses of contacts
+		QList<ContactId> knownIdentities = contactRegistry->getIdentities();
+		CheckFeatureLevelCallbackTask* taskCheckFeatureLevels = new CheckFeatureLevelCallbackTask(serverConfiguration, knownIdentities);
+		OPENMITTSU_CONNECT_QUEUED(taskCheckFeatureLevels, finished(CallbackTask*), this, callbackTaskFinished(CallbackTask*));
+		taskCheckFeatureLevels->start();
+
+		CheckContactIdStatusCallbackTask* taskCheckContactIdStatus = new CheckContactIdStatusCallbackTask(serverConfiguration, knownIdentities);
+		OPENMITTSU_CONNECT_QUEUED(taskCheckContactIdStatus, finished(CallbackTask*), this, callbackTaskFinished(CallbackTask*));
+		taskCheckContactIdStatus->start();
 	} else {
 		connectionState = ConnectionState::STATE_DISCONNECTED;
 		QMessageBox::warning(this, "Connection Error", QString("Could not connect to server.\nThe error was: %1").arg(message));
@@ -822,31 +834,68 @@ void Client::showNotYetImplementedInfo() {
 }
 
 void Client::callbackTaskFinished(CallbackTask* callbackTask) {
-	CheckFeatureLevelCallbackTask* task = dynamic_cast<CheckFeatureLevelCallbackTask*>(callbackTask);
-	if (task != nullptr) {
-		QHash<ContactId, int> result = task->getFetchedFeatureLevels();
-		QHashIterator<ContactId, int> i(result);
-		while (i.hasNext()) {
-			i.next();
-			LOGGER_DEBUG("Contact {} has feature level {}.", i.key().toString(), i.value());
-		}
+	if (callbackTask == nullptr) {
+		LOGGER()->error("A null callback task finished.");
+		return;
 	}
 
-	CheckContactIdStatusCallbackTask* task2 = dynamic_cast<CheckContactIdStatusCallbackTask*>(callbackTask);
-	if (task2 != nullptr) {
-		QHash<ContactId, ContactIdStatus> result = task2->getFetchedStatus();
-		QHashIterator<ContactId, ContactIdStatus> i(result);
-		while (i.hasNext()) {
-			i.next();
-			std::string s;
-			if (i.value() == ContactIdStatus::STATUS_ACTIVE) {
-				s = "active";
-			} else if (i.value() == ContactIdStatus::STATUS_INACTIVE) {
-				s = "inactive";
-			} else if (i.value() == ContactIdStatus::STATUS_INVALID) {
-				s = "invalid";
+	if (dynamic_cast<CheckFeatureLevelCallbackTask*>(callbackTask) != nullptr) {
+		UniquePtrWithDelayedThreadDeletion<CheckFeatureLevelCallbackTask> checkFeatureLevelTask(dynamic_cast<CheckFeatureLevelCallbackTask*>(callbackTask));
+		if (checkFeatureLevelTask->hasFinishedSuccessfully()) {
+			ContactId const selfIdentity = (clientConfiguration == nullptr) ? ContactId(0) : clientConfiguration->getClientIdentity();
+
+			QHash<ContactId, FeatureLevel> result = checkFeatureLevelTask->getFetchedFeatureLevels();
+			QHashIterator<ContactId, FeatureLevel> i(result);
+			while (i.hasNext()) {
+				i.next();
+				LOGGER_DEBUG("Contact {} has feature level {}.", i.key().toString(), FeatureLevelHelper::featureLevelToInt(i.value()));
 			}
-			LOGGER_DEBUG("Contact {} has status {}.", i.key().toString(), s);
+
+			if (result.contains(selfIdentity)) {
+				FeatureLevel const selfFeatureLevel = result.value(selfIdentity);
+				FeatureLevel const openMittsuFeatureLevel = FeatureLevelHelper::latestSupported();
+
+				if (FeatureLevelHelper::lessThan(selfFeatureLevel, openMittsuFeatureLevel)) {
+					if (clientConfiguration == nullptr || serverConfiguration == nullptr) {
+						LOGGER()->error("Wanted to update feature level, but either client config or server config is null!");
+						return;
+					}
+
+					std::shared_ptr<CryptoBox> cryptoBox = std::make_shared<CryptoBox>(KeyRegistry(clientConfiguration->getClientLongTermKeyPair(), serverConfiguration->getServerLongTermPublicKey(), {}));
+					SetFeatureLevelCallbackTask* setFeatureLevelTask = new SetFeatureLevelCallbackTask(serverConfiguration, cryptoBox, clientConfiguration, openMittsuFeatureLevel);
+					OPENMITTSU_CONNECT(setFeatureLevelTask, finished(CallbackTask*), this, callbackTaskFinished(CallbackTask*));
+					setFeatureLevelTask->start();
+				}
+			}
+		} else {
+			LOGGER()->error("Checking for supported feature levels of contacts failed: {}", checkFeatureLevelTask->getErrorMessage().toStdString());
+		}
+	} else if (dynamic_cast<CheckContactIdStatusCallbackTask*>(callbackTask) != nullptr) {
+		UniquePtrWithDelayedThreadDeletion<CheckContactIdStatusCallbackTask> checkContactIdStatusTask(dynamic_cast<CheckContactIdStatusCallbackTask*>(callbackTask));
+		if (checkContactIdStatusTask->hasFinishedSuccessfully()) {
+			QHash<ContactId, ContactIdStatus> result = checkContactIdStatusTask->getFetchedStatus();
+			QHashIterator<ContactId, ContactIdStatus> i(result);
+			while (i.hasNext()) {
+				i.next();
+				std::string s;
+				if (i.value() == ContactIdStatus::STATUS_ACTIVE) {
+					s = "active";
+				} else if (i.value() == ContactIdStatus::STATUS_INACTIVE) {
+					s = "inactive";
+				} else if (i.value() == ContactIdStatus::STATUS_INVALID) {
+					s = "invalid";
+				}
+				LOGGER_DEBUG("Contact {} has status {}.", i.key().toString(), s);
+			}
+		} else {
+			LOGGER()->error("Checking for status of contacts failed: {}", checkContactIdStatusTask->getErrorMessage().toStdString());
+		}
+	} else if (dynamic_cast<SetFeatureLevelCallbackTask*>(callbackTask) != nullptr) {
+		UniquePtrWithDelayedThreadDeletion<SetFeatureLevelCallbackTask> setFeatureLevelTask(dynamic_cast<SetFeatureLevelCallbackTask*>(callbackTask));
+		if (setFeatureLevelTask->hasFinishedSuccessfully()) {
+			LOGGER()->info("Updated feature level for used Client ID to latest support version {}.", FeatureLevelHelper::featureLevelToInt(FeatureLevelHelper::latestSupported()));
+		} else {
+			LOGGER()->error("Updating the feature level for used Client ID to latest support version {} failed: {}", FeatureLevelHelper::featureLevelToInt(FeatureLevelHelper::latestSupported()), setFeatureLevelTask->getErrorMessage().toStdString());
 		}
 	}
 }

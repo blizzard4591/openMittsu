@@ -15,11 +15,11 @@
 #include <QHash>
 #include <QList>
 #include <QSslCertificate>
-
+#include <memory>
 
 class CheckContactIdStatusCallbackTask : public CertificateBasedCallbackTask {
 public:
-	CheckContactIdStatusCallbackTask(ServerConfiguration* serverConfiguration, QList<ContactId> const& identitiesToCheck);
+	CheckContactIdStatusCallbackTask(std::shared_ptr<ServerConfiguration> const& serverConfiguration, QList<ContactId> const& identitiesToCheck);
 	virtual ~CheckContactIdStatusCallbackTask();
 
 	QList<ContactId> const& getContactIds() const;

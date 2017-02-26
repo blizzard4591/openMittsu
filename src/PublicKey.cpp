@@ -69,7 +69,7 @@ PublicKey PublicKey::fromDecodedServerResponse(QByteArray const& response) {
 
 PublicKey PublicKey::fromHexString(QString const& hexString) {
 	PublicKey pk;
-	pk.publicKey = QByteArray::fromHex(hexString.toLocal8Bit());
+	pk.publicKey = QByteArray::fromHex(hexString.toLatin1());
 	pk.calculateFingerprintFromPublicKey();
 	return pk;
 }

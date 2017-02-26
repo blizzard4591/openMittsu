@@ -5,6 +5,7 @@
 #include "tasks/CertificateBasedCallbackTask.h"
 #include "protocol/ContactId.h"
 #include "protocol/CryptoBox.h"
+#include "protocol/FeatureLevel.h"
 #include "protocol/Nonce.h"
 #include "ServerConfiguration.h"
 #include "PublicKey.h"
@@ -14,15 +15,15 @@
 #include <QHash>
 #include <QList>
 #include <QSslCertificate>
-
+#include <memory>
 
 class CheckFeatureLevelCallbackTask : public CertificateBasedCallbackTask {
 public:
-	CheckFeatureLevelCallbackTask(ServerConfiguration* serverConfiguration, QList<ContactId> const& identitiesToCheck);
+	CheckFeatureLevelCallbackTask(std::shared_ptr<ServerConfiguration> const& serverConfiguration, QList<ContactId> const& identitiesToCheck);
 	virtual ~CheckFeatureLevelCallbackTask();
 
 	QList<ContactId> const& getContactIds() const;
-	QHash<ContactId, int> const& getFetchedFeatureLevels() const;
+	QHash<ContactId, FeatureLevel> const& getFetchedFeatureLevels() const;
 protected:
 	virtual void taskRun() override;
 private:
@@ -30,7 +31,7 @@ private:
 	QString const agentString;
 	QList<ContactId> const identitiesToFetch;
 
-	QHash<ContactId, int> fetchedFeatureLevels;
+	QHash<ContactId, FeatureLevel> fetchedFeatureLevels;
 };
 
 #endif // OPENMITTSU_TASKS_CHECKFEATURELEVELCALLBACKTASK_H_

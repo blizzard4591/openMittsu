@@ -22,9 +22,9 @@
 #include <QJsonValue>
 #include <QJsonArray>
 
-CheckContactIdStatusCallbackTask::CheckContactIdStatusCallbackTask(ServerConfiguration* serverConfiguration, QList<ContactId> const& identitiesToCheck) : CertificateBasedCallbackTask(serverConfiguration->getApiServerCertificateAsBase64()), urlString(serverConfiguration->getApiServerCheckStatusForIdsUrl()), agentString(serverConfiguration->getApiServerAgent()), identitiesToFetch(identitiesToCheck) {
+CheckContactIdStatusCallbackTask::CheckContactIdStatusCallbackTask(std::shared_ptr<ServerConfiguration> const& serverConfiguration, QList<ContactId> const& identitiesToCheck) : CertificateBasedCallbackTask(serverConfiguration->getApiServerCertificateAsBase64()), urlString(serverConfiguration->getApiServerCheckStatusForIdsUrl()), agentString(serverConfiguration->getApiServerAgent()), identitiesToFetch(identitiesToCheck) {
 	if (urlString.isEmpty() || urlString.isNull()) {
-		throw IllegalArgumentException() << "No identity download URL available from server configuration.";
+		throw IllegalArgumentException() << "No URL for checking ID status available from server configuration.";
 	}
 }
 
@@ -74,22 +74,16 @@ void CheckContactIdStatusCallbackTask::taskRun() {
 		QJsonDocument answerDocument = QJsonDocument::fromJson(answer);
 		if (answerDocument.isObject()) {
 			QJsonObject answerObject = answerDocument.object();
-			QJsonValue answerValue = answerObject.value("featureLevels");
+			QJsonValue answerValue = answerObject.value("states");
 			if (answerValue.isArray()) {
 				QJsonArray answerArray = answerValue.toArray();
 				if (identitiesToFetch.size() != answerArray.size()) {
-					finishedWithError(-5, "Member featureLevels has a different size then the requested array.");
+					finishedWithError(-5, "Member states has a different size then the requested array.");
 					return;
 				}
 
 				for (int i = 0, size = answerArray.size(); i < size; ++i) {
-					QString codeString = answerArray.at(i).toString();
-					bool ok = false;
-					int code = codeString.toInt(&ok);
-					if (!ok) {
-						finishedWithError(-4, "Member featureLevels has an entry that could not be converted to an int.");
-						return;
-					}
+					int code = answerArray.at(i).toInt(-1);
 
 					if (code == 0) {
 						fetchedFeatureLevels.insert(identitiesToFetch.at(i), ContactIdStatus::STATUS_ACTIVE);
@@ -98,12 +92,12 @@ void CheckContactIdStatusCallbackTask::taskRun() {
 					} else if (code == 2) {
 						fetchedFeatureLevels.insert(identitiesToFetch.at(i), ContactIdStatus::STATUS_INVALID);
 					} else {
-						finishedWithError(-6, "Member featureLevels has an entry that could not be converted to a valid status.");
+						finishedWithError(-6, QString("Member states has an entry that could not be converted to a valid status: ").append(answerArray.at(i).toString()));
 						return;
 					}
 				}
 			} else {
-				finishedWithError(-3, "Member featureLevels is not a JSON Array.");
+				finishedWithError(-3, "Member states is not a JSON Array.");
 			}
 		} else {
 			finishedWithError(-2, "Result is not a JSON Object.");

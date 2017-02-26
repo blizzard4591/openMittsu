@@ -22,9 +22,9 @@
 #include <QJsonValue>
 #include <QJsonArray>
 
-CheckFeatureLevelCallbackTask::CheckFeatureLevelCallbackTask(ServerConfiguration* serverConfiguration, QList<ContactId> const& identitiesToCheck) : CertificateBasedCallbackTask(serverConfiguration->getApiServerCertificateAsBase64()), urlString(serverConfiguration->getApiServerFetchFeatureLevelsForIdsUrl()), agentString(serverConfiguration->getApiServerAgent()), identitiesToFetch(identitiesToCheck) {
+CheckFeatureLevelCallbackTask::CheckFeatureLevelCallbackTask(std::shared_ptr<ServerConfiguration> const& serverConfiguration, QList<ContactId> const& identitiesToCheck) : CertificateBasedCallbackTask(serverConfiguration->getApiServerCertificateAsBase64()), urlString(serverConfiguration->getApiServerFetchFeatureLevelsForIdsUrl()), agentString(serverConfiguration->getApiServerAgent()), identitiesToFetch(identitiesToCheck) {
 	if (urlString.isEmpty() || urlString.isNull()) {
-		throw IllegalArgumentException() << "No identity download URL available from server configuration.";
+		throw IllegalArgumentException() << "No feature level checking URL available from server configuration.";
 	}
 }
 
@@ -91,7 +91,7 @@ void CheckFeatureLevelCallbackTask::taskRun() {
 						return;
 					}
 
-					fetchedFeatureLevels.insert(identitiesToFetch.at(i), code);
+					fetchedFeatureLevels.insert(identitiesToFetch.at(i), FeatureLevelHelper::intToFeatureLevel(code));
 				}
 			} else {
 				finishedWithError(-3, "Member featureLevels is not a JSON Array.");
@@ -108,7 +108,7 @@ void CheckFeatureLevelCallbackTask::taskRun() {
 	}
 }
 
-QHash<ContactId, int> const& CheckFeatureLevelCallbackTask::getFetchedFeatureLevels() const {
+QHash<ContactId, FeatureLevel> const& CheckFeatureLevelCallbackTask::getFetchedFeatureLevels() const {
 	return fetchedFeatureLevels;
 }
 
