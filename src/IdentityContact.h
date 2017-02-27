@@ -9,6 +9,7 @@
 #include "Contact.h"
 #include "PublicKey.h"
 #include "protocol/ContactId.h"
+#include "protocol/ContactIdStatus.h"
 
 class IdentityContact : public Contact {
 	Q_OBJECT
@@ -23,11 +24,13 @@ public:
 	QString const& getNickname() const;
 	PublicKey const& getPublicKey() const;
 	ContactId const& getContactId() const;
-
+	ContactIdStatus const& getStatus() const;
+	void setStatus(ContactIdStatus const& newStatus);
 private:
 	ContactId const contactId;
 	PublicKey const contactPublicKey;
 
+	ContactIdStatus status;
 	QString nickname;
 };
 

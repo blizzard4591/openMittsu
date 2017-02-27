@@ -390,13 +390,6 @@ void Client::btnOpenContactsOnClick() {
 }
 
 void Client::contactRegistryOnIdentitiesChanged() {
-	/*
-	QList<ContactId> knownIdentities = contactRegistry->getIdentities();
-	CheckFeatureLevelCallbackTask* task = new CheckFeatureLevelCallbackTask(serverConfiguration.get(), knownIdentities);
-	OPENMITTSU_CONNECT(task, finished(CallbackTask*), this, callbackTaskFinished(CallbackTask*));
-	task->start();	
-	*/
-
 	LOGGER_DEBUG("Updating contacts list on IdentitiesChanged() signal.");
 	ui.listContacts->clear();
 	
@@ -410,6 +403,14 @@ void Client::contactRegistryOnIdentitiesChanged() {
 			continue;
 		}
 		ContactListWidgetItem* clwi = new ContactListWidgetItem(contactRegistry->getIdentity(*it), contactRegistry->getNickname(*it));
+
+		ContactIdStatus const status = contactRegistry->getIdentity(*it)->getStatus();
+		if (status == ContactIdStatus::STATUS_INACTIVE) {
+			clwi->setBackgroundColor(QColor::fromRgb(255, 255, 51));
+		} else if (status == ContactIdStatus::STATUS_INVALID) {
+			clwi->setBackgroundColor(QColor::fromRgb(250, 128, 114));
+		}
+
 		ui.listContacts->addItem(clwi);
 	}
 
@@ -546,24 +547,60 @@ void Client::listContactsOnContextMenu(QPoint const& pos) {
 			IdentityContact* ic = dynamic_cast<IdentityContact*>(clwi->getContact());
 			isIdentityContact = true;
 
-			actionHeadline = new QAction(QString("Identity: %1").arg(ic->getContactId().toQString()), &listContactsContextMenu);
+			actionHeadline = new QAction(QString(tr("Identity: %1")).arg(ic->getContactId().toQString()), &listContactsContextMenu);
 			listContactsContextMenu.addAction(actionHeadline);
-			actionEdit = new QAction("Edit Contact", &listContactsContextMenu);
+			actionEdit = new QAction(tr("Edit Contact"), &listContactsContextMenu);
 			listContactsContextMenu.addAction(actionEdit);
 
 			isChatWindowOpen = MessageCenter::getInstance()->hasTabOpenForIdentityContact(ic->getContactId());
 			if (isChatWindowOpen) {
 				tab = MessageCenter::getInstance()->ensureTabOpenForIdentityContact(ic->getContactId());
-				actionOpenClose = new QAction("Close Chat Window", &listContactsContextMenu);
+				actionOpenClose = new QAction(tr("Close Chat Window"), &listContactsContextMenu);
 			} else {
-				actionOpenClose = new QAction("Open Chat Window", &listContactsContextMenu);
+				actionOpenClose = new QAction(tr("Open Chat Window"), &listContactsContextMenu);
 			}
 			listContactsContextMenu.addAction(actionOpenClose);
+
+			QAction* separator = new QAction(&listContactsContextMenu);
+			separator->setSeparator(true);
+			listContactsContextMenu.addAction(separator);
+
+			QString statusText;
+			ContactIdStatus const status = ic->getStatus();
+			if (status == ContactIdStatus::STATUS_ACTIVE) {
+				statusText = tr("active");
+			} else if (status == ContactIdStatus::STATUS_UNKNOWN) {
+				statusText = tr("unknown");
+			} else if (status == ContactIdStatus::STATUS_INACTIVE) {
+				statusText = tr("inactive");
+			} else {
+				statusText = tr("invalid");
+			}
+			QAction* contactStatus = new QAction(QString(tr("Status: %1")).arg(statusText), &listContactsContextMenu);
+			contactStatus->setDisabled(true);
+			listContactsContextMenu.addAction(contactStatus);
+
+			QList<GroupId> groups = contactRegistry->getKnownGroupsContainingMember(ic->getContactId());
+			if (groups.size() < 1) {
+				QAction* groupMembership = new QAction(tr("Not a member of any known group"), &listContactsContextMenu);
+				groupMembership->setDisabled(true);
+				listContactsContextMenu.addAction(groupMembership);
+			} else {
+				QAction* groupMembership = new QAction(tr("Group memberships:"), &listContactsContextMenu);
+				groupMembership->setDisabled(true);
+				listContactsContextMenu.addAction(groupMembership);
+
+				for (GroupId const& groupId : groups) {
+					QAction* groupMember = new QAction(QString(" - ").append(contactRegistry->getNickname(groupId)), &listContactsContextMenu);
+					groupMember->setDisabled(true);
+					listContactsContextMenu.addAction(groupMember);
+				}
+			}
 		} else {
 			GroupContact* gc = dynamic_cast<GroupContact*>(clwi->getContact());
 			isIdentityContact = false;
 
-			actionHeadline = new QAction(QString("Group: %1").arg(gc->getGroupId().toQString()), &listContactsContextMenu);
+			actionHeadline = new QAction(QString(tr("Group: %1")).arg(gc->getGroupId().toQString()), &listContactsContextMenu);
 			listContactsContextMenu.addAction(actionHeadline);
 			actionEdit = new QAction("Edit Group", &listContactsContextMenu);
 			listContactsContextMenu.addAction(actionEdit);
@@ -571,21 +608,37 @@ void Client::listContactsOnContextMenu(QPoint const& pos) {
 			isChatWindowOpen = MessageCenter::getInstance()->hasTabOpenForGroupContact(gc->getGroupId());
 			if (isChatWindowOpen) {
 				tab = MessageCenter::getInstance()->ensureTabOpenForGroupContact(gc->getGroupId());
-				actionOpenClose = new QAction("Close Chat Window", &listContactsContextMenu);
+				actionOpenClose = new QAction(tr("Close Chat Window"), &listContactsContextMenu);
 			} else {
-				actionOpenClose = new QAction("Open Chat Window", &listContactsContextMenu);
+				actionOpenClose = new QAction(tr("Open Chat Window"), &listContactsContextMenu);
 			}
 			listContactsContextMenu.addAction(actionOpenClose);
 
 			if (gc->getGroupOwner() == ContactRegistry::getInstance()->getSelfContact()->getContactId()) {
 				isGroupSelfOwned = true;
-				actionRequestSync = new QAction("Force Group Sync", &listContactsContextMenu);
+				actionRequestSync = new QAction(tr("Force Group Sync"), &listContactsContextMenu);
 			} else {
-				actionRequestSync = new QAction("Request Group Sync", &listContactsContextMenu);
+				actionRequestSync = new QAction(tr("Request Group Sync"), &listContactsContextMenu);
 			}
 			listContactsContextMenu.addAction(actionRequestSync);
 			if (protocolClient == nullptr || !protocolClient->getIsConnected()) {
 				actionRequestSync->setDisabled(true);
+			}
+
+			QAction* separator = new QAction(&listContactsContextMenu);
+			separator->setSeparator(true);
+			listContactsContextMenu.addAction(separator);
+
+			QAction* groupMembers = new QAction(tr("Group members:"), &listContactsContextMenu);
+			groupMembers->setDisabled(true);
+			listContactsContextMenu.addAction(groupMembers);
+
+			QSet<ContactId> const& members = gc->getGroupMembers();
+
+			for (ContactId const& member : members) {
+				QAction* groupMember = new QAction(QString(" - ").append(contactRegistry->getNickname(member)), &listContactsContextMenu);
+				groupMember->setDisabled(true);
+				listContactsContextMenu.addAction(groupMember);
 			}
 		}
 
@@ -877,16 +930,10 @@ void Client::callbackTaskFinished(CallbackTask* callbackTask) {
 			QHashIterator<ContactId, ContactIdStatus> i(result);
 			while (i.hasNext()) {
 				i.next();
-				std::string s;
-				if (i.value() == ContactIdStatus::STATUS_ACTIVE) {
-					s = "active";
-				} else if (i.value() == ContactIdStatus::STATUS_INACTIVE) {
-					s = "inactive";
-				} else if (i.value() == ContactIdStatus::STATUS_INVALID) {
-					s = "invalid";
-				}
-				LOGGER_DEBUG("Contact {} has status {}.", i.key().toString(), s);
+				contactRegistry->getIdentity(i.key())->setStatus(i.value());
 			}
+
+			contactRegistryOnIdentitiesChanged();
 		} else {
 			LOGGER()->error("Checking for status of contacts failed: {}", checkContactIdStatusTask->getErrorMessage().toStdString());
 		}

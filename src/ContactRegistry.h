@@ -46,6 +46,7 @@ public:
 
 	QHash<ContactId, PublicKey> getKnownIdentitiesWithPublicKeys() const;
 	QHash<GroupId, std::pair<QSet<ContactId>, QString>> getKnownGroupsWithMembersAndTitles() const;
+	QList<GroupId> getKnownGroupsContainingMember(ContactId const& identity) const;
 signals:
 	void identitiesChanged();
 public slots:

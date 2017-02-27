@@ -269,6 +269,19 @@ PublicKey const& ContactRegistry::getPublicKey(ContactId const& identity) const 
 	return result;
 }
 
+QList<GroupId> ContactRegistry::getKnownGroupsContainingMember(ContactId const& identity) const {
+	QList<GroupId> result;
+
+	QHash<GroupId, GroupContact*>::const_iterator identityToGroupContactHashMapIt = identityToGroupContactHashMap.constBegin();
+	QHash<GroupId, GroupContact*>::const_iterator identityToGroupContactHashMapEnd = identityToGroupContactHashMap.constEnd();
+	for (; identityToGroupContactHashMapIt != identityToGroupContactHashMapEnd; ++identityToGroupContactHashMapIt) {
+		if (identityToGroupContactHashMapIt.value()->getGroupMembers().contains(identity)) {
+			result.append(identityToGroupContactHashMapIt.key());
+		}
+	}
+	return result;
+}
+
 QHash<GroupId, std::pair<QSet<ContactId>, QString>> ContactRegistry::getKnownGroupsWithMembersAndTitles() const {
 	QHash<GroupId, std::pair<QSet<ContactId>, QString>> result;
 

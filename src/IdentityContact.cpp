@@ -5,7 +5,7 @@
 #include "exceptions/InternalErrorException.h"
 #include "exceptions/NotConnectedException.h"
 
-IdentityContact::IdentityContact(ContactId const& contactIdentity, PublicKey const& contactPublicKey) : contactId(contactIdentity), contactPublicKey(contactPublicKey), nickname() {
+IdentityContact::IdentityContact(ContactId const& contactIdentity, PublicKey const& contactPublicKey) : contactId(contactIdentity), contactPublicKey(contactPublicKey), status(ContactIdStatus::STATUS_UNKNOWN), nickname() {
 	//
 }
 
@@ -44,4 +44,12 @@ ContactId const& IdentityContact::getContactId() const {
 
 Contact::ContactType IdentityContact::getContactType() const {
 	return ContactType::CONTACT_IDENTITY;
+}
+
+ContactIdStatus const& IdentityContact::getStatus() const {
+	return status;
+}
+
+void IdentityContact::setStatus(ContactIdStatus const& newStatus) {
+	status = newStatus;
 }
