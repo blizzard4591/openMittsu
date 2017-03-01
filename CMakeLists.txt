@@ -333,9 +333,59 @@ if (OPENMITTSU_LINK_LIBCXXABI)
 endif(OPENMITTSU_LINK_LIBCXXABI)
 
 # Targets, CPACK...
+include(InstallRequiredSystemLibraries)
 
 install(TARGETS openMittsu
    RUNTIME
-   DESTINATION bin
-   COMPONENT applications)
+   DESTINATION bin)
+install(TARGETS openMittsuVersionInfo
+   RUNTIME
+   DESTINATION bin)
 
+if (MSVC)
+	set(OPENMITTSU_WINDEPLOYQT_EXE "${Qt5Core_DIR}/../../../bin/windeployqt.exe")
+   
+	#add_custom_target(windeployqt ALL ${OPENMITTSU_WINDEPLOYQT_EXE} --dir "${PROJECT_BINARY_DIR}/windeployqt" $<TARGET_FILE:openMittsu> DEPENDS openMittsu COMMENT "Preparing Qt runtime dependencies")
+	add_custom_command(TARGET openMittsu POST_BUILD COMMAND ${OPENMITTSU_WINDEPLOYQT_EXE} --dir "${PROJECT_BINARY_DIR}/windeployqt" $<TARGET_FILE:openMittsu> COMMENT "Preparing Qt runtime dependencies")
+	
+	install(DIRECTORY "${PROJECT_BINARY_DIR}/windeployqt/" DESTINATION bin)
+	
+	if ("$ENV{VCINSTALLDIR}" STREQUAL "")
+		get_filename_component(OPENMITTSU_VCINSTALLDIR "${CMAKE_LINKER}" DIRECTORY)
+		set(ENV{VCINSTALLDIR} "${OPENMITTSU_VCINSTALLDIR}/../../")
+	endif()
+endif(MSVC)
+   
+# CPack
+set(CPACK_PACKAGE_NAME "openmittsu")
+set(CPACK_PACKAGE_VENDOR "OpenMittsu project team")
+
+set(CPACK_PACKAGE_VERSION_MAJOR "${OPENMITTSU_CPP_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${OPENMITTSU_CPP_VERSION_MINOR}")
+set(CPACK_PACKAGE_VERSION_PATCH "${OPENMITTSU_CPP_VERSION_PATCH}")
+
+set(CPACK_PACKAGE_VERSION "${OPENMITTSU_CPP_VERSION_MAJOR}.${OPENMITTSU_CPP_VERSION_MINOR}.${OPENMITTSU_CPP_VERSION_PATCH}plus${OPENMITTSU_CPP_VERSION_COMMITS_AHEAD}")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt5core5a, libqt5gui5, libqt5multimedia5, libqt5multimedia5-plugins, libqt5network5, libqt5sql5, libqt5sql5-sqlite, libqt5widgets5, openssl, libsodium13, libqrencode3")
+set(CPACK_PACKAGE_CONTACT "Philipp Berger <admin@philippberger.de>")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Philipp Berger <admin@philippberger.de>")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A chat client for Threema-style chat networks")
+set(CPACK_DEBIAN_PACKAGE_SECTION "net")
+set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "")
+set(DEBIAN_PACKAGE_BUILDS_DEPENDS "debhelper (>= 9), cmake (>= 3), qt5-qmake, qtbase5-dev, qtbase5-dev-tools, qtmultimedia5-dev, libsodium-dev, libqrencode-dev, gcc, g++")
+SET(CPACK_PACKAGE_EXECUTABLES "openMittsu;OpenMittsu")
+SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
+if (WIN32 AND NOT UNIX)
+  SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\openMittsu.exe")
+  SET(CPACK_NSIS_DISPLAY_NAME "openMittsu")
+  SET(CPACK_NSIS_HELP_LINK "https:\\\\\\\\www.openmittsu.de")
+  SET(CPACK_NSIS_URL_INFO_ABOUT "https:\\\\\\\\www.openmittsu.de")
+  SET(CPACK_NSIS_CONTACT "mail@openmittsu.de")
+  SET(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+else(WIN32 AND NOT UNIX)
+  SET(CPACK_STRIP_FILES "bin/openMittsu")
+  SET(CPACK_SOURCE_STRIP_FILES "")
+endif(WIN32 AND NOT UNIX)
+set(CPACK_SOURCE_IGNORE_FILES ".git")
+set(CPACK_BUNDLE_NAME "openmittsu")
+set(CPACK_SOURCE_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
+INCLUDE(CPack)
