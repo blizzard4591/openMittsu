@@ -344,16 +344,16 @@ install(TARGETS openMittsuVersionInfo
 
 if (MSVC)
 	set(OPENMITTSU_WINDEPLOYQT_EXE "${Qt5Core_DIR}/../../../bin/windeployqt.exe")
-   
-	#add_custom_target(windeployqt ALL ${OPENMITTSU_WINDEPLOYQT_EXE} --dir "${PROJECT_BINARY_DIR}/windeployqt" $<TARGET_FILE:openMittsu> DEPENDS openMittsu COMMENT "Preparing Qt runtime dependencies")
-	add_custom_command(TARGET openMittsu POST_BUILD COMMAND ${OPENMITTSU_WINDEPLOYQT_EXE} --dir "${PROJECT_BINARY_DIR}/windeployqt" $<TARGET_FILE:openMittsu> COMMENT "Preparing Qt runtime dependencies")
-	
-	install(DIRECTORY "${PROJECT_BINARY_DIR}/windeployqt/" DESTINATION bin)
 	
 	if ("$ENV{VCINSTALLDIR}" STREQUAL "")
 		get_filename_component(OPENMITTSU_VCINSTALLDIR "${CMAKE_LINKER}" DIRECTORY)
-		set(ENV{VCINSTALLDIR} "${OPENMITTSU_VCINSTALLDIR}/../../")
+		file(TO_NATIVE_PATH "${OPENMITTSU_VCINSTALLDIR}/../../" VCINSTALLDIR_NATIVEPATH)
+		
+		set(ENV{VCINSTALLDIR} "${VCINSTALLDIR_NATIVEPATH}")
 	endif()
+	
+	add_custom_command(TARGET openMittsu POST_BUILD COMMAND "${CMAKE_SOURCE_DIR}/cmake/callwindeployqt.bat" "${OPENMITTSU_WINDEPLOYQT_EXE}" --dir "${PROJECT_BINARY_DIR}/windeployqt" "$<TARGET_FILE:openMittsu>" "$ENV{VCINSTALLDIR}" COMMENT "Preparing Qt runtime dependencies")
+	install(DIRECTORY "${PROJECT_BINARY_DIR}/windeployqt/" DESTINATION bin)
 endif(MSVC)
    
 # CPack
