@@ -29,6 +29,8 @@ set(OPENMITTSU_CUSTOM_VERSION_STRING "" CACHE STRING "Disables Git version numbe
 
 SET(CMAKE_PREFIX_PATH "${OPENMITTSU_CMAKE_SEARCH_PATH}/lib/cmake/")
 
+SET(OPENMITTSU_ADDITIONAL_INSTALL_FILES "" CACHE STRING "A semicolon separated list of files that will be copied to the bin directory on install.")
+
 if (OPENMITTSU_DEBUG)
 	SET(OPENMITTSU_CONFIG_DEBUG_FLAG_SET ON)
 	if (MSVC)
@@ -355,6 +357,10 @@ if (MSVC)
 	add_custom_command(TARGET openMittsu POST_BUILD COMMAND "${CMAKE_SOURCE_DIR}/cmake/callwindeployqt.bat" "${OPENMITTSU_WINDEPLOYQT_EXE}" --dir "${PROJECT_BINARY_DIR}/windeployqt" "$<TARGET_FILE:openMittsu>" "$ENV{VCINSTALLDIR}" COMMENT "Preparing Qt runtime dependencies")
 	install(DIRECTORY "${PROJECT_BINARY_DIR}/windeployqt/" DESTINATION bin)
 endif(MSVC)
+   
+foreach(ADD_FILE IN LISTS OPENMITTSU_ADDITIONAL_INSTALL_FILES)
+	install(FILES "${ADD_FILE}" DESTINATION bin) 
+endforeach()
    
 # CPack
 set(CPACK_PACKAGE_NAME "openmittsu")
