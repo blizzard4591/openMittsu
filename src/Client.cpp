@@ -316,60 +316,6 @@ void Client::updateKnownContactsInfo(QString const& currentFileName) {
 }
 
 void Client::btnConnectOnClick() {
-	if (!QSqlDatabase::isDriverAvailable("QSQLCIPHER")) {
-		LOGGER()->error("Error: Driver SQLCIPHER not available. Available are: {}", QSqlDatabase::drivers().join(',').toStdString());
-		return;
-	}
-	
-	QSqlDatabase m_db;
-	m_db = QSqlDatabase::addDatabase("QSQLCIPHER");
-	m_db.setDatabaseName("test.db");
-
-	if (!m_db.open()) {
-		LOGGER()->error("Error: connection with database fail");
-	} else {
-		LOGGER()->error("Database: connection ok");
-		QSqlQuery query(m_db);
-		if (!query.exec("PRAGMA key = 'mySecurePasswordNot';")) {
-			LOGGER()->error("Error: PRAGMA key query failed.");
-			return;
-		}
-		if (query.lastError().type() != QSqlError::NoError) {
-			LOGGER()->error("Error2: PRAGMA key query failed.");
-			return;
-		}
-		
-		query.exec("select sqlcipher_export()");
-		QString errmsg = query.lastError().databaseText();
-		if (!errmsg.startsWith("wrong number of arguments")) {
-			LOGGER()->error("Error: Message was {}", errmsg.toStdString());
-			return;
-		}
-		try {
-			if (!query.exec("SELECT count(*) AS `count` FROM sqlite_master;")) {
-				LOGGER()->error("Error: SELECT query failed.");
-				return;
-			} else if (query.lastError().type() != QSqlError::NoError) {
-				LOGGER()->error("Error2: SELECT query failed.");
-				return;
-			} else {
-				while (query.next()) {
-					int count = query.value("count").toInt();
-					LOGGER()->error("Count: {}", count);
-				}
-			}
-		} catch (...) {
-			LOGGER()->error("Exception occurred.");
-		}
-
-		if (!query.exec("CREATE TABLE `test` (`id`	INTEGER PRIMARY KEY AUTOINCREMENT, `bla`	TEXT); ")) {
-			LOGGER()->error("Error: CREATE query failed.");
-			return;
-		}
-	}
-
-	return;
-
 	if (connectionState == ConnectionState::STATE_DISCONNECTED) {
 		if ((serverConfiguration == nullptr) || (clientConfiguration == nullptr)) {
 			QMessageBox::warning(this, "Can not connect", "Please choose a valid client configuration file first.");
@@ -789,7 +735,7 @@ void Client::menuAboutLicenseOnClick() {
 }
 
 void Client::menuAboutAboutOnClick() {
-	QMessageBox::about(this, "OpenMittsu - About", QString("<h2>OpenMittsu</h2><br><br>%1<br>%2<br><br>An open source chat client for Threema-style end-to-end encrypted chat networks.<br><br>This project is in no way connected, affiliated or endorsed with/by Threema GmbH.<br><br>Copyright (C) 2015-16 by Philipp Berger<br>This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.<br>See LICENSE for further information.<br><br>Don't be a jerk!").arg(QString::fromStdString(Version::longVersionString())).arg(QString::fromStdString(Version::buildInfo())));
+	QMessageBox::about(this, "OpenMittsu - About", QString("<h2>OpenMittsu</h2><br><br>%1<br>%2<br><br>An open source chat client for Threema-style end-to-end encrypted chat networks.<br><br>This project is in no way connected, affiliated or endorsed with/by Threema GmbH.<br><br>Copyright (C) 2015-17 by Philipp Berger<br>This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.<br>See LICENSE for further information.<br><br>Don't be a jerk!").arg(QString::fromStdString(Version::longVersionString())).arg(QString::fromStdString(Version::buildInfo())));
 }
 
 void Client::menuAboutAboutQtOnClick() {

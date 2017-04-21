@@ -14,9 +14,9 @@ openMittsu is governed by the GNU GPL v2.0 license, but includes works from diff
  
 ## Supported Platforms
 Currently, the application has been built and tested on:
- - Windows 7 using Visual Studio 2013
  - Windows 7 using Visual Studio 2015
- - Windows 10 using Visual Studio 2015
+ - Windows 7 using Visual Studio 2017
+ - Windows 10 using Visual Studio 2017
  - Debian 8 using GCC 4.8 (AMD64)
  - Debian 8 using GCC 4.9 (PPC)
  

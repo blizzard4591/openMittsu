@@ -34,7 +34,7 @@ else()
 		SET (LIB_POSTFIX "so")
 	ENDIF (WIN32)
  
-	find_path(SODIUM_INCLUDE_DIR
+	find_path(LIBSODIUM_INCLUDE_DIRS
 		NAMES sodium.h
 		HINTS
 			ENV sodiumPath
@@ -46,17 +46,17 @@ else()
  
 	find_library(SODIUM_LIB
 		NAMES ${LIB_PREFIX}sodium.${LIB_POSTFIX}
-		HINTS ${SODIUM_INCLUDE_DIR}/../lib ${SODIUM_INCLUDE_DIR}/../lib64 ${SODIUM_INCLUDE_DIR}/lib${_lib_suffix} ${SODIUM_INCLUDE_DIR}/../Build/Release/${_lib_suffix_win} ${_SODIUM_LIBRARY_DIRS} /usr/lib /usr/local/lib /opt/local/lib /sw/lib
+		HINTS ${LIBSODIUM_INCLUDE_DIRS}/../lib ${LIBSODIUM_INCLUDE_DIRS}/../lib64 ${LIBSODIUM_INCLUDE_DIRS}/lib${_lib_suffix} ${LIBSODIUM_INCLUDE_DIRS}/../Build/Release/${_lib_suffix_win} ${_SODIUM_LIBRARY_DIRS} /usr/lib /usr/local/lib /opt/local/lib /sw/lib
 	)
 	
 	find_library(SODIUM_LIB_DEBUG
 		NAMES ${LIB_PREFIX}sodium.${LIB_POSTFIX}
-		HINTS ${SODIUM_INCLUDE_DIR}/../lib ${SODIUM_INCLUDE_DIR}/../lib64 ${SODIUM_INCLUDE_DIR}/lib${_lib_suffix} ${SODIUM_INCLUDE_DIR}/../Build/Debug/${_lib_suffix_win} ${_SODIUM_LIBRARY_DIRS} /usr/lib /usr/local/lib /opt/local/lib /sw/lib
+		HINTS ${LIBSODIUM_INCLUDE_DIRS}/../lib ${LIBSODIUM_INCLUDE_DIRS}/../lib64 ${LIBSODIUM_INCLUDE_DIRS}/lib${_lib_suffix} ${LIBSODIUM_INCLUDE_DIRS}/../Build/Debug/${_lib_suffix_win} ${_SODIUM_LIBRARY_DIRS} /usr/lib /usr/local/lib /opt/local/lib /sw/lib
 	)
  
-	set(LIBSODIUM_INCLUDE_DIRS ${SODIUM_INCLUDE_DIR} CACHE PATH "libSodium include dir")
+	set(LIBSODIUM_INCLUDE_DIRS ${LIBSODIUM_INCLUDE_DIRS} CACHE PATH "libSodium include dir")
 	set(LIBSODIUM_LIBRARIES "optimized;${SODIUM_LIB};debug;${SODIUM_LIB_DEBUG}" CACHE STRING "libSodium libraries")
  
-	find_package_handle_standard_args(Libsodium DEFAULT_MSG SODIUM_LIB SODIUM_INCLUDE_DIR)
+	find_package_handle_standard_args(Libsodium DEFAULT_MSG SODIUM_LIB LIBSODIUM_INCLUDE_DIRS)
 	mark_as_advanced(LIBSODIUM_INCLUDE_DIRS LIBSODIUM_LIBRARIES)
 endif()
