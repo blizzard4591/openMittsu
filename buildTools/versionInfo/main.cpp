@@ -3,7 +3,8 @@
 #include <algorithm>
 #include <string> 
 
-#include "endianness_config.h"
+#include <QtEndian>
+
 #include "utility/Version.h"
 
 int main(int argc, char *argv[]) {
@@ -34,9 +35,9 @@ int main(int argc, char *argv[]) {
 
 	std::cout << "-";
 
-#if ENDIANNESS_CONFIG_ENDIAN_TYPE == ENDIANNESS_VAL_LITTLE_ENDIAN
+#if (Q_BYTE_ORDER) == (Q_LITTLE_ENDIAN)
 	std::cout << "le";
-#elif ENDIANNESS_CONFIG_ENDIAN_TYPE == ENDIANNESS_VAL_BIG_ENDIAN
+#elif (Q_BYTE_ORDER) == (Q_BIG_ENDIAN)
 	std::cout << "be";
 #else
 	std::cout << "me";
