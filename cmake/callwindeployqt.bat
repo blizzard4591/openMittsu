@@ -14,7 +14,7 @@ if not "%~5"=="" (
 
 REM "${OPENMITTSU_WINDEPLOYQT_EXE}" --dir \\\"${PROJECT_BINARY_DIR}/windeployqt\\\" $<TARGET_FILE:openMittsu>\""
 
-set after1=%~1 %~2 %~3 %~4
+set after1=%~1 %~2 "%~3" "%~4"
 REM echo Calling %after1%
 
 %after1%

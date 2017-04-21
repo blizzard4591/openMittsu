@@ -17,9 +17,6 @@ SET(SPDLOG_MODULE_BASEPATH "${PROJECT_SOURCE_DIR}/3rdparty/spdlog")
 # SpdLog Configuration via #defines
 add_definitions(-DSPDLOG_DEBUG_ON)
 
-# CMake Portable Endian base path, included via GIT Submodule
-SET(CMAKEPORTABLEENDIAN_MODULE_BASEPATH "${PROJECT_SOURCE_DIR}/3rdparty/cmake-portable-endian")
-
 option(OPENMITTSU_LINK_LIBCXXABI "Sets whether libc++abi should be linked." OFF)
 option(OPENMITTSU_USE_LIBCXX "Sets whether the standard library is libc++." OFF)
 option(OPENMITTSU_DEBUG "Sets whether debug checks, assertions and logging should be turned on. Has no effect on builds under MSVC besides turning on debug logging level." OFF)
@@ -54,6 +51,7 @@ find_package(Qt5Gui REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5Multimedia REQUIRED)
+find_package(Qt5Sql REQUIRED)
 find_package(Libsodium REQUIRED)
 find_package(Libqrencode REQUIRED)
 
@@ -81,10 +79,6 @@ include_directories("${PROJECT_SOURCE_DIR}/src")
 
 # Add SpgLog Includes
 include_directories("${SPDLOG_MODULE_BASEPATH}/include")
-
-# Add Portable Endian
-add_subdirectory("${CMAKEPORTABLEENDIAN_MODULE_BASEPATH}" "${PROJECT_BINARY_DIR}/cmakePortableEndian")
-include_directories("${PROJECT_BINARY_DIR}/cmakePortableEndian")
 
 if(CMAKE_COMPILER_IS_GNUCC)
     set(OPENMITTSU_COMPILED_BY "GCC")
@@ -317,9 +311,6 @@ endif(MSVC)
 # Add target link dependencies
 target_link_libraries(openMittsu ${LIBSODIUM_LIBRARIES})
 target_link_libraries(openMittsu ${LIBQRENCODE_LIBRARY})
-message(STATUS "Linking ENDIAN libs: ${ENDIANNESS_LINK_LIBRARIES}")
-target_link_libraries(openMittsu "${ENDIANNESS_LINK_LIBRARIES}")
-target_link_libraries(openMittsuVersionInfo "${ENDIANNESS_LINK_LIBRARIES}")
 
 # Use the required modules from Qt 5.
 target_link_libraries(openMittsu Qt5::Core)
@@ -327,6 +318,9 @@ target_link_libraries(openMittsu Qt5::Gui)
 target_link_libraries(openMittsu Qt5::Widgets)
 target_link_libraries(openMittsu Qt5::Network)
 target_link_libraries(openMittsu Qt5::Multimedia)
+target_link_libraries(openMittsu Qt5::Sql)
+
+target_link_libraries(openMittsuVersionInfo Qt5::Core)
 
 # Link against libc++abi if requested.
 if (OPENMITTSU_LINK_LIBCXXABI)

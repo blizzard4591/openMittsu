@@ -3,6 +3,9 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QIcon>
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlError>
 
 #include <algorithm>
 #include <iostream>
@@ -313,6 +316,60 @@ void Client::updateKnownContactsInfo(QString const& currentFileName) {
 }
 
 void Client::btnConnectOnClick() {
+	if (!QSqlDatabase::isDriverAvailable("QSQLCIPHER")) {
+		LOGGER()->error("Error: Driver SQLCIPHER not available. Available are: {}", QSqlDatabase::drivers().join(',').toStdString());
+		return;
+	}
+	
+	QSqlDatabase m_db;
+	m_db = QSqlDatabase::addDatabase("QSQLCIPHER");
+	m_db.setDatabaseName("test.db");
+
+	if (!m_db.open()) {
+		LOGGER()->error("Error: connection with database fail");
+	} else {
+		LOGGER()->error("Database: connection ok");
+		QSqlQuery query(m_db);
+		if (!query.exec("PRAGMA key = 'mySecurePasswordNot';")) {
+			LOGGER()->error("Error: PRAGMA key query failed.");
+			return;
+		}
+		if (query.lastError().type() != QSqlError::NoError) {
+			LOGGER()->error("Error2: PRAGMA key query failed.");
+			return;
+		}
+		
+		query.exec("select sqlcipher_export()");
+		QString errmsg = query.lastError().databaseText();
+		if (!errmsg.startsWith("wrong number of arguments")) {
+			LOGGER()->error("Error: Message was {}", errmsg.toStdString());
+			return;
+		}
+		try {
+			if (!query.exec("SELECT count(*) AS `count` FROM sqlite_master;")) {
+				LOGGER()->error("Error: SELECT query failed.");
+				return;
+			} else if (query.lastError().type() != QSqlError::NoError) {
+				LOGGER()->error("Error2: SELECT query failed.");
+				return;
+			} else {
+				while (query.next()) {
+					int count = query.value("count").toInt();
+					LOGGER()->error("Count: {}", count);
+				}
+			}
+		} catch (...) {
+			LOGGER()->error("Exception occurred.");
+		}
+
+		if (!query.exec("CREATE TABLE `test` (`id`	INTEGER PRIMARY KEY AUTOINCREMENT, `bla`	TEXT); ")) {
+			LOGGER()->error("Error: CREATE query failed.");
+			return;
+		}
+	}
+
+	return;
+
 	if (connectionState == ConnectionState::STATE_DISCONNECTED) {
 		if ((serverConfiguration == nullptr) || (clientConfiguration == nullptr)) {
 			QMessageBox::warning(this, "Can not connect", "Please choose a valid client configuration file first.");
