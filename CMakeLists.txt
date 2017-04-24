@@ -85,6 +85,8 @@ if(CMAKE_COMPILER_IS_GNUCC)
     # Set standard flags for GCC
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -funroll-loops")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -pedantic")
+	set(CMAKE_CXX_STANDARD 14)
+	set(CMAKE_CXX_STANDARD_REQUIRED ON)
 elseif(MSVC)
     set(OPENMITTSU_COMPILED_BY "MSVC")
 	
@@ -112,6 +114,8 @@ else(CLANG)
 		set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
     endif()
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -stdlib=${CLANG_STDLIB} -Wall -pedantic -Wno-unused-variable -ftemplate-depth=1024")
+	set(CMAKE_CXX_STANDARD 14)
+	set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
 #
