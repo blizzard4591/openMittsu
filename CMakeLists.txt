@@ -81,14 +81,14 @@ include_directories("${PROJECT_SOURCE_DIR}/src")
 include_directories("${SPDLOG_MODULE_BASEPATH}/include")
 
 if(CMAKE_COMPILER_IS_GNUCC)
-    set(OPENMITTSU_COMPILED_BY "GCC")
-    # Set standard flags for GCC
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -funroll-loops")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -pedantic")
+	set(OPENMITTSU_COMPILED_BY "GCC")
+	# Set standard flags for GCC
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -funroll-loops")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -pedantic")
 	set(CMAKE_CXX_STANDARD 14)
 	set(CMAKE_CXX_STANDARD_REQUIRED ON)
 elseif(MSVC)
-    set(OPENMITTSU_COMPILED_BY "MSVC")
+	set(OPENMITTSU_COMPILED_BY "MSVC")
 	
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /GL")
 	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG")
@@ -100,20 +100,20 @@ elseif(MSVC)
 	# Disable "C:\Program Files (x86)\Windows Kits\8.1\Include\um\DbgHelp.h(1544): warning C4091: 'typedef ': ignored on left of '' when no variable is declared"
 	add_definitions(/wd4091)
 else(CLANG)
-    set(OPENMITTSU_COMPILED_BY "Clang (LLVM)")
+	set(OPENMITTSU_COMPILED_BY "Clang (LLVM)")
 	# As CLANG is not set as a variable, we need to set it in case we have not matched another compiler.
 	set (CLANG ON)
-    # Set standard flags for clang
-    set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -funroll-loops -O3")
-    if(UNIX AND NOT APPLE AND NOT OPENMITTSU_USE_LIBCXX)
+	# Set standard flags for clang
+	set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -funroll-loops -O3")
+	if(UNIX AND NOT APPLE AND NOT OPENMITTSU_USE_LIBCXX)
 		set(CLANG_STDLIB libstdc++)
-    else()
+	else()
 		set(CLANG_STDLIB libc++)
 		# Set up some Xcode specific settings
 		set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++14")
 		set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
-    endif()
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -stdlib=${CLANG_STDLIB} -Wall -pedantic -Wno-unused-variable -ftemplate-depth=1024")
+	endif()
+	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -stdlib=${CLANG_STDLIB} -Wall -pedantic -Wno-unused-variable -ftemplate-depth=1024")
 	set(CMAKE_CXX_STANDARD 14)
 	set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
