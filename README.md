@@ -46,7 +46,7 @@ Prerequisites on openSuse:
 sudo zypper install libqt5-qtbase-devel libqt5-qtmultimedia-devel libsodium-devel qrencode-devel git
 ```
 
-### Detailed steps
+### Detailed steps - Linux
 
 Adjust the paths to your system. The ones below are a current Qt version installed on OSX via brew.
 ```bash
@@ -63,10 +63,40 @@ export Qt5Network_DIR=/usr/local/Cellar/qt5/5.7.0/lib/cmake/Qt5Network/
 export Qt5Multimedia_DIR=/usr/local/Cellar/qt5/5.7.0/lib/cmake/Qt5Multimedia
 
 cmake .. # or cmake .. -G Xcode, optionally add -DOPENMITTSU_DEBUG=On
-make # optionally add -j 4 for threaded compilation on with 4 threads
+make # optionally add -j 4 for multi-threaded compilation with 4 threads
 ./openMittsu
 ```
 
+### Detailed steps - Windows
+1. Install CMake from https://cmake.org/download/
+2. Download the latest version of libsodium from https://download.libsodium.org/libsodium/releases/.
+	Either pick the sources and compile them yourself, or use the provided binaries for MSVC in the -msvc.zip packages.
+	Assuming you use the precompiled version and extracted them to C:\cpp\libsodium-1.0.xx-msvc, where xx is the most recent version, the values for CMake later on will be:
+		`LIBSODIUM_LIBRARIES = optimized;C:\cpp\libsodium-1.0.xx-msvc\x64\Release\v141\static\libsodium.lib;debug;C:\cpp\libsodium-1.0.xx-msvc\x64\Debug\v141\static\libsodium.lib` and 
+		`LIBSODIUM_INCLUDE_DIRS = C:\cpp\libsodium-1.0.xx-msvc\include`.
+3. Clone and build the qrEncode library from https://github.com/blizzard4591/qrencode-win32.
+	Use the solution provided in vc15/ and build only the target `qrcodelib` in modes `Debug-Lib` and `Release-Lib`.
+	The basepath were `qrencode.h` is located will serve as the include directory `LIBQRENCODE_INCLUDE_DIR` and
+	we define `LIBQRENCODE_LIBRARY = optimized;C:\cpp\qrencode-win32\qrencode-win32\vc15\x64\Release-Lib\qrcodelib.lib;debug;C:\cpp\qrencode-win32\qrencode-win32\vc15\x64\Debug-Lib\qrcodelib.lib` (change pathes according to your layout!).
+
+4. Download and install the latest Qt version from https://www.qt.io/download-open-source/. Check that you select the right version for your version of Visual Studio, for example msvc-2017-x64 for Visual Studio 2017 and 64bit builds.
+
+5. Open the CMakeLists.txt file in the root folder of openMittsu and look for `OPENMITTSU_CMAKE_SEARCH_PATH`. 
+	Edit the path to point to your Qt installation.
+
+6. Start CMake and point it to the openMittsu directory.
+	Lets say you cloned openMittsu to C:\cpp\openMittsu, then fill out the two lines in CMake as follows:
+		Where is the source code: C:/cpp/openMittsu
+		Where to build the binaries: C:/cpp/openMittsu/build
+	Using the /build folder allows us to perform an out-of-source build that does not pollute the sources with build files.
+	You can even have simultaneous x86 and x64 builds from the same source, just by using different build directories.
+	Click `Configure` and select the appropriate generator for Visual Studio, for example `Visual Studio 15 2017 Win64` for Visual Studio 2017 in 64bit mode.
+	After the first configuration run, there will be errors.
+	Insert the values `LIBSODIUM_LIBRARIES`, `LIBSODIUM_INCLUDE_DIRS`, `LIBQRENCODE_LIBRARY` and `LIBQRENCODE_INCLUDE_DIR` like discussed above.
+	Click `Configure` again, and no more errors should appear - otherwise fill an issue.
+	Click `Generate` and open the generated solution file in the build directory.
+	You can now build either a Debug or a Release build of openMittsu by using the standard Visual Studio target selection.
+	
 ## How to use
 The application requires two input files.
  - The contact database. This is a simple text file of the format:
