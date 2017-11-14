@@ -90,13 +90,10 @@ else()
  
 	set(Libsodium_INCLUDE_DIRS ${Libsodium_INCLUDE_DIRS} CACHE PATH "libSodium include dir")
 	if (SODIUM_LIB_DEBUG AND SODIUM_LIB)
-		message(STATUS "LS Case A")
 		set(Libsodium_LIBRARIES "optimized;${SODIUM_LIB};debug;${SODIUM_LIB_DEBUG}" CACHE STRING "libSodium libraries")
 	elseif(SODIUM_LIB)
-		message(STATUS "LS Case B")
 		set(Libsodium_LIBRARIES "${SODIUM_LIB}" CACHE STRING "libSodium libraries")
 	else()
-		message(STATUS "LS Case C")
 		set(Libsodium_LIBRARIES "")
 	endif()
  
