@@ -1,36 +1,41 @@
 #ifndef OPENMITTSU_TASKS_SYMMETRICDECRYPTIONCALLBACKTASK_H_
 #define OPENMITTSU_TASKS_SYMMETRICDECRYPTIONCALLBACKTASK_H_
 
-#include "messages/Message.h"
-#include "protocol/ContactId.h"
-#include "protocol/CryptoBox.h"
-#include "protocol/EncryptionKey.h"
-#include "protocol/Nonce.h"
-#include "tasks/MessageCallbackTask.h"
-#include "ServerConfiguration.h"
+#include "src/messages/Message.h"
+#include "src/protocol/ContactId.h"
+#include "src/crypto/FullCryptoBox.h"
+#include "src/crypto/EncryptionKey.h"
+#include "src/crypto/Nonce.h"
+#include "src/tasks/MessageCallbackTask.h"
 
 #include <QString>
 #include <QByteArray>
 #include <QSslCertificate>
 
-class SymmetricDecryptionCallbackTask : public MessageCallbackTask {
-public:
-	SymmetricDecryptionCallbackTask(CryptoBox* cryptoBox, Message* message, std::shared_ptr<AcknowledgmentProcessor> const& acknowledgmentProcessor, QByteArray const& encryptedData, Nonce const& nonce, ContactId const& symmetricKeyPartner);
-	virtual ~SymmetricDecryptionCallbackTask();
+namespace openmittsu {
+	namespace tasks {
 
-	ContactId const& getSymmetricKeyPartner() const;
-	QByteArray const& getDecryptedData() const;
+		class SymmetricDecryptionCallbackTask : public MessageCallbackTask {
+		public:
+			SymmetricDecryptionCallbackTask(std::shared_ptr<openmittsu::crypto::FullCryptoBox> const& cryptoBox, openmittsu::messages::Message* message, std::shared_ptr<openmittsu::acknowledgments::AcknowledgmentProcessor> const& acknowledgmentProcessor, QByteArray const& encryptedData, openmittsu::crypto::Nonce const& nonce, openmittsu::protocol::ContactId const& symmetricKeyPartner);
+			virtual ~SymmetricDecryptionCallbackTask();
 
-	QByteArray const& getEncryptedData() const;
-	Nonce const& getNonce() const;
-protected:
-	virtual void taskRun() override;
-private:	
-	CryptoBox* const cryptoBox;
-	QByteArray const encryptedData;
-	Nonce const nonce;
-	ContactId const symmetricKeyPartner;
-	QByteArray decryptedData;
-};
+			openmittsu::protocol::ContactId const& getSymmetricKeyPartner() const;
+			QByteArray const& getDecryptedData() const;
+
+			QByteArray const& getEncryptedData() const;
+			openmittsu::crypto::Nonce const& getNonce() const;
+		protected:
+			virtual void taskRun() override;
+		private:
+			std::shared_ptr<openmittsu::crypto::FullCryptoBox> const m_cryptoBox;
+			QByteArray const m_encryptedData;
+			openmittsu::crypto::Nonce const m_nonce;
+			openmittsu::protocol::ContactId const m_symmetricKeyPartner;
+			QByteArray m_decryptedData;
+		};
+
+	}
+}
 
 #endif // OPENMITTSU_TASKS_SYMMETRICDECRYPTIONCALLBACKTASK_H_

@@ -1,31 +1,26 @@
-#include "widgets/ContactListWidgetItem.h"
+#include "src/widgets/ContactListWidgetItem.h"
 
-#include "IdentityContact.h"
-#include "GroupContact.h"
+#include "src/widgets/GroupListWidgetItem.h"
 
-ContactListWidgetItem::ContactListWidgetItem(Contact* contact, const QString & text, QListWidget * parent, int type) : QListWidgetItem(text, parent, type), contact(contact) {
+ContactListWidgetItem::ContactListWidgetItem(openmittsu::protocol::ContactId const& contactId, bool sortById, QString const& text, QListWidget* parent, int type) : QListWidgetItem(text, parent, type), m_contactId(contactId), m_sortById(sortById) {
 	//
 }
 
-Contact* ContactListWidgetItem::getContact() const {
-	return contact;
+openmittsu::protocol::ContactId const& ContactListWidgetItem::getContactId() const {
+	return m_contactId;
 }
 
 bool ContactListWidgetItem::operator <(QListWidgetItem const& other) const {
-	ContactListWidgetItem const*const otherPtr = dynamic_cast<ContactListWidgetItem const*>(&other);
-	if (otherPtr == nullptr) {
-		return true;
-	}
-
-	Contact::ContactType const ourType = contact->getContactType();
-	if ((ourType == Contact::ContactType::CONTACT_IDENTITY) && (otherPtr->contact->getContactType() == Contact::ContactType::CONTACT_GROUP)) {
-		return true;
-	} else if ((ourType == Contact::ContactType::CONTACT_GROUP) && (otherPtr->contact->getContactType() == Contact::ContactType::CONTACT_IDENTITY)) {
-		return false;
-	} else if (ourType == Contact::ContactType::CONTACT_IDENTITY) {
-		IdentityContact const * const a = dynamic_cast<IdentityContact const*>(contact);
-		IdentityContact const * const b = dynamic_cast<IdentityContact const*>(otherPtr->contact);
-		return (a->getContactId().operator<(b->getContactId()));
+	ContactListWidgetItem const*const otherItemContact = dynamic_cast<ContactListWidgetItem const*>(&other);
+	GroupListWidgetItem const*const otherItemGroup = dynamic_cast<GroupListWidgetItem const*>(&other);
+	if (otherItemContact != nullptr) {
+		if (m_sortById) {
+			return (getContactId() < otherItemContact->getContactId());
+		} else {
+			return (this->text().localeAwareCompare(other.text()) < 0);
+		}
+	} else if (otherItemGroup != nullptr) {
+		return true; // contact before group
 	} else {
 		return (this->text().localeAwareCompare(other.text()) < 0);
 	}

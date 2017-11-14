@@ -1,0 +1,9 @@
+#ifndef OPENMITTSU_EXCEPTIONS_INSUFFICIENTINPUTEXCEPTION_H_
+#define OPENMITTSU_EXCEPTIONS_INSUFFICIENTINPUTEXCEPTION_H_
+
+#include "src/exceptions/BaseException.h"
+#include "src/exceptions/ExceptionMacros.h"
+
+OPENMITTSU_NEW_EXCEPTION(InsufficientInputException)
+ 
+#endif /* OPENMITTSU_EXCEPTIONS_INSUFFICIENTINPUTEXCEPTION_H_ */

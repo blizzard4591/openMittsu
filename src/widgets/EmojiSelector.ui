@@ -88,7 +88,7 @@
             <number>0</number>
            </property>
            <item row="0" column="0">
-            <widget class="ClickAwareLabel" name="labelPeople">
+            <widget class="openmittsu::widgets::ClickAwareLabel" name="labelPeople">
              <property name="font">
               <font>
                <family>Source Sans Pro</family>
@@ -175,7 +175,7 @@
             <number>0</number>
            </property>
            <item row="0" column="0">
-            <widget class="ClickAwareLabel" name="labelNature">
+            <widget class="openmittsu::widgets::ClickAwareLabel" name="labelNature">
              <property name="font">
               <font>
                <family>Source Sans Pro</family>
@@ -262,7 +262,7 @@
             <number>0</number>
            </property>
            <item row="0" column="0">
-            <widget class="ClickAwareLabel" name="labelFoodAndDrink">
+            <widget class="openmittsu::widgets::ClickAwareLabel" name="labelFoodAndDrink">
              <property name="font">
               <font>
                <family>Source Sans Pro</family>
@@ -349,7 +349,7 @@
             <number>0</number>
            </property>
            <item row="0" column="0">
-            <widget class="ClickAwareLabel" name="labelCelebration">
+            <widget class="openmittsu::widgets::ClickAwareLabel" name="labelCelebration">
              <property name="font">
               <font>
                <family>Source Sans Pro</family>
@@ -436,7 +436,7 @@
             <number>0</number>
            </property>
            <item row="0" column="0">
-            <widget class="ClickAwareLabel" name="labelActivity">
+            <widget class="openmittsu::widgets::ClickAwareLabel" name="labelActivity">
              <property name="font">
               <font>
                <family>Source Sans Pro</family>
@@ -523,7 +523,7 @@
             <number>0</number>
            </property>
            <item row="0" column="0">
-            <widget class="ClickAwareLabel" name="labelTravelAndPlaces">
+            <widget class="openmittsu::widgets::ClickAwareLabel" name="labelTravelAndPlaces">
              <property name="font">
               <font>
                <family>Source Sans Pro</family>
@@ -610,7 +610,7 @@
             <number>0</number>
            </property>
            <item row="0" column="0">
-            <widget class="ClickAwareLabel" name="labelObjects">
+            <widget class="openmittsu::widgets::ClickAwareLabel" name="labelObjects">
              <property name="font">
               <font>
                <family>Source Sans Pro</family>
@@ -697,7 +697,7 @@
             <number>0</number>
            </property>
            <item row="0" column="0">
-            <widget class="ClickAwareLabel" name="labelSymbols">
+            <widget class="openmittsu::widgets::ClickAwareLabel" name="labelSymbols">
              <property name="font">
               <font>
                <family>Source Sans Pro</family>
@@ -784,7 +784,7 @@
             <number>0</number>
            </property>
            <item row="0" column="0">
-            <widget class="ClickAwareLabel" name="labelSquareButtons">
+            <widget class="openmittsu::widgets::ClickAwareLabel" name="labelSquareButtons">
              <property name="font">
               <font>
                <family>Source Sans Pro</family>
@@ -823,7 +823,7 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ClickAwareLabel</class>
+   <class>openmittsu::widgets::ClickAwareLabel</class>
    <extends>QLabel</extends>
    <header>widgets/ClickAwareLabel.h</header>
   </customwidget>

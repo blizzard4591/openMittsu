@@ -1,40 +1,42 @@
 #ifndef OPENMITTSU_CLIENT_H
 #define OPENMITTSU_CLIENT_H
 
-#include <QString>
-#include <QSettings>
-#include <QMainWindow>
-#include <QThread>
-#include <QHash>
-#include <QTimer>
-#include <QFile>
 #include <QAudioOutput>
+#include <QDir>
+#include <QFile>
+#include <QHash>
+#include <QMainWindow>
+#include <QSettings>
+#include <QString>
+#include <QThread>
+#include <QTimer>
 
 #include <memory>
 
 #include "ui_main.h"
-#include "ProtocolClient.h"
-#include "ContactRegistry.h"
-#include "ChatTab.h"
-#include "updater/Updater.h"
+#include "network/ProtocolClient.h"
 
-#include "protocol/KeyRegistry.h"
-#include "protocol/GroupRegistry.h"
+#include "src/updater/Updater.h"
+
+#include "src/database/Database.h"
+
+#include "src/dataproviders/KeyRegistry.h"
+#include "src/widgets/TabController.h"
+
+#include "src/utility/AudioNotification.h"
+#include "src/tasks/CallbackTask.h"
 
 class Client : public QMainWindow {
-    Q_OBJECT
-
+	Q_OBJECT
 public:
-    Client(QWidget *parent = 0);
-	~Client();
+	Client(QWidget* parent = nullptr);
+	virtual ~Client();
 private slots:
 	// UI
 	void btnConnectOnClick();
-	void btnOpenClientIniOnClick();
-	void btnOpenContactsOnClick();
+	void btnOpenDatabaseOnClick();
 	void listContactsOnDoubleClick(QListWidgetItem* item);
 	void listContactsOnContextMenu(QPoint const& pos);
-	void chatTabWidgetOnCurrentTabChanged(int index);
 
 	void menuFileOptionsOnClick();
 	void menuFileExitOnClick();
@@ -53,15 +55,13 @@ private slots:
 	void menuIdentityShowPublicKeyOnClick();
 	void menuIdentityCreateBackupOnClick();
 	void menuIdentityLoadBackupOnClick();
-
-	// Audio
-	void audioOutputOnStateChanged(QAudio::State state);
+	void menuDatabaseImportLegacyContactsAndGroupsOnClick();
 
 	// Updater
 	void updaterFoundNewVersion(int versionMajor, int versionMinor, int versionPatch, int commitsSinceTag, QString gitHash, QString channel, QString link);
 public slots:
 	void contactRegistryOnIdentitiesChanged();
-	void messageCenterOnHasUnreadMessages(ChatTab*);
+	void messageCenterOnHasUnreadMessages(openmittsu::widgets::ChatTab*);
 	void connectionTimerOnTimer();
 
 	// All messages from the ProtocolClient
@@ -71,24 +71,20 @@ public slots:
 	void protocolClientOnDuplicateIdUsageDetected();
 
 	// Tasks
-	void callbackTaskFinished(CallbackTask* callbackTask);
+	void callbackTaskFinished(openmittsu::tasks::CallbackTask* callbackTask);
 
 	// Thread Handling
 	void threadFinished();
 protected:
 	virtual void closeEvent(QCloseEvent* event) override;
 private:
-	Ui::MainWindow ui;
-	std::unique_ptr<ProtocolClient> protocolClient;
-	QThread protocolClientThread;
-	QTimer connectionTimer;
-
-	// Audio playing
-	QFile receivedMessageAudioFile;
-	std::unique_ptr<QAudioOutput> audioOutput;
+	Ui::MainWindow m_ui;
+	std::shared_ptr<openmittsu::network::ProtocolClient> m_protocolClient;
+	QThread m_protocolClientThread;
+	QTimer m_connectionTimer;
 
 	// Update functionality
-	Updater updater;
+	openmittsu::updater::Updater m_updater;
 
 	// State of Connection
 	enum class ConnectionState {
@@ -97,21 +93,21 @@ private:
 		STATE_CONNECTED
 	};
 
-	ConnectionState connectionState;
-	std::shared_ptr<ServerConfiguration> serverConfiguration;
-	std::shared_ptr<ClientConfiguration> clientConfiguration;
-	std::shared_ptr<ContactRegistry> contactRegistry;
+	ConnectionState m_connectionState;
+	std::shared_ptr<openmittsu::widgets::TabController> m_tabController;
+	std::shared_ptr<openmittsu::dataproviders::MessageCenter> m_messageCenter;
+	std::shared_ptr<openmittsu::network::ServerConfiguration> m_serverConfiguration;
+	std::shared_ptr<openmittsu::utility::OptionMaster> m_optionMaster;
+	std::shared_ptr<openmittsu::database::Database> m_database;
+	std::shared_ptr<openmittsu::utility::AudioNotification> m_audioNotifier;
 
-	bool validateClientConfigurationFile(QString const& fileName, bool quiet = false);
-	bool validateKnownIdentitiesFile(QString const& fileName, bool quiet = false);
-	void updateClientSettingsInfo(QString const& currentFileName);
-	void updateKnownContactsInfo(QString const& currentFileName);
+	bool validateDatabaseFile(QDir const& databaseLocation, QString const& password, bool quiet = false);
+	void updateDatabaseInfo(QString const& currentFileName);
 	void uiFocusOnOverviewTab();
 	void showNotYetImplementedInfo();
 	void setupProtocolClient();
 
 	QString formatDuration(quint64 duration) const;
-	void importLegacyOptions();
 };
 
 #endif

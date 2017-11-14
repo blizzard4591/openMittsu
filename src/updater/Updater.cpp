@@ -1,4 +1,4 @@
-#include "Updater.h"
+#include "src/updater/Updater.h"
 
 #include <QEventLoop>
 #include <QNetworkAccessManager>
@@ -12,100 +12,106 @@
 #include <QString>
 
 #include "Config.h"
-#include "Endian.h"
-#include "utility/Logging.h"
-#include "utility/QObjectConnectionMacro.h"
-#include "utility/Version.h"
+#include "src/utility/Endian.h"
+#include "src/utility/Logging.h"
+#include "src/utility/QObjectConnectionMacro.h"
+#include "src/utility/Version.h"
 
-Updater::Updater() : QThread() {
-	
-}
+namespace openmittsu {
+	namespace updater {
 
-Updater::~Updater() {
-	//
-}
+		Updater::Updater() : QThread() {
 
-void Updater::run() {
+		}
+
+		Updater::~Updater() {
+			//
+		}
+
+		void Updater::run() {
 #ifdef OPENMITTSU_CONFIG_DISABLE_VERSION_UPDATE_CHECK
-	LOGGER()->error("The update checker was disabled at built time.");
+			LOGGER()->error("The update checker was disabled at built time.");
 #else
-	if ((Version::versionMajor == 0) && (Version::versionMinor == 0) && (Version::versionPatch == 0)) {
-		LOGGER()->info("This is not an official build of OpenMittsu, can not check for updates.");
-		return;
-	}
+			if ((openmittsu::utility::Version::versionMajor == 0) && (openmittsu::utility::Version::versionMinor == 0) && (openmittsu::utility::Version::versionPatch == 0)) {
+				LOGGER()->info("This is not an official build of OpenMittsu, can not check for updates.");
+				return;
+			}
 
-	QUrlQuery urlQuery;
-	urlQuery.addQueryItem("major", QString::number(Version::versionMajor));
-	urlQuery.addQueryItem("minor", QString::number(Version::versionMinor));
-	urlQuery.addQueryItem("patch", QString::number(Version::versionPatch));
-	urlQuery.addQueryItem("commitsSinceTag", QString::number(Version::commitsAhead));
-	urlQuery.addQueryItem("gitHash", QString::fromStdString(Version::gitRevisionHash));
-	urlQuery.addQueryItem("os", QString::fromStdString(Version::systemName));
-	urlQuery.addQueryItem("bits", QString::fromStdString(Version::systemPtrSize));
-	urlQuery.addQueryItem("endianness", Endian::getEndiannessDescriptionString());
-	urlQuery.addQueryItem("channel", QStringLiteral("nightly"));
+			QUrlQuery urlQuery;
+			urlQuery.addQueryItem("major", QString::number(openmittsu::utility::Version::versionMajor));
+			urlQuery.addQueryItem("minor", QString::number(openmittsu::utility::Version::versionMinor));
+			urlQuery.addQueryItem("patch", QString::number(openmittsu::utility::Version::versionPatch));
+			urlQuery.addQueryItem("commitsSinceTag", QString::number(openmittsu::utility::Version::commitsAhead));
+			urlQuery.addQueryItem("gitHash", QString::fromStdString(openmittsu::utility::Version::gitRevisionHash));
+			urlQuery.addQueryItem("os", QString::fromStdString(openmittsu::utility::Version::systemName));
+			urlQuery.addQueryItem("bits", QString::fromStdString(openmittsu::utility::Version::systemPtrSize));
+			urlQuery.addQueryItem("endianness", openmittsu::utility::Endian::getEndiannessDescriptionString());
+			urlQuery.addQueryItem("channel", QStringLiteral("nightly"));
 
-	QNetworkAccessManager networkAccessManager;
-	QEventLoop eventLoop;
+			QNetworkAccessManager networkAccessManager;
+			QEventLoop eventLoop;
 
-	OPENMITTSU_CONNECT(&networkAccessManager, finished(QNetworkReply*), &eventLoop, quit());
+			OPENMITTSU_CONNECT(&networkAccessManager, finished(QNetworkReply*), &eventLoop, quit());
 
-	// the HTTPs request
-	QNetworkRequest request;
-	QUrl url(QStringLiteral("https://update.openmittsu.de/update.php"));
-	url.setQuery(urlQuery);
-	request.setUrl(url);
-	LOGGER_DEBUG("Update query URL is {}.", url.toString().toStdString());
+			// the HTTPs request
+			QNetworkRequest request;
+			QUrl url(QStringLiteral("https://update.openmittsu.de/update.php"));
+			url.setQuery(urlQuery);
+			request.setUrl(url);
+			LOGGER_DEBUG("Update query URL is {}.", url.toString().toStdString());
 
-	QNetworkReply *reply = networkAccessManager.get(request);
-	eventLoop.exec(); // blocks until "finished()" has been called
+			QNetworkReply *reply = networkAccessManager.get(request);
+			eventLoop.exec(); // blocks until "finished()" has been called
 
-	if (reply->error() == QNetworkReply::NoError) {
-		// success
-		QByteArray answer(reply->readAll());
-		delete reply;
+			if (reply->error() == QNetworkReply::NoError) {
+				// success
+				QByteArray answer(reply->readAll());
+				delete reply;
 
-		try {
-			QJsonDocument const jsonResponse = QJsonDocument::fromJson(answer);
-			QJsonObject const jsonObject = jsonResponse.object();
-			QJsonValue const jsonValueError = jsonObject.value("error");
-			QJsonValue const jsonValueErrorMsg = jsonObject.value("errorMsg");
+				try {
+					QJsonDocument const jsonResponse = QJsonDocument::fromJson(answer);
+					QJsonObject const jsonObject = jsonResponse.object();
+					QJsonValue const jsonValueError = jsonObject.value("error");
+					QJsonValue const jsonValueErrorMsg = jsonObject.value("errorMsg");
 
-			if (jsonValueError.toBool(true)) {
-				if (!jsonResponse.isNull() && !jsonValueErrorMsg.toString().isEmpty()) {
-					LOGGER()->warn("Update check failed! Server-side error message: {}", jsonValueErrorMsg.toString().toStdString());
-				} else {
-					LOGGER()->warn("Update check failed! The server did not send valid JSON. Error message: {}", QString::fromUtf8(answer).toStdString());
+					if (jsonValueError.toBool(true)) {
+						if (!jsonResponse.isNull() && !jsonValueErrorMsg.toString().isEmpty()) {
+							LOGGER()->warn("Update check failed! Server-side error message: {}", jsonValueErrorMsg.toString().toStdString());
+						} else {
+							LOGGER()->warn("Update check failed! The server did not send valid JSON. Error message: {}", QString::fromUtf8(answer).toStdString());
+						}
+					} else {
+						QJsonValue const jsonValueHasNewVersion = jsonObject.value("hasNewVersion");
+						bool const hasNewVersion = jsonValueHasNewVersion.toBool(false);
+
+						QJsonValue const jsonValueMajor = jsonObject.value("versionMajor");
+						QJsonValue const jsonValueMinor = jsonObject.value("versionMinor");
+						QJsonValue const jsonValuePatch = jsonObject.value("versionPatch");
+						QJsonValue const jsonValueCommitsSinceTag = jsonObject.value("commitsSinceTag");
+						QJsonValue const jsonValueGitHash = jsonObject.value("gitHash");
+						QJsonValue const jsonValueType = jsonObject.value("type");
+						QJsonValue const jsonValueChannel = jsonObject.value("channel");
+						QJsonValue const jsonValueLink = jsonObject.value("link");
+
+						if (hasNewVersion) {
+							LOGGER()->info("Found new version: {}.{}.{}+{} @ {} ({}) in channel {}.", jsonValueMajor.toInt(), jsonValueMinor.toInt(), jsonValuePatch.toInt(), jsonValueCommitsSinceTag.toInt(), jsonValueGitHash.toString().toStdString(), jsonValueType.toString().toStdString(), jsonValueChannel.toString().toStdString());
+
+							emit foundNewVersion(jsonValueMajor.toInt(), jsonValueMinor.toInt(), jsonValuePatch.toInt(), jsonValueCommitsSinceTag.toInt(), jsonValueGitHash.toString(), jsonValueChannel.toString(), jsonValueLink.toString());
+						} else {
+							LOGGER()->info("No new version available. The latest version online is: {}.{}.{}+{} @ {} ({}) in channel {}.", jsonValueMajor.toInt(), jsonValueMinor.toInt(), jsonValuePatch.toInt(), jsonValueCommitsSinceTag.toInt(), jsonValueGitHash.toString().toStdString(), jsonValueType.toString().toStdString(), jsonValueChannel.toString().toStdString());
+						}
+					}
+				} catch (...) {
+					LOGGER()->warn("Caught an exception while running the update query.");
 				}
 			} else {
-				QJsonValue const jsonValueHasNewVersion = jsonObject.value("hasNewVersion");
-				bool const hasNewVersion = jsonValueHasNewVersion.toBool(false);
-
-				QJsonValue const jsonValueMajor = jsonObject.value("versionMajor");
-				QJsonValue const jsonValueMinor = jsonObject.value("versionMinor");
-				QJsonValue const jsonValuePatch = jsonObject.value("versionPatch");
-				QJsonValue const jsonValueCommitsSinceTag = jsonObject.value("commitsSinceTag");
-				QJsonValue const jsonValueGitHash = jsonObject.value("gitHash");
-				QJsonValue const jsonValueType = jsonObject.value("type");
-				QJsonValue const jsonValueChannel = jsonObject.value("channel");
-				QJsonValue const jsonValueLink = jsonObject.value("link");
-
-				if (hasNewVersion) {
-					LOGGER()->info("Found new version: {}.{}.{}+{} @ {} ({}) in channel {}.", jsonValueMajor.toInt(), jsonValueMinor.toInt(), jsonValuePatch.toInt(), jsonValueCommitsSinceTag.toInt(), jsonValueGitHash.toString().toStdString(), jsonValueType.toString().toStdString(), jsonValueChannel.toString().toStdString());
-
-					emit foundNewVersion(jsonValueMajor.toInt(), jsonValueMinor.toInt(), jsonValuePatch.toInt(), jsonValueCommitsSinceTag.toInt(), jsonValueGitHash.toString(), jsonValueChannel.toString(), jsonValueLink.toString());
-				} else {
-					LOGGER()->info("No new version available. The latest version online is: {}.{}.{}+{} @ {} ({}) in channel {}.", jsonValueMajor.toInt(), jsonValueMinor.toInt(), jsonValuePatch.toInt(), jsonValueCommitsSinceTag.toInt(), jsonValueGitHash.toString().toStdString(), jsonValueType.toString().toStdString(), jsonValueChannel.toString().toStdString());
-				}
+				// failure
+				QString const errorString(reply->errorString());
+				delete reply;
+				LOGGER()->warn("Update check failed, query error: {}", errorString.toStdString());
 			}
-		} catch (...) {
-			LOGGER()->warn("Caught an exception while running the update query.");
-		}
-	} else {
-		// failure
-		QString const errorString(reply->errorString());
-		delete reply;
-		LOGGER()->warn("Update check failed, query error: {}", errorString.toStdString());
-	}
 #endif // OPENMITTSU_CONFIG_DISABLE_VERSION_UPDATE_CHECK
+		}
+
+	}
 }

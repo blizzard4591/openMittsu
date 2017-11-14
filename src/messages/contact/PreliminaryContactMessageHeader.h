@@ -1,24 +1,32 @@
 #ifndef OPENMITTSU_MESSAGES_CONTACT_PRELIMINARYCONTACTMESSAGEHEADER_H_
 #define OPENMITTSU_MESSAGES_CONTACT_PRELIMINARYCONTACTMESSAGEHEADER_H_
 
-#include "protocol/ContactId.h"
-#include "protocol/MessageId.h"
-#include "messages/PreliminaryMessageHeader.h"
+#include "src/protocol/ContactId.h"
+#include "src/protocol/MessageId.h"
+#include "src/messages/PreliminaryMessageHeader.h"
 
-class PreliminaryContactMessageHeader : public PreliminaryMessageHeader {
-public:
-	PreliminaryContactMessageHeader(ContactId const& receiver, MessageId const& messageId, MessageFlags const& messageFlags);
-	PreliminaryContactMessageHeader(PreliminaryContactMessageHeader const& other);
-	virtual ~PreliminaryContactMessageHeader();
+namespace openmittsu {
+	namespace messages {
+		namespace contact {
 
-	virtual ContactId const& getReceiver() const;
+			class PreliminaryContactMessageHeader : public PreliminaryMessageHeader {
+			public:
+				PreliminaryContactMessageHeader(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, MessageFlags const& messageFlags);
+				PreliminaryContactMessageHeader(PreliminaryContactMessageHeader const& other);
+				virtual ~PreliminaryContactMessageHeader();
 
-	virtual PreliminaryContactMessageHeader* clone() const;
-private:
-	ContactId const receiverId;
+				virtual openmittsu::protocol::ContactId const& getReceiver() const;
 
-	// Disable the default constructor
-	PreliminaryContactMessageHeader();
-};
+				virtual PreliminaryContactMessageHeader* clone() const;
+			private:
+				openmittsu::protocol::ContactId const receiverId;
+
+				// Disable the default constructor
+				PreliminaryContactMessageHeader();
+			};
+
+		}
+	}
+}
 
 #endif // OPENMITTSU_MESSAGES_CONTACT_PRELIMINARYCONTACTMESSAGEHEADER_H_

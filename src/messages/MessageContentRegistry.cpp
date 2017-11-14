@@ -1,34 +1,42 @@
-#include "messages/MessageContentRegistry.h"
+#include "src/messages/MessageContentRegistry.h"
 
-MessageContentRegistry::MessageContentRegistry() {
-	// Intentionally left empty.
-}
+#include "MessageContentFactory.h"
 
-MessageContentRegistry::MessageContentRegistry(MessageContentRegistry const& other) {
-	throw;
-}
+namespace openmittsu {
+	namespace messages {
 
-bool MessageContentRegistry::registerContent(char signatureByte, MessageContentFactory* messageContentFactory) {
-	mutex.lock();
-	mappings.insert(std::make_pair(signatureByte, messageContentFactory));
-	mutex.unlock();
+		MessageContentRegistry::MessageContentRegistry() {
+			// Intentionally left empty.
+		}
 
-	return true;
-}
+		MessageContentRegistry::MessageContentRegistry(MessageContentRegistry const& other) {
+			throw;
+		}
 
-MessageContentFactory* MessageContentRegistry::getMessageContentFactoryForSignatureByte(char signatureByte) {
-	mutex.lock();
-	MessageContentFactory* result = nullptr;
-	if (mappings.find(signatureByte) != mappings.cend()) {
-		result = mappings.find(signatureByte)->second;
+		bool MessageContentRegistry::registerContent(char signatureByte, MessageContentFactory* messageContentFactory) {
+			mutex.lock();
+			mappings.insert(std::make_pair(signatureByte, messageContentFactory));
+			mutex.unlock();
+
+			return true;
+		}
+
+		MessageContentFactory* MessageContentRegistry::getMessageContentFactoryForSignatureByte(char signatureByte) {
+			mutex.lock();
+			MessageContentFactory* result = nullptr;
+			if (mappings.find(signatureByte) != mappings.cend()) {
+				result = mappings.find(signatureByte)->second;
+			}
+			mutex.unlock();
+
+			return result;
+		}
+
+		MessageContentRegistry& MessageContentRegistry::getInstance() {
+			static MessageContentRegistry instance;
+
+			return instance;
+		}
+
 	}
-	mutex.unlock();
-
-	return result;
-}
-
-MessageContentRegistry& MessageContentRegistry::getInstance() {
-	static MessageContentRegistry instance;
-
-	return instance;
 }

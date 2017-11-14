@@ -1,20 +1,26 @@
-#include "FingerprintDialog.h"
+#include "src/dialogs/FingerprintDialog.h"
 #include "ui_fingerprintdialog.h"
 
-#include "widgets/QrWidget.h"
+#include "src/widgets/QrWidget.h"
 
-FingerprintDialog::FingerprintDialog(ClientConfiguration* clientConfiguration, QWidget *parent) : QDialog(parent), ui(new Ui::FingerprintDialog) {
-    ui->setupUi(this);
+namespace openmittsu {
+	namespace dialogs {
 
-	QString const identityString(QString::fromStdString(clientConfiguration->getClientIdentity().toString()));
-	QString const fingerprint(clientConfiguration->getClientLongTermKeyPair().getFingerprint().toHex());
-	QString const qrData = QString("3mid:%1,%2").arg(identityString).arg(QString(clientConfiguration->getClientLongTermKeyPair().getPublicKey().toHex()).toLower());
+		FingerprintDialog::FingerprintDialog(openmittsu::protocol::ContactId const& selfContactId, openmittsu::crypto::PublicKey const& selfPublicKey, QWidget* parent) : QDialog(parent), ui(new Ui::FingerprintDialog) {
+			ui->setupUi(this);
 
-	ui->edtId->setText(identityString);
-	ui->edtFingerprint->setText(fingerprint);
-	ui->qrWidget->setQrDataString(qrData);
-}
+			QString const identityString(QString::fromStdString(selfContactId.toString()));
+			QString const fingerprint(selfPublicKey.getFingerprint().toHex());
+			QString const qrData = QString("3mid:%1,%2").arg(identityString).arg(QString(selfPublicKey.getPublicKey().toHex()).toLower());
 
-FingerprintDialog::~FingerprintDialog() {
-    delete ui;
+			ui->edtId->setText(identityString);
+			ui->edtFingerprint->setText(fingerprint);
+			ui->qrWidget->setQrDataString(qrData);
+		}
+
+		FingerprintDialog::~FingerprintDialog() {
+			delete ui;
+		}
+
+	}
 }

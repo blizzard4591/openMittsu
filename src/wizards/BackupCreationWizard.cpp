@@ -1,27 +1,31 @@
-#include "BackupCreationWizard.h"
+#include "src/wizards/BackupCreationWizard.h"
 #include "ui_backupcreationwizard.h"
 
-#include "exceptions/InternalErrorException.h"
-#include "utility/QObjectConnectionMacro.h"
+#include "src/exceptions/InternalErrorException.h"
+#include "src/utility/QObjectConnectionMacro.h"
 
-BackupCreationWizard::BackupCreationWizard(ClientConfiguration* clientConfiguration, QWidget *parent) : QWizard(parent), ui(new Ui::BackupCreationWizard), clientConfiguration(clientConfiguration), backupCreationWizardPagePassword(nullptr), backupCreationWizardPageBackup(nullptr) {
-    ui->setupUi(this);
+namespace openmittsu {
+	namespace wizards {
+		BackupCreationWizard::BackupCreationWizard(openmittsu::backup::IdentityBackup const& identityBackup, QWidget* parent) : QWizard(parent), ui(new Ui::BackupCreationWizard), backupCreationWizardPagePassword(nullptr), backupCreationWizardPageBackup(nullptr) {
+			ui->setupUi(this);
 
-	OPENMITTSU_CONNECT(this, currentIdChanged(int), this, pageNextOnClick(int));
+			OPENMITTSU_CONNECT(this, currentIdChanged(int), this, pageNextOnClick(int));
 
-	backupCreationWizardPagePassword = new BackupCreationWizardPagePassword(this);
-	this->addPage(backupCreationWizardPagePassword);
+			backupCreationWizardPagePassword = new BackupCreationWizardPagePassword(this);
+			this->addPage(backupCreationWizardPagePassword);
 
-	backupCreationWizardPageBackup = new BackupCreationWizardPageBackup(clientConfiguration, this);
-	this->addPage(backupCreationWizardPageBackup);
+			backupCreationWizardPageBackup = new BackupCreationWizardPageBackup(identityBackup, this);
+			this->addPage(backupCreationWizardPageBackup);
 
-	setOption(QWizard::NoBackButtonOnLastPage, true);
-}
+			setOption(QWizard::NoBackButtonOnLastPage, true);
+		}
 
-BackupCreationWizard::~BackupCreationWizard() {
-    delete ui;
-}
+		BackupCreationWizard::~BackupCreationWizard() {
+			delete ui;
+		}
 
-void BackupCreationWizard::pageNextOnClick(int pageId) {
-	//
+		void BackupCreationWizard::pageNextOnClick(int pageId) {
+			//
+		}
+	}
 }

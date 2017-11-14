@@ -1,35 +1,33 @@
-#ifndef GROUPCREATIONWIZARD_H
-#define GROUPCREATIONWIZARD_H
+#ifndef OPENMITTSU_WIZARDS_GROUPCREATIONWIZARD_H_
+#define OPENMITTSU_WIZARDS_GROUPCREATIONWIZARD_H_
 
+#include <QSet>
 #include <QWizard>
-#include "ClientConfiguration.h"
-#include "ProtocolClient.h"
 
-#include "GroupCreationWizardPageInfo.h"
-#include "GroupCreationWizardPageDone.h"
+#include "src/protocol/ContactId.h"
+
+#include "src/wizards/GroupCreationWizardPageInfo.h"
+#include "src/wizards/GroupCreationWizardPageDone.h"
 
 namespace Ui {
 class GroupCreationWizard;
 }
 
-class GroupCreationWizard : public QWizard
-{
-    Q_OBJECT
+namespace openmittsu {
+	namespace wizards {
+		class GroupCreationWizard : public QWizard {
+			Q_OBJECT
+		public:
+			explicit GroupCreationWizard(QHash<openmittsu::protocol::ContactId, QString> const& knownIdentitiesWithNicknamesExcludingSelfContactId, std::unique_ptr<openmittsu::dataproviders::GroupCreationProcessor> groupCreationProcessor, QWidget* parent = nullptr);
+			virtual ~GroupCreationWizard();
+		public slots:
+			void pageNextOnClick(int pageId);
+		private:
+			Ui::GroupCreationWizard *ui;
+			GroupCreationWizardPageInfo* groupCreationWizardPageInfo;
+			GroupCreationWizardPageDone* groupCreationWizardPageDone;
+		};
+	}
+}
 
-public:
-    explicit GroupCreationWizard(ClientConfiguration* clientConfiguration, ProtocolClient* protocolClient, QWidget *parent = 0);
-    ~GroupCreationWizard();
-public slots:
-	void pageNextOnClick(int pageId);
-private:
-    Ui::GroupCreationWizard *ui;
-	ClientConfiguration* const clientConfiguration;
-	ProtocolClient* const protocolClient;
-
-	GroupCreationWizardPageInfo* groupCreationWizardPageInfo;
-	GroupCreationWizardPageDone* groupCreationWizardPageDone;
-
-	bool haveFinished;
-};
-
-#endif // GROUPCREATIONWIZARD_H
+#endif // OPENMITTSU_WIZARDS_GROUPCREATIONWIZARD_H_

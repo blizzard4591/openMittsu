@@ -8,18 +8,22 @@ namespace Ui {
 class BackupCreationWizardPagePassword;
 }
 
-class BackupCreationWizardPagePassword : public QWizardPage
-{
-    Q_OBJECT
+namespace openmittsu {
+	namespace wizards {
 
-public:
-    explicit BackupCreationWizardPagePassword(QWidget *parent = 0);
-    ~BackupCreationWizardPagePassword();
+		class BackupCreationWizardPagePassword : public QWizardPage {
+			Q_OBJECT
+		public:
+			explicit BackupCreationWizardPagePassword(QWidget* parent = nullptr);
+			virtual ~BackupCreationWizardPagePassword();
 
-	//bool isComplete() const override;
-private:
-    Ui::BackupCreationWizardPagePassword *ui;
-	QRegExpValidator* passwordValidator;
-};
+			//bool isComplete() const override;
+		private:
+			Ui::BackupCreationWizardPagePassword* m_ui;
+			QRegExpValidator* m_passwordValidator;
+		};
+
+	}
+}
 
 #endif // OPENMITTSU_WIZARDS_BACKUPCREATIONWIZARDPAGEPASSWORD_H_

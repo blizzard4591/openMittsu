@@ -7,33 +7,33 @@
 #include <memory>
 #include <utility>
 
-#include "messages/MessageWithEncryptedPayload.h"
-#include "protocol/ContactId.h"
-#include "protocol/GroupId.h"
+#include "src/messages/MessageWithEncryptedPayload.h"
+#include "src/protocol/ContactId.h"
+#include "src/protocol/GroupId.h"
 
 class MissingIdentityProcessor {
 public:
-	explicit MissingIdentityProcessor(ContactId const& missingContact);
-	explicit MissingIdentityProcessor(GroupId const& groupId, QSet<ContactId> const& missingContacts);
+	explicit MissingIdentityProcessor(openmittsu::protocol::ContactId const& missingContact);
+	explicit MissingIdentityProcessor(openmittsu::protocol::GroupId const& groupId, QSet<openmittsu::protocol::ContactId> const& missingContacts);
 	virtual ~MissingIdentityProcessor();
 
-	QSet<ContactId> const& getMissingContacts() const;
+	QSet<openmittsu::protocol::ContactId> const& getMissingContacts() const;
 
 	bool hasFinishedSuccessfully() const;
 	bool hasFinished() const;
 
-	std::list<MessageWithEncryptedPayload> const& getQueuedMessages() const;
-	void enqueueMessage(MessageWithEncryptedPayload const& message);
+	std::list<openmittsu::messages::MessageWithEncryptedPayload> const& getQueuedMessages() const;
+	void enqueueMessage(openmittsu::messages::MessageWithEncryptedPayload const& message);
 
-	void identityFetcherTaskFinished(ContactId const& contactId, bool successful);
+	void identityFetcherTaskFinished(openmittsu::protocol::ContactId const& contactId, bool successful);
 
 	bool hasAssociatedGroupId() const;
-	GroupId const& getAssociatedGroupId() const;
+	openmittsu::protocol::GroupId const& getAssociatedGroupId() const;
 private:
 	bool hasErrors;
-	QSet<ContactId> missingContacts;
-	std::list<MessageWithEncryptedPayload> queuedMessages;
-	std::unique_ptr<GroupId> const groupIdPtr;
+	QSet<openmittsu::protocol::ContactId> missingContacts;
+	std::list<openmittsu::messages::MessageWithEncryptedPayload> queuedMessages;
+	std::unique_ptr<openmittsu::protocol::GroupId> const groupIdPtr;
 };
 
 #endif // OPENMITTSU_MISSINGIDENTITYPROCESSOR_H_

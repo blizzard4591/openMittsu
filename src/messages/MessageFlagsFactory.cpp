@@ -1,33 +1,39 @@
-#include "messages/MessageFlagsFactory.h"
+#include "src/messages/MessageFlagsFactory.h"
 
-MessageFlagsFactory::MessageFlagsFactory() {
-	throw;
-}
+namespace openmittsu {
+	namespace messages {
 
-MessageFlagsFactory::MessageFlagsFactory(MessageFlagsFactory const& other) {
-	throw;
-}
+		MessageFlagsFactory::MessageFlagsFactory() {
+			throw;
+		}
 
-MessageFlagsFactory::~MessageFlagsFactory() {
-	// Intentionally left empty.
-}
+		MessageFlagsFactory::MessageFlagsFactory(MessageFlagsFactory const& other) {
+			throw;
+		}
 
-MessageFlags MessageFlagsFactory::createContactMessageFlags() {
-	return MessageFlags(true, false, false, false, false);
-}
+		MessageFlagsFactory::~MessageFlagsFactory() {
+			// Intentionally left empty.
+		}
 
-MessageFlags MessageFlagsFactory::createGroupTextMessageFlags() {
-	return MessageFlags(true, false, false, false, true);
-}
+		MessageFlags MessageFlagsFactory::createContactMessageFlags() {
+			return MessageFlags(true, false, false, false, false);
+		}
 
-MessageFlags MessageFlagsFactory::createGroupControlMessageFlags() {
-	return MessageFlags(false, false, false, false, true);
-}
+		MessageFlags MessageFlagsFactory::createGroupTextMessageFlags() {
+			return MessageFlags(true, false, false, false, true);
+		}
 
-MessageFlags MessageFlagsFactory::createTypingStatusMessageFlags() {
-	return MessageFlags(false, true, true, false, false);
-}
+		MessageFlags MessageFlagsFactory::createGroupControlMessageFlags() {
+			return MessageFlags(false, false, false, false, true);
+		}
 
-MessageFlags MessageFlagsFactory::createReceiptMessageFlags() {
-	return MessageFlags(false, false, false, false, false);
+		MessageFlags MessageFlagsFactory::createTypingStatusMessageFlags() {
+			return MessageFlags(false, true, true, false, false);
+		}
+
+		MessageFlags MessageFlagsFactory::createReceiptMessageFlags() {
+			return MessageFlags(false, false, false, false, false);
+		}
+
+	}
 }

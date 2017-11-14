@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>OpenMittsu</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../resources/icons.qrc">
+    <normaloff>:/icons/icon-small-for-ico.ico</normaloff>:/icons/icon-small-for-ico.ico</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
@@ -68,7 +72,7 @@
      </widget>
     </item>
     <item>
-     <widget class="ChatTabWidget" name="tabWidget">
+     <widget class="openmittsu::widgets::ChatTabWidget" name="tabWidget">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
@@ -162,54 +166,23 @@
           </property>
           <layout class="QFormLayout" name="formLayout_2">
            <item row="0" column="0">
-            <widget class="QLabel" name="lblDescClientIni">
+            <widget class="QLabel" name="lblDescDatabase">
              <property name="text">
-              <string>Client INI File:</string>
+              <string>Database:</string>
              </property>
             </widget>
            </item>
            <item row="0" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout_2">
              <item>
-              <widget class="QLabel" name="lblClientIni">
+              <widget class="QLabel" name="lblDatabase">
                <property name="text">
                 <string>(no file loaded)</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="btnOpenClientIni">
-               <property name="maximumSize">
-                <size>
-                 <width>75</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Open...</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="lblDescContacts">
-             <property name="text">
-              <string>Contacts File:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
-             <item>
-              <widget class="QLabel" name="lblContacts">
-               <property name="text">
-                <string>(no file loaded)</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="btnOpenContacts">
+              <widget class="QPushButton" name="btnOpenDatabase">
                <property name="maximumSize">
                 <size>
                  <width>75</width>
@@ -280,12 +253,13 @@
    </widget>
    <widget class="QMenu" name="menuIdentity">
     <property name="title">
-     <string>Identity</string>
+     <string>Database</string>
     </property>
     <addaction name="actionShow_Fingerprint"/>
     <addaction name="actionShow_Public_Key"/>
     <addaction name="actionCreate_Backup"/>
     <addaction name="actionLoad_Backup"/>
+    <addaction name="actionImport_legacy_contacts_and_groups"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuIdentity"/>
@@ -340,7 +314,7 @@
   </action>
   <action name="actionLoad_Backup">
    <property name="text">
-    <string>Load Backup...</string>
+    <string>From Backup...</string>
    </property>
   </action>
   <action name="actionEdit_a_Contact">
@@ -378,15 +352,22 @@
     <string>Options...</string>
    </property>
   </action>
+  <action name="actionImport_legacy_contacts_and_groups">
+   <property name="text">
+    <string>Import openMittsu 0.9.x contacts and groups...</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ChatTabWidget</class>
+   <class>openmittsu::widgets::ChatTabWidget</class>
    <extends>QTabWidget</extends>
-   <header>ChatTabWidget.h</header>
+   <header>widgets/chat/ChatTabWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../resources/icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

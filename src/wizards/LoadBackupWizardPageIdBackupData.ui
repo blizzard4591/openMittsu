@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>LoadBackupWizardPageIdBackupData</class>
+ <widget class="QWizardPage" name="LoadBackupWizardPageIdBackupData">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>WizardPage</string>
+  </property>
+  <layout class="QFormLayout" name="formLayout">
+   <item row="0" column="0">
+    <widget class="QLabel" name="lblBackup">
+     <property name="text">
+      <string>ID Backup:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="UpperCaseLineEdit" name="edtIdBackupBackupString"/>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="lblPassword">
+     <property name="text">
+      <string>Password:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QLineEdit" name="edtIdBackupPassword"/>
+   </item>
+   <item row="2" column="0" colspan="2">
+    <widget class="QLabel" name="lblHelpText">
+     <property name="text">
+      <string>An ID Backup comes in the form of a text-string that looks like this: HTTH-C2A1-O1Q2-....
+It contains only your private key and ID - no contacts or messages.
+It can be generated in the App via Menu -&gt; My Backups -&gt; ID Backup -&gt; Backup your Threema ID.</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+     <property name="textInteractionFlags">
+      <set>Qt::NoTextInteraction</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>UpperCaseLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>widgets/UpperCaseLineEdit.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

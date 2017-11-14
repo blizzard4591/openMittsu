@@ -1,14 +1,14 @@
 #ifndef OPENMITTSU_TASKS_CHECKFEATURELEVELCALLBACKTASK_H_
 #define OPENMITTSU_TASKS_CHECKFEATURELEVELCALLBACKTASK_H_
 
-#include "messages/MessageWithEncryptedPayload.h"
-#include "tasks/CertificateBasedCallbackTask.h"
-#include "protocol/ContactId.h"
-#include "protocol/CryptoBox.h"
-#include "protocol/FeatureLevel.h"
-#include "protocol/Nonce.h"
-#include "ServerConfiguration.h"
-#include "PublicKey.h"
+#include "src/messages/MessageWithEncryptedPayload.h"
+#include "src/protocol/ContactId.h"
+#include "src/protocol/FeatureLevel.h"
+#include "src/network/ServerConfiguration.h"
+#include "src/crypto/PublicKey.h"
+
+#include "src/tasks/CallbackTask.h"
+#include "src/tasks/CertificateBasedCallbackTask.h"
 
 #include <QString>
 #include <QByteArray>
@@ -17,21 +17,27 @@
 #include <QSslCertificate>
 #include <memory>
 
-class CheckFeatureLevelCallbackTask : public CertificateBasedCallbackTask {
-public:
-	CheckFeatureLevelCallbackTask(std::shared_ptr<ServerConfiguration> const& serverConfiguration, QList<ContactId> const& identitiesToCheck);
-	virtual ~CheckFeatureLevelCallbackTask();
+namespace openmittsu {
+	namespace tasks {
 
-	QList<ContactId> const& getContactIds() const;
-	QHash<ContactId, FeatureLevel> const& getFetchedFeatureLevels() const;
-protected:
-	virtual void taskRun() override;
-private:
-	QString const urlString;
-	QString const agentString;
-	QList<ContactId> const identitiesToFetch;
+		class CheckFeatureLevelCallbackTask : public CertificateBasedCallbackTask, public CallbackTask {
+		public:
+			CheckFeatureLevelCallbackTask(std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, QSet<openmittsu::protocol::ContactId> const& identitiesToCheck);
+			virtual ~CheckFeatureLevelCallbackTask();
 
-	QHash<ContactId, FeatureLevel> fetchedFeatureLevels;
-};
+			QSet<openmittsu::protocol::ContactId> const& getContactIds() const;
+			QHash<openmittsu::protocol::ContactId, openmittsu::protocol::FeatureLevel> const& getFetchedFeatureLevels() const;
+		protected:
+			virtual void taskRun() override;
+		private:
+			QString const urlString;
+			QString const agentString;
+			QSet<openmittsu::protocol::ContactId> const identitiesToFetch;
+
+			QHash<openmittsu::protocol::ContactId, openmittsu::protocol::FeatureLevel> fetchedFeatureLevels;
+		};
+
+	}
+}
 
 #endif // OPENMITTSU_TASKS_CHECKFEATURELEVELCALLBACKTASK_H_

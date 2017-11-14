@@ -30,4 +30,5 @@
 # Build Directories
 build/
 build-vc15/
+build-vc17/
 tmp/

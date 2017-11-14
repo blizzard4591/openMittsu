@@ -7,50 +7,60 @@
 #include <QMetaType>
 #include <QSharedPointer>
 
-#include "messages/MessageFlags.h"
+#include "src/messages/MessageFlags.h"
 
-#include "protocol/ContactId.h"
-#include "protocol/MessageId.h"
-#include "protocol/MessageTime.h"
-#include "protocol/PushFromId.h"
+#include "src/protocol/ContactId.h"
+#include "src/protocol/MessageId.h"
+#include "src/protocol/MessageTime.h"
+#include "src/protocol/PushFromId.h"
 
-class PreliminaryContactMessageHeader;
-class PreliminaryGroupMessageHeader;
+namespace openmittsu {
+	namespace messages {
+		namespace contact {
+			class PreliminaryContactMessageHeader;
+		}
 
-class FullMessageHeader {
-public:
-	FullMessageHeader(ContactId const& receiverId, MessageTime const& time, ContactId const& sender, MessageId const& messageId, MessageFlags const& flags, PushFromId const& pushFromId);
-	FullMessageHeader(PreliminaryContactMessageHeader const* preliminaryHeader, ContactId const& sender, PushFromId const& pushFromId);
-	FullMessageHeader(PreliminaryGroupMessageHeader const* preliminaryHeader, ContactId const& sender, PushFromId const& pushFromId);
-	FullMessageHeader(FullMessageHeader const& messageHeader, ContactId const& replacementReceiver, MessageId const& replacementMessageId);
-	FullMessageHeader(FullMessageHeader const& other);
-	virtual ~FullMessageHeader();
+		namespace group {
+			class PreliminaryGroupMessageHeader;
+		}
 
-	static FullMessageHeader fromHeaderData(QByteArray const& headerData);
-	static int getFullMessageHeaderSize();
+		class FullMessageHeader {
+		public:
+			FullMessageHeader(openmittsu::protocol::ContactId const& receiverId, openmittsu::protocol::MessageTime const& time, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, MessageFlags const& flags, openmittsu::protocol::PushFromId const& pushFromId);
+			FullMessageHeader(contact::PreliminaryContactMessageHeader const* preliminaryHeader, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::PushFromId const& pushFromId);
+			FullMessageHeader(group::PreliminaryGroupMessageHeader const* preliminaryHeader, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::PushFromId const& pushFromId);
+			FullMessageHeader(FullMessageHeader const& messageHeader, openmittsu::protocol::ContactId const& replacementReceiver, openmittsu::protocol::MessageId const& replacementMessageId);
+			FullMessageHeader(FullMessageHeader const& other);
+			virtual ~FullMessageHeader();
 
-	virtual ContactId const& getSender() const;
-	virtual ContactId const& getReceiver() const;
-	virtual MessageId const& getMessageId() const;
-	virtual MessageTime const& getTime() const;
-	virtual MessageFlags const& getFlags() const;
-	virtual PushFromId const& getPushFromName() const;
+			static FullMessageHeader fromHeaderData(QByteArray const& headerData);
+			static int getFullMessageHeaderSize();
 
-	virtual QByteArray toPacket() const;
+			virtual openmittsu::protocol::ContactId const& getSender() const;
+			virtual openmittsu::protocol::ContactId const& getReceiver() const;
+			virtual openmittsu::protocol::MessageId const& getMessageId() const;
+			virtual openmittsu::protocol::MessageTime const& getTime() const;
+			virtual MessageFlags const& getFlags() const;
+			virtual openmittsu::protocol::PushFromId const& getPushFromName() const;
 
-	friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<FullMessageHeader, true>;
-private:
-	ContactId const sender;
-	ContactId const receiver;
-	MessageId const messageId;
-	MessageTime const time;
-	MessageFlags const flags;
-	PushFromId const pushFromName;
+			virtual QByteArray toPacket() const;
 
-	FullMessageHeader();
-};
+			friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<FullMessageHeader, true>;
+		private:
+			openmittsu::protocol::ContactId const sender;
+			openmittsu::protocol::ContactId const receiver;
+			openmittsu::protocol::MessageId const messageId;
+			openmittsu::protocol::MessageTime const time;
+			MessageFlags const flags;
+			openmittsu::protocol::PushFromId const pushFromName;
 
-Q_DECLARE_METATYPE(FullMessageHeader)
-Q_DECLARE_METATYPE(QSharedPointer<FullMessageHeader const>)
+			FullMessageHeader();
+		};
+
+	}
+}
+
+Q_DECLARE_METATYPE(openmittsu::messages::FullMessageHeader)
+Q_DECLARE_METATYPE(QSharedPointer<openmittsu::messages::FullMessageHeader const>)
 
 #endif // OPENMITTSU_MESSAGES_FULLMESSAGEHEADER_H_

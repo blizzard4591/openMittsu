@@ -1,44 +1,51 @@
-#include "messages/MessageContent.h"
+#include "src/messages/MessageContent.h"
 
-#include "messages/Message.h"
-#include "ServerConfiguration.h"
-#include "exceptions/IllegalArgumentException.h"
-#include "protocol/CryptoBox.h"
-#include "utility/HexChar.h"
+#include "src/acknowledgments/AcknowledgmentProcessor.h"
+#include "src/messages/Message.h"
+#include "src/network/ServerConfiguration.h"
+#include "src/exceptions/IllegalArgumentException.h"
+#include "src/crypto/BasicCryptoBox.h"
+#include "src/utility/HexChar.h"
 #include <QByteArray>
 
-MessageContent::~MessageContent() {
-	// Intentionally left empty.
-}
+namespace openmittsu {
+	namespace messages {
 
-bool MessageContent::hasPreSendCallbackTask() const {
-	return false;
-}
+		MessageContent::~MessageContent() {
+			// Intentionally left empty.
+		}
 
-bool MessageContent::hasPostReceiveCallbackTask() const {
-	return false;
-}
+		bool MessageContent::hasPreSendCallbackTask() const {
+			return false;
+		}
 
-CallbackTask* MessageContent::getPreSendCallbackTask(Message* preliminaryMessage, std::shared_ptr<AcknowledgmentProcessor> const& acknowledgmentProcessor, ServerConfiguration* serverConfiguration, CryptoBox* cryptoBox) const {
-	return nullptr;
-}
+		bool MessageContent::hasPostReceiveCallbackTask() const {
+			return false;
+		}
 
-CallbackTask* MessageContent::getPostReceiveCallbackTask(Message* message, ServerConfiguration* serverConfiguration, CryptoBox* cryptoBox) const {
-	return nullptr;
-}
+		openmittsu::tasks::CallbackTask* MessageContent::getPreSendCallbackTask(Message* preliminaryMessage, std::shared_ptr<openmittsu::acknowledgments::AcknowledgmentProcessor> const& acknowledgmentProcessor, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, std::shared_ptr<openmittsu::crypto::FullCryptoBox> const& cryptoBox) const {
+			return nullptr;
+		}
 
-MessageContent* MessageContent::integrateCallbackTaskResult(CallbackTask const* callbackTask) const {
-	throw;
-}
+		openmittsu::tasks::CallbackTask* MessageContent::getPostReceiveCallbackTask(Message* message, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, std::shared_ptr<openmittsu::crypto::FullCryptoBox> const& cryptoBox) const {
+			return nullptr;
+		}
 
-void MessageContent::verifyPayloadMinSizeAndSignatureByte(char signatureByte, int minPayloadSize, QByteArray const& payload, bool sizeIsExact) const {
-	if (minPayloadSize < 1) {
-		minPayloadSize = 1;
-	}
+		MessageContent* MessageContent::integrateCallbackTaskResult(openmittsu::tasks::CallbackTask const* callbackTask) const {
+			throw;
+		}
 
-	if (payload.size() < minPayloadSize || (sizeIsExact && (payload.size() != minPayloadSize))) {
-		throw IllegalArgumentException() << "Can not create MessageContent from payload with size " << payload.size() << " instead of " << minPayloadSize << " Bytes.";
-	} else if (signatureByte != payload.at(0)) {
-		throw IllegalArgumentException() << "Invalid signatureByte - expected 0x" << HexChar(signatureByte) << " but found 0x" << HexChar(payload.at(0)) << " instead.";
+		void MessageContent::verifyPayloadMinSizeAndSignatureByte(char signatureByte, int minPayloadSize, QByteArray const& payload, bool sizeIsExact) const {
+			if (minPayloadSize < 1) {
+				minPayloadSize = 1;
+			}
+
+			if (payload.size() < minPayloadSize || (sizeIsExact && (payload.size() != minPayloadSize))) {
+				throw openmittsu::exceptions::IllegalArgumentException() << "Can not create MessageContent from payload with size " << payload.size() << " instead of " << minPayloadSize << " Bytes.";
+			} else if (signatureByte != payload.at(0)) {
+				throw openmittsu::exceptions::IllegalArgumentException() << "Invalid signatureByte - expected 0x" << openmittsu::utility::HexChar(signatureByte) << " but found 0x" << openmittsu::utility::HexChar(payload.at(0)) << " instead.";
+			}
+		}
+
 	}
 }

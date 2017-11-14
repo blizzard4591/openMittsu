@@ -1,36 +1,41 @@
 #ifndef OPENMITTSU_TASKS_KEYANDFIXEDNONCEDECRYPTIONCALLBACKTASK_H_
 #define OPENMITTSU_TASKS_KEYANDFIXEDNONCEDECRYPTIONCALLBACKTASK_H_
 
-#include "messages/Message.h"
-#include "protocol/ContactId.h"
-#include "protocol/CryptoBox.h"
-#include "protocol/EncryptionKey.h"
-#include "protocol/Nonce.h"
-#include "tasks/MessageCallbackTask.h"
-#include "ServerConfiguration.h"
+#include "src/messages/Message.h"
+#include "src/protocol/ContactId.h"
+#include "src/crypto/FullCryptoBox.h"
+#include "src/crypto/EncryptionKey.h"
+#include "src/crypto/Nonce.h"
+#include "src/tasks/MessageCallbackTask.h"
 
 #include <QString>
 #include <QByteArray>
 #include <QSslCertificate>
 
-class KeyAndFixedNonceDecryptionCallbackTask : public MessageCallbackTask {
-public:
-	KeyAndFixedNonceDecryptionCallbackTask(CryptoBox* cryptoBox, Message* message, std::shared_ptr<AcknowledgmentProcessor> const& acknowledgmentProcessor, QByteArray const& encryptedData, EncryptionKey const& encryptionKey, Nonce const& nonce);
-	virtual ~KeyAndFixedNonceDecryptionCallbackTask();
+namespace openmittsu {
+	namespace tasks {
 
-	EncryptionKey const& getEncryptionKey() const;
-	QByteArray const& getDecryptedData() const;
+		class KeyAndFixedNonceDecryptionCallbackTask : public MessageCallbackTask {
+		public:
+			KeyAndFixedNonceDecryptionCallbackTask(std::shared_ptr<openmittsu::crypto::FullCryptoBox> const& cryptoBox, openmittsu::messages::Message* message, std::shared_ptr<openmittsu::acknowledgments::AcknowledgmentProcessor> const& acknowledgmentProcessor, QByteArray const& encryptedData, openmittsu::crypto::EncryptionKey const& encryptionKey, openmittsu::crypto::Nonce const& nonce);
+			virtual ~KeyAndFixedNonceDecryptionCallbackTask();
 
-	QByteArray const& getEncryptedData() const;
-	Nonce const& getFixedNonce() const;
-protected:
-	virtual void taskRun() override;
-private:	
-	CryptoBox* const cryptoBox;
-	QByteArray const encryptedData;
-	Nonce const nonce;
-	EncryptionKey const encryptionKey;
-	QByteArray decryptedData;
-};
+			openmittsu::crypto::EncryptionKey const& getEncryptionKey() const;
+			QByteArray const& getDecryptedData() const;
+
+			QByteArray const& getEncryptedData() const;
+			openmittsu::crypto::Nonce const& getFixedNonce() const;
+		protected:
+			virtual void taskRun() override;
+		private:
+			std::shared_ptr<openmittsu::crypto::FullCryptoBox> const m_cryptoBox;
+			QByteArray const m_encryptedData;
+			openmittsu::crypto::Nonce const m_nonce;
+			openmittsu::crypto::EncryptionKey const m_encryptionKey;
+			QByteArray m_decryptedData;
+		};
+
+	}
+}
 
 #endif // OPENMITTSU_TASKS_KEYANDFIXEDNONCEDECRYPTIONCALLBACKTASK_H_

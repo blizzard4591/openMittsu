@@ -4,30 +4,37 @@
 #include <QWizardPage>
 #include <QListWidget>
 #include <QRegExpValidator>
-#include "ClientConfiguration.h"
+
+#include <memory>
+
+#include "src/dataproviders/ContactDataProvider.h"
 
 namespace Ui {
 	class ContactEditWizardPageSelectContact;
 }
 
-class ContactEditWizardPageSelectContact : public QWizardPage
-{
-    Q_OBJECT
+namespace openmittsu {
+	namespace wizards {
 
-public:
-	explicit ContactEditWizardPageSelectContact(ClientConfiguration* clientConfiguration, QWidget *parent = 0);
-	~ContactEditWizardPageSelectContact();
+		class ContactEditWizardPageSelectContact : public QWizardPage {
+			Q_OBJECT
+		public:
+			explicit ContactEditWizardPageSelectContact(std::shared_ptr<openmittsu::dataproviders::ContactDataProvider> const& contactDataProvider, QWidget* parent = nullptr);
+			virtual ~ContactEditWizardPageSelectContact();
 
-	bool isComplete() const override;
-	QListWidget const* getSelectedGroupMembersWidgetPointer() const;
-public slots:
-	void onListWidgetItemSelectionChanged();
-private:
-	Ui::ContactEditWizardPageSelectContact *ui;
-	ClientConfiguration* const clientConfiguration;
+			bool isComplete() const override;
+			QListWidget const* getSelectedGroupMembersWidgetPointer() const;
+		public slots:
+			void onListWidgetItemSelectionChanged();
+		private:
+			Ui::ContactEditWizardPageSelectContact* m_ui;
+			std::shared_ptr<openmittsu::dataproviders::ContactDataProvider> const m_contactDataProvider;
 
-	QRegExpValidator* nameValidator;
-	bool isSelectionOkay;
-};
+			QRegExpValidator* m_nameValidator;
+			bool m_isSelectionOkay;
+		};
+
+	}
+}
 
 #endif // OPENMITTSU_WIZARDS_CONTACTEDITWIZARDPAGESELECTCONTACT_H_

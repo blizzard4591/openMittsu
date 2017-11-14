@@ -1,0 +1,209 @@
+#include "dataproviders/DatabaseContactDataProvider.h"
+
+#include "database/Database.h"
+#include "dataproviders/BackedContact.h"
+#include "dataproviders/BackedContactMessage.h"
+#include "utility/QObjectConnectionMacro.h"
+
+namespace openmittsu {
+	namespace dataproviders {
+
+		DatabaseContactDataProvider::DatabaseContactDataProvider(openmittsu::database::Database& database) : ContactDataProvider(), m_database(database) {
+			OPENMITTSU_CONNECT(&m_database, contactChanged(ContactId const&), this, onContactChanged(ContactId const&));
+		}
+
+		DatabaseContactDataProvider::~DatabaseContactDataProvider() {
+			OPENMITTSU_DISCONNECT_NOTHROW(&m_database, contactChanged(ContactId const&), this, onContactChanged(ContactId const&));
+		}
+
+		QVariant DatabaseContactDataProvider::queryField(ContactId const& contact, QString const& fieldName) const {
+			QSqlQuery query(m_database.database);
+
+			query.prepare(QStringLiteral("SELECT `%1` FROM `contacts` WHERE `identity` = :identity;").arg(fieldName));
+			query.bindValue(QStringLiteral(":identity"), QVariant(contact.toQString()));
+
+			if (!query.exec() || !query.isSelect()) {
+				throw InternalErrorException() << "Could not execute contact field query for field \"" << fieldName.toStdString() << "\". Query error: " << query.lastError().text().toStdString();
+			} else if (!query.next()) {
+				throw InternalErrorException() << "No contact with identity \"" << contact.toString() << "\" exists, can not manipulate.";
+			}
+
+			return query.value(fieldName);
+		}
+
+		void DatabaseContactDataProvider::setField(ContactId const& contact, QString const& fieldName, QVariant const& value) {
+			QSqlQuery query(m_database.database);
+
+			query.prepare(QStringLiteral("UPDATE `contacts` SET `%1` = :value WHERE `identity` = :identity;").arg(fieldName));
+			query.bindValue(QStringLiteral(":identity"), QVariant(contact.toQString()));
+			query.bindValue(QStringLiteral(":value"), value);
+
+			if (!query.exec()) {
+				throw InternalErrorException() << "Could not execute contact field update query for field \"" << fieldName.toStdString() << "\". Query error: " << query.lastError().text().toStdString();
+			}
+		}
+
+		bool DatabaseContactDataProvider::hasContact(ContactId const& contact) const {
+			QSqlQuery query(m_database.database);
+
+			query.prepare(QStringLiteral("SELECT `identity` FROM `contacts` WHERE `identity` = :identity;"));
+			query.bindValue(QStringLiteral(":identity"), QVariant(contact.toQString()));
+
+			if (!query.exec() || !query.isSelect()) {
+				throw InternalErrorException() << "Could not execute contact existance query for contact \"" << contact.toString() << "\". Query error: " << query.lastError().text().toStdString();
+			}
+
+			return query.next();
+		}
+
+		BackedContact DatabaseContactDataProvider::getSelfContact() {
+			return getContact(m_database.getSelfContact());
+		}
+
+		PublicKey DatabaseContactDataProvider::getPublicKey(ContactId const& contact) const {
+			return PublicKey::fromHexString(queryField(contact, QStringLiteral("publickey")).toString());
+		}
+
+		QString DatabaseContactDataProvider::getFirstName(ContactId const& contact) const {
+			return queryField(contact, QStringLiteral("firstname")).toString();
+		}
+
+		QString DatabaseContactDataProvider::getLastName(ContactId const& contact) const {
+			return queryField(contact, QStringLiteral("lastname")).toString();
+		}
+
+		QString DatabaseContactDataProvider::getNickname(ContactId const& contact) const {
+			return queryField(contact, QStringLiteral("nick_name")).toString();
+		}
+
+		ContactIdStatus DatabaseContactDataProvider::getStatus(ContactId const& contact) const {
+			return ContactIdStatusHelper::fromInt(queryField(contact, QStringLiteral("status")).toInt());
+		}
+
+		ContactIdVerificationStatus DatabaseContactDataProvider::getVerificationLevel(ContactId const& contact) const {
+			return ContactIdVerificationStatusHelper::fromQString(queryField(contact, QStringLiteral("verification")).toString());
+		}
+
+		FeatureLevel DatabaseContactDataProvider::getFeatureLevel(ContactId const& contact) const {
+			return FeatureLevelHelper::fromInt(queryField(contact, QStringLiteral("feature_level")).toInt());
+		}
+
+		int DatabaseContactDataProvider::getColor(ContactId const& contact) const {
+			return queryField(contact, QStringLiteral("color")).toInt();
+		}
+
+		int DatabaseContactDataProvider::getContactCount() const {
+			QSqlQuery query(m_database.database);
+			query.prepare(QStringLiteral("SELECT Count(*) AS `count` FROM `contacts`"));
+
+			if (query.exec() && query.isSelect() && query.next()) {
+				return query.value(QStringLiteral("count")).toInt();
+			} else {
+				throw InternalErrorException() << "Could not execute contact count query for table contacts. Query error: " << query.lastError().text().toStdString();
+			}
+		}
+
+		void DatabaseContactDataProvider::setNickname(ContactId const& contact, QString const& nickname) {
+			setField(contact, QStringLiteral("nick_name"), nickname);
+
+			m_database.announceContactChanged(contact);
+		}
+
+		void DatabaseContactDataProvider::setFirstName(ContactId const& contact, QString const& firstName) {
+			setField(contact, QStringLiteral("firstname"), firstName);
+
+			m_database.announceContactChanged(contact);
+		}
+
+		void DatabaseContactDataProvider::setLastName(ContactId const& contact, QString const& lastName) {
+			setField(contact, QStringLiteral("lastname"), lastName);
+
+			m_database.announceContactChanged(contact);
+		}
+
+		void DatabaseContactDataProvider::setStatus(ContactId const& contact, ContactIdStatus const& status) {
+			setField(contact, QStringLiteral("status"), ContactIdStatusHelper::toInt(status));
+			setField(contact, QStringLiteral("status_last_check"), MessageTime::now().getMessageTimeMSecs());
+
+			m_database.announceContactChanged(contact);
+		}
+
+		void DatabaseContactDataProvider::setVerificationLevel(ContactId const& contact, ContactIdVerificationStatus const& verificationStatus) {
+			setField(contact, QStringLiteral("verification"), ContactIdVerificationStatusHelper::toQString(verificationStatus));
+
+			m_database.announceContactChanged(contact);
+		}
+
+		void DatabaseContactDataProvider::setFeatureLevel(ContactId const& contact, FeatureLevel const& featureLevel) {
+			setField(contact, QStringLiteral("feature_level"), FeatureLevelHelper::toInt(featureLevel));
+			setField(contact, QStringLiteral("feature_level_last_check"), MessageTime::now().getMessageTimeMSecs());
+
+			m_database.announceContactChanged(contact);
+		}
+
+		void DatabaseContactDataProvider::setColor(ContactId const& contact, int color) {
+			setField(contact, QStringLiteral("color"), color);
+
+			m_database.announceContactChanged(contact);
+		}
+
+		BackedContact DatabaseContactDataProvider::getContact(ContactId const& contact) const {
+			return BackedContact(contact, getPublicKey(contact), *this, m_database);
+		}
+
+		QList<ContactId> DatabaseContactDataProvider::getIdentities() const {
+			QList<ContactId> result;
+
+			QSqlQuery query(m_database.database);
+			query.prepare(QStringLiteral("SELECT `identity` FROM `contacts`;"));
+
+			if (query.exec() && query.isSelect()) {
+				while (query.next()) {
+					result.append(ContactId(query.value(QStringLiteral("identity")).toString()));
+				}
+				return result;
+			} else {
+				throw InternalErrorException() << "Could not execute contact enumeration query for table contacts. Query error: " << query.lastError().text().toStdString();
+			}
+		}
+
+		QHash<ContactId, PublicKey> DatabaseContactDataProvider::getKnownIdentitiesWithPublicKeys() const {
+			QHash<ContactId, PublicKey> result;
+
+			QSqlQuery query(m_database.database);
+			query.prepare(QStringLiteral("SELECT `identity`, `publickey` FROM `contacts`;"));
+
+			if (query.exec() && query.isSelect()) {
+				while (query.next()) {
+					ContactId const contactId(query.value(QStringLiteral("identity")).toString());
+					PublicKey const publicKey(PublicKey::fromHexString(query.value(QStringLiteral("publickey")).toString()));
+
+					result.insert(contactId, publicKey);
+				}
+
+				return result;
+			} else {
+				throw InternalErrorException() << "Could not execute contact/key enumeration query for table contacts. Query error: " << query.lastError().text().toStdString();
+			}
+		}
+
+		void DatabaseContactDataProvider::onContactChanged(ContactId const& identity) {
+			emit contactChanged(identity);
+		}
+
+		std::shared_ptr<messages::ContactMessageCursor> DatabaseContactDataProvider::getMessageCursor(ContactId const& contact) {
+			return std::make_shared<openmittsu::database::DatabaseContactMessageCursor>(m_database, contact);
+		}
+
+		BackedContactMessage DatabaseContactDataProvider::getContactMessage(ContactId const& contact, QString const& uuid) const {
+			openmittsu::database::DatabaseContactMessageCursor cursor(m_database, contact);
+			if (!cursor.seekByUuid(uuid)) {
+				throw InternalErrorException() << "Could not find message with UUID " << uuid.toStdString() << " for contact " << contact.toString() << ".";
+			}
+
+			auto message = cursor.getMessage();
+			return BackedContactMessage(message, this->getContact(message->getSender()), m_database);
+		}
+
+	}
+}

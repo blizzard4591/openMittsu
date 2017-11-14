@@ -1,27 +1,33 @@
-#include "widgets/ClickAwareLabel.h"
+#include "src/widgets/ClickAwareLabel.h"
 
 #include <QMouseEvent>
 
-ClickAwareLabel::ClickAwareLabel(QWidget* parent) : QLabel(parent) {
-	//
-}
+namespace openmittsu {
+	namespace widgets {
 
-ClickAwareLabel::~ClickAwareLabel() {
-	//
-}
+		ClickAwareLabel::ClickAwareLabel(QWidget* parent) : QLabel(parent) {
+			//
+		}
 
-void ClickAwareLabel::mousePressEvent(QMouseEvent* event) {
-	if (event->buttons() == Qt::LeftButton) {
-		emit clicked();
-	}
+		ClickAwareLabel::~ClickAwareLabel() {
+			//
+		}
 
-	QLabel::mousePressEvent(event);
-}
+		void ClickAwareLabel::mousePressEvent(QMouseEvent* event) {
+			if (event->buttons() == Qt::LeftButton) {
+				emit clicked();
+			}
 
-void ClickAwareLabel::mouseDoubleClickEvent(QMouseEvent *event) {
-	QLabel::mouseDoubleClickEvent(event);
+			QLabel::mousePressEvent(event);
+		}
 
-	if (this->hasSelectedText()) {
-		emit doubleClickSelectedText(this->selectedText());
+		void ClickAwareLabel::mouseDoubleClickEvent(QMouseEvent *event) {
+			QLabel::mouseDoubleClickEvent(event);
+
+			if (this->hasSelectedText()) {
+				emit doubleClickSelectedText(this->selectedText());
+			}
+		}
+
 	}
 }

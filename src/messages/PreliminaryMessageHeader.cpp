@@ -1,30 +1,36 @@
-#include "messages/PreliminaryMessageHeader.h"
+#include "src/messages/PreliminaryMessageHeader.h"
 
-PreliminaryMessageHeader::PreliminaryMessageHeader() : messageId(0), time(0), flags(false, false, false, false, false) {
-	// This constructor is disabled and should not be used.
-	throw;
-}
+namespace openmittsu {
+	namespace messages {
 
-PreliminaryMessageHeader::PreliminaryMessageHeader(MessageId const& messageId, MessageFlags const& messageFlags) : messageId(messageId), time(MessageTime::now()), flags(messageFlags) {
-	// Intentionally left empty.
-}
+		PreliminaryMessageHeader::PreliminaryMessageHeader() : m_messageId(0), m_time(0), m_flags(false, false, false, false, false) {
+			// This constructor is disabled and should not be used.
+			throw;
+		}
 
-PreliminaryMessageHeader::PreliminaryMessageHeader(PreliminaryMessageHeader const& other) : messageId(other.messageId), time(other.time), flags(other.flags) {
-	// Intentionally left empty.
-}
+		PreliminaryMessageHeader::PreliminaryMessageHeader(openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, MessageFlags const& messageFlags) : m_messageId(messageId), m_time(time), m_flags(messageFlags) {
+			// Intentionally left empty.
+		}
 
-PreliminaryMessageHeader::~PreliminaryMessageHeader() {
-	// Intentionally left empty.
-}
+		PreliminaryMessageHeader::PreliminaryMessageHeader(PreliminaryMessageHeader const& other) : m_messageId(other.m_messageId), m_time(other.m_time), m_flags(other.m_flags) {
+			// Intentionally left empty.
+		}
 
-MessageId const& PreliminaryMessageHeader::getMessageId() const {
-	return messageId;
-}
+		PreliminaryMessageHeader::~PreliminaryMessageHeader() {
+			// Intentionally left empty.
+		}
 
-MessageTime const& PreliminaryMessageHeader::getTime() const {
-	return time;
-}
+		openmittsu::protocol::MessageId const& PreliminaryMessageHeader::getMessageId() const {
+			return m_messageId;
+		}
 
-MessageFlags const& PreliminaryMessageHeader::getFlags() const {
-	return flags;
+		openmittsu::protocol::MessageTime const& PreliminaryMessageHeader::getTime() const {
+			return m_time;
+		}
+
+		MessageFlags const& PreliminaryMessageHeader::getFlags() const {
+			return m_flags;
+		}
+
+	}
 }

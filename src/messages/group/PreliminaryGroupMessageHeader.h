@@ -1,20 +1,28 @@
 #ifndef OPENMITTSU_MESSAGES_GROUP_PRELIMINARYGROUPMESSAGEHEADER_H_
 #define OPENMITTSU_MESSAGES_GROUP_PRELIMINARYGROUPMESSAGEHEADER_H_
 
-#include "protocol/GroupId.h"
-#include "messages/PreliminaryMessageHeader.h"
+#include "src/protocol/GroupId.h"
+#include "src/messages/PreliminaryMessageHeader.h"
 
-class PreliminaryGroupMessageHeader : public PreliminaryMessageHeader {
-public:
-	PreliminaryGroupMessageHeader(GroupId const& group, MessageId const& messageId, MessageFlags const& messageFlags);
-	PreliminaryGroupMessageHeader(PreliminaryGroupMessageHeader const& other);
-	virtual ~PreliminaryGroupMessageHeader();
+namespace openmittsu {
+	namespace messages {
+		namespace group {
 
-	virtual GroupId const& getGroup() const;
+			class PreliminaryGroupMessageHeader : public PreliminaryMessageHeader {
+			public:
+				PreliminaryGroupMessageHeader(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, MessageFlags const& messageFlags);
+				PreliminaryGroupMessageHeader(PreliminaryGroupMessageHeader const& other);
+				virtual ~PreliminaryGroupMessageHeader();
 
-	virtual PreliminaryGroupMessageHeader* clone() const;
-private:
-	GroupId const groupId;
-};
+				virtual openmittsu::protocol::GroupId const& getGroup() const;
+
+				virtual PreliminaryGroupMessageHeader* clone() const;
+			private:
+				openmittsu::protocol::GroupId const groupId;
+			};
+
+		}
+	}
+}
 
 #endif // OPENMITTSU_MESSAGES_GROUP_PRELIMINARYGROUPMESSAGEHEADER_H_

@@ -1,24 +1,30 @@
 #ifndef OPENMITTSU_MESSAGES_MESSAGECONTENTREGISTRY_H_
 #define OPENMITTSU_MESSAGES_MESSAGECONTENTREGISTRY_H_
 
-#include "MessageContentFactory.h"
-
 #include <unordered_map>
 #include <mutex>
 
-class MessageContentRegistry {
-public:
-	bool registerContent(char signatureByte, MessageContentFactory* messageContentFactory);
+namespace openmittsu {
+	namespace messages {
+		class MessageContentFactory;
 
-	MessageContentFactory* getMessageContentFactoryForSignatureByte(char signatureByte);
+		class MessageContentRegistry {
+		public:
+			bool registerContent(char signatureByte, MessageContentFactory* messageContentFactory);
 
-	static MessageContentRegistry& getInstance();
-private:
-	std::mutex mutex;
-	std::unordered_map<char, MessageContentFactory*> mappings;
+			MessageContentFactory* getMessageContentFactoryForSignatureByte(char signatureByte);
 
-	MessageContentRegistry();
-	MessageContentRegistry(MessageContentRegistry const& other);
-};
+			static MessageContentRegistry& getInstance();
+		private:
+			std::mutex mutex;
+			std::unordered_map<char, MessageContentFactory*> mappings;
+
+			MessageContentRegistry();
+			MessageContentRegistry(MessageContentRegistry const& other);
+			virtual ~MessageContentRegistry() {}
+		};
+
+	}
+}
 
 #endif // OPENMITTSU_MESSAGES_MESSAGECONTENTREGISTRY_H_

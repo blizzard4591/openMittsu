@@ -6,17 +6,23 @@ namespace Ui {
 class EmojiSelector;
 }
 
-class EmojiSelector : public QWidget {
-    Q_OBJECT
-public:
-    explicit EmojiSelector(QWidget *parent = nullptr);
-    ~EmojiSelector();
-signals:
-	void emojiDoubleClicked(QString const& emoji);
-private slots:
-	void labelTextDoubleClicked(QString const& selectedText);
-private:
-    Ui::EmojiSelector *ui;
-};
+namespace openmittsu {
+	namespace widgets {
+
+		class EmojiSelector : public QWidget {
+			Q_OBJECT
+		public:
+			explicit EmojiSelector(QWidget* parent = nullptr);
+			virtual ~EmojiSelector();
+		signals:
+			void emojiDoubleClicked(QString const& emoji);
+		private slots:
+			void labelTextDoubleClicked(QString const& selectedText);
+		private:
+			Ui::EmojiSelector* m_ui;
+		};
+
+	}
+}
 
 #endif // OPENMITTSU_WIDGETS_EMOJISELECTOR_H_

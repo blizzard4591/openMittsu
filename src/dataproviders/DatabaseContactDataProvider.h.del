@@ -1,0 +1,61 @@
+#ifndef OPENMITTSU_DATAPROVIDERS_DATABASECONTACTDATAPROVIDER_H_
+#define OPENMITTSU_DATAPROVIDERS_DATABASECONTACTDATAPROVIDER_H_
+
+#include "database/DatabaseContactMessageCursor.h"
+#include "dataproviders/ContactDataProvider.h"
+
+#include <QString>
+#include <QVariant>
+
+class openmittsu::database::Database;
+
+namespace openmittsu {
+	namespace dataproviders {
+
+		class DatabaseContactDataProvider : public virtual ContactDataProvider {
+		public:
+			DatabaseContactDataProvider(openmittsu::database::Database& database);
+			virtual ~DatabaseContactDataProvider();
+
+			virtual bool hasContact(ContactId const& contact) const override;
+
+			virtual BackedContact getSelfContact() override;
+
+			virtual PublicKey getPublicKey(ContactId const& contact) const override;
+			virtual QString getFirstName(ContactId const& contact) const override;
+			virtual QString getLastName(ContactId const& contact) const override;
+			virtual QString getNickname(ContactId const& contact) const override;
+			virtual ContactIdStatus getStatus(ContactId const& contact) const override;
+			virtual ContactIdVerificationStatus getVerificationLevel(ContactId const& contact) const override;
+			virtual FeatureLevel getFeatureLevel(ContactId const& contact) const override;
+			virtual int getColor(ContactId const& contact) const override;
+			virtual int getContactCount() const override;
+
+			virtual void setFirstName(ContactId const& contact, QString const& firstName) override;
+			virtual void setLastName(ContactId const& contact, QString const& lastName) override;
+			virtual void setNickname(ContactId const& contact, QString const& nickname) override;
+			virtual void setStatus(ContactId const& contact, ContactIdStatus const& status) override;
+			virtual void setVerificationLevel(ContactId const& contact, ContactIdVerificationStatus const& verificationStatus) override;
+			virtual void setFeatureLevel(ContactId const& contact, FeatureLevel const& featureLevel) override;
+			virtual void setColor(ContactId const& contact, int color) override;
+
+			virtual std::shared_ptr<messages::ContactMessageCursor> getMessageCursor(ContactId const& contact) override;
+
+			virtual BackedContact getContact(ContactId const& contact) const override;
+			virtual BackedContactMessage getContactMessage(ContactId const& contact, QString const& uuid) const override;
+
+			virtual QList<ContactId> getIdentities() const override;
+			virtual QHash<ContactId, PublicKey> getKnownIdentitiesWithPublicKeys() const override;
+			private slots:
+			void onContactChanged(ContactId const& contact);
+		private:
+			openmittsu::database::Database& m_database;
+
+			QVariant queryField(ContactId const& contact, QString const& fieldName) const;
+			void setField(ContactId const& contact, QString const& fieldName, QVariant const& value);
+		};
+
+	}
+}
+
+#endif // OPENMITTSU_DATAPROVIDERS_DATABASECONTACTDATAPROVIDER_H_

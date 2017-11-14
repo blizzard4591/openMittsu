@@ -15,56 +15,78 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="lblStatus">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+    <layout class="QGridLayout" name="gridLayout">
+     <property name="bottomMargin">
+      <number>0</number>
      </property>
-     <property name="font">
-      <font>
-       <pointsize>11</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Status:</string>
-     </property>
-     <property name="wordWrap">
-      <bool>true</bool>
-     </property>
-    </widget>
+     <item row="0" column="0" colspan="3">
+      <widget class="QLabel" name="lblDescription">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2">
+      <widget class="QPushButton" name="btnMenu">
+       <property name="maximumSize">
+        <size>
+         <width>100</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Menu</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="lblStatus">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLabel" name="lblMessageCount">
+       <property name="maximumSize">
+        <size>
+         <width>150</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
-    <widget class="QLabel" name="lblDescription">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>11</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Description:</string>
-     </property>
-     <property name="wordWrap">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="ChatWidget" name="chatWidget">
+    <widget class="openmittsu::widgets::ChatWidget" name="chatWidget">
      <property name="styleSheet">
       <string notr="true">background: lightgray;</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="EmojiSelector" name="emojiSelector" native="true">
+    <widget class="openmittsu::widgets::EmojiSelector" name="emojiSelector" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -86,7 +108,7 @@
     </widget>
    </item>
    <item>
-    <widget class="BetterPlainTextEdit" name="edtInput">
+    <widget class="openmittsu::widgets::BetterPlainTextEdit" name="edtInput">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -138,18 +160,18 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ChatWidget</class>
+   <class>openmittsu::widgets::ChatWidget</class>
    <extends>QScrollArea</extends>
-   <header>widgets/ChatWidget.h</header>
+   <header>widgets/chat/ChatWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>BetterPlainTextEdit</class>
+   <class>openmittsu::widgets::BetterPlainTextEdit</class>
    <extends>QPlainTextEdit</extends>
    <header>widgets/BetterPlainTextEdit.h</header>
   </customwidget>
   <customwidget>
-   <class>EmojiSelector</class>
+   <class>openmittsu::widgets::EmojiSelector</class>
    <extends>QWidget</extends>
    <header>widgets/EmojiSelector.h</header>
    <container>1</container>

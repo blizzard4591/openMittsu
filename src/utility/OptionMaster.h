@@ -12,84 +12,105 @@
 
 #include <memory>
 
-class OptionsDialog;
+namespace openmittsu {
+	namespace database {
+		class Database;
+	}
 
-class OptionMaster : public QObject {
-	Q_OBJECT
-public:
-	friend class OptionsDialog;
-	static OptionMaster* getInstance();
+	namespace dialogs {
+		class OptionsDialog;
+	}
+}
 
-	enum class OptionGroups {
-		GROUP_PRIVACY,
-		GROUP_NOTIFICATIONS,
-		GROUP_GENERAL,
-		GROUP_INTERNAL
-	};
+namespace openmittsu {
+	namespace utility {
 
-	enum class OptionTypes {
-		TYPE_BOOL,
-		TYPE_FILEPATH,
-		TYPE_BINARY
-	};
+		class OptionMaster : public QObject {
+			Q_OBJECT
+		public:
+			friend class openmittsu::dialogs::OptionsDialog;
 
-	enum class Options {
-		BOOLEAN_SEND_TYPING_NOTIFICATION,
-		BOOLEAN_SEND_READ_NOTIFICATION,
-		BOOLEAN_FORCE_FOREGROUND_ON_MESSAGE_RECEIVED,
-		BOOLEAN_PLAY_SOUND_ON_MESSAGE_RECEIVED,
-		BOOLEAN_RECONNECT_ON_CONNECTION_LOSS,
-		BOOLEAN_UPDATE_FEATURE_LEVEL,
-		FILEPATH_CONTACTS_DATABASE,
-		FILEPATH_CLIENT_CONFIGURATION,
-		BINARY_MAINWINDOW_GEOMETRY,
-		BINARY_MAINWINDOW_STATE
-	};
-	
-	bool getOptionAsBool(Options const& option) const;
-	QString getOptionAsQString(Options const& option) const;
-	QByteArray getOptionAsQByteArray(Options const& option) const;
+			OptionMaster();
+			virtual ~OptionMaster();
 
-	void setOption(Options const& option, QVariant const& value);
+			enum class OptionGroups {
+				GROUP_PRIVACY,
+				GROUP_NOTIFICATIONS,
+				GROUP_GENERAL,
+				GROUP_INTERNAL
+			};
 
-	void registerOptions();
-private:
-	OptionMaster();
-	virtual ~OptionMaster();
+			enum class OptionTypes {
+				TYPE_BOOL,
+				TYPE_FILEPATH,
+				TYPE_BINARY
+			};
 
-	void ensureOptionsExist();
-	QString getOptionKeyForOption(Options const& option) const;
-	OptionTypes getOptionTypeForOption(Options const& option) const;
+			enum class Options {
+				BOOLEAN_SEND_TYPING_NOTIFICATION,
+				BOOLEAN_SEND_READ_NOTIFICATION,
+				BOOLEAN_FORCE_FOREGROUND_ON_MESSAGE_RECEIVED,
+				BOOLEAN_PLAY_SOUND_ON_MESSAGE_RECEIVED,
+				BOOLEAN_RECONNECT_ON_CONNECTION_LOSS,
+				BOOLEAN_UPDATE_FEATURE_LEVEL,
+				BOOLEAN_TRUST_OTHERS,
+				FILEPATH_DATABASE,
+				BINARY_MAINWINDOW_GEOMETRY,
+				BINARY_MAINWINDOW_STATE
+			};
 
-	QMetaType::Type optionTypeToMetaType(OptionTypes const& type) const;
+			enum class OptionStorage {
+				STORAGE_SIMPLE,
+				STORAGE_DATABASE
+			};
 
-	bool registerOption(OptionGroups const& optionGroup, Options const& option, QString const& optionName, QString const& optionDescription, QVariant const& defaultValue, OptionTypes optionType);
+			void setDatabase(std::shared_ptr<openmittsu::database::Database> const& database);
 
-	static OptionMaster* instance;
-	std::unique_ptr<QSettings> settings;
+			bool getOptionAsBool(Options const& option) const;
+			QString getOptionAsQString(Options const& option) const;
+			QByteArray getOptionAsQByteArray(Options const& option) const;
 
-	struct OptionContainer {
-		Options option;
-		QString name;
-		QString description;
-		QVariant defaultValue;
-		OptionTypes type;
-		OptionGroups group;
+			void setOption(Options const& option, QVariant const& value);
 
-		OptionContainer(OptionGroups const& optionGroup, Options const& option, QString const& optionName, QString const& optionDescription, QVariant const& optionDefaultValue, OptionTypes optionType) : option(option), name(optionName), description(optionDescription), defaultValue(optionDefaultValue), type(optionType), group(optionGroup) {}
-		OptionContainer() = default;
-	};
+			void registerOptions();
+		private:
+			void ensureOptionsExist();
+			QString getOptionKeyForOption(Options const& option) const;
+			OptionTypes getOptionTypeForOption(Options const& option) const;
 
-	QHash<QString, Options> nameToOptionMap;
-	QHash<Options, OptionContainer> optionToOptionContainerMap;
-	QMultiHash<OptionGroups, Options> groupToOptionsMap;
-	QHash<OptionGroups, QString> groupToNameMap;
-};
+			QMetaType::Type optionTypeToMetaType(OptionTypes const& type) const;
 
-uint qHash(OptionMaster::Options const& key, uint seed);
-uint qHash(OptionMaster::OptionGroups const& key, uint seed);
+			bool registerOption(OptionGroups const& optionGroup, Options const& option, QString const& optionName, QString const& optionDescription, QVariant const& defaultValue, OptionTypes const& optionType, OptionStorage const& optionStorage);
 
-Q_DECLARE_METATYPE(OptionMaster::Options)
-Q_DECLARE_METATYPE(OptionMaster::OptionGroups)
+			std::unique_ptr<QSettings> m_settings;
+			std::shared_ptr<openmittsu::database::Database> m_database;
+
+			struct OptionContainer {
+				Options option;
+				QString name;
+				QString description;
+				QVariant defaultValue;
+				OptionTypes type;
+				OptionGroups group;
+				OptionStorage storage;
+
+				OptionContainer(OptionGroups const& optionGroup, Options const& option, QString const& optionName, QString const& optionDescription, QVariant const& optionDefaultValue, OptionTypes const& optionType, OptionStorage const& optionStorage) : option(option), name(optionName), description(optionDescription), defaultValue(optionDefaultValue), type(optionType), group(optionGroup), storage(optionStorage) {}
+				OptionContainer() = default;
+			};
+
+			QHash<QString, Options> m_nameToOptionMap;
+			QHash<Options, OptionContainer> m_optionToOptionContainerMap;
+			QMultiHash<OptionGroups, Options> m_groupToOptionsMap;
+			QHash<OptionGroups, QString> m_groupToNameMap;
+		};
+
+		uint qHash(OptionMaster::Options const& key, uint seed);
+		uint qHash(OptionMaster::OptionGroups const& key, uint seed);
+
+	}
+}
+
+Q_DECLARE_METATYPE(openmittsu::utility::OptionMaster::Options)
+Q_DECLARE_METATYPE(openmittsu::utility::OptionMaster::OptionGroups)
 
 #endif // OPENMITTSU_UTILITY_OPTIONMASTER_H_

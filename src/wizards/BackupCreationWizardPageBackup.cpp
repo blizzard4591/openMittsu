@@ -1,19 +1,23 @@
-#include "BackupCreationWizardPageBackup.h"
+#include "src/wizards/BackupCreationWizardPageBackup.h"
 #include "ui_backupcreationwizardpagebackup.h"
 
-BackupCreationWizardPageBackup::BackupCreationWizardPageBackup(ClientConfiguration* clientConfiguration, QWidget *parent) : QWizardPage(parent), ui(new Ui::BackupCreationWizardPageBackup), clientConfiguration(clientConfiguration) {
-    ui->setupUi(this);
+namespace openmittsu {
+	namespace wizards {
+		BackupCreationWizardPageBackup::BackupCreationWizardPageBackup(openmittsu::backup::IdentityBackup const& identityBackup, QWidget* parent) : QWizardPage(parent), ui(new Ui::BackupCreationWizardPageBackup), m_identityBackup(identityBackup) {
+			ui->setupUi(this);
 
-	registerField("edtBackupString*", ui->edtBackupString);
-}
+			registerField("edtBackupString*", ui->edtBackupString);
+		}
 
-BackupCreationWizardPageBackup::~BackupCreationWizardPageBackup() {
-    delete ui;
-}
+		BackupCreationWizardPageBackup::~BackupCreationWizardPageBackup() {
+			delete ui;
+		}
 
-void BackupCreationWizardPageBackup::initializePage() {
-	QString const password = field("edtPassword").toString();
-	QString backup = clientConfiguration->toBackup(password);
-	ui->edtBackupString->setText(backup.toUpper());
-	ui->edtBackupString->selectAll();
+		void BackupCreationWizardPageBackup::initializePage() {
+			QString const password = field("edtPassword").toString();
+			QString const backup = m_identityBackup.toBackupString(password);
+			ui->edtBackupString->setText(backup.toUpper());
+			ui->edtBackupString->selectAll();
+		}
+	}
 }

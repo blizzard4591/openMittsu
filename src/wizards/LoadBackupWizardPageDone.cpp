@@ -1,14 +1,18 @@
-#include "LoadBackupWizardPageDone.h"
-#include "ui_loadbackupwizardpagedone.h"
+#include "src/wizards/LoadBackupWizardPageDone.h"
+#include "ui_LoadBackupWizardPageDone.h"
 
-LoadBackupWizardPageDone::LoadBackupWizardPageDone(QWidget *parent) :
-    QWizardPage(parent),
-    ui(new Ui::LoadBackupWizardPageDone)
-{
-    ui->setupUi(this);
-}
+namespace openmittsu {
+	namespace wizards {
 
-LoadBackupWizardPageDone::~LoadBackupWizardPageDone()
-{
-    delete ui;
+		LoadBackupWizardPageDone::LoadBackupWizardPageDone(QWidget* parent) :
+			QWizardPage(parent),
+			m_ui(new Ui::LoadBackupWizardPageDone) {
+			m_ui->setupUi(this);
+		}
+
+		LoadBackupWizardPageDone::~LoadBackupWizardPageDone() {
+			delete m_ui;
+		}
+
+	}
 }

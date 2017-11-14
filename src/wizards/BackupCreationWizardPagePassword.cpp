@@ -1,21 +1,27 @@
-#include "BackupCreationWizardPagePassword.h"
+#include "src/wizards/BackupCreationWizardPagePassword.h"
 #include "ui_backupcreationwizardpagepassword.h"
 
 #include <QRegExp>
 
-BackupCreationWizardPagePassword::BackupCreationWizardPagePassword(QWidget *parent) : QWizardPage(parent), ui(new Ui::BackupCreationWizardPagePassword) {
-    ui->setupUi(this);
+namespace openmittsu {
+	namespace wizards {
 
-	// At least one character
-	passwordValidator = new QRegExpValidator(QRegExp(".+", Qt::CaseInsensitive, QRegExp::RegExp2), ui->edtPassword);
-	ui->edtPassword->setValidator(passwordValidator);
-	ui->edtPassword->setEchoMode(QLineEdit::EchoMode::Password);
+		BackupCreationWizardPagePassword::BackupCreationWizardPagePassword(QWidget *parent) : QWizardPage(parent), m_ui(new Ui::BackupCreationWizardPagePassword) {
+			m_ui->setupUi(this);
 
-	registerField("edtPassword*", ui->edtPassword);
-}
+			// At least one character
+			m_passwordValidator = new QRegExpValidator(QRegExp(".+", Qt::CaseInsensitive, QRegExp::RegExp2), m_ui->edtPassword);
+			m_ui->edtPassword->setValidator(m_passwordValidator);
+			m_ui->edtPassword->setEchoMode(QLineEdit::EchoMode::Password);
 
-BackupCreationWizardPagePassword::~BackupCreationWizardPagePassword() {
-    delete ui;
-	// Ownership is with ui->edtPassword
-	passwordValidator = nullptr;
+			registerField("edtPassword*", m_ui->edtPassword);
+		}
+
+		BackupCreationWizardPagePassword::~BackupCreationWizardPagePassword() {
+			delete m_ui;
+			// Ownership is with ui->edtPassword
+			m_passwordValidator = nullptr;
+		}
+
+	}
 }

@@ -1,29 +1,35 @@
 #ifndef OPENMITTSU_TASKS_BLOBUPLOADERCALLBACKTASK_H_
 #define OPENMITTSU_TASKS_BLOBUPLOADERCALLBACKTASK_H_
 
-#include "messages/Message.h"
-#include "tasks/CertificateBasedCallbackTask.h"
-#include "tasks/MessageCallbackTask.h"
-#include "ServerConfiguration.h"
+#include "src/messages/Message.h"
+#include "src/tasks/CertificateBasedCallbackTask.h"
+#include "src/tasks/MessageCallbackTask.h"
+#include "src/network/ServerConfiguration.h"
 
 #include <QString>
 #include <QByteArray>
 #include <QSslCertificate>
 
-class BlobUploaderCallbackTask : public virtual CertificateBasedCallbackTask, public virtual MessageCallbackTask {
-public:
-	BlobUploaderCallbackTask(ServerConfiguration* serverConfiguration, Message* message, std::shared_ptr<AcknowledgmentProcessor> const& acknowledgmentProcessor, QByteArray const& dataToUpload);
-	virtual ~BlobUploaderCallbackTask();
+namespace openmittsu {
+	namespace tasks {
 
-	QByteArray const& getBlobId() const;
-protected:
-	virtual void taskRun() override;
-private:
-	QString const urlString;
-	QString const agentString;
+		class BlobUploaderCallbackTask : public CertificateBasedCallbackTask, public MessageCallbackTask {
+		public:
+			BlobUploaderCallbackTask(std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, openmittsu::messages::Message* message, std::shared_ptr<openmittsu::acknowledgments::AcknowledgmentProcessor> const& acknowledgmentProcessor, QByteArray const& dataToUpload);
+			virtual ~BlobUploaderCallbackTask();
 
-	QByteArray const dataToUpload;
-	QByteArray result;
-};
+			QByteArray const& getBlobId() const;
+		protected:
+			virtual void taskRun() override;
+		private:
+			QString const urlString;
+			QString const agentString;
+
+			QByteArray const dataToUpload;
+			QByteArray result;
+		};
+
+	}
+}
 
 #endif // OPENMITTSU_TASKS_BLOBUPLOADERCALLBACKTASK_H_

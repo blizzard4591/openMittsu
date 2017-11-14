@@ -1,65 +1,71 @@
-#include "tasks/CallbackTask.h"
+#include "src/tasks/CallbackTask.h"
 
-#include "utility/Logging.h"
+#include "src/utility/Logging.h"
 
-CallbackTask::CallbackTask() : QThread(nullptr), cb_errorCode(0), cb_errorMessage(""), cb_isFinished(false), cb_finishedSuccessfully(false) {
-	// Intentionally left empty.
-}
+namespace openmittsu {
+	namespace tasks {
 
-CallbackTask::~CallbackTask() {
-	// Intentionally left empty.
-}
+		CallbackTask::CallbackTask() : QThread(nullptr), cb_errorCode(0), cb_errorMessage(""), cb_isFinished(false), cb_finishedSuccessfully(false) {
+			// Intentionally left empty.
+		}
 
-int CallbackTask::getErrorCode() const {
-	return cb_errorCode;
-}
+		CallbackTask::~CallbackTask() {
+			// Intentionally left empty.
+		}
 
-QString const & CallbackTask::getErrorMessage() const {
-	return cb_errorMessage;
-}
+		int CallbackTask::getErrorCode() const {
+			return cb_errorCode;
+		}
 
-void CallbackTask::preRunSetup() {
-	// This is a default implementation which does not do anything.
-}
+		QString const & CallbackTask::getErrorMessage() const {
+			return cb_errorMessage;
+		}
 
-void CallbackTask::taskRun() {
-	// This is a default implementation which does not do anything.
-	finishedWithNoError();
-}
+		void CallbackTask::preRunSetup() {
+			// This is a default implementation which does not do anything.
+		}
 
-void CallbackTask::run() {
-	LOGGER_DEBUG("CallbackTask::run() will now run the setup.");
-	preRunSetup();
-	LOGGER_DEBUG("CallbackTask::run() will now enter the taskRun section.");
-	taskRun();
-	LOGGER_DEBUG("CallbackTask::run() has left the taskRun section.");
+		void CallbackTask::taskRun() {
+			// This is a default implementation which does not do anything.
+			finishedWithNoError();
+		}
 
-	this->exit(0);
-}
+		void CallbackTask::run() {
+			LOGGER_DEBUG("CallbackTask::run() will now run the setup.");
+			preRunSetup();
+			LOGGER_DEBUG("CallbackTask::run() will now enter the taskRun section.");
+			taskRun();
+			LOGGER_DEBUG("CallbackTask::run() has left the taskRun section.");
 
-void CallbackTask::finishedWithNoError() {
-	// The Error Code and Message are in the success state by default.
-	if (!this->cb_isFinished) {
-		this->cb_isFinished = true;
-		this->cb_finishedSuccessfully = true;
+			this->exit(0);
+		}
 
-		emit finished(this);
+		void CallbackTask::finishedWithNoError() {
+			// The Error Code and Message are in the success state by default.
+			if (!this->cb_isFinished) {
+				this->cb_isFinished = true;
+				this->cb_finishedSuccessfully = true;
+
+				emit finished(this);
+			}
+		}
+
+		void CallbackTask::finishedWithError(int errorCode, QString const & errorMessage) {
+			this->cb_errorCode = errorCode;
+			this->cb_errorMessage = errorMessage;
+			this->cb_isFinished = true;
+			this->cb_finishedSuccessfully = false;
+
+			emit finished(this);
+		}
+
+		bool CallbackTask::hasFinished() const {
+			return cb_isFinished;
+		}
+
+		bool CallbackTask::hasFinishedSuccessfully() const {
+			return cb_finishedSuccessfully;
+		}
+
 	}
-}
-
-void CallbackTask::finishedWithError(int errorCode, QString const & errorMessage) {
-	this->cb_errorCode = errorCode;
-	this->cb_errorMessage = errorMessage;
-	this->cb_isFinished = true;
-	this->cb_finishedSuccessfully = false;
-
-	emit finished(this);
-}
-
-bool CallbackTask::hasFinished() const {
-	return cb_isFinished;
-}
-
-bool CallbackTask::hasFinishedSuccessfully() const {
-	return cb_finishedSuccessfully;
 }

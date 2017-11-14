@@ -3,30 +3,36 @@
 
 #include <QByteArray>
 
-class MessageFlags {
-public:
-	MessageFlags();
-	MessageFlags(char messageFlags);
-	MessageFlags(bool pushMessage, bool noQueuing, bool noAckExpected, bool messageHasAlreadyBeenDelivered, bool groupMessage);
-	MessageFlags(MessageFlags const& other);
-	virtual ~MessageFlags();
+namespace openmittsu {
+	namespace messages {
 
-	virtual char getFlags() const;
+		class MessageFlags {
+		public:
+			MessageFlags();
+			MessageFlags(char messageFlags);
+			MessageFlags(bool pushMessage, bool noQueuing, bool noAckExpected, bool messageHasAlreadyBeenDelivered, bool groupMessage);
+			MessageFlags(MessageFlags const& other);
+			virtual ~MessageFlags();
 
-	virtual bool isPushMessage() const;
-	virtual bool isNoQueueMessage() const;
-	virtual bool isNoAckExpectedForMessage() const;
-	virtual bool isMessageHasAlreadyBeenDelivered() const;
-	virtual bool isGroupMessage() const;
-private:
-	bool const pushMessage;
-	bool const noQueuing; 
-	bool const noAckExpected;
-	bool const messageHasAlreadyBeenDelivered;
-	bool const groupMessage;
+			virtual char getFlags() const;
 
-	static char boolsToByte(bool bitLsbPlus0, bool bitLsbPlus1, bool bitLsbPlus2, bool bitLsbPlus3, bool bitLsbPlus4, bool bitLsbPlus5, bool bitLsbPlus6, bool bitLsbPlus7);
-	static bool byteToBool(char c, size_t position);
-};
+			virtual bool isPushMessage() const;
+			virtual bool isNoQueueMessage() const;
+			virtual bool isNoAckExpectedForMessage() const;
+			virtual bool isMessageHasAlreadyBeenDelivered() const;
+			virtual bool isGroupMessage() const;
+		private:
+			bool const pushMessage;
+			bool const noQueuing;
+			bool const noAckExpected;
+			bool const messageHasAlreadyBeenDelivered;
+			bool const groupMessage;
+
+			static char boolsToByte(bool bitLsbPlus0, bool bitLsbPlus1, bool bitLsbPlus2, bool bitLsbPlus3, bool bitLsbPlus4, bool bitLsbPlus5, bool bitLsbPlus6, bool bitLsbPlus7);
+			static bool byteToBool(char c, size_t position);
+		};
+
+	}
+}
 
 #endif // OPENMITTSU_MESSAGES_MESSAGEFLAGS_H_

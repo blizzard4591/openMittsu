@@ -1,48 +1,56 @@
 #ifndef OPENMITTSU_PROTOCOL_GROUPID_H_
 #define OPENMITTSU_PROTOCOL_GROUPID_H_
 
-#include "protocol/Id.h"
-#include "protocol/ContactId.h"
-#include "protocol/MessageId.h"
+#include "src/protocol/ContactId.h"
+#include "src/protocol/MessageId.h"
 #include <cstdint>
 #include <QtGlobal>
 #include <QByteArray>
 #include <QMetaType>
 #include <QHash>
 
-class GroupId : public Id {
-public:
-	GroupId(ContactId const& owner, quint64 groupId);
-	explicit GroupId(quint64 owner, quint64 groupId);
-	GroupId(GroupId const& other);
-	virtual ~GroupId();
+namespace openmittsu {
+	namespace protocol {
 
-	ContactId const& getOwner() const;
-	quint64 getGroupId() const;
-	QByteArray getGroupIdAsByteArray() const;
-	static int getSizeOfGroupIdInBytes();
-	virtual std::string toString() const override;
-	virtual QString toQString() const override;
+		class GroupId {
+		public:
+			GroupId(ContactId const& owner, quint64 groupId);
+			explicit GroupId(quint64 owner, quint64 groupId);
+			explicit GroupId(ContactId const& owner, QString const& hexEncodedGroupId);
+			GroupId(GroupId const& other);
+			virtual ~GroupId();
 
-	QString toContactFileFormat() const;
+			ContactId const& getOwner() const;
+			quint64 getGroupId() const;
+			QByteArray getGroupIdAsByteArray() const;
+			static int getSizeOfGroupIdInBytes();
+			std::string toString() const;
+			QString toQString() const;
+			QString groupIdWithoutOwnerToQString() const;
 
-	bool operator ==(GroupId const& other) const;
-	bool operator <(GroupId const& other) const;
+			QString toContactFileFormat() const;
 
-	static GroupId fromData(QByteArray const& data);
-	static GroupId createRandomGroupId(ContactId const& owner);
+			bool operator ==(GroupId const& other) const;
+			bool operator !=(GroupId const& other) const;
+			bool operator <(GroupId const& other) const;
 
-	friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<GroupId, true>;
-	friend class QHash<MessageId, GroupId>;
-private:
-	ContactId owner;
-	quint64 groupId;
+			static GroupId fromData(QByteArray const& data);
+			static GroupId createRandomGroupId(ContactId const& owner);
 
-	GroupId();
-};
+			friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<GroupId, true>;
+			friend class QHash<MessageId, GroupId>;
+		private:
+			ContactId owner;
+			quint64 groupId;
 
-uint qHash(GroupId const& key, uint seed);
+			GroupId();
+		};
 
-Q_DECLARE_METATYPE(GroupId)
+
+		uint qHash(GroupId const& key, uint seed);
+	}
+}
+
+Q_DECLARE_METATYPE(openmittsu::protocol::GroupId)
 
 #endif // OPENMITTSU_PROTOCOL_GROUPID_H_

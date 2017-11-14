@@ -1,34 +1,39 @@
 #ifndef OPENMITTSU_PROTOCOL_CONTACTIDWITHMESSAGEID_H_
 #define OPENMITTSU_PROTOCOL_CONTACTIDWITHMESSAGEID_H_
 
-#include "protocol/ContactId.h"
-#include "protocol/MessageId.h"
+#include "src/protocol/ContactId.h"
+#include "src/protocol/MessageId.h"
 #include <QtGlobal>
 #include <QByteArray>
 #include <QMetaType>
 
-class ContactIdWithMessageId {
-public:
-	ContactIdWithMessageId(ContactId const& contact, MessageId const& messageId);
-	ContactIdWithMessageId(ContactIdWithMessageId const& other);
-	virtual ~ContactIdWithMessageId();
+namespace openmittsu {
+	namespace protocol {
 
-	MessageId const& getMessageId() const;
-	ContactId const& getContactId() const;
+		class ContactIdWithMessageId {
+		public:
+			ContactIdWithMessageId(ContactId const& contact, MessageId const& messageId);
+			ContactIdWithMessageId(ContactIdWithMessageId const& other);
+			virtual ~ContactIdWithMessageId();
 
-	bool operator ==(ContactIdWithMessageId const& other) const;
+			MessageId const& getMessageId() const;
+			ContactId const& getContactId() const;
 
-	friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<ContactIdWithMessageId, true>;
-private:
-	ContactId const contact;
-	MessageId const messageId;
+			bool operator ==(ContactIdWithMessageId const& other) const;
 
-	ContactIdWithMessageId();
-};
+			friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<ContactIdWithMessageId, true>;
+		private:
+			ContactId const contact;
+			MessageId const messageId;
 
-uint qHash(ContactIdWithMessageId const& key, uint seed);
+			ContactIdWithMessageId();
+		};
 
-Q_DECLARE_METATYPE(ContactIdWithMessageId)
+		uint qHash(ContactIdWithMessageId const& key, uint seed);
+	}
+}
+
+Q_DECLARE_METATYPE(openmittsu::protocol::ContactIdWithMessageId)
 
 #endif // #define OPENMITTSU_PROTOCOL_CONTACTIDWITHMESSAGEID_H_
 

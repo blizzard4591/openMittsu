@@ -1,13 +1,13 @@
 #ifndef OPENMITTSU_TASKS_IDENTITYRECEIVERCALLBACKTASK_H_
 #define OPENMITTSU_TASKS_IDENTITYRECEIVERCALLBACKTASK_H_
 
-#include "messages/MessageWithEncryptedPayload.h"
-#include "tasks/CertificateBasedCallbackTask.h"
-#include "protocol/ContactId.h"
-#include "protocol/CryptoBox.h"
-#include "protocol/Nonce.h"
-#include "ServerConfiguration.h"
-#include "PublicKey.h"
+#include "src/messages/MessageWithEncryptedPayload.h"
+#include "src/protocol/ContactId.h"
+#include "src/network/ServerConfiguration.h"
+#include "src/crypto/PublicKey.h"
+
+#include "src/tasks/CallbackTask.h"
+#include "src/tasks/CertificateBasedCallbackTask.h"
 
 #include <QString>
 #include <QByteArray>
@@ -15,21 +15,27 @@
 
 #include <utility>
 
-class IdentityReceiverCallbackTask : public CertificateBasedCallbackTask {
-public:
-	IdentityReceiverCallbackTask(ServerConfiguration* serverConfiguration, ContactId const& identityToFetch);
-	virtual ~IdentityReceiverCallbackTask();
+namespace openmittsu {
+	namespace tasks {
 
-	ContactId const& getContactIdOfFetchedPublicKey() const;
-	PublicKey const& getFetchedPublicKey() const;
-protected:
-	virtual void taskRun() override;
-private:
-	QString const urlString;
-	QString const agentString;
-	ContactId const identityToFetch;
+		class IdentityReceiverCallbackTask : public CertificateBasedCallbackTask, public CallbackTask {
+		public:
+			IdentityReceiverCallbackTask(std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, openmittsu::protocol::ContactId const& identityToFetch);
+			virtual ~IdentityReceiverCallbackTask();
 
-	PublicKey fetchedPublicKey;
-};
+			openmittsu::protocol::ContactId const& getContactIdOfFetchedPublicKey() const;
+			openmittsu::crypto::PublicKey const& getFetchedPublicKey() const;
+		protected:
+			virtual void taskRun() override;
+		private:
+			QString const m_urlString;
+			QString const m_agentString;
+			openmittsu::protocol::ContactId const m_identityToFetch;
+
+			openmittsu::crypto::PublicKey m_fetchedPublicKey;
+		};
+
+	}
+}
 
 #endif // OPENMITTSU_TASKS_IDENTITYRECEIVERCALLBACKTASK_H_

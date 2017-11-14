@@ -1,30 +1,38 @@
 #ifndef OPENMITTSU_MESSAGES_CONTACT_CONTACTIMAGEMESSAGECONTENT_H_
 #define OPENMITTSU_MESSAGES_CONTACT_CONTACTIMAGEMESSAGECONTENT_H_
 
-#include "messages/contact/ContactMessageContent.h"
+#include "src/messages/contact/ContactMessageContent.h"
 
 #include <QByteArray>
 
-class ContactImageMessageContent : public ContactMessageContent {
-public:
-	ContactImageMessageContent(QByteArray const& imageData);
-	virtual ~ContactImageMessageContent();
+namespace openmittsu {
+	namespace messages {
+		namespace contact {
 
-	virtual ContactMessageContent* clone() const override;
+			class ContactImageMessageContent : public ContactMessageContent {
+			public:
+				ContactImageMessageContent(QByteArray const& imageData);
+				virtual ~ContactImageMessageContent();
 
-	virtual bool hasPreSendCallbackTask() const override;
+				virtual ContactMessageContent* clone() const override;
 
-	virtual CallbackTask* getPreSendCallbackTask(Message* message, std::shared_ptr<AcknowledgmentProcessor> const& acknowledgmentProcessor, ServerConfiguration* serverConfiguration, CryptoBox* cryptoBox) const override;
-	virtual MessageContent* integrateCallbackTaskResult(CallbackTask const* callbackTask) const override;
+				virtual bool hasPreSendCallbackTask() const override;
 
-	virtual QByteArray toPacketPayload() const override;
-	virtual MessageContent* fromPacketPayload(FullMessageHeader const& messageHeader, QByteArray const& payload) const override;
+				virtual openmittsu::tasks::CallbackTask* getPreSendCallbackTask(Message* message, std::shared_ptr<openmittsu::acknowledgments::AcknowledgmentProcessor> const& acknowledgmentProcessor, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, std::shared_ptr<openmittsu::crypto::FullCryptoBox> const& cryptoBox) const override;
+				virtual MessageContent* integrateCallbackTaskResult(openmittsu::tasks::CallbackTask const* callbackTask) const override;
 
-	QByteArray const& getImageData() const;
-private:
-	QByteArray imageData;
+				virtual QByteArray toPacketPayload() const override;
+				virtual MessageContent* fromPacketPayload(FullMessageHeader const& messageHeader, QByteArray const& payload) const override;
 
-	static bool registrationResult;
-};
+				QByteArray const& getImageData() const;
+			private:
+				QByteArray imageData;
+
+				static bool registrationResult;
+			};
+
+		}
+	}
+}
 
 #endif // OPENMITTSU_MESSAGES_CONTACT_CONTACTIMAGEMESSAGECONTENT_H_

@@ -1,31 +1,39 @@
 #ifndef OPENMITTSU_MESSAGES_CONTACT_CONTACTTEXTMESSAGECONTENT_H_
 #define OPENMITTSU_MESSAGES_CONTACT_CONTACTTEXTMESSAGECONTENT_H_
 
-#include "messages/MessageContentFactory.h"
-#include "messages/contact/ContactMessageContent.h"
+#include "src/messages/MessageContentFactory.h"
+#include "src/messages/contact/ContactMessageContent.h"
 
 #include <QString>
 
-class ContactTextMessageContent : public ContactMessageContent {
-public:
-	ContactTextMessageContent(QString const& text);
-	virtual ~ContactTextMessageContent();
+namespace openmittsu {
+	namespace messages {
+		namespace contact {
 
-	virtual ContactMessageContent* clone() const override;
+			class ContactTextMessageContent : public ContactMessageContent {
+			public:
+				ContactTextMessageContent(QString const& text);
+				virtual ~ContactTextMessageContent();
 
-	virtual QByteArray toPacketPayload() const override;
+				virtual ContactMessageContent* clone() const override;
 
-	virtual MessageContent* fromPacketPayload(FullMessageHeader const& messageHeader, QByteArray const& payload) const override;
+				virtual QByteArray toPacketPayload() const override;
 
-	virtual QString const& getText() const;
+				virtual MessageContent* fromPacketPayload(FullMessageHeader const& messageHeader, QByteArray const& payload) const override;
 
-	friend class TypedMessageContentFactory<ContactTextMessageContent>;
-private:
-	ContactTextMessageContent();
+				virtual QString const& getText() const;
 
-	QString const text;
+				friend class TypedMessageContentFactory<ContactTextMessageContent>;
+			private:
+				ContactTextMessageContent();
 
-	static bool registrationResult;
-};
+				QString const text;
+
+				static bool registrationResult;
+			};
+
+		}
+	}
+}
 
 #endif // OPENMITTSU_MESSAGES_CONTACT_CONTACTTEXTMESSAGECONTENT_H_

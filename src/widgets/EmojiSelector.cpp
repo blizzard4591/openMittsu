@@ -1,26 +1,32 @@
 #include "EmojiSelector.h"
 #include "ui_EmojiSelector.h"
 
-#include "utility/QObjectConnectionMacro.h"
+#include "src/utility/QObjectConnectionMacro.h"
 
-EmojiSelector::EmojiSelector(QWidget *parent) : QWidget(parent), ui(new Ui::EmojiSelector) {
-    ui->setupUi(this);
+namespace openmittsu {
+	namespace widgets {
 
-	OPENMITTSU_CONNECT(ui->labelActivity, doubleClickSelectedText(QString const&), this, labelTextDoubleClicked(QString const&));
-	OPENMITTSU_CONNECT(ui->labelCelebration, doubleClickSelectedText(QString const&), this, labelTextDoubleClicked(QString const&));
-	OPENMITTSU_CONNECT(ui->labelFoodAndDrink, doubleClickSelectedText(QString const&), this, labelTextDoubleClicked(QString const&));
-	OPENMITTSU_CONNECT(ui->labelNature, doubleClickSelectedText(QString const&), this, labelTextDoubleClicked(QString const&));
-	OPENMITTSU_CONNECT(ui->labelObjects, doubleClickSelectedText(QString const&), this, labelTextDoubleClicked(QString const&));
-	OPENMITTSU_CONNECT(ui->labelPeople, doubleClickSelectedText(QString const&), this, labelTextDoubleClicked(QString const&));
-	OPENMITTSU_CONNECT(ui->labelSquareButtons, doubleClickSelectedText(QString const&), this, labelTextDoubleClicked(QString const&));
-	OPENMITTSU_CONNECT(ui->labelSymbols, doubleClickSelectedText(QString const&), this, labelTextDoubleClicked(QString const&));
-	OPENMITTSU_CONNECT(ui->labelTravelAndPlaces, doubleClickSelectedText(QString const&), this, labelTextDoubleClicked(QString const&));
-}
+		EmojiSelector::EmojiSelector(QWidget* parent) : QWidget(parent), m_ui(new Ui::EmojiSelector) {
+			m_ui->setupUi(this);
 
-EmojiSelector::~EmojiSelector() {
-    delete ui;
-}
+			OPENMITTSU_CONNECT(m_ui->labelActivity, doubleClickSelectedText(QString const&), this, labelTextDoubleClicked(QString const&));
+			OPENMITTSU_CONNECT(m_ui->labelCelebration, doubleClickSelectedText(QString const&), this, labelTextDoubleClicked(QString const&));
+			OPENMITTSU_CONNECT(m_ui->labelFoodAndDrink, doubleClickSelectedText(QString const&), this, labelTextDoubleClicked(QString const&));
+			OPENMITTSU_CONNECT(m_ui->labelNature, doubleClickSelectedText(QString const&), this, labelTextDoubleClicked(QString const&));
+			OPENMITTSU_CONNECT(m_ui->labelObjects, doubleClickSelectedText(QString const&), this, labelTextDoubleClicked(QString const&));
+			OPENMITTSU_CONNECT(m_ui->labelPeople, doubleClickSelectedText(QString const&), this, labelTextDoubleClicked(QString const&));
+			OPENMITTSU_CONNECT(m_ui->labelSquareButtons, doubleClickSelectedText(QString const&), this, labelTextDoubleClicked(QString const&));
+			OPENMITTSU_CONNECT(m_ui->labelSymbols, doubleClickSelectedText(QString const&), this, labelTextDoubleClicked(QString const&));
+			OPENMITTSU_CONNECT(m_ui->labelTravelAndPlaces, doubleClickSelectedText(QString const&), this, labelTextDoubleClicked(QString const&));
+		}
 
-void EmojiSelector::labelTextDoubleClicked(QString const& selectedText) {
-	emit emojiDoubleClicked(selectedText);
+		EmojiSelector::~EmojiSelector() {
+			delete m_ui;
+		}
+
+		void EmojiSelector::labelTextDoubleClicked(QString const& selectedText) {
+			emit emojiDoubleClicked(selectedText);
+		}
+
+	}
 }

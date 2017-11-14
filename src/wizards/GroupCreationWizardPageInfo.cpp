@@ -1,64 +1,79 @@
-#include "GroupCreationWizardPageInfo.h"
+#include "src/wizards/GroupCreationWizardPageInfo.h"
 #include "ui_groupcreationwizardpageinfo.h"
 
-#include "ContactRegistry.h"
-#include "widgets/ContactListWidgetItem.h"
-#include "exceptions/InternalErrorException.h"
-#include "utility/QObjectConnectionMacro.h"
+#include "src/widgets/ContactListWidgetItem.h"
+#include "src/exceptions/InternalErrorException.h"
+#include "src/utility/QObjectConnectionMacro.h"
 
+#include <QMessageBox>
 
-GroupCreationWizardPageInfo::GroupCreationWizardPageInfo(ClientConfiguration* clientConfiguration, QWidget *parent) : QWizardPage(parent), ui(new Ui::GroupCreationWizardPageInfo), clientConfiguration(clientConfiguration) {
-    ui->setupUi(this);
+namespace openmittsu {
+	namespace wizards {
+		GroupCreationWizardPageInfo::GroupCreationWizardPageInfo(QHash<openmittsu::protocol::ContactId, QString> const& knownIdentitiesWithNicknamesExcludingSelfContactId, std::unique_ptr<openmittsu::dataproviders::GroupCreationProcessor> groupCreationProcessor, QWidget* parent) : QWizardPage(parent), m_ui(new Ui::GroupCreationWizardPageInfo), m_knownIdentities(knownIdentitiesWithNicknamesExcludingSelfContactId), m_groupCreationProcessor(std::move(groupCreationProcessor)) {
+			m_ui->setupUi(this);
 
-	nameValidator = new QRegExpValidator(QRegExp(".+", Qt::CaseInsensitive, QRegExp::RegExp2), ui->edtName);
-	ui->edtName->setValidator(nameValidator);
+			m_nameValidator = new QRegExpValidator(QRegExp(".+", Qt::CaseInsensitive, QRegExp::RegExp2), m_ui->edtName);
+			m_ui->edtName->setValidator(m_nameValidator);
 
-	ui->listWidget->clear();
-	ui->listWidget->setSelectionMode(QListWidget::SelectionMode::MultiSelection);
+			m_ui->listWidget->clear();
+			m_ui->listWidget->setSelectionMode(QListWidget::SelectionMode::MultiSelection);
 
-	OPENMITTSU_CONNECT(ui->listWidget, itemSelectionChanged(), this, onListWidgetItemSelectionChanged());
+			OPENMITTSU_CONNECT(m_ui->listWidget, itemSelectionChanged(), this, onListWidgetItemSelectionChanged());
 
-	// Load all Identities
-	ContactRegistry* contactRegistry = ContactRegistry::getInstance();
-	QList<ContactId> knownIdentities = contactRegistry->getIdentities();
-	QList<ContactId>::const_iterator it = knownIdentities.constBegin();
-	QList<ContactId>::const_iterator end = knownIdentities.constEnd();
+			// Load all Identities
+			QHash<openmittsu::protocol::ContactId, QString>::const_iterator it = m_knownIdentities.constBegin();
+			QHash<openmittsu::protocol::ContactId, QString>::const_iterator end = m_knownIdentities.constEnd();
 
-	ContactId const selfIdentity = (clientConfiguration == nullptr) ? ContactId(0) : clientConfiguration->getClientIdentity();
-	for (; it != end; ++it) {
-		if (*it == selfIdentity) {
-			continue;
+			for (; it != end; ++it) {
+				ContactListWidgetItem* clwi = new ContactListWidgetItem(it.key(), false, it.value());
+				m_ui->listWidget->addItem(clwi);
+			}
+			m_ui->listWidget->clearSelection();
+			m_isSelectionOkay = false;
+
+			registerField("edtName*", m_ui->edtName);
+			registerField("listWidget*", m_ui->listWidget);
 		}
-		ContactListWidgetItem* clwi = new ContactListWidgetItem(contactRegistry->getIdentity(*it), contactRegistry->getNickname(*it));
-		ui->listWidget->addItem(clwi);
+
+		GroupCreationWizardPageInfo::~GroupCreationWizardPageInfo() {
+			delete m_ui;
+		}
+
+		bool GroupCreationWizardPageInfo::validatePage() {
+			// all data in the Info section was given, now create the group
+			QList<QListWidgetItem*> selectedItems = m_ui->listWidget->selectedItems();
+			QList<QListWidgetItem*>::const_iterator it = selectedItems.constBegin();
+			QList<QListWidgetItem*>::const_iterator end = selectedItems.constEnd();
+
+			QSet<openmittsu::protocol::ContactId> groupMembers;
+			for (; it != end; ++it) {
+				ContactListWidgetItem* clwi = dynamic_cast<ContactListWidgetItem*>(*it);
+				groupMembers.insert(clwi->getContactId());
+			}
+
+			bool const creationResult = m_groupCreationProcessor->createNewGroup(groupMembers, true, m_ui->edtName->text(), QVariant());
+			if (!creationResult) {
+				QMessageBox::warning(this, QStringLiteral("Group creation failed!"), QStringLiteral("openMittsu was unable to create and store the new group.\nPlease try again and/or contact a developer!"));
+				return false;
+			} else {
+				return true;
+			}
+		}
+
+		bool GroupCreationWizardPageInfo::isComplete() const {
+			if (m_ui->edtName->hasAcceptableInput() && m_isSelectionOkay) {
+				return true;
+			}
+			return false;
+		}
+
+		void GroupCreationWizardPageInfo::onListWidgetItemSelectionChanged() {
+			if (m_ui->listWidget->selectedItems().size() > 0) {
+				m_isSelectionOkay = true;
+			} else {
+				m_isSelectionOkay = false;
+			}
+			emit completeChanged();
+		}
 	}
-	ui->listWidget->clearSelection();
-	isSelectionOkay = false;
-
-	registerField("edtName*", ui->edtName);
-	registerField("listWidget*", ui->listWidget);
-}
-
-GroupCreationWizardPageInfo::~GroupCreationWizardPageInfo() {
-    delete ui;
-}
-
-bool GroupCreationWizardPageInfo::isComplete() const {
-	if (ui->edtName->hasAcceptableInput() && isSelectionOkay) {
-		return true;
-	}
-	return false;
-}
-
-void GroupCreationWizardPageInfo::onListWidgetItemSelectionChanged() {
-	if (ui->listWidget->selectedItems().size() > 0) {
-		isSelectionOkay = true;
-	} else {
-		isSelectionOkay = false;
-	}
-	emit completeChanged();
-}
-
-QListWidget const* GroupCreationWizardPageInfo::getSelectedGroupMembersWidgetPointer() const {
-	return ui->listWidget;
 }

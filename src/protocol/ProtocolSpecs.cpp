@@ -1,2 +1,8 @@
-#include "ProtocolSpecs.h"
-//
+#include "src/protocol/ProtocolSpecs.h"
+
+namespace openmittsu {
+	namespace protocol {
+		//
+	}
+}
+

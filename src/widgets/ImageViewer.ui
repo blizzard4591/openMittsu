@@ -17,7 +17,7 @@
    <property name="widgetResizable">
     <bool>true</bool>
    </property>
-   <widget class="PixmapLabel" name="lblImage">
+   <widget class="openmittsu::widgets::PixmapLabel" name="lblImage">
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -120,7 +120,7 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>PixmapLabel</class>
+   <class>openmittsu::widgets::PixmapLabel</class>
    <extends>QLabel</extends>
    <header>widgets/PixmapLabel.h</header>
   </customwidget>

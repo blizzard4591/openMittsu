@@ -10,27 +10,27 @@
 int main(int argc, char *argv[]) {
 	// openMittsu_'.$row->version_major.'.'.$row->version_minor.'.'.$row->version_patch.$linkCommitsSinceTagPart.'-'.$row->git_hash.'-'.$linkOsPart.'-'.$linkBitsPart.'-'.$linkEndianPart.'.'.$
 
-	std::cout << "openMittsu_" << Version::versionMajor << "." << Version::versionMinor << "." << Version::versionPatch;
+	std::cout << "openMittsu_" << openmittsu::utility::Version::versionMajor << "." << openmittsu::utility::Version::versionMinor << "." << openmittsu::utility::Version::versionPatch;
 
-	if (Version::commitsAhead > 0) {
-		std::cout << "plus" << Version::commitsAhead;
+	if (openmittsu::utility::Version::commitsAhead > 0) {
+		std::cout << "plus" << openmittsu::utility::Version::commitsAhead;
 	}
 
-	std::cout << "-" << Version::gitRevisionHash << "-";
+	std::cout << "-" << openmittsu::utility::Version::gitRevisionHash << "-";
 
-	std::string osName = Version::systemName;
+	std::string osName = openmittsu::utility::Version::systemName;
 	std::transform(osName.begin(), osName.end(), osName.begin(), ::tolower);
 
 	std::cout << osName << "-";
 
 	std::string const ptrSize64Bits = "64";
 	std::string const ptrSize32Bits = "32";
-	if (Version::systemPtrSize == ptrSize64Bits) {
+	if (openmittsu::utility::Version::systemPtrSize == ptrSize64Bits) {
 		std::cout << "x64";
-	} else if (Version::systemPtrSize == ptrSize32Bits) {
+	} else if (openmittsu::utility::Version::systemPtrSize == ptrSize32Bits) {
 		std::cout << "x86";
 	} else {
-		std::cout << Version::systemPtrSize;
+		std::cout << openmittsu::utility::Version::systemPtrSize;
 	}
 
 	std::cout << "-";

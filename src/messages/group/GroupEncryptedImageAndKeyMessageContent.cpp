@@ -1,75 +1,83 @@
-#include "messages/group/GroupEncryptedImageAndKeyMessageContent.h"
+#include "src/messages/group/GroupEncryptedImageAndKeyMessageContent.h"
 
-#include "exceptions/IllegalFunctionCallException.h"
-#include "messages/group/GroupImageIdAndKeyMessageContent.h"
-#include "messages/group/GroupImageMessageContent.h"
-#include "protocol/CryptoBox.h"
-#include "protocol/Nonce.h"
-#include "protocol/FixedNonces.h"
-#include "tasks/BlobUploaderCallbackTask.h"
-#include "tasks/KeyAndFixedNonceDecryptionCallbackTask.h"
-#include "utility/Logging.h"
+#include "src/exceptions/IllegalFunctionCallException.h"
+#include "src/messages/group/GroupImageIdAndKeyMessageContent.h"
+#include "src/messages/group/GroupImageMessageContent.h"
+#include "src/crypto/FullCryptoBox.h"
+#include "src/crypto/Nonce.h"
+#include "src/crypto/FixedNonces.h"
+#include "src/tasks/BlobUploaderCallbackTask.h"
+#include "src/tasks/KeyAndFixedNonceDecryptionCallbackTask.h"
+#include "src/utility/Logging.h"
 
-GroupEncryptedImageAndKeyMessageContent::GroupEncryptedImageAndKeyMessageContent(GroupId const& groupId, QByteArray const& encryptedImage, EncryptionKey const& encryptionKey, quint32 imageSizeInBytes) : GroupMessageContent(groupId), encryptedImageData(encryptedImage), encryptionKey(encryptionKey), sizeInBytes(imageSizeInBytes) {
-	// Intentionally left empty.
-}
+namespace openmittsu {
+	namespace messages {
+		namespace group {
 
-GroupEncryptedImageAndKeyMessageContent::~GroupEncryptedImageAndKeyMessageContent() {
-	// Intentionally left empty.
-}
+			GroupEncryptedImageAndKeyMessageContent::GroupEncryptedImageAndKeyMessageContent(openmittsu::protocol::GroupId const& groupId, QByteArray const& encryptedImage, openmittsu::crypto::EncryptionKey const& encryptionKey, quint32 imageSizeInBytes) : GroupMessageContent(groupId), encryptedImageData(encryptedImage), encryptionKey(encryptionKey), sizeInBytes(imageSizeInBytes) {
+				// Intentionally left empty.
+			}
 
-GroupMessageContent* GroupEncryptedImageAndKeyMessageContent::clone() const {
-	return new GroupEncryptedImageAndKeyMessageContent(getGroupId(), encryptedImageData, encryptionKey, sizeInBytes);
-}
+			GroupEncryptedImageAndKeyMessageContent::~GroupEncryptedImageAndKeyMessageContent() {
+				// Intentionally left empty.
+			}
 
-bool GroupEncryptedImageAndKeyMessageContent::hasPreSendCallbackTask() const {
-	return true;
-}
+			GroupMessageContent* GroupEncryptedImageAndKeyMessageContent::clone() const {
+				return new GroupEncryptedImageAndKeyMessageContent(getGroupId(), encryptedImageData, encryptionKey, sizeInBytes);
+			}
 
-CallbackTask* GroupEncryptedImageAndKeyMessageContent::getPreSendCallbackTask(Message* message, std::shared_ptr<AcknowledgmentProcessor> const& acknowledgmentProcessor, ServerConfiguration* serverConfiguration, CryptoBox* cryptoBox) const {
-	return new BlobUploaderCallbackTask(serverConfiguration, message, acknowledgmentProcessor, encryptedImageData);
-}
+			bool GroupEncryptedImageAndKeyMessageContent::hasPreSendCallbackTask() const {
+				return true;
+			}
 
-bool GroupEncryptedImageAndKeyMessageContent::hasPostReceiveCallbackTask() const {
-	return true;
-}
+			openmittsu::tasks::CallbackTask* GroupEncryptedImageAndKeyMessageContent::getPreSendCallbackTask(Message* message, std::shared_ptr<openmittsu::acknowledgments::AcknowledgmentProcessor> const& acknowledgmentProcessor, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, std::shared_ptr<openmittsu::crypto::FullCryptoBox> const& cryptoBox) const {
+				return new openmittsu::tasks::BlobUploaderCallbackTask(serverConfiguration, message, acknowledgmentProcessor, encryptedImageData);
+			}
 
-CallbackTask* GroupEncryptedImageAndKeyMessageContent::getPostReceiveCallbackTask(Message* message, ServerConfiguration* serverConfiguration, CryptoBox* cryptoBox) const {
-	Nonce const fixedImageNonce = FixedNonces::getFixedGroupImageNonce();
-	return new KeyAndFixedNonceDecryptionCallbackTask(cryptoBox, message, std::shared_ptr<AcknowledgmentProcessor>(), encryptedImageData, encryptionKey, fixedImageNonce);
-}
+			bool GroupEncryptedImageAndKeyMessageContent::hasPostReceiveCallbackTask() const {
+				return true;
+			}
 
-MessageContent* GroupEncryptedImageAndKeyMessageContent::integrateCallbackTaskResult(CallbackTask const* callbackTask) const {
-	if (dynamic_cast<KeyAndFixedNonceDecryptionCallbackTask const*>(callbackTask) != nullptr) {
-		KeyAndFixedNonceDecryptionCallbackTask const* kfndct = dynamic_cast<KeyAndFixedNonceDecryptionCallbackTask const*>(callbackTask);
-		LOGGER_DEBUG("Integrating result from KeyAndFixedNonceDecryptionCallbackTask into a new GroupImageMessageContent.");
-		return new GroupImageMessageContent(getGroupId(), kfndct->getDecryptedData());
-	} else if (dynamic_cast<BlobUploaderCallbackTask const*>(callbackTask) != nullptr) {
-		BlobUploaderCallbackTask const* buct = dynamic_cast<BlobUploaderCallbackTask const*>(callbackTask);
-		LOGGER_DEBUG("Integrating result from BlobUploaderCallbackTask into a new GroupImageIdAndKeyMessageContent.");
-		return new GroupImageIdAndKeyMessageContent(getGroupId(), buct->getBlobId(), encryptionKey, sizeInBytes);
-	} else {
-		LOGGER()->critical("GroupEncryptedImageAndKeyMessageContent::integrateCallbackTaskResult called for unexpected CallbackTask.");
-		throw;
+			openmittsu::tasks::CallbackTask* GroupEncryptedImageAndKeyMessageContent::getPostReceiveCallbackTask(Message* message, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, std::shared_ptr<openmittsu::crypto::FullCryptoBox> const& cryptoBox) const {
+				openmittsu::crypto::Nonce const fixedImageNonce = openmittsu::crypto::FixedNonces::getFixedGroupImageNonce();
+				return new openmittsu::tasks::KeyAndFixedNonceDecryptionCallbackTask(cryptoBox, message, std::shared_ptr<openmittsu::acknowledgments::AcknowledgmentProcessor>(), encryptedImageData, encryptionKey, fixedImageNonce);
+			}
+
+			MessageContent* GroupEncryptedImageAndKeyMessageContent::integrateCallbackTaskResult(openmittsu::tasks::CallbackTask const* callbackTask) const {
+				if (dynamic_cast<openmittsu::tasks::KeyAndFixedNonceDecryptionCallbackTask const*>(callbackTask) != nullptr) {
+					openmittsu::tasks::KeyAndFixedNonceDecryptionCallbackTask const* kfndct = dynamic_cast<openmittsu::tasks::KeyAndFixedNonceDecryptionCallbackTask const*>(callbackTask);
+					LOGGER_DEBUG("Integrating result from KeyAndFixedNonceDecryptionCallbackTask into a new GroupImageMessageContent.");
+					return new GroupImageMessageContent(getGroupId(), kfndct->getDecryptedData());
+				} else if (dynamic_cast<openmittsu::tasks::BlobUploaderCallbackTask const*>(callbackTask) != nullptr) {
+					openmittsu::tasks::BlobUploaderCallbackTask const* buct = dynamic_cast<openmittsu::tasks::BlobUploaderCallbackTask const*>(callbackTask);
+					LOGGER_DEBUG("Integrating result from BlobUploaderCallbackTask into a new GroupImageIdAndKeyMessageContent.");
+					return new GroupImageIdAndKeyMessageContent(getGroupId(), buct->getBlobId(), encryptionKey, sizeInBytes);
+				} else {
+					LOGGER()->critical("GroupEncryptedImageAndKeyMessageContent::integrateCallbackTaskResult called for unexpected CallbackTask.");
+					throw;
+				}
+			}
+
+			QByteArray const& GroupEncryptedImageAndKeyMessageContent::getEncryptedImageData() const {
+				return encryptedImageData;
+			}
+
+			openmittsu::crypto::EncryptionKey const& GroupEncryptedImageAndKeyMessageContent::getEncryptionKey() const {
+				return encryptionKey;
+			}
+
+			quint32 GroupEncryptedImageAndKeyMessageContent::getImageSizeInBytes() const {
+				return sizeInBytes;
+			}
+
+			MessageContent* GroupEncryptedImageAndKeyMessageContent::fromPacketPayload(FullMessageHeader const& messageHeader, QByteArray const& payload) const {
+				throw openmittsu::exceptions::IllegalFunctionCallException() << "The intermediate content GroupEncryptedImageAndKeyMessageContent does not support creation from a packet payload.";
+			}
+
+			QByteArray GroupEncryptedImageAndKeyMessageContent::toPacketPayload() const {
+				throw openmittsu::exceptions::IllegalFunctionCallException() << "The intermediate content GroupEncryptedImageAndKeyMessageContent does not support building a packet payload.";
+			}
+
+		}
 	}
-}
-
-QByteArray const& GroupEncryptedImageAndKeyMessageContent::getEncryptedImageData() const {
-	return encryptedImageData;
-}
-
-EncryptionKey const& GroupEncryptedImageAndKeyMessageContent::getEncryptionKey() const {
-	return encryptionKey;
-}
-
-quint32 GroupEncryptedImageAndKeyMessageContent::getImageSizeInBytes() const {
-	return sizeInBytes;
-}
-
-MessageContent* GroupEncryptedImageAndKeyMessageContent::fromPacketPayload(FullMessageHeader const& messageHeader, QByteArray const& payload) const {
-	throw IllegalFunctionCallException() << "The intermediate content GroupEncryptedImageAndKeyMessageContent does not support creation from a packet payload.";
-}
-
-QByteArray GroupEncryptedImageAndKeyMessageContent::toPacketPayload() const {
-	throw IllegalFunctionCallException() << "The intermediate content GroupEncryptedImageAndKeyMessageContent does not support building a packet payload.";
 }

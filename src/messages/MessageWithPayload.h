@@ -1,29 +1,35 @@
 #ifndef OPENMITTSU_MESSAGES_MESSAGEWITHPAYLOAD_H_
 #define OPENMITTSU_MESSAGES_MESSAGEWITHPAYLOAD_H_
 
-#include "messages/FullMessageHeader.h"
-#include "messages/ContentType.h"
-#include "protocol/CryptoBox.h"
-#include "protocol/Nonce.h"
+#include "src/messages/FullMessageHeader.h"
+#include "src/messages/ContentType.h"
+#include "src/crypto/FullCryptoBox.h"
 
-class MessageWithEncryptedPayload;
+#include <memory>
 
-class MessageWithPayload {
-public:
-	MessageWithPayload(FullMessageHeader const& messageHeader, QByteArray const& payload);
-	MessageWithPayload(MessageWithPayload const& other);
-	virtual ~MessageWithPayload();
+namespace openmittsu {
+	namespace messages {
+		class MessageWithEncryptedPayload;
 
-	FullMessageHeader const& getMessageHeader() const;
-	QByteArray const& getPayload() const;
+		class MessageWithPayload {
+		public:
+			MessageWithPayload(FullMessageHeader const& messageHeader, QByteArray const& payload);
+			MessageWithPayload(MessageWithPayload const& other);
+			virtual ~MessageWithPayload();
 
-	virtual MessageWithEncryptedPayload encrypt(CryptoBox* cryptoBox) const;
-private:
-	FullMessageHeader const messageHeader;
-	QByteArray const payload;
+			FullMessageHeader const& getMessageHeader() const;
+			QByteArray const& getPayload() const;
 
-	// Disable the default constructor
-	MessageWithPayload();
-};
+			virtual MessageWithEncryptedPayload encrypt(std::shared_ptr<openmittsu::crypto::FullCryptoBox> const& cryptoBox) const;
+		private:
+			FullMessageHeader const messageHeader;
+			QByteArray const payload;
+
+			// Disable the default constructor
+			MessageWithPayload();
+		};
+
+	}
+}
 
 #endif // OPENMITTSU_MESSAGES_MESSAGEWITHPAYLOAD_H_

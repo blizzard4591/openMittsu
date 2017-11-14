@@ -1,27 +1,24 @@
-#ifndef GROUPCREATIONWIZARDPAGEDONE_H
-#define GROUPCREATIONWIZARDPAGEDONE_H
+#ifndef OPENMITTSU_WIZARDS_GROUPCREATIONWIZARDPAGEDONE_H_
+#define OPENMITTSU_WIZARDS_GROUPCREATIONWIZARDPAGEDONE_H_
 
 #include <QWizardPage>
-#include <QListWidget>
-#include "ProtocolClient.h"
 
 namespace Ui {
-class GroupCreationWizardPageDone;
+	class GroupCreationWizardPageDone;
 }
 
-class GroupCreationWizardPageDone : public QWizardPage {
-    Q_OBJECT
+namespace openmittsu {
+	namespace wizards {
+		class GroupCreationWizardPageDone : public QWizardPage {
+			Q_OBJECT
+		public:
+			explicit GroupCreationWizardPageDone(QWidget* parent = nullptr);
+			virtual ~GroupCreationWizardPageDone();
 
-public:
-	explicit GroupCreationWizardPageDone(ProtocolClient* protocolClient, ClientConfiguration* clientConfiguration, QListWidget const* selectedGroupMembersWidget, QWidget *parent = 0);
-    ~GroupCreationWizardPageDone();
+		private:
+			Ui::GroupCreationWizardPageDone *m_ui;
+		};
+	}
+}
 
-	virtual void initializePage();
-private:
-    Ui::GroupCreationWizardPageDone *ui;
-	ProtocolClient* const protocolClient;
-	ClientConfiguration* const clientConfiguration;
-	QListWidget const*const groupMemberWidget;
-};
-
-#endif // GROUPCREATIONWIZARDPAGEDONE_H
+#endif // OPENMITTSU_WIZARDS_GROUPCREATIONWIZARDPAGEDONE_H_

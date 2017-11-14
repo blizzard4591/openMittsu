@@ -12,126 +12,133 @@
 typedef QList<QByteArray> QByteArrayList;
 #endif
 
-#include "utility/QObjectConnectionMacro.h"
+#include "src/utility/QObjectConnectionMacro.h"
 
-ImageViewer::ImageViewer(QImage const& img) : ui(new Ui::ImageViewerWindow), image(img), scaleFactor(1.0) {
-	ui->setupUi(this);
+namespace openmittsu {
+	namespace widgets {
 
-	this->setAttribute(Qt::WA_DeleteOnClose, true);
+		ImageViewer::ImageViewer(QImage const& img) : m_ui(new Ui::ImageViewerWindow), m_image(img), m_scaleFactor(1.0) {
+			m_ui->setupUi(this);
 
-	// Setup connections from Menu Actions
-	OPENMITTSU_CONNECT(ui->actionSave_as, triggered(), this, actionSaveAsOnClick());
-	OPENMITTSU_CONNECT(ui->actionClose, triggered(), this, actionCloseOnClick());
-	OPENMITTSU_CONNECT(ui->actionCopy_to_Clipboard, triggered(), this, actionCopyToClipboardOnClick());
-	OPENMITTSU_CONNECT(ui->actionZoom_In, triggered(), this, actionZoomInOnClick());
-	OPENMITTSU_CONNECT(ui->actionZoom_out, triggered(), this, actionZoomOutOnClick());
-	OPENMITTSU_CONNECT(ui->actionReset_Zoom, triggered(), this, actionNormalSizeOnClick());
-	OPENMITTSU_CONNECT(ui->actionFit_to_Window, triggered(), this, actionFitToWindowOnChange());
+			this->setAttribute(Qt::WA_DeleteOnClose, true);
 
-	ui->lblImage->setMode(PixmapLabel::Mode::TouchFromInside);
-	ui->lblImage->setPixmap(QPixmap::fromImage(image));
+			// Setup connections from Menu Actions
+			OPENMITTSU_CONNECT(m_ui->actionSave_as, triggered(), this, actionSaveAsOnClick());
+			OPENMITTSU_CONNECT(m_ui->actionClose, triggered(), this, actionCloseOnClick());
+			OPENMITTSU_CONNECT(m_ui->actionCopy_to_Clipboard, triggered(), this, actionCopyToClipboardOnClick());
+			OPENMITTSU_CONNECT(m_ui->actionZoom_In, triggered(), this, actionZoomInOnClick());
+			OPENMITTSU_CONNECT(m_ui->actionZoom_out, triggered(), this, actionZoomOutOnClick());
+			OPENMITTSU_CONNECT(m_ui->actionReset_Zoom, triggered(), this, actionNormalSizeOnClick());
+			OPENMITTSU_CONNECT(m_ui->actionFit_to_Window, triggered(), this, actionFitToWindowOnChange());
 
-    ui->lblImage->setBackgroundRole(QPalette::Base);
-	ui->scrollArea->setBackgroundRole(QPalette::Dark);
+			m_ui->lblImage->setMode(PixmapLabel::Mode::TouchFromInside);
+			m_ui->lblImage->setPixmap(QPixmap::fromImage(m_image));
 
-    resize(QGuiApplication::primaryScreen()->availableSize() * 3.0 / 5.0);
+			m_ui->lblImage->setBackgroundRole(QPalette::Base);
+			m_ui->scrollArea->setBackgroundRole(QPalette::Dark);
 
-	QString const message = tr("Image: %2x%3, Depth: %4").arg(image.width()).arg(image.height()).arg(image.depth());
-	statusBar()->showMessage(message);
+			resize(QGuiApplication::primaryScreen()->availableSize() * 3.0 / 5.0);
 
-	ui->actionFit_to_Window->setChecked(true);
-	actionFitToWindowOnChange();
-}
+			QString const message = tr("Image: %2x%3, Depth: %4").arg(m_image.width()).arg(m_image.height()).arg(m_image.depth());
+			statusBar()->showMessage(message);
 
-ImageViewer::~ImageViewer() {
-	delete ui;
-}
-
-bool ImageViewer::saveFile(QString const& fileName) {
-    QImageWriter writer(fileName);
-
-    if (!writer.write(image)) {
-        QMessageBox::information(this, QGuiApplication::applicationDisplayName(), tr("Error while saving image.\nCannot write file \"%1\": %2").arg(QDir::toNativeSeparators(fileName)), writer.errorString());
-        return false;
-    }
-    return true;
-}
-
-void ImageViewer::actionSaveAsOnClick() {
-    QFileDialog dialog(this, tr("Save File As"));
-	QStringList mimeTypeFilters;
-	QByteArrayList const supportedMimeTypes = QImageWriter::supportedMimeTypes();
-	foreach(QByteArray const& mimeTypeName, supportedMimeTypes) {
-		mimeTypeFilters.append(mimeTypeName);
-	}
-	mimeTypeFilters.sort();
-
-	dialog.setMimeTypeFilters(mimeTypeFilters);
-	dialog.selectMimeTypeFilter("image/jpeg");
-	dialog.setDefaultSuffix("jpg");
-
-    while (dialog.exec() == QDialog::Accepted && !saveFile(dialog.selectedFiles().first())) {}
-}
-
-void ImageViewer::actionCloseOnClick() {
-	this->close();
-}
-
-void ImageViewer::actionCopyToClipboardOnClick() {
-    QGuiApplication::clipboard()->setImage(image);
-}
-
-void ImageViewer::actionZoomInOnClick() {
-	bool fitToWindow = ui->actionFit_to_Window->isChecked();
-	if (!fitToWindow) {
-		scaleImage(1.25);
-	}
-}
-
-void ImageViewer::actionZoomOutOnClick() {
-	bool fitToWindow = ui->actionFit_to_Window->isChecked();
-	if (!fitToWindow) {
-		scaleImage(0.75);
-	}
-}
-
-void ImageViewer::actionNormalSizeOnClick() {
-	bool fitToWindow = ui->actionFit_to_Window->isChecked();
-	if (!fitToWindow) {
-		scaleFactor = 1.0;
-		scaleImage(1.0);
-	} else {
-		QSize const requiredSize = image.size();
-		QSize const availableSize = QGuiApplication::primaryScreen()->availableSize();
-		if ((requiredSize.width() > availableSize.width()) || (requiredSize.height() > availableSize.height())) {
-			this->resize(availableSize);
-		} else {
-			this->resize(requiredSize);
+			m_ui->actionFit_to_Window->setChecked(true);
+			actionFitToWindowOnChange();
 		}
+
+		ImageViewer::~ImageViewer() {
+			delete m_ui;
+		}
+
+		bool ImageViewer::saveFile(QString const& fileName) {
+			QImageWriter writer(fileName);
+
+			if (!writer.write(m_image)) {
+				QMessageBox::information(this, QGuiApplication::applicationDisplayName(), tr("Error while saving image.\nCannot write file \"%1\": %2").arg(QDir::toNativeSeparators(fileName)), writer.errorString());
+				return false;
+			}
+			return true;
+		}
+
+		void ImageViewer::actionSaveAsOnClick() {
+			QFileDialog dialog(this, tr("Save File As"));
+			QStringList mimeTypeFilters;
+			QByteArrayList const supportedMimeTypes = QImageWriter::supportedMimeTypes();
+			foreach(QByteArray const& mimeTypeName, supportedMimeTypes) {
+				mimeTypeFilters.append(mimeTypeName);
+			}
+			mimeTypeFilters.sort();
+
+			dialog.setMimeTypeFilters(mimeTypeFilters);
+			dialog.selectMimeTypeFilter("image/jpeg");
+			dialog.setDefaultSuffix("jpg");
+
+			while (dialog.exec() == QDialog::Accepted && !saveFile(dialog.selectedFiles().first())) {}
+		}
+
+		void ImageViewer::actionCloseOnClick() {
+			this->close();
+		}
+
+		void ImageViewer::actionCopyToClipboardOnClick() {
+			QGuiApplication::clipboard()->setImage(m_image);
+		}
+
+		void ImageViewer::actionZoomInOnClick() {
+			bool fitToWindow = m_ui->actionFit_to_Window->isChecked();
+			if (!fitToWindow) {
+				scaleImage(1.25);
+			}
+		}
+
+		void ImageViewer::actionZoomOutOnClick() {
+			bool fitToWindow = m_ui->actionFit_to_Window->isChecked();
+			if (!fitToWindow) {
+				scaleImage(0.75);
+			}
+		}
+
+		void ImageViewer::actionNormalSizeOnClick() {
+			bool fitToWindow = m_ui->actionFit_to_Window->isChecked();
+			if (!fitToWindow) {
+				m_scaleFactor = 1.0;
+				scaleImage(1.0);
+			} else {
+				QSize const requiredSize = m_image.size();
+				QSize const availableSize = QGuiApplication::primaryScreen()->availableSize();
+				if ((requiredSize.width() > availableSize.width()) || (requiredSize.height() > availableSize.height())) {
+					this->resize(availableSize);
+				} else {
+					this->resize(requiredSize);
+				}
+			}
+		}
+
+		void ImageViewer::actionFitToWindowOnChange() {
+			bool fitToWindow = m_ui->actionFit_to_Window->isChecked();
+			if (fitToWindow) {
+				m_ui->lblImage->setMode(PixmapLabel::Mode::TouchFromInside);
+			} else {
+				m_ui->lblImage->setMode(PixmapLabel::Mode::FixedSize);
+			}
+			m_ui->scrollArea->setWidgetResizable(fitToWindow);
+			if (!fitToWindow) {
+				actionNormalSizeOnClick();
+			}
+		}
+
+		void ImageViewer::scaleImage(double factor) {
+			m_scaleFactor *= factor;
+			m_ui->lblImage->setScalingFactor(m_scaleFactor);
+
+			adjustScrollBar(m_ui->scrollArea->horizontalScrollBar(), factor);
+			adjustScrollBar(m_ui->scrollArea->verticalScrollBar(), factor);
+		}
+
+		void ImageViewer::adjustScrollBar(QScrollBar *scrollBar, double factor) {
+			scrollBar->setValue(int(factor * scrollBar->value() + ((factor - 1) * scrollBar->pageStep() / 2)));
+		}
+
 	}
 }
 
-void ImageViewer::actionFitToWindowOnChange() {
-    bool fitToWindow = ui->actionFit_to_Window->isChecked();
-	if (fitToWindow) {
-		ui->lblImage->setMode(PixmapLabel::Mode::TouchFromInside);
-	} else {
-		ui->lblImage->setMode(PixmapLabel::Mode::FixedSize);
-	}
-    ui->scrollArea->setWidgetResizable(fitToWindow);
-	if (!fitToWindow) {
-		actionNormalSizeOnClick();
-	}
-}
-
-void ImageViewer::scaleImage(double factor) {
-    scaleFactor *= factor;
-	ui->lblImage->setScalingFactor(scaleFactor);
-
-    adjustScrollBar(ui->scrollArea->horizontalScrollBar(), factor);
-    adjustScrollBar(ui->scrollArea->verticalScrollBar(), factor);
-}
-
-void ImageViewer::adjustScrollBar(QScrollBar *scrollBar, double factor) {
-    scrollBar->setValue(int(factor * scrollBar->value() + ((factor - 1) * scrollBar->pageStep()/2)));
-}

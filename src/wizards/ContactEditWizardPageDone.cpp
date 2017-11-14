@@ -1,26 +1,20 @@
-#include "ContactEditWizardPageDone.h"
+#include "src/wizards/ContactEditWizardPageDone.h"
 #include "ui_contacteditwizardpagedone.h"
 
-#include "ContactRegistry.h"
+namespace openmittsu {
+	namespace wizards {
 
-ContactEditWizardPageDone::ContactEditWizardPageDone(ProtocolClient* protocolClient, ClientConfiguration* clientConfiguration, QWidget *parent) : QWizardPage(parent), ui(new Ui::ContactEditWizardPageDone), protocolClient(protocolClient), clientConfiguration(clientConfiguration) {
-    ui->setupUi(this);
-}
+		ContactEditWizardPageDone::ContactEditWizardPageDone(QWidget* parent) : QWizardPage(parent), m_ui(new Ui::ContactEditWizardPageDone) {
+			m_ui->setupUi(this);
+		}
 
-ContactEditWizardPageDone::~ContactEditWizardPageDone() {
-    delete ui;
-}
+		ContactEditWizardPageDone::~ContactEditWizardPageDone() {
+			delete m_ui;
+		}
 
-void ContactEditWizardPageDone::initializePage() {
-	// all data in the Info section was given, now create the group
-	// Generate new random ID as group identifier
-	quint64 newGroupId = GroupContact::generateRandomGroupId();
-	GroupContact* gc = new GroupContact(GroupId(clientConfiguration->getClientIdentity(), newGroupId));
-	gc->setGroupName(field("edtName").toString());
-	gc->addMember(clientConfiguration->getClientIdentity());
+		void ContactEditWizardPageDone::initializePage() {
+			//
+		}
 
-	// Send messages to members
-	QMetaObject::invokeMethod(protocolClient, "sendGroupCreation", Q_ARG(quint64, newGroupId), Q_ARG(bool, true));
-	QThread::msleep(100);
-	QMetaObject::invokeMethod(protocolClient, "sendGroupTitle", Q_ARG(quint64, newGroupId), Q_ARG(QString const&, field("edtName").toString()));
+	}
 }

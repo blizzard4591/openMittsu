@@ -1,26 +1,31 @@
-#include "ContactEditWizard.h"
+#include "src/wizards/ContactEditWizard.h"
 #include "ui_contacteditwizard.h"
 
-#include "ContactRegistry.h"
-#include "exceptions/InternalErrorException.h"
-#include "utility/QObjectConnectionMacro.h"
+#include "src/exceptions/InternalErrorException.h"
+#include "src/utility/QObjectConnectionMacro.h"
 
-ContactEditWizard::ContactEditWizard(ClientConfiguration* clientConfiguration, ProtocolClient* protocolClient, IdentityContact* preChosenContact, QWidget *parent) : QWizard(parent), ui(new Ui::ContactEditWizard), clientConfiguration(clientConfiguration), protocolClient(protocolClient), haveFinished(false), preChosenContact(preChosenContact) {
-    ui->setupUi(this);
-	setOption(QWizard::NoBackButtonOnLastPage, true);
+namespace openmittsu {
+	namespace wizards {
 
-	OPENMITTSU_CONNECT(this, currentIdChanged(int), this, pageNextOnClick(int));
+		ContactEditWizard::ContactEditWizard(std::shared_ptr<openmittsu::dataproviders::ContactDataProvider> const& contactDataProvider, QWidget* parent) : QWizard(parent), m_ui(new Ui::ContactEditWizard), m_contactDataProvider(contactDataProvider), m_haveFinished(false) {
+			m_ui->setupUi(this);
+			setOption(QWizard::NoBackButtonOnLastPage, true);
 
-	contactEditWizardPageInfo = new ContactEditWizardPageSelectContact(clientConfiguration, this);
-	this->addPage(contactEditWizardPageInfo);
-	contactEditWizardPageDone = new ContactEditWizardPageDone(protocolClient, clientConfiguration, this);
-	this->addPage(contactEditWizardPageDone);
-}
+			OPENMITTSU_CONNECT(this, currentIdChanged(int), this, pageNextOnClick(int));
 
-ContactEditWizard::~ContactEditWizard() {
-    delete ui;
-}
+			m_contactEditWizardPageInfo = new ContactEditWizardPageSelectContact(contactDataProvider, this);
+			this->addPage(m_contactEditWizardPageInfo);
+			m_contactEditWizardPageDone = new ContactEditWizardPageDone(this);
+			this->addPage(m_contactEditWizardPageDone);
+		}
 
-void ContactEditWizard::pageNextOnClick(int pageId) {
-	//
+		ContactEditWizard::~ContactEditWizard() {
+			delete m_ui;
+		}
+
+		void ContactEditWizard::pageNextOnClick(int pageId) {
+			//
+		}
+
+	}
 }

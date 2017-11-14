@@ -3,29 +3,30 @@
 
 #include <QWizard>
 
-#include "ClientConfiguration.h"
-#include "BackupCreationWizardPageBackup.h"
-#include "BackupCreationWizardPagePassword.h"
+#include "src/backup/IdentityBackup.h"
+#include "src/wizards/BackupCreationWizardPageBackup.h"
+#include "src/wizards/BackupCreationWizardPagePassword.h"
 
 namespace Ui {
-class BackupCreationWizard;
+	class BackupCreationWizard;
 }
 
-class BackupCreationWizard : public QWizard
-{
-    Q_OBJECT
+namespace openmittsu {
+	namespace wizards {
+		class BackupCreationWizard : public QWizard {
+			Q_OBJECT
+		public:
+			explicit BackupCreationWizard(openmittsu::backup::IdentityBackup const& identityBackup, QWidget* parent = nullptr);
+			virtual ~BackupCreationWizard();
+		public slots:
+			void pageNextOnClick(int pageId);
+		private:
+			Ui::BackupCreationWizard* ui;
 
-public:
-	explicit BackupCreationWizard(ClientConfiguration* clientConfiguration, QWidget *parent = 0);
-    ~BackupCreationWizard();
-public slots:
-	void pageNextOnClick(int pageId);
-private:
-    Ui::BackupCreationWizard *ui;
-	ClientConfiguration* const clientConfiguration;
-
-	BackupCreationWizardPagePassword* backupCreationWizardPagePassword;
-	BackupCreationWizardPageBackup* backupCreationWizardPageBackup;
-};
+			BackupCreationWizardPagePassword* backupCreationWizardPagePassword;
+			BackupCreationWizardPageBackup* backupCreationWizardPageBackup;
+		};
+	}
+}
 
 #endif // OPENMITTSU_WIZARDS_BACKUPCREATIONWIZARD_H_

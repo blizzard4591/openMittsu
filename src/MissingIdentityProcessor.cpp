@@ -1,13 +1,14 @@
 #include "MissingIdentityProcessor.h"
 
-#include "exceptions/IllegalFunctionCallException.h"
-#include "utility/Logging.h"
+#include "src/exceptions/IllegalFunctionCallException.h"
+#include "src/utility/Logging.h"
+#include "src/utility/MakeUnique.h"
 
-MissingIdentityProcessor::MissingIdentityProcessor(ContactId const& missingContact) : hasErrors(false), missingContacts(), queuedMessages(), groupIdPtr(nullptr) {
+MissingIdentityProcessor::MissingIdentityProcessor(openmittsu::protocol::ContactId const& missingContact) : hasErrors(false), missingContacts(), queuedMessages(), groupIdPtr(nullptr) {
 	missingContacts.insert(missingContact);
 }
 
-MissingIdentityProcessor::MissingIdentityProcessor(GroupId const& groupId, QSet<ContactId> const& missingContacts) : hasErrors(false), missingContacts(missingContacts), queuedMessages(), groupIdPtr(std::unique_ptr<GroupId>(new GroupId(groupId))) {
+MissingIdentityProcessor::MissingIdentityProcessor(openmittsu::protocol::GroupId const& groupId, QSet<openmittsu::protocol::ContactId> const& missingContacts) : hasErrors(false), missingContacts(missingContacts), queuedMessages(), groupIdPtr(std::make_unique<openmittsu::protocol::GroupId>(groupId)) {
 	// Intentionally left empty.
 }
 
@@ -15,7 +16,7 @@ MissingIdentityProcessor::~MissingIdentityProcessor() {
 	// Intentionally left empty.
 }
 
-QSet<ContactId> const& MissingIdentityProcessor::getMissingContacts() const {
+QSet<openmittsu::protocol::ContactId> const& MissingIdentityProcessor::getMissingContacts() const {
 	return missingContacts;
 }
 
@@ -27,15 +28,15 @@ bool MissingIdentityProcessor::hasFinished() const {
 	return missingContacts.isEmpty();
 }
 
-std::list<MessageWithEncryptedPayload> const& MissingIdentityProcessor::getQueuedMessages() const {
+std::list<openmittsu::messages::MessageWithEncryptedPayload> const& MissingIdentityProcessor::getQueuedMessages() const {
 	return queuedMessages;
 }
 
-void MissingIdentityProcessor::enqueueMessage(MessageWithEncryptedPayload const& message) {
+void MissingIdentityProcessor::enqueueMessage(openmittsu::messages::MessageWithEncryptedPayload const& message) {
 	queuedMessages.push_back(message);
 }
 
-void MissingIdentityProcessor::identityFetcherTaskFinished(ContactId const& contactId, bool successful) {
+void MissingIdentityProcessor::identityFetcherTaskFinished(openmittsu::protocol::ContactId const& contactId, bool successful) {
 	if (!missingContacts.contains(contactId)) {
 		LOGGER()->warn("MissingIdentityProcessor received result for contact {}, but it was not set as missing in this context.", contactId.toString());
 	} else {
@@ -50,9 +51,9 @@ bool MissingIdentityProcessor::hasAssociatedGroupId() const {
 	return groupIdPtr.get() != nullptr;
 }
 
-GroupId const& MissingIdentityProcessor::getAssociatedGroupId() const {
+openmittsu::protocol::GroupId const& MissingIdentityProcessor::getAssociatedGroupId() const {
 	if (!hasAssociatedGroupId()) {
-		throw IllegalFunctionCallException() << "Can not get GroupId from MissingIdentityProcessor that does not have an associated GroupId.";
+		throw openmittsu::exceptions::IllegalFunctionCallException() << "Can not get GroupId from MissingIdentityProcessor that does not have an associated GroupId.";
 	} else {
 		return *groupIdPtr;
 	}

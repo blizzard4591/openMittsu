@@ -1,22 +1,27 @@
-#ifndef SHOWIDENTITYANDPUBLICKEYDIALOG_H
-#define SHOWIDENTITYANDPUBLICKEYDIALOG_H
+#ifndef OPENMITTSU_DIALOGS_SHOWIDENTITYANDPUBLICKEYDIALOG_H_
+#define OPENMITTSU_DIALOGS_SHOWIDENTITYANDPUBLICKEYDIALOG_H_
 
 #include <QDialog>
-#include "ClientConfiguration.h"
+
+#include "src/protocol/ContactId.h"
+#include "src/crypto/PublicKey.h"
 
 namespace Ui {
 class ShowIdentityAndPublicKeyDialog;
 }
 
-class ShowIdentityAndPublicKeyDialog : public QDialog {
-    Q_OBJECT
+namespace openmittsu {
+	namespace dialogs {
+		class ShowIdentityAndPublicKeyDialog : public QDialog {
+			Q_OBJECT
+		public:
+			explicit ShowIdentityAndPublicKeyDialog(openmittsu::protocol::ContactId const& selfContactId, openmittsu::crypto::PublicKey const& selfPublicKey, QWidget* parent = nullptr);
+			~ShowIdentityAndPublicKeyDialog();
 
-public:
-    explicit ShowIdentityAndPublicKeyDialog(ClientConfiguration* clientConfiguration, QWidget *parent = 0);
-    ~ShowIdentityAndPublicKeyDialog();
+		private:
+			Ui::ShowIdentityAndPublicKeyDialog *ui;
+		};
+	}
+}
 
-private:
-    Ui::ShowIdentityAndPublicKeyDialog *ui;
-};
-
-#endif // SHOWIDENTITYANDPUBLICKEYDIALOG_H
+#endif // OPENMITTSU_DIALOGS_SHOWIDENTITYANDPUBLICKEYDIALOG_H_

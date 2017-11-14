@@ -1,26 +1,36 @@
 #ifndef OPENMITTSU_TASKS_MESSAGECALLBACKTASK_H_
 #define OPENMITTSU_TASKS_MESSAGECALLBACKTASK_H_
 
-#include "acknowledgments/AcknowledgmentProcessor.h"
-#include "tasks/CallbackTask.h"
+#include "src/acknowledgments/AcknowledgmentProcessor.h"
+#include "src/tasks/CallbackTask.h"
 
 #include <memory>
 
-class Message;
+namespace openmittsu {
+	namespace messages {
+		class Message;
+	}
+}
 
-class MessageCallbackTask : public virtual CallbackTask {
-public:
-	virtual ~MessageCallbackTask();
+namespace openmittsu {
+	namespace tasks {
 
-	virtual Message const* getInitialMessage() const;
-	virtual Message* getResultMessage() const;
+		class MessageCallbackTask : public CallbackTask {
+		public:
+			virtual ~MessageCallbackTask();
 
-	virtual std::shared_ptr<AcknowledgmentProcessor> const& getAcknowledgmentProcessor() const;
-protected:
-	MessageCallbackTask(Message* message, std::shared_ptr<AcknowledgmentProcessor> const& acknowledgmentProcessor);
-private:
-	std::unique_ptr<Message> message;
-	std::shared_ptr<AcknowledgmentProcessor> const acknowledgmentProcessor;
-};
+			virtual openmittsu::messages::Message const* getInitialMessage() const;
+			virtual openmittsu::messages::Message* getResultMessage() const;
+
+			virtual std::shared_ptr<openmittsu::acknowledgments::AcknowledgmentProcessor> const& getAcknowledgmentProcessor() const;
+		protected:
+			MessageCallbackTask(openmittsu::messages::Message* message, std::shared_ptr<openmittsu::acknowledgments::AcknowledgmentProcessor> const& acknowledgmentProcessor);
+		private:
+			std::unique_ptr<openmittsu::messages::Message> message;
+			std::shared_ptr<openmittsu::acknowledgments::AcknowledgmentProcessor> const acknowledgmentProcessor;
+		};
+
+	}
+}
 
 #endif // OPENMITTSU_TASKS_MESSAGECALLBACKTASK_H_

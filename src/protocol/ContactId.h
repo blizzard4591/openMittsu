@@ -1,40 +1,47 @@
 #ifndef OPENMITTSU_PROTOCOL_CONTACTID_H_
 #define OPENMITTSU_PROTOCOL_CONTACTID_H_
 
-#include "protocol/Id.h"
 #include <cstdint>
 #include <QtGlobal>
 #include <QByteArray>
 #include <QMetaType>
 #include <QString>
 
-class ContactId : public Id {
-public:
-	explicit ContactId(quint64 contactId);
-	explicit ContactId(QString const& identityString);
-	ContactId(QByteArray const& contactIdBytes);
-	ContactId(ContactId const& other);
-	virtual ~ContactId();
+namespace openmittsu {
+	namespace protocol {
 
-	quint64 getContactId() const;
-	QByteArray getContactIdAsByteArray() const;
+		class ContactId {
+		public:
+			explicit ContactId(quint64 contactId);
+			explicit ContactId(QString const& identityString);
+			ContactId(QByteArray const& contactIdBytes);
+			ContactId(ContactId const& other);
+			virtual ~ContactId();
 
-	static int getSizeOfContactIdInBytes();
-	virtual std::string toString() const override;
-	virtual QString toQString() const override;
+			quint64 getContactId() const;
+			QByteArray getContactIdAsByteArray() const;
 
-	bool operator ==(ContactId const& other) const;
-	bool operator <(ContactId const& other) const;
+			static int getSizeOfContactIdInBytes();
+			std::string toString() const;
+			QString toQString() const;
 
-	friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<ContactId, true>;
-private:
-	quint64 contactId;
+			static bool isValidContactId(QString const& identity);
 
-	ContactId();
-};
+			bool operator ==(ContactId const& other) const;
+			bool operator !=(ContactId const& other) const;
+			bool operator <(ContactId const& other) const;
 
-uint qHash(ContactId const& key, uint seed);
+			friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<ContactId, true>;
+		private:
+			quint64 contactId;
 
-Q_DECLARE_METATYPE(ContactId)
+			ContactId();
+		};
+
+		uint qHash(ContactId const& key, uint seed);
+	}
+}
+
+Q_DECLARE_METATYPE(openmittsu::protocol::ContactId)
 
 #endif // OPENMITTSU_PROTOCOL_CONTACTID_H_

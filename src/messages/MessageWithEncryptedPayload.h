@@ -1,33 +1,41 @@
 #ifndef OPENMITTSU_MESSAGES_MESSAGEWITHENCRYPTEDPAYLOAD_H_
 #define OPENMITTSU_MESSAGES_MESSAGEWITHENCRYPTEDPAYLOAD_H_
 
-#include "messages/FullMessageHeader.h"
-#include "protocol/CryptoBox.h"
-#include "protocol/Nonce.h"
+#include "src/messages/FullMessageHeader.h"
+#include "src/crypto/FullCryptoBox.h"
+#include "src/crypto/Nonce.h"
 
-class MessageWithPayload;
+#include <memory>
 
-class MessageWithEncryptedPayload {
-public:
-	MessageWithEncryptedPayload(FullMessageHeader const& messageHeader, Nonce const& nonce, QByteArray const& encryptedPayload);
-	MessageWithEncryptedPayload(MessageWithEncryptedPayload const& other);
-	virtual ~MessageWithEncryptedPayload();
+namespace openmittsu {
+	namespace messages {
 
-	FullMessageHeader const& getMessageHeader() const;
-	Nonce const& getNonce() const;
-	QByteArray const& getEncryptedPayload() const;
+		class MessageWithPayload;
 
-	virtual QByteArray toPacket() const;
-	virtual MessageWithPayload decrypt(CryptoBox* cryptoBox) const;
+		class MessageWithEncryptedPayload {
+		public:
+			MessageWithEncryptedPayload(FullMessageHeader const& messageHeader, openmittsu::crypto::Nonce const& nonce, QByteArray const& encryptedPayload);
+			MessageWithEncryptedPayload(MessageWithEncryptedPayload const& other);
+			virtual ~MessageWithEncryptedPayload();
 
-	static MessageWithEncryptedPayload fromPacket(QByteArray const& packet);
-private:
-	FullMessageHeader const messageHeader;
-	Nonce const nonce;
-	QByteArray const encryptedPayload;
+			FullMessageHeader const& getMessageHeader() const;
+			openmittsu::crypto::Nonce const& getNonce() const;
+			QByteArray const& getEncryptedPayload() const;
 
-	// Disable the default constructor
-	MessageWithEncryptedPayload();
-};
+			virtual QByteArray toPacket() const;
+			virtual MessageWithPayload decrypt(std::shared_ptr<openmittsu::crypto::FullCryptoBox> const& cryptoBox) const;
+
+			static MessageWithEncryptedPayload fromPacket(QByteArray const& packet);
+		private:
+			FullMessageHeader const messageHeader;
+			openmittsu::crypto::Nonce const nonce;
+			QByteArray const encryptedPayload;
+
+			// Disable the default constructor
+			MessageWithEncryptedPayload();
+		};
+
+	}
+}
 
 #endif // OPENMITTSU_MESSAGES_MESSAGEWITHENCRYPTEDPAYLOAD_H_

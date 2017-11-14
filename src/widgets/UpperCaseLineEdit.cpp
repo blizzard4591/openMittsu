@@ -1,7 +1,7 @@
 #include "UpperCaseLineEdit.h"
 
-#include "utility/Logging.h"
-#include "utility/QObjectConnectionMacro.h"
+#include "src/utility/Logging.h"
+#include "src/utility/QObjectConnectionMacro.h"
 
 UpperCaseLineEdit::UpperCaseLineEdit(QWidget *parent) : QLineEdit(parent) {
 	OPENMITTSU_CONNECT(this, textEdited(QString const&), this, onTextChanged(QString const&));

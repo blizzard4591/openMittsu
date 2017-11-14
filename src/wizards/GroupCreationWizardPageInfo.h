@@ -1,33 +1,43 @@
-#ifndef GROUPCREATIONWIZARDPAGEINFO_H
-#define GROUPCREATIONWIZARDPAGEINFO_H
+#ifndef OPENMITTSU_WIZARDS_GROUPCREATIONWIZARDPAGEINFO_H_
+#define OPENMITTSU_WIZARDS_GROUPCREATIONWIZARDPAGEINFO_H_
 
 #include <QWizardPage>
 #include <QListWidget>
 #include <QRegExpValidator>
-#include "ClientConfiguration.h"
+
+#include <QSet>
+
+#include <memory>
+
+#include "src/dataproviders/GroupCreationProcessor.h"
+#include "src/protocol/ContactId.h"
 
 namespace Ui {
 class GroupCreationWizardPageInfo;
 }
 
-class GroupCreationWizardPageInfo : public QWizardPage
-{
-    Q_OBJECT
+namespace openmittsu {
+	namespace wizards {
+		class GroupCreationWizardPageInfo : public QWizardPage {
+			Q_OBJECT
 
-public:
-	explicit GroupCreationWizardPageInfo(ClientConfiguration* clientConfiguration, QWidget *parent = 0);
-    ~GroupCreationWizardPageInfo();
+		public:
+			explicit GroupCreationWizardPageInfo(QHash<openmittsu::protocol::ContactId, QString> const& knownIdentitiesWithNicknamesExcludingSelfContactId, std::unique_ptr<openmittsu::dataproviders::GroupCreationProcessor> groupCreationProcessor, QWidget* parent = nullptr);
+			virtual ~GroupCreationWizardPageInfo();
 
-	bool isComplete() const override;
-	QListWidget const* getSelectedGroupMembersWidgetPointer() const;
-public slots:
-	void onListWidgetItemSelectionChanged();
-private:
-    Ui::GroupCreationWizardPageInfo *ui;
-	ClientConfiguration* const clientConfiguration;
+			bool isComplete() const override;
+			virtual bool validatePage() override;
+		public slots:
+			void onListWidgetItemSelectionChanged();
+		private:
+			Ui::GroupCreationWizardPageInfo *m_ui;
+			QHash<openmittsu::protocol::ContactId, QString> const m_knownIdentities;
+			std::unique_ptr<openmittsu::dataproviders::GroupCreationProcessor> const m_groupCreationProcessor;
 
-	QRegExpValidator* nameValidator;
-	bool isSelectionOkay;
-};
+			QRegExpValidator* m_nameValidator;
+			bool m_isSelectionOkay;
+		};
+	}
+}
 
-#endif // GROUPCREATIONWIZARDPAGEINFO_H
+#endif // OPENMITTSU_WIZARDS_GROUPCREATIONWIZARDPAGEINFO_H_

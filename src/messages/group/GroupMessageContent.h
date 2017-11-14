@@ -1,23 +1,30 @@
 #ifndef OPENMITTSU_MESSAGES_GROUP_GROUPMESSAGECONTENT_H_
 #define OPENMITTSU_MESSAGES_GROUP_GROUPMESSAGECONTENT_H_
 
-#include "messages/MessageContent.h"
-#include "protocol/ContactId.h"
-#include "protocol/GroupId.h"
+#include "src/messages/MessageContent.h"
+#include "src/protocol/ContactId.h"
+#include "src/protocol/GroupId.h"
 
 #include <QByteArray>
 
-class GroupMessageContent : public MessageContent {
-public:
-	GroupMessageContent(GroupId const& groupId);
+namespace openmittsu {
+	namespace messages {
+		namespace group {
 
-	virtual ~GroupMessageContent();
+			class GroupMessageContent : public MessageContent {
+			public:
+				GroupMessageContent(openmittsu::protocol::GroupId const& groupId);
+				virtual ~GroupMessageContent();
 
-	virtual GroupMessageContent* clone() const = 0;
+				virtual GroupMessageContent* clone() const = 0;
 
-	virtual GroupId const& getGroupId() const;
-private:
-	GroupId const groupId;
-};
+				virtual openmittsu::protocol::GroupId const& getGroupId() const;
+			private:
+				openmittsu::protocol::GroupId const groupId;
+			};
+
+		}
+	}
+}
 
 #endif // OPENMITTSU_MESSAGES_GROUP_GROUPMESSAGECONTENT_H_

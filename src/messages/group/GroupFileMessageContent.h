@@ -1,29 +1,37 @@
 #ifndef OPENMITTSU_MESSAGES_GROUP_GROUPFILEMESSAGECONTENT_H_
 #define OPENMITTSU_MESSAGES_GROUP_GROUPFILEMESSAGECONTENT_H_
 
-#include "messages/MessageContentFactory.h"
-#include "messages/group/GroupMessageContent.h"
+#include "src/messages/MessageContentFactory.h"
+#include "src/messages/group/GroupMessageContent.h"
 
 #include <QString>
 
-class GroupFileMessageContent : public GroupMessageContent {
-public:
-	GroupFileMessageContent(GroupId const& groupId);
-	virtual ~GroupFileMessageContent();
+namespace openmittsu {
+	namespace messages {
+		namespace group {
 
-	virtual GroupMessageContent* clone() const override;
+			class GroupFileMessageContent : public GroupMessageContent {
+			public:
+				GroupFileMessageContent(openmittsu::protocol::GroupId const& groupId);
+				virtual ~GroupFileMessageContent();
 
-	virtual QByteArray toPacketPayload() const override;
+				virtual GroupMessageContent* clone() const override;
 
-	virtual MessageContent* fromPacketPayload(FullMessageHeader const& messageHeader, QByteArray const& payload) const override;
+				virtual QByteArray toPacketPayload() const override;
 
-	friend class TypedMessageContentFactory<GroupFileMessageContent>;
-private:
-	QString const text;
+				virtual MessageContent* fromPacketPayload(FullMessageHeader const& messageHeader, QByteArray const& payload) const override;
 
-	static bool registrationResult;
+				friend class TypedMessageContentFactory<GroupFileMessageContent>;
+			private:
+				QString const text;
 
-	GroupFileMessageContent();
-};
+				static bool registrationResult;
+
+				GroupFileMessageContent();
+			};
+
+		}
+	}
+}
 
 #endif // OPENMITTSU_MESSAGES_GROUP_GROUPFILEMESSAGECONTENT_H_

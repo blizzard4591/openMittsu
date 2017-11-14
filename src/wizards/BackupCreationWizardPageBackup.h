@@ -2,25 +2,27 @@
 #define OPENMITTSU_WIZARDS_BACKUPCREATIONWIZARDPAGEBACKUP_H_
 
 #include <QWizardPage>
-#include "ClientConfiguration.h"
+#include "src/backup/IdentityBackup.h"
 
 namespace Ui {
 class BackupCreationWizardPageBackup;
 }
 
-class BackupCreationWizardPageBackup : public QWizardPage
-{
-    Q_OBJECT
+namespace openmittsu {
+	namespace wizards {
+		class BackupCreationWizardPageBackup : public QWizardPage {
+			Q_OBJECT
+		public:
+			explicit BackupCreationWizardPageBackup(openmittsu::backup::IdentityBackup const& identityBackup, QWidget* parent = nullptr);
+			virtual ~BackupCreationWizardPageBackup();
 
-public:
-    explicit BackupCreationWizardPageBackup(ClientConfiguration* clientConfiguration, QWidget *parent = 0);
-    ~BackupCreationWizardPageBackup();
-
-	//bool isComplete() const override;
-	virtual void initializePage() override;
-private:
-    Ui::BackupCreationWizardPageBackup *ui;
-	ClientConfiguration* clientConfiguration;
-};
+			//bool isComplete() const override;
+			virtual void initializePage() override;
+		private:
+			Ui::BackupCreationWizardPageBackup* ui;
+			openmittsu::backup::IdentityBackup const m_identityBackup;
+		};
+	}
+}
 
 #endif // OPENMITTSU_WIZARDS_BACKUPCREATIONWIZARDPAGEBACKUP_H_

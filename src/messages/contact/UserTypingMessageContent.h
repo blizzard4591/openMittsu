@@ -1,31 +1,39 @@
 #ifndef OPENMITTSU_MESSAGES_CONTACT_USERTYPINGMESSAGECONTENT_H_
 #define OPENMITTSU_MESSAGES_CONTACT_USERTYPINGMESSAGECONTENT_H_
 
-#include "messages/MessageContentFactory.h"
-#include "messages/contact/ContactMessageContent.h"
+#include "src/messages/MessageContentFactory.h"
+#include "src/messages/contact/ContactMessageContent.h"
 
 #include <QByteArray>
 
-class UserTypingMessageContent : public ContactMessageContent {
-public:
-	UserTypingMessageContent(bool isTyping);
-	virtual ~UserTypingMessageContent();
+namespace openmittsu {
+	namespace messages {
+		namespace contact {
 
-	virtual bool isUserTyping() const;
+			class UserTypingMessageContent : public ContactMessageContent {
+			public:
+				UserTypingMessageContent(bool isTyping);
+				virtual ~UserTypingMessageContent();
 
-	virtual ContactMessageContent* clone() const override;
+				virtual bool isUserTyping() const;
 
-	virtual QByteArray toPacketPayload() const override;
+				virtual ContactMessageContent* clone() const override;
 
-	virtual MessageContent* fromPacketPayload(FullMessageHeader const& messageHeader, QByteArray const& payload) const override;
+				virtual QByteArray toPacketPayload() const override;
 
-	friend class TypedMessageContentFactory <UserTypingMessageContent>;
-private:
-	bool isTyping;
+				virtual MessageContent* fromPacketPayload(FullMessageHeader const& messageHeader, QByteArray const& payload) const override;
 
-	static bool registrationResult;
+				friend class TypedMessageContentFactory <UserTypingMessageContent>;
+			private:
+				bool isTyping;
 
-	UserTypingMessageContent();
-};
+				static bool registrationResult;
+
+				UserTypingMessageContent();
+			};
+
+		}
+	}
+}
 
 #endif // OPENMITTSU_MESSAGES_CONTACT_USERTYPINGMESSAGECONTENT_H_

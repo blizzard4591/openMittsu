@@ -1,46 +1,54 @@
 #ifndef OPENMITTSU_MESSAGES_CONTACT_RECEIPTMESSAGECONTENT_H_
 #define OPENMITTSU_MESSAGES_CONTACT_RECEIPTMESSAGECONTENT_H_
 
-#include "messages/MessageContentFactory.h"
-#include "messages/contact/ContactMessageContent.h"
-#include "protocol/MessageId.h"
+#include "src/messages/MessageContentFactory.h"
+#include "src/messages/contact/ContactMessageContent.h"
+#include "src/protocol/MessageId.h"
 
 #include <QByteArray>
 
 #include <vector>
 
-class ReceiptMessageContent : public ContactMessageContent {
-public:
-	enum class ReceiptType {
-		RECEIVED,
-		SEEN,
-		AGREE,
-		DISAGREE
-	};
+namespace openmittsu {
+	namespace messages {
+		namespace contact {
 
-	ReceiptMessageContent(std::vector<MessageId> const& relatedMessages, ReceiptType const& receiptType);
-	virtual ~ReceiptMessageContent();
+			class ReceiptMessageContent : public ContactMessageContent {
+			public:
+				enum class ReceiptType {
+					RECEIVED,
+					SEEN,
+					AGREE,
+					DISAGREE
+				};
 
-	virtual ReceiptType const& getReceiptType() const;
-	virtual std::vector<MessageId> const& getReferredMessageIds() const;
+				ReceiptMessageContent(std::vector<openmittsu::protocol::MessageId> const& relatedMessages, ReceiptType const& receiptType);
+				virtual ~ReceiptMessageContent();
 
-	virtual ContactMessageContent* clone() const override;
+				virtual ReceiptType const& getReceiptType() const;
+				virtual std::vector<openmittsu::protocol::MessageId> const& getReferredMessageIds() const;
 
-	virtual QByteArray toPacketPayload() const override;
+				virtual ContactMessageContent* clone() const override;
 
-	virtual MessageContent* fromPacketPayload(FullMessageHeader const& messageHeader, QByteArray const& payload) const override;
+				virtual QByteArray toPacketPayload() const override;
 
-	friend class TypedMessageContentFactory<ReceiptMessageContent>;
-private:
-	std::vector<MessageId> const messageIds;
-	ReceiptType const receiptType;
+				virtual MessageContent* fromPacketPayload(FullMessageHeader const& messageHeader, QByteArray const& payload) const override;
 
-	char receiptTypeToChar(ReceiptType const& receiptType) const;
-	ReceiptType charToReceiptType(char c) const;
+				friend class TypedMessageContentFactory<ReceiptMessageContent>;
+			private:
+				std::vector<openmittsu::protocol::MessageId> const messageIds;
+				ReceiptType const receiptType;
 
-	static bool registrationResult;
+				char receiptTypeToChar(ReceiptType const& receiptType) const;
+				ReceiptType charToReceiptType(char c) const;
 
-	ReceiptMessageContent();
-};
+				static bool registrationResult;
+
+				ReceiptMessageContent();
+			};
+
+		}
+	}
+}
 
 #endif // OPENMITTSU_MESSAGES_CONTACT_RECEIPTMESSAGECONTENT_H_

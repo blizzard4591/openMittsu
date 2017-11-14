@@ -1,60 +1,88 @@
-#include "acknowledgments/GroupContentMessageAcknowledgmentProcessor.h"
+#include "src/acknowledgments/GroupContentMessageAcknowledgmentProcessor.h"
 
-#include "MessageCenter.h"
-#include "ProtocolClient.h"
-#include "exceptions/IllegalArgumentException.h"
-#include "utility/Logging.h"
+#include "src/network/ProtocolClient.h"
+#include "src/exceptions/IllegalArgumentException.h"
+#include "src/utility/Logging.h"
 
-GroupContentMessageAcknowledgmentProcessor::GroupContentMessageAcknowledgmentProcessor(GroupId const& groupId, QDateTime const& timeoutTime, MessageId const& groupUniqueMessageId) : AcknowledgmentProcessor(timeoutTime), messages(), hasFailedMessage(false), groupId(groupId), groupUniqueMessageId(groupUniqueMessageId) {
-	// Intentionally left empty.
-}
+namespace openmittsu {
+	namespace acknowledgments {
 
-GroupContentMessageAcknowledgmentProcessor::~GroupContentMessageAcknowledgmentProcessor() {
-	// Intentionally left empty.
-}
-
-GroupId const& GroupContentMessageAcknowledgmentProcessor::getGroupId() const {
-	return groupId;
-}
-
-MessageId const& GroupContentMessageAcknowledgmentProcessor::getGroupUniqueMessageId() const {
-	return groupUniqueMessageId;
-}
-
-void GroupContentMessageAcknowledgmentProcessor::addMessage(MessageId const& addedMessageId) {
-	if (messages.contains(addedMessageId)) {
-		throw IllegalArgumentException() << "Tried adding Message ID " << addedMessageId.toString() << " to GroupContentMessageAcknowledgmentProcessor that already contains this Message ID.";
-	}
-	messages.insert(addedMessageId);
-}
-
-void GroupContentMessageAcknowledgmentProcessor::sendFailed(ProtocolClient* protocolClient, MessageCenter* messageCenter, MessageId const& messageId) {
-	if (messages.contains(messageId)) {
-		hasFailedMessage = true;
-		messages.remove(messageId);
-		sendResultIfDone(protocolClient);
-	} else {
-		LOGGER()->warn("GroupContentMessageAcknowledgmentProcessor received a MESSAGE_FAILED notification for group {}, unique message ID {}, send with message ID {}, that was not recognized.", groupId.toString(), groupUniqueMessageId.toString(), messageId.toString());
-	}
-}
-
-void GroupContentMessageAcknowledgmentProcessor::sendSuccess(ProtocolClient* protocolClient, MessageCenter* messageCenter, MessageId const& messageId) {
-	if (messages.contains(messageId)) {
-		messages.remove(messageId);
-		sendResultIfDone(protocolClient);
-	} else {
-		LOGGER()->warn("GroupContentMessageAcknowledgmentProcessor received a MESSAGE_SUCCESS notification for group {}, unique message ID {}, send with message ID {}, that was not recognized.", groupId.toString(), groupUniqueMessageId.toString(), messageId.toString());
-	}
-}
-
-void GroupContentMessageAcknowledgmentProcessor::sendResultIfDone(ProtocolClient* protocolClient) {
-	if (messages.size() == 0) {
-		if (hasFailedMessage) {
-			groupMessageSendFailed(groupId, groupUniqueMessageId, protocolClient);
-		} else {
-			groupMessageSendSuccess(groupId, groupUniqueMessageId, protocolClient);
+		GroupContentMessageAcknowledgmentProcessor::GroupContentMessageAcknowledgmentProcessor(openmittsu::protocol::GroupId const& groupId, QDateTime const& timeoutTime, openmittsu::protocol::MessageId const& messageId) : AcknowledgmentProcessor(timeoutTime), m_messageCount(0u), m_hasFailedMessage(false), m_groupId(groupId), m_messageId(messageId) {
+			// Intentionally left empty.
 		}
-	} else {
-		LOGGER_DEBUG("Group Message with unique ID {} to group {} still has {} ACKs outstanding.", groupUniqueMessageId.toString(), groupId.toString(), messages.size());
+
+		GroupContentMessageAcknowledgmentProcessor::~GroupContentMessageAcknowledgmentProcessor() {
+			// Intentionally left empty.
+		}
+
+		openmittsu::protocol::GroupId const& GroupContentMessageAcknowledgmentProcessor::getGroupId() const {
+			return m_groupId;
+		}
+
+		openmittsu::protocol::MessageId const& GroupContentMessageAcknowledgmentProcessor::getGroupUniqueMessageId() const {
+			return m_messageId;
+		}
+
+		bool GroupContentMessageAcknowledgmentProcessor::isDone() const {
+			return m_messageCount == 0;
+		}
+
+		void GroupContentMessageAcknowledgmentProcessor::addMessage(openmittsu::protocol::MessageId const& addedMessageId) {
+			if (m_messageId != addedMessageId) {
+				throw openmittsu::exceptions::IllegalArgumentException() << "Tried adding Message ID #" << addedMessageId.toString() << " to GroupContentMessageAcknowledgmentProcessor that was built for a different message ID #" << m_messageId.toString() << ".";
+			}
+			QMutexLocker lock(&m_mutex);
+			m_messageCount++;
+		}
+
+		void GroupContentMessageAcknowledgmentProcessor::sendFailedTimeout(openmittsu::network::ProtocolClient* protocolClient) {
+			QMutexLocker lock(&m_mutex);
+			
+			m_messageCount = 0;
+			m_hasFailedMessage = true;
+			sendResultIfDone(protocolClient);
+		}
+
+		void GroupContentMessageAcknowledgmentProcessor::sendFailed(openmittsu::network::ProtocolClient* protocolClient, openmittsu::protocol::MessageId const& messageId) {
+			if (m_messageId != messageId) {
+				throw openmittsu::exceptions::IllegalArgumentException() << "Received a SEND_FAILED for a message with ID #" << messageId.toString() << " on a GroupContentMessageAcknowledgmentProcessor built for Message ID #" << m_messageId.toString() << ".";
+			}
+			
+			QMutexLocker lock(&m_mutex);
+			if (m_messageCount > 0) {
+				m_hasFailedMessage = true;
+				m_messageCount--;
+				sendResultIfDone(protocolClient);
+			} else {
+				LOGGER()->warn("GroupContentMessageAcknowledgmentProcessor received a MESSAGE_FAILED notification for group {}, message ID {}, that was not recognized.", m_groupId.toString(), m_messageId.toString());
+			}
+		}
+
+		void GroupContentMessageAcknowledgmentProcessor::sendSuccess(openmittsu::network::ProtocolClient* protocolClient, openmittsu::protocol::MessageId const& messageId) {
+			if (m_messageId != messageId) {
+				throw openmittsu::exceptions::IllegalArgumentException() << "Received a SEND_SUCCESS for a message with ID #" << messageId.toString() << " on a GroupContentMessageAcknowledgmentProcessor built for Message ID #" << m_messageId.toString() << ".";
+			}
+
+			QMutexLocker lock(&m_mutex);
+			if (m_messageCount > 0) {
+				m_messageCount--;
+				sendResultIfDone(protocolClient);
+			} else {
+				LOGGER()->warn("GroupContentMessageAcknowledgmentProcessor received a MESSAGE_SUCCESS notification for group {}, message ID {}, that was not recognized.", m_groupId.toString(), m_messageId.toString());
+			}
+		}
+
+		void GroupContentMessageAcknowledgmentProcessor::sendResultIfDone(openmittsu::network::ProtocolClient* protocolClient) {
+			if (m_messageCount == 0) {
+				if (m_hasFailedMessage) {
+					groupMessageSendFailed(m_groupId, m_messageId, protocolClient);
+				} else {
+					groupMessageSendSuccess(m_groupId, m_messageId, protocolClient);
+				}
+			} else {
+				LOGGER_DEBUG("Group Message with message ID #{} to group {} still has {} ACKs outstanding.", m_messageId.toString(), m_groupId.toString(), m_messageCount);
+			}
+		}
+
 	}
 }

@@ -1,5 +1,5 @@
-#ifndef OPTIONSDIALOG_H
-#define OPTIONSDIALOG_H
+#ifndef OPENMITTSU_DIALOGS_OPTIONSDIALOG_H_
+#define OPENMITTSU_DIALOGS_OPTIONSDIALOG_H_
 
 #include <QDialog>
 
@@ -8,34 +8,42 @@
 #include <QLineEdit>
 #include <QCheckBox>
 
-#include "utility/OptionMaster.h"
+#include <memory>
+
+#include "src/utility/OptionMaster.h"
 
 namespace Ui {
 class OptionsDialog;
 }
 
-class OptionsDialog : public QDialog
-{
-    Q_OBJECT
+namespace openmittsu {
+	namespace dialogs {
 
-public:
-    explicit OptionsDialog(QWidget *parent = 0);
-    ~OptionsDialog();
-public slots:
-	virtual void accept() override;
-private:
-    Ui::OptionsDialog *ui;
+		class OptionsDialog : public QDialog {
+			Q_OBJECT
 
-	struct OptionWidget {
-		OptionMaster::OptionTypes type;
-		union {
-			QCheckBox* cboxPtr;
-			QLineEdit* edtPtr;
+		public:
+			explicit OptionsDialog(std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster, QWidget* parent = nullptr);
+			virtual ~OptionsDialog();
+		public slots:
+			virtual void accept() override;
+		private:
+			Ui::OptionsDialog* m_ui;
+			std::shared_ptr<openmittsu::utility::OptionMaster> const m_optionMaster;
+
+			struct OptionWidget {
+				openmittsu::utility::OptionMaster::OptionTypes type;
+				union {
+					QCheckBox* cboxPtr;
+					QLineEdit* edtPtr;
+				};
+			};
+
+			QHash<openmittsu::utility::OptionMaster::Options, OptionWidget> optionToWidgetMap;
+			void saveOptions();
 		};
-	};
 
-	QHash<OptionMaster::Options, OptionWidget> optionToWidgetMap;
-	void saveOptions();
-};
+	}
+}
 
-#endif // OPTIONSDIALOG_H
+#endif // OPENMITTSU_DIALOGS_OPTIONSDIALOG_H_

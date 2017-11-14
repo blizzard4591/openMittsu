@@ -10,29 +10,34 @@ namespace Ui {
 	class ImageViewerWindow;
 }
 
-class ImageViewer : public QMainWindow {
-    Q_OBJECT
-public:
-    explicit ImageViewer(QImage const& img);
-	virtual ~ImageViewer();
-private slots:
-    void actionSaveAsOnClick();
-	void actionCloseOnClick();
-    void actionCopyToClipboardOnClick();
-    void actionZoomInOnClick();
-    void actionZoomOutOnClick();
-    void actionNormalSizeOnClick();
-    void actionFitToWindowOnChange();
+namespace openmittsu {
+	namespace widgets {
 
-private:
-	Ui::ImageViewerWindow *ui;
+		class ImageViewer : public QMainWindow {
+			Q_OBJECT
+		public:
+			explicit ImageViewer(QImage const& img);
+			virtual ~ImageViewer();
+		private slots:
+			void actionSaveAsOnClick();
+			void actionCloseOnClick();
+			void actionCopyToClipboardOnClick();
+			void actionZoomInOnClick();
+			void actionZoomOutOnClick();
+			void actionNormalSizeOnClick();
+			void actionFitToWindowOnChange();
+		private:
+			Ui::ImageViewerWindow* m_ui;
 
-    bool saveFile(QString const& fileName);
-    void scaleImage(double factor);
-    void adjustScrollBar(QScrollBar *scrollBar, double factor);
+			bool saveFile(QString const& fileName);
+			void scaleImage(double factor);
+			void adjustScrollBar(QScrollBar *scrollBar, double factor);
 
-    QImage image;
-    double scaleFactor;
-};
+			QImage const m_image;
+			double m_scaleFactor;
+		};
+
+	}
+}
 
 #endif // OPENMITTSU_WIDGETS_IMAGEVIEWER_H_

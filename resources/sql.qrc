@@ -1,0 +1,13 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="/sql">
+	<file alias="CreateContactMessages.sql">sql/CreateContactMessages.sql</file>
+	<file alias="CreateContacts.sql">sql/CreateContacts.sql</file>
+	<file alias="CreateContactControlMessages.sql">sql/CreateContactControlMessages.sql</file>
+	<file alias="CreateFeatureLevels.sql">sql/CreateFeatureLevels.sql</file>
+	<file alias="CreateGroupMessages.sql">sql/CreateGroupMessages.sql</file>
+	<file alias="CreateGroups.sql">sql/CreateGroups.sql</file>
+	<file alias="CreateMedia.sql">sql/CreateMedia.sql</file>
+	<file alias="CreateSettings.sql">sql/CreateSettings.sql</file>
+	<file alias="CreateTableVersions.sql">sql/CreateTableVersions.sql</file>
+</qresource>
+</RCC>

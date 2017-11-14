@@ -1,19 +1,27 @@
 #ifndef OPENMITTSU_PROTOCOL_AUTHENTICATIONPACKET_H_
 #define OPENMITTSU_PROTOCOL_AUTHENTICATIONPACKET_H_
 
-#include "protocol/ContactId.h"
-#include "protocol/CryptoBox.h"
-#include "protocol/Nonce.h"
+#include "src/protocol/ContactId.h"
+#include "src/crypto/FullCryptoBox.h"
+#include "src/crypto/Nonce.h"
 
-class AuthenticationPacket {
-public:
-	explicit AuthenticationPacket(ContactId const& sender, CryptoBox* cryptoBox);
-	virtual ~AuthenticationPacket();
+#include <memory>
 
-	virtual QByteArray toPacket() const;
-private:
-	ContactId const sender;
-	CryptoBox* const cryptoBox;
-};
+namespace openmittsu {
+	namespace protocol {
+
+		class AuthenticationPacket {
+		public:
+			explicit AuthenticationPacket(ContactId const& sender, std::shared_ptr<openmittsu::crypto::FullCryptoBox> const& cryptoBox);
+			virtual ~AuthenticationPacket();
+
+			virtual QByteArray toPacket() const;
+		private:
+			ContactId const m_sender;
+			std::shared_ptr<openmittsu::crypto::FullCryptoBox> const m_cryptoBox;
+		};
+
+	}
+}
 
 #endif // OPENMITTSU_PROTOCOL_AUTHENTICATIONPACKET_H_

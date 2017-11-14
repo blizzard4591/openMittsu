@@ -1,41 +1,47 @@
-#include "tasks/SymmetricDecryptionCallbackTask.h"
+#include "src/tasks/SymmetricDecryptionCallbackTask.h"
 
-#include "exceptions/CryptoException.h"
-#include "utility/Logging.h"
+#include "src/exceptions/CryptoException.h"
+#include "src/utility/Logging.h"
 
 #include <QString>
 
-SymmetricDecryptionCallbackTask::SymmetricDecryptionCallbackTask(CryptoBox* cryptoBox, Message* message, std::shared_ptr<AcknowledgmentProcessor> const& acknowledgmentProcessor, QByteArray const& encryptedData, Nonce const& nonce, ContactId const& symmetricKeyPartner) : MessageCallbackTask(message, acknowledgmentProcessor), cryptoBox(cryptoBox), encryptedData(encryptedData), nonce(nonce), symmetricKeyPartner(symmetricKeyPartner), decryptedData() {
-	// Intentionally left empty.
-}
+namespace openmittsu {
+	namespace tasks {
 
-SymmetricDecryptionCallbackTask::~SymmetricDecryptionCallbackTask() {
-	// Intentionally left empty.
-}
+		SymmetricDecryptionCallbackTask::SymmetricDecryptionCallbackTask(std::shared_ptr<openmittsu::crypto::FullCryptoBox> const& cryptoBox, openmittsu::messages::Message* message, std::shared_ptr<openmittsu::acknowledgments::AcknowledgmentProcessor> const& acknowledgmentProcessor, QByteArray const& encryptedData, openmittsu::crypto::Nonce const& nonce, openmittsu::protocol::ContactId const& symmetricKeyPartner) : MessageCallbackTask(message, acknowledgmentProcessor), m_cryptoBox(cryptoBox), m_encryptedData(encryptedData), m_nonce(nonce), m_symmetricKeyPartner(symmetricKeyPartner), m_decryptedData() {
+			// Intentionally left empty.
+		}
 
-ContactId const& SymmetricDecryptionCallbackTask::getSymmetricKeyPartner() const {
-	return symmetricKeyPartner;
-}
+		SymmetricDecryptionCallbackTask::~SymmetricDecryptionCallbackTask() {
+			// Intentionally left empty.
+		}
 
-QByteArray const& SymmetricDecryptionCallbackTask::getDecryptedData() const {
-	return decryptedData;
-}
+		openmittsu::protocol::ContactId const& SymmetricDecryptionCallbackTask::getSymmetricKeyPartner() const {
+			return m_symmetricKeyPartner;
+		}
 
-QByteArray const& SymmetricDecryptionCallbackTask::getEncryptedData() const {
-	return encryptedData;
-}
+		QByteArray const& SymmetricDecryptionCallbackTask::getDecryptedData() const {
+			return m_decryptedData;
+		}
 
-Nonce const& SymmetricDecryptionCallbackTask::getNonce() const {
-	return nonce;
-}
+		QByteArray const& SymmetricDecryptionCallbackTask::getEncryptedData() const {
+			return m_encryptedData;
+		}
 
-void SymmetricDecryptionCallbackTask::taskRun() {
-	LOGGER_DEBUG("Running SymmetricDecryptionCallbackTask for {} Bytes from user {}.", encryptedData.size(), symmetricKeyPartner.toString());
-	try {
-		decryptedData = cryptoBox->decrypt(encryptedData, nonce, symmetricKeyPartner);
+		openmittsu::crypto::Nonce const& SymmetricDecryptionCallbackTask::getNonce() const {
+			return m_nonce;
+		}
 
-		finishedWithNoError();
-	} catch (CryptoException& cryptoException) {
-		finishedWithError(-1, QString(cryptoException.what()));
+		void SymmetricDecryptionCallbackTask::taskRun() {
+			LOGGER_DEBUG("Running SymmetricDecryptionCallbackTask for {} Bytes from user {}.", m_encryptedData.size(), m_symmetricKeyPartner.toString());
+			try {
+				m_decryptedData = m_cryptoBox->decrypt(m_encryptedData, m_nonce, m_symmetricKeyPartner);
+
+				finishedWithNoError();
+			} catch (openmittsu::exceptions::CryptoException& cryptoException) {
+				finishedWithError(-1, QString(cryptoException.what()));
+			}
+		}
+
 	}
 }

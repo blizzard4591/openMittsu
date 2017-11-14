@@ -1,5 +1,5 @@
-#ifndef LOADBACKUPWIZARDPAGEDONE_H
-#define LOADBACKUPWIZARDPAGEDONE_H
+#ifndef OPENMITTSU_WIZARDS_LOADBACKUPWIZARDPAGEDONE_H_
+#define OPENMITTSU_WIZARDS_LOADBACKUPWIZARDPAGEDONE_H_
 
 #include <QWizardPage>
 
@@ -7,16 +7,20 @@ namespace Ui {
 class LoadBackupWizardPageDone;
 }
 
-class LoadBackupWizardPageDone : public QWizardPage
-{
-    Q_OBJECT
+namespace openmittsu {
+	namespace wizards {
 
-public:
-    explicit LoadBackupWizardPageDone(QWidget *parent = 0);
-    ~LoadBackupWizardPageDone();
+		class LoadBackupWizardPageDone : public QWizardPage {
+			Q_OBJECT
+		public:
+			explicit LoadBackupWizardPageDone(QWidget* parent = nullptr);
+			virtual ~LoadBackupWizardPageDone();
 
-private:
-    Ui::LoadBackupWizardPageDone *ui;
-};
+		private:
+			Ui::LoadBackupWizardPageDone* m_ui;
+		};
 
-#endif // LOADBACKUPWIZARDPAGEDONE_H
+	}
+}
+
+#endif // OPENMITTSU_WIZARDS_LOADBACKUPWIZARDPAGEDONE_H_

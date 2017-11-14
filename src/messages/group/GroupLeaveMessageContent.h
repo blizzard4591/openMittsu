@@ -1,31 +1,39 @@
 #ifndef OPENMITTSU_MESSAGES_GROUP_GROUPLEAVEMESSAGECONTENT_H_
 #define OPENMITTSU_MESSAGES_GROUP_GROUPLEAVEMESSAGECONTENT_H_
 
-#include "messages/MessageContentFactory.h"
-#include "messages/group/GroupMessageContent.h"
+#include "src/messages/MessageContentFactory.h"
+#include "src/messages/group/GroupMessageContent.h"
 
 #include <QString>
 
-class GroupLeaveMessageContent : public GroupMessageContent {
-public:
-	GroupLeaveMessageContent(GroupId const& groupId, ContactId const& leavingContactId);
-	virtual ~GroupLeaveMessageContent();
+namespace openmittsu {
+	namespace messages {
+		namespace group {
 
-	virtual GroupMessageContent* clone() const override;
+			class GroupLeaveMessageContent : public GroupMessageContent {
+			public:
+				GroupLeaveMessageContent(openmittsu::protocol::GroupId const& groupId, openmittsu::protocol::ContactId const& leavingContactId);
+				virtual ~GroupLeaveMessageContent();
 
-	virtual QByteArray toPacketPayload() const override;
+				virtual GroupMessageContent* clone() const override;
 
-	virtual MessageContent* fromPacketPayload(FullMessageHeader const& messageHeader, QByteArray const& payload) const override;
+				virtual QByteArray toPacketPayload() const override;
 
-	virtual ContactId const& getLeavingContactId() const;
+				virtual MessageContent* fromPacketPayload(FullMessageHeader const& messageHeader, QByteArray const& payload) const override;
 
-	friend class TypedMessageContentFactory<GroupLeaveMessageContent>;
-private:
-	ContactId const leavingContactId;
+				virtual openmittsu::protocol::ContactId const& getLeavingContactId() const;
 
-	static bool registrationResult;
+				friend class TypedMessageContentFactory<GroupLeaveMessageContent>;
+			private:
+				openmittsu::protocol::ContactId const leavingContactId;
 
-	GroupLeaveMessageContent();
-};
+				static bool registrationResult;
+
+				GroupLeaveMessageContent();
+			};
+
+		}
+	}
+}
 
 #endif // OPENMITTSU_MESSAGES_GROUP_GROUPLEAVEMESSAGECONTENT_H_

@@ -1,13 +1,21 @@
-#include "messages/group/GroupMessageContent.h"
+#include "src/messages/group/GroupMessageContent.h"
 
-GroupMessageContent::GroupMessageContent(GroupId const& groupId) : groupId(groupId) {
-	// Intentionally left empty.
-}
+namespace openmittsu {
+	namespace messages {
+		namespace group {
 
-GroupMessageContent::~GroupMessageContent() {
-	// Intentionally left empty.
-}
+			GroupMessageContent::GroupMessageContent(openmittsu::protocol::GroupId const& groupId) : groupId(groupId) {
+				// Intentionally left empty.
+			}
 
-GroupId const& GroupMessageContent::getGroupId() const {
-	return groupId;
+			GroupMessageContent::~GroupMessageContent() {
+				// Intentionally left empty.
+			}
+
+			openmittsu::protocol::GroupId const& GroupMessageContent::getGroupId() const {
+				return groupId;
+			}
+
+		}
+	}
 }

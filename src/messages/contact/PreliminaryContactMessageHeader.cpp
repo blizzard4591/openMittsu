@@ -1,26 +1,34 @@
-#include "messages/contact/PreliminaryContactMessageHeader.h"
+#include "src/messages/contact/PreliminaryContactMessageHeader.h"
 
-PreliminaryContactMessageHeader::PreliminaryContactMessageHeader() : PreliminaryMessageHeader(), receiverId(0) {
-	// This constructor is disabled and should not be used.
-	throw;
-}
+namespace openmittsu {
+	namespace messages {
+		namespace contact {
 
-PreliminaryContactMessageHeader::PreliminaryContactMessageHeader(ContactId const& receiver, MessageId const& messageId, MessageFlags const& messageFlags) : PreliminaryMessageHeader(messageId, messageFlags), receiverId(receiver) {
-	// Intentionally left empty.
-}
+			PreliminaryContactMessageHeader::PreliminaryContactMessageHeader() : PreliminaryMessageHeader(), receiverId(0) {
+				// This constructor is disabled and should not be used.
+				throw;
+			}
 
-PreliminaryContactMessageHeader::PreliminaryContactMessageHeader(PreliminaryContactMessageHeader const& other) : PreliminaryMessageHeader(other), receiverId(other.receiverId) {
-	// Intentionally left empty.
-}
+			PreliminaryContactMessageHeader::PreliminaryContactMessageHeader(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, MessageFlags const& messageFlags) : PreliminaryMessageHeader(messageId, time, messageFlags), receiverId(receiver) {
+				// Intentionally left empty.
+			}
 
-PreliminaryContactMessageHeader::~PreliminaryContactMessageHeader() {
-	// Intentionally left empty.
-}
+			PreliminaryContactMessageHeader::PreliminaryContactMessageHeader(PreliminaryContactMessageHeader const& other) : PreliminaryMessageHeader(other), receiverId(other.receiverId) {
+				// Intentionally left empty.
+			}
 
-ContactId const& PreliminaryContactMessageHeader::getReceiver() const {
-	return receiverId;
-}
+			PreliminaryContactMessageHeader::~PreliminaryContactMessageHeader() {
+				// Intentionally left empty.
+			}
 
-PreliminaryContactMessageHeader* PreliminaryContactMessageHeader::clone() const {
-	return new PreliminaryContactMessageHeader(*this);
+			openmittsu::protocol::ContactId const& PreliminaryContactMessageHeader::getReceiver() const {
+				return receiverId;
+			}
+
+			PreliminaryContactMessageHeader* PreliminaryContactMessageHeader::clone() const {
+				return new PreliminaryContactMessageHeader(*this);
+			}
+
+		}
+	}
 }

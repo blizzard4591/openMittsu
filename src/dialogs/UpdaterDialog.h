@@ -1,5 +1,5 @@
-#ifndef UPDATERDIALOG_H
-#define UPDATERDIALOG_H
+#ifndef OPENMITTSU_DIALOGS_UPDATERDIALOG_H_
+#define OPENMITTSU_DIALOGS_UPDATERDIALOG_H_
 
 #include <QDialog>
 #include <QString>
@@ -8,19 +8,24 @@ namespace Ui {
 class UpdaterDialog;
 }
 
-class UpdaterDialog : public QDialog
-{
-    Q_OBJECT
+namespace openmittsu {
+	namespace dialogs {
 
-public:
-    explicit UpdaterDialog(int versionMajor, int versionMinor, int versionPatch, int commitsSinceTag, QString const& gitHash, QString const& channel, QString const& link, QWidget *parent = nullptr);
-    ~UpdaterDialog();
+		class UpdaterDialog : public QDialog {
+			Q_OBJECT
 
-public slots:
-	void btnLinkOnClick();
-private:
-    Ui::UpdaterDialog *ui;
-	QString const link;
-};
+		public:
+			explicit UpdaterDialog(int versionMajor, int versionMinor, int versionPatch, int commitsSinceTag, QString const& gitHash, QString const& channel, QString const& link, QWidget* parent = nullptr);
+			virtual ~UpdaterDialog();
 
-#endif // UPDATERDIALOG_H
+		public slots:
+			void btnLinkOnClick();
+		private:
+			Ui::UpdaterDialog* m_ui;
+			QString const m_link;
+		};
+
+	}
+}
+
+#endif // OPENMITTSU_DIALOGS_UPDATERDIALOG_H_

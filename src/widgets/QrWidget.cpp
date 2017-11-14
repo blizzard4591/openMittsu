@@ -1,11 +1,11 @@
-#include "widgets/QrWidget.h"
+#include "src/widgets/QrWidget.h"
 
 #include <QPainter>
 #include <QImage>
 #include <QPixmap>
 
 #include "Config.h"
-#include "utility/Logging.h"
+#include "src/utility/Logging.h"
 
 #ifdef OPENMITTSU_CONFIG_HAVE_LIBQRENCODE
 #	include "qrencode.h"

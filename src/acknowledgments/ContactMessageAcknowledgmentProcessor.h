@@ -1,25 +1,35 @@
 #ifndef OPENMITTSU_ACKNOWLEDGMENTS_CONTACTMESSAGEACKNOWLEDGMENTPROCESSOR_H_
 #define OPENMITTSU_ACKNOWLEDGMENTS_CONTACTMESSAGEACKNOWLEDGMENTPROCESSOR_H_
 
-#include "acknowledgments/AcknowledgmentProcessor.h"
-#include "protocol/ContactId.h"
-#include "protocol/MessageId.h"
+#include "src/acknowledgments/AcknowledgmentProcessor.h"
+#include "src/protocol/ContactId.h"
+#include "src/protocol/MessageId.h"
 
-class ContactMessageAcknowledgmentProcessor : public AcknowledgmentProcessor {
-public:
-	ContactMessageAcknowledgmentProcessor(ContactId const& receiver, QDateTime const& timeoutTime, MessageId const& messageId);
-	virtual ~ContactMessageAcknowledgmentProcessor();
+namespace openmittsu {
+	namespace acknowledgments {
 
-	virtual ContactId const& getReceiver() const;
-	virtual MessageId const& getMessageId() const;
+		class ContactMessageAcknowledgmentProcessor : public AcknowledgmentProcessor {
+		public:
+			ContactMessageAcknowledgmentProcessor(openmittsu::protocol::ContactId const& receiver, QDateTime const& timeoutTime, openmittsu::protocol::MessageId const& messageId);
+			virtual ~ContactMessageAcknowledgmentProcessor();
 
-	virtual void sendFailed(ProtocolClient* protocolClient, MessageCenter* messageCenter, MessageId const& messageId) override;
-	virtual void sendSuccess(ProtocolClient* protocolClient, MessageCenter* messageCenter, MessageId const& messageId) override;
+			virtual bool isDone() const override;
 
-	virtual void addMessage(MessageId const& addedMessageId) override;
-private:
-	ContactId const receiver;
-	MessageId const messageId;
-};
+			virtual openmittsu::protocol::ContactId const& getReceiver() const;
+			virtual openmittsu::protocol::MessageId const& getMessageId() const;
+
+			virtual void sendFailedTimeout(openmittsu::network::ProtocolClient* protocolClient) override;
+			virtual void sendFailed(openmittsu::network::ProtocolClient* protocolClient, openmittsu::protocol::MessageId const& messageId) override;
+			virtual void sendSuccess(openmittsu::network::ProtocolClient* protocolClient, openmittsu::protocol::MessageId const& messageId) override;
+
+			virtual void addMessage(openmittsu::protocol::MessageId const& addedMessageId) override;
+		private:
+			openmittsu::protocol::ContactId const m_receiver;
+			openmittsu::protocol::MessageId const m_messageId;
+			bool m_receivedAck;
+		};
+
+	}
+}
 
 #endif // OPENMITTSU_ACKNOWLEDGMENTS_CONTACTMESSAGEACKNOWLEDGMENTPROCESSOR_H_

@@ -1,40 +1,46 @@
 #include "utility/Version.h"
 
-// The major version of OpenMittsu
-const unsigned Version::versionMajor = @OPENMITTSU_CPP_VERSION_MAJOR@;
+namespace openmittsu {
+	namespace utility {
 
-// The minor version of OpenMittsu
-const unsigned Version::versionMinor = @OPENMITTSU_CPP_VERSION_MINOR@;
+		// The major version of OpenMittsu
+		const unsigned Version::versionMajor = @OPENMITTSU_CPP_VERSION_MAJOR@;
 
-// The patch version of OpenMittsu
-const unsigned Version::versionPatch = @OPENMITTSU_CPP_VERSION_PATCH@;
+		// The minor version of OpenMittsu
+		const unsigned Version::versionMinor = @OPENMITTSU_CPP_VERSION_MINOR@;
 
-// The short hash of the git commit this build is based on
-const std::string Version::gitRevisionHash = "@OPENMITTSU_CPP_VERSION_HASH@";
+		// The patch version of OpenMittsu
+		const unsigned Version::versionPatch = @OPENMITTSU_CPP_VERSION_PATCH@;
 
-// How many commits passed since the last tag was set
-const unsigned Version::commitsAhead = @OPENMITTSU_CPP_VERSION_COMMITS_AHEAD@;
+		// The short hash of the git commit this build is based on
+		const std::string Version::gitRevisionHash = "@OPENMITTSU_CPP_VERSION_HASH@";
 
-// "0" iff no files were modified in the checkout, "1" else
-const unsigned Version::dirty = @OPENMITTSU_CPP_VERSION_DIRTY@;
+		// How many commits passed since the last tag was set
+		const unsigned Version::commitsAhead = @OPENMITTSU_CPP_VERSION_COMMITS_AHEAD@;
 
-// The system which has compiled OpenMittsu
-const std::string Version::systemName = "@CMAKE_SYSTEM_NAME@";
+		// "0" iff no files were modified in the checkout, "1" else
+		const unsigned Version::dirty = @OPENMITTSU_CPP_VERSION_DIRTY@;
 
-// The size of a pointer of the system that has compiled OpenMittsu
-const std::string Version::systemPtrSize = "@OPENMITTSU_CPP_POINTER_SIZE@";
+		// The system which has compiled OpenMittsu
+		const std::string Version::systemName = "@CMAKE_SYSTEM_NAME@";
 
-// The system version which has compiled OpenMittsu
-const std::string Version::systemVersion = "@CMAKE_SYSTEM_VERSION@";
+		// The size of a pointer of the system that has compiled OpenMittsu
+		const std::string Version::systemPtrSize = "@OPENMITTSU_CPP_POINTER_SIZE@";
 
-// The build type that was used to build OpenMittsu
+		// The system version which has compiled OpenMittsu
+		const std::string Version::systemVersion = "@CMAKE_SYSTEM_VERSION@";
+
+		// The build type that was used to build OpenMittsu
 #if (defined(_MSC_VER) && defined(_DEBUG))
-const std::string Version::buildType = "Debug";
+		const std::string Version::buildType = "Debug";
 #elif (defined(_MSC_VER) && !defined(_DEBUG))
-const std::string Version::buildType = "Release";
+		const std::string Version::buildType = "Release";
 #else
-const std::string Version::buildType = "@CMAKE_BUILD_TYPE@";
+		const std::string Version::buildType = "@CMAKE_BUILD_TYPE@";
 #endif
 
-// The compiler version that was used to build OpenMittsu
-const std::string Version::cxxCompiler = "@OPENMITTSU_COMPILED_BY@ @CMAKE_CXX_COMPILER_VERSION@";
+		// The compiler version that was used to build OpenMittsu
+		const std::string Version::cxxCompiler = "@OPENMITTSU_COMPILED_BY@ @CMAKE_CXX_COMPILER_VERSION@";
+
+	}
+}

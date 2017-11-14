@@ -1,0 +1,22 @@
+CREATE TABLE `contact_messages` (
+	`identity`				TEXT,
+	`apiid`					TEXT,
+	`uid`					TEXT UNIQUE,
+	`is_outbox`				INTEGER NOT NULL DEFAULT 0 CHECK(is_outbox IN (0, 1)),
+	`is_read`				INTEGER NOT NULL DEFAULT 0 CHECK(is_read IN (0, 1)),
+	`is_saved`				INTEGER NOT NULL DEFAULT 0 CHECK(is_saved IN (0, 1)),
+	`messagestate`			TEXT,
+	`sort_by`				INTEGER,
+	`created_at`			INTEGER,
+	`sent_at`				INTEGER,
+	`received_at`			INTEGER,
+	`seen_at`				INTEGER,
+	`modified_at`			INTEGER,
+	`contact_message_type`	TEXT,
+	`body`					TEXT,
+	`is_statusmessage`		INTEGER NOT NULL DEFAULT 0 CHECK(is_statusmessage IN (0, 1)),
+	`is_queued`				INTEGER NOT NULL DEFAULT 0 CHECK(is_queued IN (0, 1)),
+	`is_sent`				INTEGER NOT NULL DEFAULT 0 CHECK(is_sent IN (0, 1)),
+	`caption`				TEXT,
+	PRIMARY KEY(`uid`)
+);

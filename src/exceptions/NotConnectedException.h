@@ -1,8 +1,8 @@
 #ifndef OPENMITTSU_EXCEPTIONS_NOTCONNECTEDEXCEPTION_H_
 #define OPENMITTSU_EXCEPTIONS_NOTCONNECTEDEXCEPTION_H_
 
-#include "exceptions/BaseException.h"
-#include "exceptions/ExceptionMacros.h"
+#include "src/exceptions/BaseException.h"
+#include "src/exceptions/ExceptionMacros.h"
 
 OPENMITTSU_NEW_EXCEPTION(NotConnectedException)
 

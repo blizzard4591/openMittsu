@@ -1,4 +1,4 @@
-#include "widgets/SimpleChatTab.h"
+#include "src/widgets/SimpleChatTab.h"
 #include <QListWidgetItem>
 #include <QDateTime>
 #include <QFile>
@@ -12,583 +12,289 @@
 #include <QClipboard>
 #include <QApplication>
 
-#include "KnownIdentities.h"
-#include "ChatTabWidget.h"
+#include "src/exceptions/InternalErrorException.h"
+#include "src/exceptions/NotConnectedException.h"
+#include "src/utility/Logging.h"
+#include "src/utility/QObjectConnectionMacro.h"
 
-#include "protocol/ProtocolSpecs.h"
-
-#include "widgets/TextChatWidgetItem.h"
-#include "widgets/ImageChatWidgetItem.h"
-#include "widgets/LocationChatWidgetItem.h"
-
-#include "IdentityHelper.h"
-#include "MessageCenter.h"
-#include "IdentityContact.h"
-#include "GroupContact.h"
-#include "exceptions/InternalErrorException.h"
-#include "exceptions/NotConnectedException.h"
-#include "utility/Logging.h"
-#include "utility/QExifImageHeader.h"
-#include "utility/QObjectConnectionMacro.h"
+#include "src/protocol/TextLengthLimiter.h"
 
 #include "ui_simplechattab.h"
 
+namespace openmittsu {
+	namespace widgets {
 
-SimpleChatTab::SimpleChatTab(Contact* contact, UniqueMessageIdGenerator* idGenerator, QWidget* parent) : ChatTab(parent), uniqueMessageIdGenerator(idGenerator), ui(new Ui::SimpleChatTab), contact(contact), messageIdToItemIndex(), unseenMessages(), writeMessagesToLog(true), messageLogFilename(QString("MessageLog-for-%1.txt").arg(getContactPrintableId(contact))) {
-	ui->setupUi(this);
+		SimpleChatTab::SimpleChatTab(QWidget* parent) : ChatTab(parent), m_ui(new Ui::SimpleChatTab), m_isTyping(false) {
+			m_ui->setupUi(this);
 
-	OPENMITTSU_CONNECT(ui->edtInput, textChanged(), this, edtInputOnTextEdited());
-	OPENMITTSU_CONNECT(ui->edtInput, returnPressed(), this, edtInputOnReturnPressed());
-	OPENMITTSU_CONNECT(ui->btnInputSend, clicked(), this, btnInputSendOnClick());
-	OPENMITTSU_CONNECT(ui->btnSendImage, clicked(), this, btnSendImageOnClick());
-	OPENMITTSU_CONNECT(ui->emojiSelector, emojiDoubleClicked(QString const&), this, emojiDoubleClicked(QString const&));
+			OPENMITTSU_CONNECT(m_ui->edtInput, textChanged(), this, edtInputOnTextEdited());
+			OPENMITTSU_CONNECT(m_ui->edtInput, returnPressed(), this, edtInputOnReturnPressed());
+			OPENMITTSU_CONNECT(m_ui->btnInputSend, clicked(), this, btnInputSendOnClick());
+			OPENMITTSU_CONNECT(m_ui->btnSendImage, clicked(), this, btnSendImageOnClick());
+			OPENMITTSU_CONNECT(m_ui->btnMenu, clicked(), this, btnMenuOnClick());
+			OPENMITTSU_CONNECT(m_ui->emojiSelector, emojiDoubleClicked(QString const&), this, emojiDoubleClicked(QString const&));
+			OPENMITTSU_CONNECT(&m_typingTimer, timeout(), this, typingTimerOnTimer());
 
-	onContactDataChanged();
+			m_ui->edtInput->setFocus();
 
-	ui->edtInput->setFocus();
-}
-
-SimpleChatTab::~SimpleChatTab() {
-	//
-	delete ui;
-}
-
-QString SimpleChatTab::getContactPrintableId(Contact const* const c) {
-	if (c == nullptr) {
-		return QString("INVALID-PTR");
-	}
-	if (c->getContactType() == Contact::ContactType::CONTACT_IDENTITY) {
-		IdentityContact const* const identityContact = static_cast<IdentityContact const*>(c);
-		return identityContact->getContactId().toQString();
-	} else {
-		GroupContact const* const groupContact = static_cast<GroupContact const*>(c);
-		return groupContact->getGroupId().toQString();
-	}
-}
-
-void SimpleChatTab::writeMessageToLog(QString const& message) {
-	QFile logFile(messageLogFilename);
-	if (logFile.open(QFile::WriteOnly | QIODevice::Append | QFile::Text)) {
-		{
-			QTextStream out(&logFile);
-			out.setCodec("UTF-8");
-			out << message << endl;
-
-			out.flush();
-		}
-		logFile.close();
-	} else {
-		LOGGER()->critical("Could not write message log to {}.", messageLogFilename.toStdString());
-	}
-}
-
-Contact* SimpleChatTab::getAssociatedContact() const {
-	return contact;
-}
-
-void SimpleChatTab::onReceivedMessage(ContactId const& sender, MessageTime const& timeSend, MessageId const& messageId, QString const& message) {
-	LOGGER_DEBUG("SimpleChatTab received a text message from {} with ID #{}, sent on {}.", sender.toString(), messageId.toString(), timeSend.toString());
-	if (writeMessagesToLog) {
-		writeMessageToLog(QString(tr("Received a TEXT message from %1 with ID #%2 sent on %3: %4")).arg(sender.toQString()).arg(messageId.toQString()).arg(timeSend.toQString()).arg(message));
-	}
-
-	ContactRegistry* contactRegistry = ContactRegistry::getInstance();
-
-	QDateTime const currentTime = QDateTime::currentDateTime();
-	TextChatWidgetItem* clwi = new TextChatWidgetItem(contactRegistry->getIdentity(sender), ContactIdWithMessageId(sender, messageId), timeSend.getTime(), currentTime, message);
-	ui->chatWidget->addItem(clwi);
-	scrollDownChatWidget();
-	messageIdToItemIndex.insert(messageId, clwi);
-	//listWidget->scrollToBottom();
-
-	sendReceipt(messageId, ReceiptMessageContent::ReceiptType::RECEIVED);
-
-	// Add to unseen
-	unseenMessages.append(messageId);
-
-	handleFocus(true);
-}
-
-void SimpleChatTab::onReceivedLocation(ContactId const& sender, MessageTime const& timeSend, MessageId const& messageId, double latitude, double longitude, double height, QString const& description) {
-	LOGGER_DEBUG("SimpleChatTab received a location message from {} with ID #{}, sent on {}.", sender.toString(), messageId.toString(), timeSend.toString());
-	if (writeMessagesToLog) {
-		writeMessageToLog(QString(tr("Received a LOCATION message from %1 with ID #%2 sent on %3: Latitude = %4, Longitude = %5, Height = %6, Description = %7")).arg(sender.toQString()).arg(messageId.toQString()).arg(timeSend.toQString()).arg(latitude).arg(longitude).arg(height).arg(description));
-	}
-
-	ContactRegistry* contactRegistry = ContactRegistry::getInstance();
-
-	LocationChatWidgetItem* lcwi = new LocationChatWidgetItem(contactRegistry->getIdentity(sender), ContactIdWithMessageId(sender, messageId), timeSend.getTime(), QDateTime::currentDateTime(), latitude, longitude, height, description);
-	ui->chatWidget->addItem(lcwi);
-	scrollDownChatWidget();
-	messageIdToItemIndex.insert(messageId, lcwi);
-	//listWidget->scrollToBottom();
-
-	sendReceipt(messageId, ReceiptMessageContent::ReceiptType::RECEIVED);
-
-	// Add to unseen
-	unseenMessages.append(messageId);
-
-	handleFocus(true);
-}
-
-void SimpleChatTab::onReceivedImage(ContactId const& sender, MessageTime const& timeSend, MessageId const& messageId, QByteArray const& picture) {
-	LOGGER_DEBUG("SimpleChatTab received an Image of size {} Bytes from {}, sent on {}.", picture.size(), sender.toString(), timeSend.toString());
-	if (writeMessagesToLog) {
-		writeMessageToLog(QString(tr("Received an IMAGE message from %1 with ID #%2 sent on %3: %4")).arg(sender.toQString()).arg(messageId.toQString()).arg(timeSend.toQString()).arg(QString(picture.toBase64())));
-	}
-
-	ContactRegistry* contactRegistry = ContactRegistry::getInstance();
-
-	QPixmap p;
-	if (!p.loadFromData(picture)) {
-		QString filename(QStringLiteral("failed-image-from-%1.bin"));
-		filename = filename.arg(QDateTime::currentDateTime().toString("HH-mm-ss-dd-MM-yyyy"));
-		QFile tempFile(filename);
-		if (tempFile.open(QFile::WriteOnly)) {
-			tempFile.write(picture);
-			tempFile.close();
-			LOGGER()->critical("Could not load image, wrote raw image to {}.", filename.toStdString());
-		} else {
-			LOGGER()->critical("Could not load image AND failed to write raw image to {}.", filename.toStdString());
-		}
-	} else {
-		QExifImageHeader header;
-		QBuffer buffer;
-		buffer.setData(picture);
-		buffer.open(QBuffer::ReadOnly);
-
-		QString imageText;
-		if (header.loadFromJpeg(&buffer)) {
-			if (header.contains(QExifImageHeader::Artist)) {
-				LOGGER_DEBUG("Image has Artist Tag: {}", header.value(QExifImageHeader::Artist).toString().toStdString());
-				imageText = header.value(QExifImageHeader::Artist).toString();
-			} else if (header.contains(QExifImageHeader::UserComment)) {
-				LOGGER_DEBUG("Image has UserComment Tag: {}", header.value(QExifImageHeader::UserComment).toString().toStdString());
-				imageText = header.value(QExifImageHeader::UserComment).toString();
-			} else {
-				LOGGER_DEBUG("Image does not have Artist or UserComment Tag.");
-			}
-		} else {
-			LOGGER_DEBUG("Image does not have an EXIF Tag.");
+			// Load the last 10 messages
+			QTimer::singleShot(1, this, SLOT(loadLastNMessages()));
 		}
 
-		ImageChatWidgetItem* clwi = new ImageChatWidgetItem(contactRegistry->getIdentity(sender), ContactIdWithMessageId(sender, messageId), timeSend.getTime(), QDateTime::currentDateTime(), p, imageText);
-		ui->chatWidget->addItem(clwi);
-		messageIdToItemIndex.insert(messageId, clwi);
-		//listWidget->scrollToBottom();
-
-		sendReceipt(messageId, ReceiptMessageContent::ReceiptType::RECEIVED);
-
-		// Add to unseen
-		unseenMessages.append(messageId);
-
-		handleFocus(true);
-	}
-}
-
-void SimpleChatTab::onMessageReceiptReceived(ContactId const& sender, MessageTime const& timeSend, MessageId const& messageId) {
-	if (messageIdToItemIndex.contains(messageId)) {
-		setStatusLine(tr("User received a Message."));
-		ChatWidgetItem* clwi = messageIdToItemIndex.value(messageId);
-		if (clwi != nullptr) {
-			clwi->setMessageState(ChatWidgetItem::MessageState::STATE_RECEIVED, timeSend.getTime());
+		SimpleChatTab::~SimpleChatTab() {
+			//
+			delete m_ui;
 		}
-	}
 
-	handleFocus();
-}
-
-void SimpleChatTab::onMessageReceiptSeen(ContactId const& sender, MessageTime const& timeSend, MessageId const& messageId) {
-	if (messageIdToItemIndex.contains(messageId)) {
-		setStatusLine(tr("User saw a Message."));
-		ChatWidgetItem* clwi = messageIdToItemIndex.value(messageId);
-		if (clwi != nullptr) {
-			clwi->setMessageState(ChatWidgetItem::MessageState::STATE_READ, timeSend.getTime());
-		}
-	}
-
-	handleFocus();
-}
-
-void SimpleChatTab::onMessageReceiptAgree(ContactId const& sender, MessageTime const& timeSend, MessageId const& messageId) {
-	if (messageIdToItemIndex.contains(messageId)) {
-		setStatusLine(tr("User agreed with a Message."));
-		ChatWidgetItem* clwi = messageIdToItemIndex.value(messageId);
-		if (clwi != nullptr) {
-			clwi->setMessageAgreeState(ChatWidgetItem::MessageAgreeState::STATE_AGREE, timeSend.getTime());
-		}
-	}
-
-	handleFocus();
-}
-
-void SimpleChatTab::onMessageReceiptDisagree(ContactId const& sender, MessageTime const& timeSend, MessageId const& messageId) {
-	if (messageIdToItemIndex.contains(messageId)) {
-		setStatusLine(tr("User disagreed with a Message."));
-		ChatWidgetItem* clwi = messageIdToItemIndex.value(messageId);
-		if (clwi != nullptr) {
-			clwi->setMessageAgreeState(ChatWidgetItem::MessageAgreeState::STATE_DISAGREE, timeSend.getTime());
-		}
-	}
-
-	handleFocus();
-}
-
-void SimpleChatTab::onContactDataChanged() {
-	ui->lblDescription->setText(QString(tr("Description: %1")).arg(contact->getContactDescription()));
-	ui->chatWidget->onContactDataChanged();
-}
-
-void SimpleChatTab::onUserStartedTypingNotification() {
-	setStatusLine(tr("User is typing..."));
-
-	handleFocus();
-}
-
-void SimpleChatTab::onUserStoppedTypingNotification() {
-	setStatusLine(tr("User stopped typing."));
-
-	handleFocus();
-}
-
-void SimpleChatTab::onMessageSendFailed(MessageId const& messageId) {
-	if (messageIdToItemIndex.contains(messageId)) {
-		ChatWidgetItem* clwi = messageIdToItemIndex.value(messageId);
-		clwi->setMessageState(ChatWidgetItem::MessageState::STATE_FAILED, QDateTime::currentDateTime());
-
-		if (writeMessagesToLog) {
-			writeMessageToLog(QString(tr("Failed to send message with ID #%2.")).arg(messageId.toQString()));
-		}
-	}
-
-	handleFocus();
-}
-
-void SimpleChatTab::onMessageSendDone(MessageId const& messageId) {
-	if (messageIdToItemIndex.contains(messageId)) {
-		LOGGER_DEBUG("Displaying message #{} as sent.", messageId.toString());
-		ChatWidgetItem* clwi = messageIdToItemIndex.value(messageId);
-		clwi->setMessageState(ChatWidgetItem::MessageState::STATE_SEND, QDateTime::currentDateTime());
-
-		if (contact->getContactType() == Contact::ContactType::CONTACT_GROUP) {
-			// Auto-read the messages to groups
-			clwi->setMessageState(ChatWidgetItem::MessageState::STATE_RECEIVED, QDateTime::currentDateTime());
-			clwi->setMessageState(ChatWidgetItem::MessageState::STATE_READ, QDateTime::currentDateTime());
-		}
-	}
-
-	handleFocus();
-}
-
-QStringList SimpleChatTab::splitMessageForSending(QString const& message) {
-	int const maxLengthInBytes = PROTO_MESSAGE_CONTENT_PAYLOAD_MAX_LENGTH_BYTES;
-
-	if (message.toUtf8().size() <= maxLengthInBytes) {
-		return { message };
-	} else {
-		QStringList result;
-
-		int startPosition = 0;
-		while (true) {
-			int currentLength = maxLengthInBytes;
-
-			// Check if the remainder fits
-			if (message.midRef(startPosition).toUtf8().size() <= maxLengthInBytes) {
-				result.append(message.mid(startPosition));
-				break;
-			}
-
-			QStringRef currentSubstring = message.midRef(startPosition, maxLengthInBytes);
-			while (currentSubstring.toUtf8().size() > maxLengthInBytes) {
-				--currentLength;
-				currentSubstring = message.midRef(startPosition, maxLengthInBytes);
-			}
-
-			int const splitPositionSpace = currentSubstring.lastIndexOf(' ');
-			int const splitPositionNewLine = currentSubstring.lastIndexOf('\n');
-			int const splitPositionTab = currentSubstring.lastIndexOf('\t');
-
-			int splitPosition = std::max(std::max(splitPositionSpace, splitPositionNewLine), splitPositionTab);
-
-			// -1: failed, 0: first character. Does not help when splitting.
-			if (splitPosition <= 0) {
-				result.append(currentSubstring.toString());
-				startPosition += currentLength;
-			} else {
-				++splitPosition;
-				currentLength = splitPosition - startPosition;
-				currentSubstring = message.midRef(startPosition, currentLength);
-				result.append(currentSubstring.toString());
-				startPosition = splitPosition;
+		void SimpleChatTab::loadLastNMessages() {
+			QVector<QString> const lastMessages = getMessageSource().getLastMessageUuids(10u);
+			for (int i = 0; i < lastMessages.size(); ++i) {
+				QString const& messageUuid = lastMessages.at(i);
+				this->onNewMessage(messageUuid);
 			}
 		}
 
-		return result;
-	}
-}
-
-void SimpleChatTab::btnInputSendOnClick() {
-	QString const text = ui->edtInput->toPlainText();
-
-	if (!(text.isEmpty() || text.isNull())) {
-		QStringList messageParts = splitMessageForSending(text);
-
-		QStringList::const_iterator constIterator;
-		for (constIterator = messageParts.constBegin(); constIterator != messageParts.constEnd(); ++constIterator) {
-			MessageId const messageId = getUniqueMessageId();
-
-			LOGGER_DEBUG("Sending text with {} Bytes.", constIterator->toUtf8().size());
-
-			if (!sendText(messageId, *constIterator)) {
-				QMessageBox::warning(this, tr("Not connected"), tr("Could not send your message as you are currently not connected to a server."));
-				return;
-			}
-
-			if (writeMessagesToLog) {
-				MessageTime mt = MessageTime::now();
-				writeMessageToLog(QString(tr("Send a TEXT message with ID #%2 sent on %3: %4")).arg(messageId.toQString()).arg(mt.toQString()).arg(*constIterator));
-			}
-
-			TextChatWidgetItem* clwi = new TextChatWidgetItem(ContactRegistry::getInstance()->getSelfContact(), ContactIdWithMessageId(ContactRegistry::getInstance()->getSelfContact()->getContactId(), messageId), *constIterator);
-			ui->chatWidget->addItem(clwi);
-			messageIdToItemIndex.insert(messageId, clwi);
+		void SimpleChatTab::addChatWidgetItem(ChatWidgetItem* item) {
+			this->m_ui->chatWidget->addItem(item);
 		}
 
-		ui->edtInput->setPlainText("");
+		void SimpleChatTab::btnInputSendOnClick() {
+			QString const text = m_ui->edtInput->toPlainText();
 
-		if (isTyping) {
-			// Send a Stopped_Typing notification
-			typingTimerOnTimer();
-		}
-	}
+			if (!(text.isEmpty() || text.isNull())) {
+				QStringList messageParts = openmittsu::protocol::TextLengthLimiter::splitTextForSending(text);
 
-	handleFocus();
-}
+				auto it = messageParts.constBegin();
+				auto end = messageParts.constEnd();
+				for (; it != end; ++it) {
+					sendText(*it);
 
-void SimpleChatTab::btnSendImageOnClick() {
-	QMenu menu;
-
-	QAction* actionClipboard = new QAction(tr("Load Image from Clipboard"), &menu);
-	QAction* actionFile = new QAction(tr("Load Image from File"), &menu);
-	QAction* actionUrl = new QAction(tr("Load Image from URL"), &menu);
-
-	menu.addAction(actionClipboard);
-	menu.addAction(actionFile);
-	menu.addAction(actionUrl);
-
-	// Check Cursor Position:
-	// If the cursor is on the button, display the menu there, if not, display the menu on the right side of the button (approx. 0.8 * width).
-	QPoint const cursorPosition = QCursor::pos();
-
-	QPoint globalPos = cursorPosition;
-	if (!ui->btnSendImage->underMouse()) {
-		globalPos = ui->btnSendImage->mapToGlobal(QPoint(ui->btnSendImage->width() * 0.8, ui->btnSendImage->height() / 2));
-	}
-
-	QAction* selectedItem = menu.exec(globalPos);
-	if (selectedItem != nullptr) {
-		if (selectedItem == actionFile) {
-			ctxMenuImageFromFileOnClick();
-		} else if (selectedItem == actionUrl) {
-			ctxMenuImageFromUrlOnClick();
-		} else if (selectedItem == actionClipboard) {
-			ctxMenuImageFromClipboardOnClick();
-		}
-	}
-}
-
-void SimpleChatTab::ctxMenuImageFromFileOnClick() {
-	QString filename = QFileDialog::getOpenFileName(this, tr("Select an Image to Send"), QString(), tr("Images (*.png *.jpg)"));
-	if (!filename.isNull() && !filename.isEmpty()) {
-		QFile imageFile(filename);
-		if (imageFile.open(QFile::ReadOnly)) {
-			prepareAndSendImage(imageFile.readAll());
-		} else {
-			QMessageBox::warning(this, tr("Error loading image"), tr("Could not open selected image.\nInsufficient rights or I/O error."), QMessageBox::Ok, QMessageBox::NoButton);
-		}
-	}
-}
-
-void SimpleChatTab::ctxMenuImageFromUrlOnClick() {
-	bool ok = false;
-	QString urlString = QInputDialog::getText(this, tr("URL of Image to send"), tr("Please insert the URL of the Image you want to send:"), QLineEdit::Normal, QStringLiteral("http://www.example.com/exampleImage.jpg"), &ok);
-	if (ok && !urlString.isEmpty()) {
-		FileDownloaderCallbackTask* fileDownloaderCallbackTask = new FileDownloaderCallbackTask(QUrl(urlString));
-		OPENMITTSU_CONNECT(fileDownloaderCallbackTask, finished(CallbackTask*), this, fileDownloaderCallbackTaskFinished(CallbackTask*));
-		
-		QMetaObject::invokeMethod(fileDownloaderCallbackTask, "start", Qt::QueuedConnection);
-	}
-}
-
-void SimpleChatTab::ctxMenuImageFromClipboardOnClick() {
-	QClipboard *clipboard = QApplication::clipboard();
-
-	QImage clipboardImage = clipboard->image();
-	if (!clipboardImage.isNull()) {
-		prepareAndSendImage(clipboardImage);
-	}
-}
-
-void SimpleChatTab::prepareAndSendImage(QImage image) {
-	int width = image.width();
-	int height = image.height();
-	int maxSize = std::max(width, height);
-	if (maxSize > 1500) {
-		double factor = 1500.0 / maxSize;
-		image = image.scaled(width * factor, height * factor, Qt::AspectRatioMode::KeepAspectRatio, Qt::SmoothTransformation);
-	}
-
-	QByteArray imageBytes;
-	QBuffer buffer(&imageBytes);
-	buffer.open(QIODevice::ReadWrite);
-	image.save(&buffer, "JPG", 75);
-
-	// Insert Text if available
-	QString const text = ui->edtInput->toPlainText();
-	if (!text.isEmpty()) {
-		QExifImageHeader header;
-		header.setValue(QExifImageHeader::UserComment, QExifValue(text));
-		buffer.seek(0);
-		header.saveToJpeg(&buffer);
-	}
-
-	buffer.close();
-
-	MessageId const messageId = getUniqueMessageId();
-	if (!sendImage(messageId, imageBytes)) {
-		QMessageBox::warning(this, tr("Not connected"), tr("Could not send your message as you are currently not connected to a server."));
-		return;
-	}
-
-	if (!text.isEmpty()) {
-		ui->edtInput->setPlainText("");
-	}
-
-	if (writeMessagesToLog) {
-		MessageTime mt = MessageTime::now();
-		writeMessageToLog(QString(tr("Send an IMAGE message with ID #%2 sent on %3: %4")).arg(messageId.toQString()).arg(mt.toQString()).arg(QString(imageBytes.toBase64())));
-	}
-
-	ImageChatWidgetItem* clwi = new ImageChatWidgetItem(ContactRegistry::getInstance()->getSelfContact(), ContactIdWithMessageId(ContactRegistry::getInstance()->getSelfContact()->getContactId(), messageId), QPixmap::fromImage(image), text);
-	ui->chatWidget->addItem(clwi);
-	messageIdToItemIndex.insert(messageId, clwi);
-}
-
-void SimpleChatTab::prepareAndSendImage(QByteArray const& imageData) {
-	QImage image;
-	if (image.loadFromData(imageData)) {
-		prepareAndSendImage(image);
-	} else {
-		QMessageBox::warning(this, tr("Error loading image"), tr("Could not load selected image.\nUnsupported format or I/O error."), QMessageBox::Ok, QMessageBox::NoButton);
-	}
-}
-
-void SimpleChatTab::edtInputOnReturnPressed() {
-	btnInputSendOnClick();
-}
-
-void SimpleChatTab::edtInputOnTextEdited() {
-	if (!isTyping) {
-		isTyping = true;
-		if (contact->getContactType() == Contact::ContactType::CONTACT_IDENTITY) {
-			LOGGER_DEBUG("Sending typing started notification.");
-			sendUserTypingStatus(true);
-		}
-		typingTimer.start(10000);
-	} else {
-		// Do not reset too often, this does not matter this much
-		if (typingTimer.remainingTime() < 9000) {
-			typingTimer.stop();
-			typingTimer.start(10000);
-		}
-	}
-
-	handleFocus();
-}
-
-void SimpleChatTab::typingTimerOnTimer() {
-	if (isTyping) {
-		isTyping = false;
-		if (contact->getContactType() == Contact::ContactType::CONTACT_IDENTITY) {
-			LOGGER_DEBUG("Sending typing stopped notification.");
-			sendUserTypingStatus(false);
-		}
-		typingTimer.stop();
-	}
-
-	handleFocus();
-}
-
-void SimpleChatTab::scrollDownChatWidget() {
-	QMetaObject::invokeMethod(ui->chatWidget, "scrollToBottom", Qt::QueuedConnection);
-}
-
-void SimpleChatTab::onReceivedFocus() {
-	handleFocus();
-}
-
-void SimpleChatTab::handleFocus(bool hasNewMessage) {
-	ChatTabWidget* tabWidget = dynamic_cast<ChatTabWidget*>(this->parentWidget()->parentWidget());
-	if (tabWidget == nullptr) {
-		LOGGER()->warn("Ignoring handleFocus() call since the parentWidget is not a ChatTabWidget.");
-		return;
-	}
-
-	if ((tabWidget->currentWidget() == this) && (QApplication::activeWindow() != nullptr)) {
-		QVector<MessageId>::const_iterator it = unseenMessages.constBegin();
-		QVector<MessageId>::const_iterator end = unseenMessages.constEnd();
-
-		try {
-			for (; it != end; ++it) {
-				if (contact->getContactType() == Contact::ContactType::CONTACT_IDENTITY) {
-					sendReceipt(*it, ReceiptMessageContent::ReceiptType::SEEN);
+					LOGGER_DEBUG("Sending text with {} Bytes.", it->toUtf8().size());
 				}
-				if (messageIdToItemIndex.contains(*it)) {
-					ChatWidgetItem* clwi = messageIdToItemIndex.value(*it);
-					if (clwi != nullptr) {
-						clwi->setMessageState(ChatWidgetItem::MessageState::STATE_READ, QDateTime::currentDateTime());
+
+				m_ui->edtInput->setPlainText("");
+
+				if (m_isTyping) {
+					// Send a Stopped_Typing notification
+					typingTimerOnTimer();
+				}
+			}
+		}
+
+		void SimpleChatTab::btnMenuOnClick() {
+			QMenu menu;
+
+			QAction* actionLoad25 = new QAction(tr("Load 25 more messages"), &menu);
+			QAction* actionLoadN = new QAction(tr("Load N more messages..."), &menu);
+
+			menu.addAction(actionLoad25);
+			menu.addAction(actionLoadN);
+
+			// Check Cursor Position:
+			// If the cursor is on the button, display the menu there, if not, display the menu on the right side of the button (approx. 0.8 * width).
+			QPoint const cursorPosition = QCursor::pos();
+
+			QPoint globalPos = cursorPosition;
+			if (!m_ui->btnMenu->underMouse()) {
+				globalPos = m_ui->btnMenu->mapToGlobal(QPoint(m_ui->btnMenu->width() * 0.8, m_ui->btnMenu->height() / 2));
+			}
+
+			QAction* selectedItem = menu.exec(globalPos);
+			if (selectedItem != nullptr) {
+				if (selectedItem == actionLoad25) {
+					QVector<QString> const lastMessages = getMessageSource().getLastMessageUuids(static_cast<std::size_t>(25 + m_knownUuids.size()));
+					for (int i = 0; i < lastMessages.size(); ++i) {
+						QString const& messageUuid = lastMessages.at(i);
+						this->onNewMessage(messageUuid);
+					}
+				} else if (selectedItem == actionLoadN) {
+					bool ok = false;
+					int const result = QInputDialog::getInt(this, tr("Choose how many messages to load"), tr("Please choose how many older messages should be loaded:"), 25, 1, 1000, 1, &ok);
+					if (ok) {
+						QVector<QString> const lastMessages = getMessageSource().getLastMessageUuids(static_cast<std::size_t>(result + m_knownUuids.size()));
+						for (int i = 0; i < lastMessages.size(); ++i) {
+							QString const& messageUuid = lastMessages.at(i);
+							this->onNewMessage(messageUuid);
+						}
 					}
 				}
 			}
-		} catch (NotConnectedException&) {
-			QMessageBox::warning(this, tr("Not connected"), tr("Could not send your message as you are currently not connected to a server."));
-			return;
 		}
-		unseenMessages.clear();
 
-		tabWidget->setTabBlinking(tabWidget->indexOf(this), false);
-	} else if (unseenMessages.size() > 0) {
-		tabWidget->setTabBlinking(tabWidget->indexOf(this), true);
-		if (hasNewMessage) {
-			MessageCenter::getInstance()->chatTabHasNewUnreadMessageAvailable(this);
+		void SimpleChatTab::btnSendImageOnClick() {
+			QMenu menu;
+
+			QAction* actionClipboard = new QAction(tr("Load Image from Clipboard"), &menu);
+			QAction* actionFile = new QAction(tr("Load Image from File"), &menu);
+			QAction* actionUrl = new QAction(tr("Load Image from URL"), &menu);
+
+			menu.addAction(actionClipboard);
+			menu.addAction(actionFile);
+			menu.addAction(actionUrl);
+
+			// Check Cursor Position:
+			// If the cursor is on the button, display the menu there, if not, display the menu on the right side of the button (approx. 0.8 * width).
+			QPoint const cursorPosition = QCursor::pos();
+
+			QPoint globalPos = cursorPosition;
+			if (!m_ui->btnSendImage->underMouse()) {
+				globalPos = m_ui->btnSendImage->mapToGlobal(QPoint(m_ui->btnSendImage->width() * 0.8, m_ui->btnSendImage->height() / 2));
+			}
+
+			QAction* selectedItem = menu.exec(globalPos);
+			if (selectedItem != nullptr) {
+				if (selectedItem == actionFile) {
+					ctxMenuImageFromFileOnClick();
+				} else if (selectedItem == actionUrl) {
+					ctxMenuImageFromUrlOnClick();
+				} else if (selectedItem == actionClipboard) {
+					ctxMenuImageFromClipboardOnClick();
+				}
+			}
 		}
+
+		void SimpleChatTab::ctxMenuImageFromFileOnClick() {
+			QString filename = QFileDialog::getOpenFileName(this, tr("Select an Image to Send"), QString(), tr("Images (*.png *.jpg)"));
+			if (!filename.isNull() && !filename.isEmpty()) {
+				QFile imageFile(filename);
+				if (imageFile.open(QFile::ReadOnly)) {
+					prepareAndSendImage(imageFile.readAll());
+				} else {
+					QMessageBox::warning(this, tr("Error loading image"), tr("Could not open selected image.\nInsufficient rights or I/O error."), QMessageBox::Ok, QMessageBox::NoButton);
+				}
+			}
+		}
+
+		void SimpleChatTab::ctxMenuImageFromUrlOnClick() {
+			bool ok = false;
+			QString urlString = QInputDialog::getText(this, tr("URL of Image to send"), tr("Please insert the URL of the Image you want to send:"), QLineEdit::Normal, QStringLiteral("http://www.example.com/exampleImage.jpg"), &ok);
+			if (ok && !urlString.isEmpty()) {
+				openmittsu::tasks::FileDownloaderCallbackTask* fileDownloaderCallbackTask = new openmittsu::tasks::FileDownloaderCallbackTask(QUrl(urlString));
+				OPENMITTSU_CONNECT(fileDownloaderCallbackTask, finished(openmittsu::tasks::CallbackTask*), this, fileDownloaderCallbackTaskFinished(openmittsu::tasks::CallbackTask*));
+
+				QMetaObject::invokeMethod(fileDownloaderCallbackTask, "start", Qt::QueuedConnection);
+			}
+		}
+
+		void SimpleChatTab::ctxMenuImageFromClipboardOnClick() {
+			QClipboard *clipboard = QApplication::clipboard();
+
+			QImage clipboardImage = clipboard->image();
+			if (!clipboardImage.isNull()) {
+				prepareAndSendImage(clipboardImage);
+			}
+		}
+
+		void SimpleChatTab::prepareAndSendImage(QImage const& image) {
+			QImage resizedImage;
+			int width = image.width();
+			int height = image.height();
+			int maxSize = std::max(width, height);
+			if (maxSize > 1500) {
+				double factor = 1500.0 / maxSize;
+				resizedImage = image.scaled(width * factor, height * factor, Qt::AspectRatioMode::KeepAspectRatio, Qt::SmoothTransformation);
+			} else {
+				resizedImage = image;
+			}
+
+			QByteArray imageBytes;
+			QBuffer buffer(&imageBytes);
+			buffer.open(QIODevice::ReadWrite);
+			resizedImage.save(&buffer, "JPG", 75);
+			buffer.close();
+
+			QString const text = m_ui->edtInput->toPlainText();
+			sendImage(imageBytes, text);
+
+			if (!text.isEmpty()) {
+				m_ui->edtInput->setPlainText("");
+			}
+		}
+
+		void SimpleChatTab::prepareAndSendImage(QByteArray const& imageData) {
+			QImage image;
+			if (image.loadFromData(imageData)) {
+				prepareAndSendImage(image);
+			} else {
+				QMessageBox::warning(this, tr("Error loading image"), tr("Could not load selected image.\nUnsupported format or I/O error."), QMessageBox::Ok, QMessageBox::NoButton);
+			}
+		}
+
+		void SimpleChatTab::edtInputOnReturnPressed() {
+			btnInputSendOnClick();
+		}
+
+		void SimpleChatTab::edtInputOnTextEdited() {
+			LOGGER_DEBUG("SimpleChatTab::edtInputOnTextEdited(): Entered.");
+			if (!m_isTyping) {
+				m_isTyping = true;
+				LOGGER_DEBUG("SimpleChatTab::edtInputOnTextEdited(): Sending User typing status.");
+				sendUserTypingStatus(true);
+				m_typingTimer.start(10000);
+			} else {
+				// Do not reset too often, this does not matter this much
+				if (m_typingTimer.remainingTime() < 9000) {
+					m_typingTimer.stop();
+					m_typingTimer.start(10000);
+				}
+			}
+		}
+
+		void SimpleChatTab::typingTimerOnTimer() {
+			LOGGER_DEBUG("SimpleChatTab::typingTimerOnTimer(): Entered.");
+			if (m_isTyping) {
+				LOGGER_DEBUG("SimpleChatTab::typingTimerOnTimer(): isTyping = true.");
+				m_isTyping = false;
+				sendUserTypingStatus(false);
+				m_typingTimer.stop();
+			}
+		}
+
+		void SimpleChatTab::scrollDownChatWidget() {
+			QMetaObject::invokeMethod(m_ui->chatWidget, "scrollToBottom", Qt::QueuedConnection);
+		}
+
+		void SimpleChatTab::internalOnReceivedFocus() {
+			m_ui->chatWidget->setIsActive(true);
+		}
+
+		void SimpleChatTab::internalOnLostFocus() {
+			m_ui->chatWidget->setIsActive(false);
+		}
+
+		void SimpleChatTab::setStatusLine(QString const& newStatus) {
+			m_ui->lblStatus->setText(newStatus);
+		}
+
+		void SimpleChatTab::setDescriptionLine(QString const& newDescription) {
+			m_ui->lblDescription->setText(newDescription);
+		}
+
+		void SimpleChatTab::setMessageCount(int messageCount) {
+			m_ui->lblMessageCount->setText(tr("Stored: %1 messages.").arg(messageCount));
+		}
+
+		void SimpleChatTab::fileDownloaderCallbackTaskFinished(openmittsu::tasks::CallbackTask* callbackTask) {
+			if (dynamic_cast<openmittsu::tasks::FileDownloaderCallbackTask*>(callbackTask) == nullptr) {
+				LOGGER()->warn("SimpleChatTab::fileDownloaderCallbackTaskFinished(CallbackTask* callbackTask) called with a CallbackTask that is not a FileDownloaderCallbackTask. Ignoring.");
+				delete callbackTask;
+			} else {
+				openmittsu::tasks::FileDownloaderCallbackTask* fileDownloaderCallbackTask = dynamic_cast<openmittsu::tasks::FileDownloaderCallbackTask*>(callbackTask);
+
+				if (!fileDownloaderCallbackTask->hasFinishedSuccessfully()) {
+					QMessageBox::warning(this, tr("Download failed"), tr("Downloading from the given URL failed.\nThe error message was:\n").append(fileDownloaderCallbackTask->getErrorMessage()));
+				} else {
+					prepareAndSendImage(fileDownloaderCallbackTask->getDownloadedFile());
+				}
+
+				delete fileDownloaderCallbackTask;
+			}
+		}
+
+		void SimpleChatTab::emojiDoubleClicked(QString const& emoji) {
+			QTextCursor cursor = m_ui->edtInput->textCursor();
+			cursor.insertText(emoji);
+		}
+
 	}
-}
-
-void SimpleChatTab::setStatusLine(QString const& newStatus) {
-	static const QString statusTemplate = tr("Status: %1");
-
-	ui->lblStatus->setText(statusTemplate.arg(newStatus));
-}
-
-void SimpleChatTab::fileDownloaderCallbackTaskFinished(CallbackTask* callbackTask) {
-	if (dynamic_cast<FileDownloaderCallbackTask*>(callbackTask) == nullptr) {
-		LOGGER()->warn("SimpleChatTab::fileDownloaderCallbackTaskFinished(CallbackTask* callbackTask) called with a CallbackTask that is not a FileDownloaderCallbackTask. Ignoring.");
-		delete callbackTask;
-	} else {
-		FileDownloaderCallbackTask* fileDownloaderCallbackTask = dynamic_cast<FileDownloaderCallbackTask*>(callbackTask);
-
-		if (!fileDownloaderCallbackTask->hasFinishedSuccessfully()) {
-			QMessageBox::warning(this, tr("Download failed"), tr("Downloading from the given URL failed.\nThe error message was:\n").append(fileDownloaderCallbackTask->getErrorMessage()));
-		} else {
-			prepareAndSendImage(fileDownloaderCallbackTask->getDownloadedFile());
-		}
-
-		delete fileDownloaderCallbackTask;
-	}
-}
-
-void SimpleChatTab::emojiDoubleClicked(QString const& emoji) {
-	QTextCursor cursor = ui->edtInput->textCursor();
-	cursor.insertText(emoji);
 }

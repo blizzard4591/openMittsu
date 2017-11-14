@@ -1,33 +1,41 @@
 #ifndef OPENMITTSU_MESSAGES_GROUP_GROUPCREATIONMESSAGECONTENT_H_
 #define OPENMITTSU_MESSAGES_GROUP_GROUPCREATIONMESSAGECONTENT_H_
 
-#include "messages/MessageContentFactory.h"
-#include "messages/group/GroupMessageContent.h"
-#include "protocol/ContactId.h"
+#include "src/messages/MessageContentFactory.h"
+#include "src/messages/group/GroupMessageContent.h"
+#include "src/protocol/ContactId.h"
 
 #include <QString>
 #include <QSet>
 
-class GroupCreationMessageContent : public GroupMessageContent {
-public:
-	GroupCreationMessageContent(GroupId const& groupId, QSet<ContactId> const groupMembers);
-	virtual ~GroupCreationMessageContent();
+namespace openmittsu {
+	namespace messages {
+		namespace group {
 
-	virtual QSet<ContactId> const& getGroupMembers() const;
+			class GroupCreationMessageContent : public GroupMessageContent {
+			public:
+				GroupCreationMessageContent(openmittsu::protocol::GroupId const& groupId, QSet<openmittsu::protocol::ContactId> const& groupMembers);
+				virtual ~GroupCreationMessageContent();
 
-	virtual GroupMessageContent* clone() const override;
+				virtual QSet<openmittsu::protocol::ContactId> const& getGroupMembers() const;
 
-	virtual QByteArray toPacketPayload() const override;
+				virtual GroupMessageContent* clone() const override;
 
-	virtual MessageContent* fromPacketPayload(FullMessageHeader const& messageHeader, QByteArray const& payload) const override;
+				virtual QByteArray toPacketPayload() const override;
 
-	friend class TypedMessageContentFactory<GroupCreationMessageContent>;
-private:
-	QSet<ContactId> const members;
+				virtual MessageContent* fromPacketPayload(FullMessageHeader const& messageHeader, QByteArray const& payload) const override;
 
-	static bool registrationResult;
+				friend class TypedMessageContentFactory<GroupCreationMessageContent>;
+			private:
+				QSet<openmittsu::protocol::ContactId> const members;
 
-	GroupCreationMessageContent();
-};
+				static bool registrationResult;
+
+				GroupCreationMessageContent();
+			};
+
+		}
+	}
+}
 
 #endif // OPENMITTSU_MESSAGES_GROUP_GROUPCREATIONMESSAGECONTENT_H_

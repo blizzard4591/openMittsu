@@ -1,45 +1,48 @@
-#include "tasks/KeyAndFixedNonceDecryptionCallbackTask.h"
+#include "src/tasks/KeyAndFixedNonceDecryptionCallbackTask.h"
 
-#include "exceptions/CryptoException.h"
-#include "utility/Logging.h"
-
-#include "protocol/ProtocolSpecs.h"
-#include "protocol/NonceGenerator.h"
+#include "src/exceptions/CryptoException.h"
+#include "src/utility/Logging.h"
 
 #include <QString>
 
-KeyAndFixedNonceDecryptionCallbackTask::KeyAndFixedNonceDecryptionCallbackTask(CryptoBox* cryptoBox, Message* message, std::shared_ptr<AcknowledgmentProcessor> const& acknowledgmentProcessor, QByteArray const& encryptedData, EncryptionKey const& encryptionKey, Nonce const& nonce) : MessageCallbackTask(message, acknowledgmentProcessor), cryptoBox(cryptoBox), encryptedData(encryptedData), nonce(nonce), encryptionKey(encryptionKey), decryptedData() {
-	// Intentionally left empty.
-}
+namespace openmittsu {
+	namespace tasks {
 
-KeyAndFixedNonceDecryptionCallbackTask::~KeyAndFixedNonceDecryptionCallbackTask() {
-	// Intentionally left empty.
-}
+		KeyAndFixedNonceDecryptionCallbackTask::KeyAndFixedNonceDecryptionCallbackTask(std::shared_ptr<openmittsu::crypto::FullCryptoBox> const& cryptoBox, openmittsu::messages::Message* message, std::shared_ptr<openmittsu::acknowledgments::AcknowledgmentProcessor> const& acknowledgmentProcessor, QByteArray const& encryptedData, openmittsu::crypto::EncryptionKey const& encryptionKey, openmittsu::crypto::Nonce const& nonce) : MessageCallbackTask(message, acknowledgmentProcessor), m_cryptoBox(cryptoBox), m_encryptedData(encryptedData), m_nonce(nonce), m_encryptionKey(encryptionKey), m_decryptedData() {
+			// Intentionally left empty.
+		}
 
-EncryptionKey const& KeyAndFixedNonceDecryptionCallbackTask::getEncryptionKey() const {
-	return encryptionKey;
-}
+		KeyAndFixedNonceDecryptionCallbackTask::~KeyAndFixedNonceDecryptionCallbackTask() {
+			// Intentionally left empty.
+		}
 
-QByteArray const& KeyAndFixedNonceDecryptionCallbackTask::getDecryptedData() const {
-	return decryptedData;
-}
+		openmittsu::crypto::EncryptionKey const& KeyAndFixedNonceDecryptionCallbackTask::getEncryptionKey() const {
+			return m_encryptionKey;
+		}
 
-QByteArray const& KeyAndFixedNonceDecryptionCallbackTask::getEncryptedData() const {
-	return encryptedData;
-}
+		QByteArray const& KeyAndFixedNonceDecryptionCallbackTask::getDecryptedData() const {
+			return m_decryptedData;
+		}
 
-Nonce const& KeyAndFixedNonceDecryptionCallbackTask::getFixedNonce() const {
-	return nonce;
-}
+		QByteArray const& KeyAndFixedNonceDecryptionCallbackTask::getEncryptedData() const {
+			return m_encryptedData;
+		}
 
-void KeyAndFixedNonceDecryptionCallbackTask::taskRun() {
-	LOGGER_DEBUG("Running KeyAndFixedNonceDecryptionCallbackTask for {} Bytes.", encryptedData.size());
+		openmittsu::crypto::Nonce const& KeyAndFixedNonceDecryptionCallbackTask::getFixedNonce() const {
+			return m_nonce;
+		}
 
-	try {
-		this->decryptedData = cryptoBox->decryptFromFixedNonce(encryptedData, encryptionKey, nonce);
+		void KeyAndFixedNonceDecryptionCallbackTask::taskRun() {
+			LOGGER_DEBUG("Running KeyAndFixedNonceDecryptionCallbackTask for {} Bytes.", m_encryptedData.size());
 
-		finishedWithNoError();
-	} catch (CryptoException& cryptoException) {
-		finishedWithError(-1, QString(cryptoException.what()));
+			try {
+				m_decryptedData = m_cryptoBox->decryptFromFixedNonce(m_encryptedData, m_encryptionKey, m_nonce);
+
+				finishedWithNoError();
+			} catch (openmittsu::exceptions::CryptoException& cryptoException) {
+				finishedWithError(-1, QString(cryptoException.what()));
+			}
+		}
+
 	}
 }

@@ -7,34 +7,44 @@
 #include <QByteArray>
 #include <QMetaType>
 
-class MessageTime {
-public:
-	explicit MessageTime(QDateTime const& messageTime);
-	explicit MessageTime(QByteArray const& messageTimeBytes);
-	MessageTime(MessageTime const& other);
-	virtual ~MessageTime();
+namespace openmittsu {
+	namespace protocol {
 
-	quint64 getMessageTime() const;
-	QDateTime const& getTime() const;
-	QByteArray getMessageTimeAsByteArray() const;
-	static int getSizeOfMessageTimeInBytes();
-	virtual std::string toString() const;
-	virtual QString toQString() const;
+		class MessageTime {
+		public:
+			explicit MessageTime();
+			explicit MessageTime(QDateTime const& messageTime);
+			explicit MessageTime(QByteArray const& messageTimeBytes);
+			MessageTime(MessageTime const& other);
+			virtual ~MessageTime();
 
-	bool operator ==(MessageTime const& other) const;
+			quint64 getMessageTime() const;
+			qint64 getMessageTimeMSecs() const;
+			QDateTime const& getTime() const;
+			QByteArray getMessageTimeAsByteArray() const;
+			static int getSizeOfMessageTimeInBytes();
+			virtual std::string toString() const;
+			virtual QString toQString() const;
 
-	static MessageTime now();
+			bool isNull() const;
 
-	friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<MessageTime, true>;
-private:
-	QDateTime messageTime;
+			bool operator ==(MessageTime const& other) const;
 
-	MessageTime();
-};
+			static MessageTime now();
+			static MessageTime fromDatabase(qint64 msecs);
 
-uint qHash(MessageTime const& key, uint seed);
+			friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<MessageTime, true>;
+		private:
+			QDateTime messageTime;
 
-Q_DECLARE_METATYPE(MessageTime)
+			bool null;
+		};
+
+		uint qHash(MessageTime const& key, uint seed);
+	}
+}
+
+Q_DECLARE_METATYPE(openmittsu::protocol::MessageTime)
 
 #endif // OPENMITTSU_PROTOCOL_MESSAGETIME_H_
 

@@ -3,9 +3,18 @@
 
 #include <QString>
 
-class TextFormatter {
-public:
-	static QString format(QString const& input);
-};
+namespace openmittsu {
+	namespace utility {
+
+		class TextFormatter {
+		public:
+			static QString format(QString const& input);
+		private:
+			TextFormatter() {}
+			virtual ~TextFormatter() {}
+		};
+
+	}
+}
 
 #endif // OPENMITTSU_UTILITY_TEXTFORMATTER_H_

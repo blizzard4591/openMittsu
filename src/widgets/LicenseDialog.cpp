@@ -1,4 +1,4 @@
-#include "widgets/LicenseDialog.h"
+#include "src/widgets/LicenseDialog.h"
 #include "ui_LicenseDialog.h"
 
 #include <QIcon>

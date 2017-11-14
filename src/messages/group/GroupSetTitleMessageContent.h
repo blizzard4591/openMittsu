@@ -1,31 +1,39 @@
 #ifndef OPENMITTSU_MESSAGES_GROUP_GROUPSETTITLEMESSAGECONTENT_H_
 #define OPENMITTSU_MESSAGES_GROUP_GROUPSETTITLEMESSAGECONTENT_H_
 
-#include "messages/MessageContentFactory.h"
-#include "messages/group/GroupMessageContent.h"
+#include "src/messages/MessageContentFactory.h"
+#include "src/messages/group/GroupMessageContent.h"
 
 #include <QString>
 
-class GroupSetTitleMessageContent : public GroupMessageContent {
-public:
-	GroupSetTitleMessageContent(GroupId const& groupId, QString const& title);
-	virtual ~GroupSetTitleMessageContent();
+namespace openmittsu {
+	namespace messages {
+		namespace group {
 
-	virtual GroupMessageContent* clone() const override;
+			class GroupSetTitleMessageContent : public GroupMessageContent {
+			public:
+				GroupSetTitleMessageContent(openmittsu::protocol::GroupId const& groupId, QString const& title);
+				virtual ~GroupSetTitleMessageContent();
 
-	virtual QByteArray toPacketPayload() const override;
+				virtual GroupMessageContent* clone() const override;
 
-	virtual MessageContent* fromPacketPayload(FullMessageHeader const& messageHeader, QByteArray const& payload) const override;
+				virtual QByteArray toPacketPayload() const override;
 
-	virtual QString const& getTitle() const;
+				virtual MessageContent* fromPacketPayload(FullMessageHeader const& messageHeader, QByteArray const& payload) const override;
 
-	friend class TypedMessageContentFactory<GroupSetTitleMessageContent>;
-private:
-	QString const title;
+				virtual QString const& getTitle() const;
 
-	static bool registrationResult;
+				friend class TypedMessageContentFactory<GroupSetTitleMessageContent>;
+			private:
+				QString const title;
 
-	GroupSetTitleMessageContent();
-};
+				static bool registrationResult;
+
+				GroupSetTitleMessageContent();
+			};
+
+		}
+	}
+}
 
 #endif // OPENMITTSU_MESSAGES_GROUP_GROUPSETTITLEMESSAGECONTENT_H_

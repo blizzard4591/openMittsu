@@ -2,36 +2,40 @@
 #define OPENMITTSU_WIZARDS_CONTACTEDITWIZARD_H_
 
 #include <QWizard>
-#include "ClientConfiguration.h"
-#include "ProtocolClient.h"
-#include "IdentityContact.h"
+
+#include <memory>
 
 #include "ContactEditWizardPageSelectContact.h"
 #include "ContactEditWizardPageDone.h"
+
+#include "src/dataproviders/ContactDataProvider.h"
 
 namespace Ui {
 class ContactEditWizard;
 }
 
-class ContactEditWizard : public QWizard
-{
-    Q_OBJECT
+namespace openmittsu {
+	namespace wizards {
 
-public:
-	explicit ContactEditWizard(ClientConfiguration* clientConfiguration, ProtocolClient* protocolClient, IdentityContact* preChosenContact = nullptr , QWidget *parent = nullptr);
-	~ContactEditWizard();
-public slots:
-	void pageNextOnClick(int pageId);
-private:
-	Ui::ContactEditWizard *ui;
-	ClientConfiguration* const clientConfiguration;
-	ProtocolClient* const protocolClient;
+		class ContactEditWizard : public QWizard {
+			Q_OBJECT
+		public:
+			explicit ContactEditWizard(std::shared_ptr<openmittsu::dataproviders::ContactDataProvider> const& contactDataProvider, QWidget* parent = nullptr);
+			virtual ~ContactEditWizard();
+		public slots:
+			void pageNextOnClick(int pageId);
+		private:
+			Ui::ContactEditWizard* m_ui;
+			std::shared_ptr<openmittsu::dataproviders::ContactDataProvider> const m_contactDataProvider;
+			
 
-	ContactEditWizardPageSelectContact* contactEditWizardPageInfo;
-	ContactEditWizardPageDone* contactEditWizardPageDone;
+			ContactEditWizardPageSelectContact* m_contactEditWizardPageInfo;
+			ContactEditWizardPageDone* m_contactEditWizardPageDone;
 
-	bool haveFinished;
-	IdentityContact* preChosenContact;
-};
+			bool m_haveFinished;
+		};
+
+	}
+}
 
 #endif // OPENMITTSU_WIZARDS_CONTACTEDITWIZARD_H_

@@ -1,15 +1,14 @@
 #ifndef OPENMITTSU_TASKS_SETFEATURELEVELCALLBACKTASK_H_
 #define OPENMITTSU_TASKS_SETFEATURELEVELCALLBACKTASK_H_
 
-#include "messages/MessageWithEncryptedPayload.h"
-#include "tasks/CertificateBasedCallbackTask.h"
-#include "protocol/ContactId.h"
-#include "protocol/CryptoBox.h"
-#include "protocol/FeatureLevel.h"
-#include "protocol/Nonce.h"
-#include "ServerConfiguration.h"
-#include "ClientConfiguration.h"
-#include "PublicKey.h"
+#include "src/crypto/BasicCryptoBox.h"
+#include "src/messages/MessageWithEncryptedPayload.h"
+#include "src/protocol/ContactId.h"
+#include "src/protocol/FeatureLevel.h"
+#include "src/network/ServerConfiguration.h"
+
+#include "src/tasks/CallbackTask.h"
+#include "src/tasks/CertificateBasedCallbackTask.h"
 
 #include <QString>
 #include <QByteArray>
@@ -18,21 +17,27 @@
 #include <QSslCertificate>
 #include <memory>
 
-class SetFeatureLevelCallbackTask : public CertificateBasedCallbackTask {
-public:
-	SetFeatureLevelCallbackTask(std::shared_ptr<ServerConfiguration> const& serverConfiguration, std::shared_ptr<CryptoBox> const& cryptoBox, std::shared_ptr<ClientConfiguration> const& clientConfiguration, FeatureLevel const& featureLevel);
-	virtual ~SetFeatureLevelCallbackTask();
+namespace openmittsu {
+	namespace tasks {
 
-	FeatureLevel const& getFeatureLevelToSet() const;
-protected:
-	virtual void taskRun() override;
-private:
-	QString const urlString;
-	QString const agentString;
-	std::shared_ptr<CryptoBox> const cryptoBox;
+		class SetFeatureLevelCallbackTask : public CertificateBasedCallbackTask, public CallbackTask {
+		public:
+			SetFeatureLevelCallbackTask(std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, openmittsu::crypto::BasicCryptoBox const& cryptoBox, openmittsu::protocol::ContactId const& ownId, openmittsu::protocol::FeatureLevel const& featureLevel);
+			virtual ~SetFeatureLevelCallbackTask();
 
-	ContactId const contactId;
-	FeatureLevel const featureLevelToSet;
-};
+			openmittsu::protocol::FeatureLevel const& getFeatureLevelToSet() const;
+		protected:
+			virtual void taskRun() override;
+		private:
+			QString const m_urlString;
+			QString const m_agentString;
+			openmittsu::crypto::BasicCryptoBox m_cryptoBox;
+
+			openmittsu::protocol::ContactId const m_contactId;
+			openmittsu::protocol::FeatureLevel const m_featureLevelToSet;
+		};
+
+	}
+}
 
 #endif // OPENMITTSU_TASKS_SETFEATURELEVELCALLBACKTASK_H_

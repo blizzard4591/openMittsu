@@ -1,27 +1,33 @@
-#include "tasks/MessageCallbackTask.h"
+#include "src/tasks/MessageCallbackTask.h"
 
-#include "exceptions/IllegalFunctionCallException.h"
-#include "messages/Message.h"
+#include "src/exceptions/IllegalFunctionCallException.h"
+#include "src/messages/Message.h"
 
-MessageCallbackTask::MessageCallbackTask(Message* message, std::shared_ptr<AcknowledgmentProcessor> const& acknowledgmentProcessor) : CallbackTask(), message(message), acknowledgmentProcessor(acknowledgmentProcessor) {
-	// Intentionally left empty.
-}
+namespace openmittsu {
+	namespace tasks {
 
-MessageCallbackTask::~MessageCallbackTask() {
-	// Intentionally left empty.
-}
+		MessageCallbackTask::MessageCallbackTask(openmittsu::messages::Message* message, std::shared_ptr<openmittsu::acknowledgments::AcknowledgmentProcessor> const& acknowledgmentProcessor) : CallbackTask(), message(message), acknowledgmentProcessor(acknowledgmentProcessor) {
+			// Intentionally left empty.
+		}
 
-Message const* MessageCallbackTask::getInitialMessage() const {
-	return message.get();
-}
+		MessageCallbackTask::~MessageCallbackTask() {
+			// Intentionally left empty.
+		}
 
-Message* MessageCallbackTask::getResultMessage() const {
-	if (!hasFinishedSuccessfully()) {
-		throw IllegalFunctionCallException() << "This CallbackTask has not finished successfully, can not build result message.";
+		openmittsu::messages::Message const* MessageCallbackTask::getInitialMessage() const {
+			return message.get();
+		}
+
+		openmittsu::messages::Message* MessageCallbackTask::getResultMessage() const {
+			if (!hasFinishedSuccessfully()) {
+				throw openmittsu::exceptions::IllegalFunctionCallException() << "This CallbackTask has not finished successfully, can not build result message.";
+			}
+			return getInitialMessage()->withNewMessageContent(getInitialMessage()->getMessageContent()->integrateCallbackTaskResult(this));
+		}
+
+		std::shared_ptr<openmittsu::acknowledgments::AcknowledgmentProcessor> const& MessageCallbackTask::getAcknowledgmentProcessor() const {
+			return acknowledgmentProcessor;
+		}
+
 	}
-	return getInitialMessage()->withNewMessageContent(getInitialMessage()->getMessageContent()->integrateCallbackTaskResult(this));
-}
-
-std::shared_ptr<AcknowledgmentProcessor> const& MessageCallbackTask::getAcknowledgmentProcessor() const {
-	return acknowledgmentProcessor;
 }

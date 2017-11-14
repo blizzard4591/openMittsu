@@ -1,44 +1,50 @@
-#include "acknowledgments/AcknowledgmentProcessor.h"
+#include "src/acknowledgments/AcknowledgmentProcessor.h"
 
-#include "ProtocolClient.h"
-#include "utility/Logging.h"
+#include "src/network/ProtocolClient.h"
+#include "src/utility/Logging.h"
 
-AcknowledgmentProcessor::AcknowledgmentProcessor(QDateTime const& timeoutTime) : timeoutTime(timeoutTime) {
-	// Intentionally left empty.
-}
+namespace openmittsu {
+	namespace acknowledgments {
 
-AcknowledgmentProcessor::~AcknowledgmentProcessor() {
-	// Intentionally left empty.
-}
+		AcknowledgmentProcessor::AcknowledgmentProcessor(QDateTime const& timeoutTime) : m_timeoutTime(timeoutTime) {
+			// Intentionally left empty.
+		}
 
-QDateTime const& AcknowledgmentProcessor::getTimeoutTime() const {
-	return timeoutTime;
-}
+		AcknowledgmentProcessor::~AcknowledgmentProcessor() {
+			// Intentionally left empty.
+		}
 
-void AcknowledgmentProcessor::contactMessageSendFailed(ContactId const& receiver, MessageId const& messageId, ProtocolClient* protocolClient) {
-	LOGGER()->info("Sending MESSAGE_FAILED for message ID {} send to {}.", messageId.toString(), receiver.toString());
-	protocolClient->messageSendFailed(receiver, messageId);
-}
+		QDateTime const& AcknowledgmentProcessor::getTimeoutTime() const {
+			return m_timeoutTime;
+		}
 
-void AcknowledgmentProcessor::groupMessageSendFailed(GroupId const& groupId, MessageId const& messageId, ProtocolClient* protocolClient) {
-	LOGGER()->info("Sending MESSAGE_FAILED for message ID {} send to group {}.", messageId.toString(), groupId.toString());
-	protocolClient->messageSendFailed(groupId, messageId);
-}
+		void AcknowledgmentProcessor::contactMessageSendFailed(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId, openmittsu::network::ProtocolClient* protocolClient) {
+			LOGGER()->info("Sending MESSAGE_FAILED for message ID {} send to {}.", messageId.toString(), receiver.toString());
+			protocolClient->messageSendFailed(receiver, messageId);
+		}
 
-void AcknowledgmentProcessor::contactMessageSendSuccess(ContactId const& receiver, MessageId const& messageId, ProtocolClient* protocolClient) {
-	LOGGER()->info("Sending MESSAGE_SUCCESS for message ID {} send to {}.", messageId.toString(), receiver.toString());
-	protocolClient->messageSendDone(receiver, messageId);
-}
+		void AcknowledgmentProcessor::groupMessageSendFailed(openmittsu::protocol::GroupId const& groupId, openmittsu::protocol::MessageId const& messageId, openmittsu::network::ProtocolClient* protocolClient) {
+			LOGGER()->info("Sending MESSAGE_FAILED for message ID {} send to group {}.", messageId.toString(), groupId.toString());
+			protocolClient->messageSendFailed(groupId, messageId);
+		}
 
-void AcknowledgmentProcessor::groupMessageSendSuccess(GroupId const& groupId, MessageId const& messageId, ProtocolClient* protocolClient) {
-	LOGGER()->info("Sending MESSAGE_SUCESS for message ID {} send to group {}.", messageId.toString(), groupId.toString());
-	protocolClient->messageSendDone(groupId, messageId);
-}
+		void AcknowledgmentProcessor::contactMessageSendSuccess(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId, openmittsu::network::ProtocolClient* protocolClient) {
+			LOGGER()->info("Sending MESSAGE_SUCCESS for message ID {} send to {}.", messageId.toString(), receiver.toString());
+			protocolClient->messageSendDone(receiver, messageId);
+		}
 
-void AcknowledgmentProcessor::emitGroupCreationFailed(GroupId const& groupId, ProtocolClient* procolClient) {
-	procolClient->groupSetupDone(groupId, false);
-}
+		void AcknowledgmentProcessor::groupMessageSendSuccess(openmittsu::protocol::GroupId const& groupId, openmittsu::protocol::MessageId const& messageId, openmittsu::network::ProtocolClient* protocolClient) {
+			LOGGER()->info("Sending MESSAGE_SUCESS for message ID {} send to group {}.", messageId.toString(), groupId.toString());
+			protocolClient->messageSendDone(groupId, messageId);
+		}
 
-void AcknowledgmentProcessor::emitGroupCreationSuccess(GroupId const& groupId, ProtocolClient* procolClient) {
-	procolClient->groupSetupDone(groupId, true);
+		void AcknowledgmentProcessor::emitGroupCreationFailed(openmittsu::protocol::GroupId const& groupId, openmittsu::network::ProtocolClient* procolClient) {
+			procolClient->groupSetupDone(groupId, false);
+		}
+
+		void AcknowledgmentProcessor::emitGroupCreationSuccess(openmittsu::protocol::GroupId const& groupId, openmittsu::network::ProtocolClient* procolClient) {
+			procolClient->groupSetupDone(groupId, true);
+		}
+
+	}
 }

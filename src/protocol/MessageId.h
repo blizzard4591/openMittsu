@@ -1,39 +1,51 @@
 #ifndef OPENMITTSU_PROTOCOL_MESSAGEID_H_
 #define OPENMITTSU_PROTOCOL_MESSAGEID_H_
 
-#include "protocol/Id.h"
 #include <cstdint>
 #include <QtGlobal>
 #include <QByteArray>
 #include <QMetaType>
 #include <QVector>
+#include <QString>
 
-class MessageId : public Id {
-public:
-	explicit MessageId(quint64 messageId);
-	MessageId(QByteArray const& messageIdBytes);
-	MessageId(MessageId const& other);
-	virtual ~MessageId();
+namespace openmittsu {
+	namespace protocol {
 
-	quint64 getMessageId() const;
-	QByteArray getMessageIdAsByteArray() const;
-	static int getSizeOfMessageIdInBytes();
-	virtual std::string toString() const override;
-	virtual QString toQString() const override;
+		class MessageId {
+		public:
+			explicit MessageId(quint64 messageId);
+			explicit MessageId(QByteArray const& messageIdBytes);
+			explicit MessageId(QString const& messageIdString);
 
-	bool operator ==(MessageId const& other) const;
+			MessageId(MessageId const& other);
+			virtual ~MessageId();
 
-	friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<MessageId, true>;
-	friend class QVector<MessageId>;
-private:
-	quint64 messageId;
+			quint64 getMessageId() const;
+			QByteArray getMessageIdAsByteArray() const;
+			static int getSizeOfMessageIdInBytes();
+			std::string toString() const;
+			QString toQString() const;
 
-	MessageId();
-};
+			bool operator ==(MessageId const& other) const;
+			bool operator !=(MessageId const& other) const;
 
-uint qHash(MessageId const& key, uint seed);
+			static MessageId random();
 
-Q_DECLARE_METATYPE(MessageId)
+			friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<MessageId, true>;
+			friend class QVector<MessageId>;
+		private:
+			quint64 messageId;
+			bool isValid;
+			void throwIfInvalid() const;
+
+			MessageId();
+		};
+
+		uint qHash(MessageId const& key, uint seed);
+	}
+}
+
+Q_DECLARE_METATYPE(openmittsu::protocol::MessageId)
 
 #endif // #define OPENMITTSU_PROTOCOL_MESSAGEID_H_
 

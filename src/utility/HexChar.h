@@ -5,16 +5,21 @@
 #include <string>
 #include <iostream>
 
-class HexChar {
-public:
-	HexChar(unsigned char uc);
-	HexChar(char sc);
+namespace openmittsu {
+	namespace utility {
 
-	unsigned char getChar() const;
-private:
-	unsigned char c;
-};
+		class HexChar {
+		public:
+			HexChar(unsigned char uc);
+			HexChar(char sc);
 
-std::ostream& operator<<(std::ostream& o, HexChar const& h);
+			unsigned char getChar() const;
+		private:
+			unsigned char c;
+		};
+
+		std::ostream& operator<<(std::ostream& o, HexChar const& h);
+	}
+}
 
 #endif // OPENMITTSU_UTILITY_HEXCHAR_H_

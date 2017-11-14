@@ -1,91 +1,99 @@
-#include "messages/group/GroupImageIdAndKeyMessageContent.h"
+#include "src/messages/group/GroupImageIdAndKeyMessageContent.h"
 
-#include "Endian.h"
-#include "exceptions/IllegalArgumentException.h"
-#include "messages/MessageContentRegistry.h"
-#include "messages/group/GroupEncryptedImageAndKeyMessageContent.h"
-#include "protocol/ProtocolSpecs.h"
-#include "tasks/BlobDownloaderCallbackTask.h"
-#include "utility/ByteArrayConversions.h"
-#include "utility/Logging.h"
+#include "src/utility/Endian.h"
+#include "src/exceptions/IllegalArgumentException.h"
+#include "src/messages/MessageContentRegistry.h"
+#include "src/messages/group/GroupEncryptedImageAndKeyMessageContent.h"
+#include "src/protocol/ProtocolSpecs.h"
+#include "src/tasks/BlobDownloaderCallbackTask.h"
+#include "src/utility/ByteArrayConversions.h"
+#include "src/utility/Logging.h"
 
-// Register this MessageContent with the MessageContentRegistry
-bool GroupImageIdAndKeyMessageContent::registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_GROUP_PICTURE, new TypedMessageContentFactory<GroupImageIdAndKeyMessageContent>());
+namespace openmittsu {
+	namespace messages {
+		namespace group {
 
-GroupImageIdAndKeyMessageContent::GroupImageIdAndKeyMessageContent() : GroupMessageContent(GroupId(0, 0)), imageId(), encryptionKey(QByteArray(EncryptionKey::getSizeOfEncryptionKeyInBytes(), 0x00)), sizeInBytes(0) {
-	// Only accessible and used by the MessageContentFactory.
-}
+			// Register this MessageContent with the MessageContentRegistry
+			bool GroupImageIdAndKeyMessageContent::registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_GROUP_PICTURE, new TypedMessageContentFactory<GroupImageIdAndKeyMessageContent>());
 
-GroupImageIdAndKeyMessageContent::GroupImageIdAndKeyMessageContent(GroupId const& groupId, QByteArray const& imageId, EncryptionKey const& encryptionKey, quint32 sizeInBytes) : GroupMessageContent(groupId), imageId(imageId), encryptionKey(encryptionKey), sizeInBytes(sizeInBytes) {
-	if (imageId.size() != (PROTO_IMAGESERVER_ID_LENGTH_BYTES)) {
-		throw IllegalArgumentException() << "The supplied image ID has " << imageId.size() << " Bytes instead of " << (PROTO_IMAGESERVER_ID_LENGTH_BYTES) << " Bytes.";
-	}
-}
+			GroupImageIdAndKeyMessageContent::GroupImageIdAndKeyMessageContent() : GroupMessageContent(openmittsu::protocol::GroupId(0, 0)), imageId(), encryptionKey(QByteArray(openmittsu::crypto::EncryptionKey::getSizeOfEncryptionKeyInBytes(), 0x00)), sizeInBytes(0) {
+				// Only accessible and used by the MessageContentFactory.
+			}
 
-GroupImageIdAndKeyMessageContent::~GroupImageIdAndKeyMessageContent() {
-	// Intentionally left empty.
-}
+			GroupImageIdAndKeyMessageContent::GroupImageIdAndKeyMessageContent(openmittsu::protocol::GroupId const& groupId, QByteArray const& imageId, openmittsu::crypto::EncryptionKey const& encryptionKey, quint32 sizeInBytes) : GroupMessageContent(groupId), imageId(imageId), encryptionKey(encryptionKey), sizeInBytes(sizeInBytes) {
+				if (imageId.size() != (PROTO_IMAGESERVER_ID_LENGTH_BYTES)) {
+					throw openmittsu::exceptions::IllegalArgumentException() << "The supplied image ID has " << imageId.size() << " Bytes instead of " << (PROTO_IMAGESERVER_ID_LENGTH_BYTES) << " Bytes.";
+				}
+			}
 
-GroupMessageContent* GroupImageIdAndKeyMessageContent::clone() const {
-	return new GroupImageIdAndKeyMessageContent(getGroupId(), imageId, encryptionKey, sizeInBytes);
-}
+			GroupImageIdAndKeyMessageContent::~GroupImageIdAndKeyMessageContent() {
+				// Intentionally left empty.
+			}
 
-bool GroupImageIdAndKeyMessageContent::hasPostReceiveCallbackTask() const {
-	return true;
-}
+			GroupMessageContent* GroupImageIdAndKeyMessageContent::clone() const {
+				return new GroupImageIdAndKeyMessageContent(getGroupId(), imageId, encryptionKey, sizeInBytes);
+			}
 
-CallbackTask* GroupImageIdAndKeyMessageContent::getPostReceiveCallbackTask(Message* message, ServerConfiguration* serverConfiguration, CryptoBox* cryptoBox) const {
-	return new BlobDownloaderCallbackTask(serverConfiguration, message, std::shared_ptr<AcknowledgmentProcessor>(), imageId);
-}
+			bool GroupImageIdAndKeyMessageContent::hasPostReceiveCallbackTask() const {
+				return true;
+			}
 
-MessageContent* GroupImageIdAndKeyMessageContent::integrateCallbackTaskResult(CallbackTask const* callbackTask) const {
-	if (dynamic_cast<BlobDownloaderCallbackTask const*>(callbackTask) != nullptr) {
-		BlobDownloaderCallbackTask const* bdct = dynamic_cast<BlobDownloaderCallbackTask const*>(callbackTask);
-		if (bdct->getDownloadedBlob().size() != static_cast<int>(sizeInBytes)) {
-			LOGGER()->warn("Size of downloaded blob differs from stated size ({} Bytes downloaded vs. {} Bytes promised).", bdct->getDownloadedBlob().size(), sizeInBytes);
+			openmittsu::tasks::CallbackTask* GroupImageIdAndKeyMessageContent::getPostReceiveCallbackTask(Message* message, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, std::shared_ptr<openmittsu::crypto::FullCryptoBox> const& cryptoBox) const {
+				return new openmittsu::tasks::BlobDownloaderCallbackTask(serverConfiguration, message, std::shared_ptr<openmittsu::acknowledgments::AcknowledgmentProcessor>(), imageId);
+			}
+
+			MessageContent* GroupImageIdAndKeyMessageContent::integrateCallbackTaskResult(openmittsu::tasks::CallbackTask const* callbackTask) const {
+				if (dynamic_cast<openmittsu::tasks::BlobDownloaderCallbackTask const*>(callbackTask) != nullptr) {
+					openmittsu::tasks::BlobDownloaderCallbackTask const* bdct = dynamic_cast<openmittsu::tasks::BlobDownloaderCallbackTask const*>(callbackTask);
+					if (bdct->getDownloadedBlob().size() != static_cast<int>(sizeInBytes)) {
+						LOGGER()->warn("Size of downloaded blob differs from stated size ({} Bytes downloaded vs. {} Bytes promised).", bdct->getDownloadedBlob().size(), sizeInBytes);
+					}
+
+					LOGGER_DEBUG("Integrating result from BlobDownloaderCallbackTask into a new GroupEncryptedImageAndKeyMessageContent.");
+					return new GroupEncryptedImageAndKeyMessageContent(getGroupId(), bdct->getDownloadedBlob(), encryptionKey, sizeInBytes);
+				} else {
+					LOGGER()->critical("GroupImageIdAndKeyMessageContent::integrateCallbackTaskResult called for unexpected CallbackTask.");
+					throw;
+				}
+			}
+
+			QByteArray const& GroupImageIdAndKeyMessageContent::getImageId() const {
+				return imageId;
+			}
+
+			openmittsu::crypto::EncryptionKey const& GroupImageIdAndKeyMessageContent::getEncryptionKey() const {
+				return encryptionKey;
+			}
+
+			quint32 GroupImageIdAndKeyMessageContent::getImageSizeInBytes() const {
+				return sizeInBytes;
+			}
+
+			MessageContent* GroupImageIdAndKeyMessageContent::fromPacketPayload(FullMessageHeader const& messageHeader, QByteArray const& payload) const {
+				verifyPayloadMinSizeAndSignatureByte(PROTO_MESSAGE_SIGNATURE_GROUP_PICTURE, 1 + openmittsu::protocol::GroupId::getSizeOfGroupIdInBytes() + (PROTO_IMAGESERVER_ID_LENGTH_BYTES)+4 + openmittsu::crypto::EncryptionKey::getSizeOfEncryptionKeyInBytes(), payload, true);
+
+				int startingPosition = 1;
+				openmittsu::protocol::GroupId const group(openmittsu::protocol::GroupId::fromData(payload.mid(startingPosition, openmittsu::protocol::GroupId::getSizeOfGroupIdInBytes())));
+				startingPosition += openmittsu::protocol::GroupId::getSizeOfGroupIdInBytes();
+				QByteArray const id(payload.mid(startingPosition, PROTO_IMAGESERVER_ID_LENGTH_BYTES));
+				startingPosition += PROTO_IMAGESERVER_ID_LENGTH_BYTES;
+				uint32_t const size = openmittsu::utility::ByteArrayConversions::convert4ByteQByteArrayToQuint32(payload.mid(startingPosition, 4));
+				startingPosition += 4;
+				openmittsu::crypto::EncryptionKey const key(payload.mid(startingPosition, openmittsu::crypto::EncryptionKey::getSizeOfEncryptionKeyInBytes()));
+
+				return new GroupImageIdAndKeyMessageContent(group, id, key, size);
+			}
+
+			QByteArray GroupImageIdAndKeyMessageContent::toPacketPayload() const {
+				QByteArray result(1, PROTO_MESSAGE_SIGNATURE_GROUP_PICTURE);
+				result.append(getGroupId().getGroupIdAsByteArray());
+				result.append(imageId);
+				result.append(openmittsu::utility::Endian::uint32FromHostToLittleEndianByteArray(sizeInBytes));
+				result.append(encryptionKey.getEncryptionKey());
+
+				return result;
+			}
+
 		}
-
-		LOGGER_DEBUG("Integrating result from BlobDownloaderCallbackTask into a new GroupEncryptedImageAndKeyMessageContent.");
-		return new GroupEncryptedImageAndKeyMessageContent(getGroupId(), bdct->getDownloadedBlob(), encryptionKey, sizeInBytes);
-	} else {
-		LOGGER()->critical("GroupImageIdAndKeyMessageContent::integrateCallbackTaskResult called for unexpected CallbackTask.");
-		throw;
 	}
-}
-
-QByteArray const& GroupImageIdAndKeyMessageContent::getImageId() const {
-	return imageId;
-}
-
-EncryptionKey const& GroupImageIdAndKeyMessageContent::getEncryptionKey() const {
-	return encryptionKey;
-}
-
-quint32 GroupImageIdAndKeyMessageContent::getImageSizeInBytes() const {
-	return sizeInBytes;
-}
-
-MessageContent* GroupImageIdAndKeyMessageContent::fromPacketPayload(FullMessageHeader const& messageHeader, QByteArray const& payload) const {
-	verifyPayloadMinSizeAndSignatureByte(PROTO_MESSAGE_SIGNATURE_GROUP_PICTURE, 1 + GroupId::getSizeOfGroupIdInBytes() + (PROTO_IMAGESERVER_ID_LENGTH_BYTES) + 4 + EncryptionKey::getSizeOfEncryptionKeyInBytes(), payload, true);
-
-	int startingPosition = 1;
-	GroupId const group(GroupId::fromData(payload.mid(startingPosition, GroupId::getSizeOfGroupIdInBytes())));
-	startingPosition += GroupId::getSizeOfGroupIdInBytes();
-	QByteArray const id(payload.mid(startingPosition, PROTO_IMAGESERVER_ID_LENGTH_BYTES));
-	startingPosition += PROTO_IMAGESERVER_ID_LENGTH_BYTES;
-	uint32_t const size = ByteArrayConversions::convert4ByteQByteArrayToQuint32(payload.mid(startingPosition, 4));
-	startingPosition += 4;
-	EncryptionKey const key(payload.mid(startingPosition, EncryptionKey::getSizeOfEncryptionKeyInBytes()));
-
-	return new GroupImageIdAndKeyMessageContent(group, id, key, size);
-}
-
-QByteArray GroupImageIdAndKeyMessageContent::toPacketPayload() const {
-	QByteArray result(1, PROTO_MESSAGE_SIGNATURE_GROUP_PICTURE);
-	result.append(getGroupId().getGroupIdAsByteArray());
-	result.append(imageId);
-	result.append(Endian::uint32FromHostToLittleEndianByteArray(sizeInBytes));
-	result.append(encryptionKey.getEncryptionKey());
-
-	return result;
 }

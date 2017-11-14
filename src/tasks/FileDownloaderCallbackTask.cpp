@@ -1,54 +1,60 @@
-#include "tasks/FileDownloaderCallbackTask.h"
+#include "src/tasks/FileDownloaderCallbackTask.h"
 
-#include "exceptions/IllegalFunctionCallException.h"
-#include "utility/QObjectConnectionMacro.h"
-#include "utility/Logging.h"
+#include "src/exceptions/IllegalFunctionCallException.h"
+#include "src/utility/QObjectConnectionMacro.h"
+#include "src/utility/Logging.h"
 
 #include <QEventLoop>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
-FileDownloaderCallbackTask::FileDownloaderCallbackTask(QUrl const& url) : CallbackTask(), url(url) {
-	// Intentionally left empty.
-}
+namespace openmittsu {
+	namespace tasks {
 
-FileDownloaderCallbackTask::~FileDownloaderCallbackTask() {
-	// Intentionally left empty.
-}
+		FileDownloaderCallbackTask::FileDownloaderCallbackTask(QUrl const& url) : CallbackTask(), m_url(url) {
+			// Intentionally left empty.
+		}
 
-void FileDownloaderCallbackTask::taskRun() {
-	LOGGER_DEBUG("Running FileDownloaderCallbackTask for URL {}.", QString(url.toDisplayString()).toStdString());
+		FileDownloaderCallbackTask::~FileDownloaderCallbackTask() {
+			// Intentionally left empty.
+		}
 
-	QNetworkAccessManager networkAccessManager;
-	QEventLoop eventLoop;
+		void FileDownloaderCallbackTask::taskRun() {
+			LOGGER_DEBUG("Running FileDownloaderCallbackTask for URL {}.", QString(m_url.toDisplayString()).toStdString());
 
-	OPENMITTSU_CONNECT(&networkAccessManager, finished(QNetworkReply*), &eventLoop, quit());
-	
-	// the HTTPs request
-	QNetworkRequest request;
-	request.setUrl(url);
+			QNetworkAccessManager networkAccessManager;
+			QEventLoop eventLoop;
 
-	QNetworkReply *reply = networkAccessManager.get(request);
-	eventLoop.exec(); // blocks until "finished()" has been called
+			OPENMITTSU_CONNECT(&networkAccessManager, finished(QNetworkReply*), &eventLoop, quit());
 
-	if (reply->error() == QNetworkReply::NoError) {
-		// success
-		result = reply->readAll();
-		delete reply;
+			// the HTTPs request
+			QNetworkRequest request;
+			request.setUrl(m_url);
 
-		finishedWithNoError();
-	} else {
-		// failure
-		QString const errorString(reply->errorString());
-		delete reply;
+			QNetworkReply *reply = networkAccessManager.get(request);
+			eventLoop.exec(); // blocks until "finished()" has been called
 
-		finishedWithError(-1, errorString);
+			if (reply->error() == QNetworkReply::NoError) {
+				// success
+				m_result = reply->readAll();
+				delete reply;
+
+				finishedWithNoError();
+			} else {
+				// failure
+				QString const errorString(reply->errorString());
+				delete reply;
+
+				finishedWithError(-1, errorString);
+			}
+		}
+
+		QByteArray const& FileDownloaderCallbackTask::getDownloadedFile() const {
+			if (!hasFinishedSuccessfully()) {
+				throw openmittsu::exceptions::IllegalFunctionCallException() << "This FileDownloaderCallbackTask did not finish successfully. There is no resulting file to be fetched.";
+			}
+			return m_result;
+		}
+
 	}
-}
-
-QByteArray const& FileDownloaderCallbackTask::getDownloadedFile() const {
-	if (!hasFinishedSuccessfully()) {
-		throw IllegalFunctionCallException() << "This FileDownloaderCallbackTask did not finish successfully. There is no resulting file to be fetched.";
-	}
-	return result;
 }

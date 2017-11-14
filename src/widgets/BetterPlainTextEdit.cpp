@@ -1,23 +1,29 @@
-#include "BetterPlainTextEdit.h"
+#include "src/widgets/BetterPlainTextEdit.h"
 
-BetterPlainTextEdit::BetterPlainTextEdit(QWidget *parent) : QPlainTextEdit(parent) {
-	//
-}
+namespace openmittsu {
+	namespace widgets {
 
-void BetterPlainTextEdit::keyReleaseEvent(QKeyEvent* e) {
-	QPlainTextEdit::keyReleaseEvent(e);
-}
+		BetterPlainTextEdit::BetterPlainTextEdit(QWidget *parent) : QPlainTextEdit(parent) {
+			//
+		}
 
-void BetterPlainTextEdit::keyPressEvent(QKeyEvent* e) {
-	if (e->isAutoRepeat()) {
-		QPlainTextEdit::keyPressEvent(e);
-		return;
-	}
+		void BetterPlainTextEdit::keyReleaseEvent(QKeyEvent* e) {
+			QPlainTextEdit::keyReleaseEvent(e);
+		}
 
-	if ((!(e->modifiers() & Qt::KeyboardModifier::ShiftModifier)) && (e->key() == Qt::Key::Key_Return)) {
-		e->accept();
-		emit returnPressed();
-	} else {
-		QPlainTextEdit::keyPressEvent(e);
+		void BetterPlainTextEdit::keyPressEvent(QKeyEvent* e) {
+			if (e->isAutoRepeat()) {
+				QPlainTextEdit::keyPressEvent(e);
+				return;
+			}
+
+			if ((!(e->modifiers() & Qt::KeyboardModifier::ShiftModifier)) && (e->key() == Qt::Key::Key_Return)) {
+				e->accept();
+				emit returnPressed();
+			} else {
+				QPlainTextEdit::keyPressEvent(e);
+			}
+		}
+
 	}
 }

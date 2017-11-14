@@ -1,21 +1,29 @@
-#include "messages/group/PreliminaryGroupMessageHeader.h"
+#include "src/messages/group/PreliminaryGroupMessageHeader.h"
 
-PreliminaryGroupMessageHeader::PreliminaryGroupMessageHeader(GroupId const& group, MessageId const& messageId, MessageFlags const& messageFlags) : PreliminaryMessageHeader(messageId, messageFlags), groupId(group) {
-	// Intentionally left empty.
-}
+namespace openmittsu {
+	namespace messages {
+		namespace group {
 
-PreliminaryGroupMessageHeader::PreliminaryGroupMessageHeader(PreliminaryGroupMessageHeader const& other) : PreliminaryMessageHeader(other), groupId(other.groupId) {
-	// Intentionally left empty.
-}
+			PreliminaryGroupMessageHeader::PreliminaryGroupMessageHeader(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, MessageFlags const& messageFlags) : PreliminaryMessageHeader(messageId, time, messageFlags), groupId(group) {
+				// Intentionally left empty.
+			}
 
-PreliminaryGroupMessageHeader::~PreliminaryGroupMessageHeader() {
-	// Intentionally left empty.
-}
+			PreliminaryGroupMessageHeader::PreliminaryGroupMessageHeader(PreliminaryGroupMessageHeader const& other) : PreliminaryMessageHeader(other), groupId(other.groupId) {
+				// Intentionally left empty.
+			}
 
-GroupId const& PreliminaryGroupMessageHeader::getGroup() const {
-	return groupId;
-}
+			PreliminaryGroupMessageHeader::~PreliminaryGroupMessageHeader() {
+				// Intentionally left empty.
+			}
 
-PreliminaryGroupMessageHeader* PreliminaryGroupMessageHeader::clone() const {
-	return new PreliminaryGroupMessageHeader(*this);
+			openmittsu::protocol::GroupId const& PreliminaryGroupMessageHeader::getGroup() const {
+				return groupId;
+			}
+
+			PreliminaryGroupMessageHeader* PreliminaryGroupMessageHeader::clone() const {
+				return new PreliminaryGroupMessageHeader(*this);
+			}
+
+		}
+	}
 }

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>LoadBackupWizardPageDataBackupData</class>
+ <widget class="QWizardPage" name="LoadBackupWizardPageDataBackupData">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>341</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>WizardPage</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QLabel" name="lblBackup">
+     <property name="text">
+      <string>Path to Data Backup:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="lblPassword">
+     <property name="text">
+      <string>Password:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="3">
+    <widget class="QLabel" name="lblHelpTextA">
+     <property name="text">
+      <string>A data backup contains your private key, your ID plus all contacts, groups and messages. A data backup is exported by Threema as a password-protected *.zip file. If you chose to also included media files in your data backup, these can be imported as well.
+It can be generated in the App via Menu -&gt; My Backups -&gt; Data Backup -&gt; Add.</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+     <property name="textInteractionFlags">
+      <set>Qt::NoTextInteraction</set>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QLineEdit" name="edtDataBackupLocation">
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0" colspan="3">
+    <widget class="QLabel" name="lblHelpTextC">
+     <property name="text">
+      <string>The password for decryption is the one you entered when creating the data backup.</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0" colspan="3">
+    <widget class="QLabel" name="lblHelpTextE">
+     <property name="text">
+      <string>If everything was successful, the folder should now contain files like &quot;identity&quot; and &quot;contacts.csv&quot;.</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2">
+    <widget class="QPushButton" name="btnOpenFolder">
+     <property name="text">
+      <string>Open...</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0" colspan="3">
+    <widget class="QLabel" name="lblHelpTextD">
+     <property name="text">
+      <string>You can use free and open source tools like 7zip or commerical alternatives like WinZIP or WinRAR.</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="3">
+    <widget class="QLabel" name="lblHelpTextB">
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Before the data backup can be imported into openMittsu, you need to extract it into an empty folder!</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QLineEdit" name="edtDataBackupPassword"/>
+   </item>
+   <item row="7" column="0" colspan="3">
+    <widget class="QLabel" name="lblHelpTextF">
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Delete the contents of this folder immediately after the backup has been imported, as it contains your messages and contacts in clear text!</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

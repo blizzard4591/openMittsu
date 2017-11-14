@@ -1,5 +1,17 @@
-#include "messages/contact/ContactMessageContent.h"
+#include "src/messages/contact/ContactMessageContent.h"
 
-ContactMessageContent::~ContactMessageContent() {
-	// Intentionally left empty.
+namespace openmittsu {
+	namespace messages {
+		namespace contact {
+
+			ContactMessageContent::ContactMessageContent() : MessageContent() {
+				//
+			}
+
+			ContactMessageContent::~ContactMessageContent() {
+				// Intentionally left empty.
+			}
+
+		}
+	}
 }

@@ -1,0 +1,60 @@
+#include "src/widgets/chat/ContactImageChatWidgetItem.h"
+
+#include <QAction>
+#include <QApplication>
+#include <QClipboard>
+#include <QMenu>
+#include <QPixmap>
+
+#include "src/widgets/ClickAwareLabel.h"
+#include "src/widgets/ImageViewer.h"
+#include "src/utility/QObjectConnectionMacro.h"
+
+#include "src/exceptions/InternalErrorException.h"
+
+namespace openmittsu {
+	namespace widgets {
+
+		ContactImageChatWidgetItem::ContactImageChatWidgetItem(openmittsu::dataproviders::BackedContactMessage const& message, QWidget* parent) : ContactChatWidgetItem(message, parent), m_lblImage(new openmittsu::widgets::ClickAwareLabel()), m_lblCaption(new QLabel()) {
+			if (message.getMessageType() != openmittsu::dataproviders::messages::ContactMessageType::IMAGE) {
+				throw openmittsu::exceptions::InternalErrorException() << "Can not handle message with type " << openmittsu::dataproviders::messages::ContactMessageTypeHelper::toString(message.getMessageType()) << ".";
+			}
+
+			ChatWidgetItem::configureLabel(m_lblCaption, 13);
+			this->addWidget(m_lblImage);
+			this->addWidget(m_lblCaption);
+
+			OPENMITTSU_CONNECT(m_lblImage, clicked(), this, onImageHasBeenClicked());
+
+			onContactDataChanged();
+			onMessageDataChanged();
+		}
+
+		ContactImageChatWidgetItem::~ContactImageChatWidgetItem() {
+			delete m_lblImage;
+			delete m_lblCaption;
+		}
+
+		void ContactImageChatWidgetItem::onImageHasBeenClicked() {
+			ImageViewer* imageViewer = new ImageViewer(m_lblImage->pixmap()->toImage());
+			imageViewer->show();
+		}
+
+		void ContactImageChatWidgetItem::onMessageDataChanged() {
+			QPixmap pixmap;
+			pixmap.loadFromData(m_contactMessage.getContentAsImage());
+			m_lblImage->setPixmap(pixmap);
+			m_lblCaption->setText(preprocessLinks(m_contactMessage.getCaption()));
+
+			ContactChatWidgetItem::onMessageDataChanged();
+		}
+
+		void ContactImageChatWidgetItem::copyToClipboard() {
+			QClipboard *clipboard = QApplication::clipboard();
+			QPixmap pixmap;
+			pixmap.loadFromData(m_contactMessage.getContentAsImage());
+			clipboard->setPixmap(pixmap);
+		}
+
+	}
+}

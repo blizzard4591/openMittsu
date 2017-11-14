@@ -1,8 +1,8 @@
 #ifndef OPENMITTSU_PROTOCOL_GROUPREGISTRY_H_
 #define OPENMITTSU_PROTOCOL_GROUPREGISTRY_H_
 
-#include "protocol/ContactId.h"
-#include "protocol/GroupId.h"
+#include "src/protocol/ContactId.h"
+#include "src/protocol/GroupId.h"
 
 #include <QObject>
 #include <QMutex>
@@ -11,31 +11,37 @@
 #include <QString>
 #include <utility>
 
-class GroupRegistry : public QObject {
-	Q_OBJECT
-public:
-	GroupRegistry();
-	GroupRegistry(QHash<GroupId, std::pair<QSet<ContactId>, QString>> const& preKnownGroups);
-	GroupRegistry(GroupRegistry const& other);
-	virtual ~GroupRegistry();
+namespace openmittsu {
+	namespace protocol {
 
-	void addGroup(GroupId const& groupId, QSet<ContactId> const& members, QString const& groupTitle);
+		class GroupRegistry : public QObject {
+			Q_OBJECT
+		public:
+			GroupRegistry();
+			GroupRegistry(QHash<GroupId, std::pair<QSet<ContactId>, QString>> const& preKnownGroups);
+			GroupRegistry(GroupRegistry const& other);
+			virtual ~GroupRegistry();
 
-	bool hasGroup(GroupId const& groupId) const;
-	
-	QSet<ContactId> getGroupMembers(GroupId const& groupId) const;
-	
-	QString getGroupTitle(GroupId const& groupId) const;
-	void setGroupTitle(GroupId const& groupId, QString const& newTitle);
+			void addGroup(GroupId const& groupId, QSet<ContactId> const& members, QString const& groupTitle);
 
-	void updateGroupMembers(GroupId const& groupId, QSet<ContactId> const& members);
-	void removeMember(GroupId const& groupId, ContactId const& leavingMember);
-signals:
-	void groupDataChanged();
-private:
-	QHash<GroupId, QSet<ContactId>> knownGroups;
-	QHash<GroupId, QString> groupTitles;
-	mutable QMutex mutex;
-};
+			bool hasGroup(GroupId const& groupId) const;
+
+			QSet<ContactId> getGroupMembers(GroupId const& groupId) const;
+
+			QString getGroupTitle(GroupId const& groupId) const;
+			void setGroupTitle(GroupId const& groupId, QString const& newTitle);
+
+			void updateGroupMembers(GroupId const& groupId, QSet<ContactId> const& members);
+			void removeMember(GroupId const& groupId, ContactId const& leavingMember);
+		signals:
+			void groupDataChanged();
+		private:
+			QHash<GroupId, QSet<ContactId>> knownGroups;
+			QHash<GroupId, QString> groupTitles;
+			mutable QMutex mutex;
+		};
+
+	}
+}
 
 #endif // OPENMITTSU_PROTOCOL_GROUPREGISTRY_H_
