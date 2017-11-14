@@ -26,11 +26,11 @@ namespace openmittsu {
 
 			static GroupBackupObject fromBackupMatch(QString const& filename, QHash<QString, int> const& headerOffsets, SimpleCsvLineSplitter const& splittedLines);
 		private:
-			openmittsu::protocol::GroupId const m_id;
-			QString const m_name;
-			openmittsu::protocol::MessageTime const m_createdAt;
-			QSet<openmittsu::protocol::ContactId> const m_members;
-			bool const m_isDeleted;
+			openmittsu::protocol::GroupId m_id;
+			QString m_name;
+			openmittsu::protocol::MessageTime m_createdAt;
+			QSet<openmittsu::protocol::ContactId> m_members;
+			bool m_isDeleted;
 		};
 
 	}

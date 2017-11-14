@@ -47,23 +47,23 @@ namespace openmittsu {
 			static QHash<openmittsu::protocol::GroupId, QString> getGroupMessageFiles(QDir const& path);
 		private:
 			// "apiid","uid","identity","isoutbox","isread","issaved","messagestae","posted_at","created_at","modified_at","type","body","isstatusmessage","isqueued","caption"
-			openmittsu::protocol::GroupId const m_group;
-			openmittsu::protocol::ContactId const m_contact;
-			openmittsu::protocol::MessageId const m_apiId;
-			QString const m_uuid;
-			bool const m_isOutbox;
-			bool const m_isRead;
-			bool const m_isSaved;
-			openmittsu::dataproviders::messages::UserMessageState const m_messageState;
-			openmittsu::protocol::MessageTime const m_createdAt;
-			openmittsu::protocol::MessageTime const m_sentAt;
-			openmittsu::protocol::MessageTime const m_receivedAt;
-			openmittsu::protocol::MessageTime const m_modifiedAt;
-			openmittsu::dataproviders::messages::GroupMessageType const m_messageType;
-			QString const m_body;
-			bool const m_isStatusMessage;
-			bool const m_isQueued;
-			QString const m_caption;
+			openmittsu::protocol::GroupId m_group;
+			openmittsu::protocol::ContactId m_contact;
+			openmittsu::protocol::MessageId m_apiId;
+			QString m_uuid;
+			bool m_isOutbox;
+			bool m_isRead;
+			bool m_isSaved;
+			openmittsu::dataproviders::messages::UserMessageState m_messageState;
+			openmittsu::protocol::MessageTime m_createdAt;
+			openmittsu::protocol::MessageTime m_sentAt;
+			openmittsu::protocol::MessageTime m_receivedAt;
+			openmittsu::protocol::MessageTime m_modifiedAt;
+			openmittsu::dataproviders::messages::GroupMessageType m_messageType;
+			QString m_body;
+			bool m_isStatusMessage;
+			bool m_isQueued;
+			QString m_caption;
 		};
 
 	}

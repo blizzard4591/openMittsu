@@ -26,13 +26,13 @@ namespace openmittsu {
 
 			static ContactBackupObject fromBackupMatch(QString const& filename, QHash<QString, int> const& headerOffsets, SimpleCsvLineSplitter const& splittedLines);
 		private:
-			openmittsu::protocol::ContactId const m_id;
-			openmittsu::crypto::PublicKey const m_publicKey;
-			openmittsu::protocol::ContactIdVerificationStatus const m_verificationStatus;
-			QString const m_firstName;
-			QString const m_lastName;
-			QString const m_nickName;
-			int const m_color;
+			openmittsu::protocol::ContactId m_id;
+			openmittsu::crypto::PublicKey m_publicKey;
+			openmittsu::protocol::ContactIdVerificationStatus m_verificationStatus;
+			QString m_firstName;
+			QString m_lastName;
+			QString m_nickName;
+			int m_color;
 		};
 
 	}

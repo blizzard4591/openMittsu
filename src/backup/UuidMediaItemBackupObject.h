@@ -17,7 +17,7 @@ namespace openmittsu {
 
 			QString const& getUuid() const;
 		private:
-			QString const m_uuid;
+			QString m_uuid;
 		};
 
 	}

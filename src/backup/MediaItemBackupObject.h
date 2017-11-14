@@ -23,7 +23,7 @@ namespace openmittsu {
 			virtual MediaItemType getType() const = 0;
 			QByteArray const& getData() const;
 		private:
-			QByteArray const m_data;
+			QByteArray m_data;
 		};
 
 	}

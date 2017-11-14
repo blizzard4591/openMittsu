@@ -18,7 +18,7 @@ namespace openmittsu {
 
 			static IdentityBackupObject fromFile(QDir const& path);
 		private:
-			QString const m_backupString;
+			QString m_backupString;
 		};
 
 	}
