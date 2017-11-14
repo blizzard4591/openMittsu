@@ -9,7 +9,7 @@ openMittsu is governed by the GNU GPL v2.0 license, but includes works from diff
 ## Requirements
  - [CMake](https://cmake.org/)
  - [Qt 5](https://www.qt.io/)
- - [LibSodium](https://download.libsodium.org/doc/)
+ - [LibSodium >= 1.0.12](https://download.libsodium.org/doc/)
  - [LibQrEncode](https://fukuchi.org/works/qrencode/) or [LibQrEncode-win32](https://code.google.com/p/qrencode-win32/)
  
 ## Supported Platforms
@@ -17,8 +17,8 @@ Currently, the application has been built and tested on:
  - Windows 7 using Visual Studio 2015
  - Windows 7 using Visual Studio 2017
  - Windows 10 using Visual Studio 2017
- - Debian 8 using GCC 4.8 (AMD64)
- - Debian 8 using GCC 4.9 (PPC)
+ - Debian 9 using GCC 6.3 (AMD64)
+ - Debian 9 using GCC 6.3 (PPC)
  
 Other platforms should work with no or minimal changes.
 
@@ -32,13 +32,18 @@ git submodule update --init --recursive
 ```
 
 2. Install or build both LibSodium (for example ```apt-get install libsodium-dev```) and LibQrEncode (for example ```apt-get install libqrencode-dev```)
+	Note that openMittsu requires at least LibSodium 1.0.12 or newer.
 3. Run CMake on the main directory. Point CMake to the installation locations of libSodium and LibQrEncode, if required, using `LIBSODIUM_INCLUDE_DIRS`, `LIBSODIUM_LIBRARIES`, `LIBQRENCODE_INCLUDE_DIR` and `LIBQRENCODE_LIBRARY`, respectively.
 4. Once Makefiles or a solution (MSVS) has been successfully generated, start the build process.
 	On Windows, choosing a DEBUG configuration causes the application to show an additional terminal window containinig run-time debug information and logs.
 
 Prerequisites on Debian/Ubuntu: 
 ```
-apt-get install libqt5core5a libqt5gui5 libqt5multimedia5 libqt5multimedia5-plugins libqt5sql5 libqt5sql5-sqlite libqt5widgets5 qt5-qmake qtbase5-dev qtbase5-dev-tools qtmultimedia5-dev libsodium-dev libqrencode-dev git
+apt-get install libqt5core5a libqt5gui5 libqt5multimedia5 libqt5multimedia5-plugins libqt5sql5 libqt5sql5-sqlite libqt5widgets5 qt5-qmake qtbase5-dev qtbase5-dev-tools qtmultimedia5-dev libqrencode-dev git
+```
+To install a more recent version of libsodium, you need to have the backports repository in your APT configuration.
+```
+apt-get -t stretch-backports install libsodium-dev libsodium18
 ```
 
 Prerequisites on openSuse: 

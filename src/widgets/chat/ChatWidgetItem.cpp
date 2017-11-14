@@ -248,6 +248,11 @@ namespace openmittsu {
 			QSizePolicy sizePolicy = label->sizePolicy();
 			sizePolicy.setHorizontalPolicy(QSizePolicy::Expanding);
 			label->setSizePolicy(sizePolicy);
+
+			// Activate RichText parsing
+			label->setTextFormat(Qt::RichText);
+			// Make links accessible
+			label->setTextInteractionFlags(Qt::LinksAccessibleByMouse | Qt::TextSelectableByKeyboard | Qt::TextSelectableByMouse);
 		}
 
 		bool ChatWidgetItem::isMessageFromUs() const {

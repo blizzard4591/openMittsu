@@ -58,16 +58,16 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5Multimedia REQUIRED)
 find_package(Qt5Sql REQUIRED)
-find_package(Libsodium REQUIRED)
+find_package(Libsodium 1.0.12 REQUIRED)
 find_package(Libqrencode REQUIRED)
 
-if (LIBSODIUM_FOUND)
-	message(STATUS "Found LibSodium! ${LIBSODIUM_INCLUDE_DIRS} ${LIBSODIUM_LIBRARIES}")
+if (Libsodium_FOUND)
+	#message(STATUS "Found LibSodium! ${Libsodium_INCLUDE_DIRS} ${Libsodium_LIBRARIES}")
 	# Add LibSodium Includes
-	include_directories(${LIBSODIUM_INCLUDE_DIRS})
+	include_directories(${Libsodium_INCLUDE_DIRS})
 else ()
 	message(SEND_ERROR "Can not build OpenMittsu without LibSodium.")
-endif(LIBSODIUM_FOUND)
+endif(Libsodium_FOUND)
 
 if (Libqrencode_FOUND)
 	message(STATUS "Found LibQREncode with include directory: ${LIBQRENCODE_INCLUDE_DIR}")
@@ -236,8 +236,9 @@ add_subdirectory("${CMAKE_BINARY_DIR}/googletest-src"
  
 
 # Main Sources
-file(GLOB_RECURSE OPENMITTSU_HEADERS ${PROJECT_SOURCE_DIR}/src/*.h)
-file(GLOB_RECURSE OPENMITTSU_SOURCES_CPP ${PROJECT_SOURCE_DIR}/src/*.cpp)
+file(GLOB OPENMITTSU_HEADERS ${PROJECT_SOURCE_DIR}/src/*.h)
+file(GLOB OPENMITTSU_SOURCES_CPP ${PROJECT_SOURCE_DIR}/src/*.cpp)
+message(STATUS "Sources CPP: ${OPENMITTSU_SOURCES_CPP}")
 
 file(GLOB_RECURSE OPENMITTSU_HEADERS_ACKNOWLEDGMENTS ${PROJECT_SOURCE_DIR}/src/acknowledgments/*.h)
 file(GLOB_RECURSE OPENMITTSU_SOURCES_ACKNOWLEDGMENTS ${PROJECT_SOURCE_DIR}/src/acknowledgments/*.cpp)
@@ -408,7 +409,7 @@ if (MSVC)
 endif(MSVC)
 
 # Add target link dependencies
-target_link_libraries(openMittsuCore ${LIBSODIUM_LIBRARIES} gtest)
+target_link_libraries(openMittsuCore ${Libsodium_LIBRARIES} gtest)
 target_link_libraries(openMittsu ${LIBQRENCODE_LIBRARY})
 
 add_dependencies(openMittsuTests gtest)

@@ -225,10 +225,8 @@ namespace openmittsu {
 		}
 
 		void SimpleChatTab::edtInputOnTextEdited() {
-			LOGGER_DEBUG("SimpleChatTab::edtInputOnTextEdited(): Entered.");
 			if (!m_isTyping) {
 				m_isTyping = true;
-				LOGGER_DEBUG("SimpleChatTab::edtInputOnTextEdited(): Sending User typing status.");
 				sendUserTypingStatus(true);
 				m_typingTimer.start(10000);
 			} else {
@@ -241,9 +239,7 @@ namespace openmittsu {
 		}
 
 		void SimpleChatTab::typingTimerOnTimer() {
-			LOGGER_DEBUG("SimpleChatTab::typingTimerOnTimer(): Entered.");
 			if (m_isTyping) {
-				LOGGER_DEBUG("SimpleChatTab::typingTimerOnTimer(): isTyping = true.");
 				m_isTyping = false;
 				sendUserTypingStatus(false);
 				m_typingTimer.stop();

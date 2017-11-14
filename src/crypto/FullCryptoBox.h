@@ -27,7 +27,8 @@ namespace openmittsu {
 
 			virtual ~FullCryptoBox();
 
-			std::pair<Nonce, QByteArray> encrypt(QByteArray const& data, openmittsu::protocol::ContactId const& targetIdentity);
+			using BasicCryptoBox::encrypt;
+			virtual std::pair<Nonce, QByteArray> encrypt(QByteArray const& data, openmittsu::protocol::ContactId const& targetIdentity);
 			QByteArray decrypt(QByteArray const& encryptedData, openmittsu::crypto::Nonce const& nonce, openmittsu::protocol::ContactId const& sourceIdentity);
 
 			QByteArray encryptForServer(QByteArray const& data);
