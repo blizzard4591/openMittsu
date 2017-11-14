@@ -29,11 +29,11 @@ namespace openmittsu {
 		protected:
 			virtual void taskRun() override;
 		private:
-			QString const urlString;
-			QString const agentString;
-			QSet<openmittsu::protocol::ContactId> const identitiesToFetch;
+			QString const m_urlString;
+			QString const m_agentString;
+			QSet<openmittsu::protocol::ContactId> const m_identitiesToFetch;
 
-			QHash<openmittsu::protocol::ContactId, openmittsu::protocol::AccountStatus> fetchedFeatureLevels;
+			QHash<openmittsu::protocol::ContactId, openmittsu::protocol::AccountStatus> m_fetchedFeatureLevels;
 		};
 
 	}

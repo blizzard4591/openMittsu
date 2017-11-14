@@ -21,7 +21,7 @@ namespace openmittsu {
 	namespace tasks {
 
 		SetFeatureLevelCallbackTask::SetFeatureLevelCallbackTask(std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, openmittsu::crypto::BasicCryptoBox const& cryptoBox, openmittsu::protocol::ContactId const& ownId, openmittsu::protocol::FeatureLevel const& featureLevel)
-			: CertificateBasedCallbackTask(serverConfiguration->getApiServerCertificateAsBase64()), m_urlString(serverConfiguration->getApiServerSetFeatureLevelUrl()), m_agentString(serverConfiguration->getApiServerAgent()), CallbackTask(), m_cryptoBox(cryptoBox), m_contactId(ownId), m_featureLevelToSet(featureLevel) {
+			: CertificateBasedCallbackTask(serverConfiguration->getApiServerCertificateAsBase64()), CallbackTask(), m_urlString(serverConfiguration->getApiServerSetFeatureLevelUrl()), m_agentString(serverConfiguration->getApiServerAgent()), m_cryptoBox(cryptoBox), m_contactId(ownId), m_featureLevelToSet(featureLevel) {
 			if (m_urlString.isEmpty() || m_urlString.isNull()) {
 				throw openmittsu::exceptions::IllegalArgumentException() << "No feature level setting URL available from server configuration.";
 			}

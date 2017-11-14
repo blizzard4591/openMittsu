@@ -151,7 +151,7 @@ namespace openmittsu {
 			unsigned long long decrypted_len;
 			if (crypto_aead_xchacha20poly1305_ietf_decrypt(reinterpret_cast<unsigned char*>(decryptedData.data()), &decrypted_len, NULL, reinterpret_cast<unsigned char const*>(encryptedData.data()), encryptedData.size(), NULL, 0, reinterpret_cast<unsigned char const*>(nonce.data()), reinterpret_cast<unsigned char const*>(key.data())) != 0) {
 				throw openmittsu::exceptions::InternalErrorException() << "Could not decrypt blob, data corrupt!";
-			} else if (decrypted_len != (encryptedData.size() - cryptoGetHeaderSize())) {
+			} else if (static_cast<int>(decrypted_len) != (encryptedData.size() - cryptoGetHeaderSize())) {
 				throw openmittsu::exceptions::InternalErrorException() << "Could not decrypt media item blob: Expected size was " << (encryptedData.size() - cryptoGetHeaderSize()) << " Bytes, but we got " << decrypted_len << " Bytes instead!";
 			}
 
@@ -175,7 +175,7 @@ namespace openmittsu {
 			unsigned long long ciphertext_len;
 			if (crypto_aead_xchacha20poly1305_ietf_encrypt(reinterpret_cast<unsigned char*>(encryptedData.data()), &ciphertext_len, reinterpret_cast<unsigned char const*>(unencryptedData.data()), unencryptedData.size(), NULL, 0, NULL, reinterpret_cast<unsigned char const*>(nonce.data()), reinterpret_cast<unsigned char const*>(key.data())) != 0) {
 				throw openmittsu::exceptions::InternalErrorException() << "Could not encrypt blob, data corrupt!";
-			} else if (ciphertext_len != (unencryptedData.size() + cryptoGetHeaderSize())) {
+			} else if (static_cast<int>(ciphertext_len) != (unencryptedData.size() + cryptoGetHeaderSize())) {
 				throw openmittsu::exceptions::InternalErrorException() << "Could not encrypt media item blob: Expected size was " << (unencryptedData.size() + cryptoGetHeaderSize()) << " Bytes, but we got " << ciphertext_len << " Bytes instead!";
 			}
 

@@ -80,12 +80,12 @@ else()
  
 	find_library(SODIUM_LIB
 		NAMES ${LIB_PREFIX}sodium.${LIB_POSTFIX}
-		HINTS ${Libsodium_INCLUDE_DIRS}/../lib ${Libsodium_INCLUDE_DIRS}/../lib64 ${Libsodium_INCLUDE_DIRS}/lib${_lib_suffix} ${Libsodium_INCLUDE_DIRS}/../Build/Release/${_lib_suffix_win} ${Libsodium_INCLUDE_DIRS}/../${_lib_suffix_win}/Release/v141/static ${_SODIUM_LIBRARY_DIRS} /usr/lib /usr/local/lib /opt/local/lib /sw/lib
+		HINTS ${Libsodium_INCLUDE_DIRS}/../lib ${Libsodium_INCLUDE_DIRS}/../lib64 ${Libsodium_INCLUDE_DIRS}/lib${_lib_suffix} ${Libsodium_INCLUDE_DIRS}/../Build/Release/${_lib_suffix_win} ${Libsodium_INCLUDE_DIRS}/../../../Build/Release/${_lib_suffix_win} ${Libsodium_INCLUDE_DIRS}/../${_lib_suffix_win}/Release/v141/static ${_SODIUM_LIBRARY_DIRS} /usr/lib /usr/local/lib /opt/local/lib /sw/lib
 	)
 	
 	find_library(SODIUM_LIB_DEBUG
 		NAMES ${LIB_PREFIX}sodium.${LIB_POSTFIX}
-		HINTS ${Libsodium_INCLUDE_DIRS}/../lib ${Libsodium_INCLUDE_DIRS}/../lib64 ${Libsodium_INCLUDE_DIRS}/lib${_lib_suffix} ${Libsodium_INCLUDE_DIRS}/../Build/Debug/${_lib_suffix_win} ${Libsodium_INCLUDE_DIRS}/../${_lib_suffix_win}/Debug/v141/static ${_SODIUM_LIBRARY_DIRS} /usr/lib /usr/local/lib /opt/local/lib /sw/lib
+		HINTS ${Libsodium_INCLUDE_DIRS}/../lib ${Libsodium_INCLUDE_DIRS}/../lib64 ${Libsodium_INCLUDE_DIRS}/lib${_lib_suffix} ${Libsodium_INCLUDE_DIRS}/../Build/Debug/${_lib_suffix_win} ${Libsodium_INCLUDE_DIRS}/../../../Build/Debug/${_lib_suffix_win} ${Libsodium_INCLUDE_DIRS}/../${_lib_suffix_win}/Debug/v141/static ${_SODIUM_LIBRARY_DIRS} /usr/lib /usr/local/lib /opt/local/lib /sw/lib
 	)
  
 	set(Libsodium_INCLUDE_DIRS ${Libsodium_INCLUDE_DIRS} CACHE PATH "libSodium include dir")

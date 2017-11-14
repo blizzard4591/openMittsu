@@ -24,7 +24,7 @@ option(OPENMITTSU_LINK_LIBCXXABI "Sets whether libc++abi should be linked." OFF)
 option(OPENMITTSU_USE_LIBCXX "Sets whether the standard library is libc++." OFF)
 option(OPENMITTSU_DEBUG "Sets whether debug checks, assertions and logging should be turned on. Has no effect on builds under MSVC besides turning on debug logging level." OFF)
 option(OPENMITTSU_DISABLE_VERSION_UPDATE_CHECK "Disables the version check on start-up. Useful for custom builds or added privacy." OFF)
-SET(OPENMITTSU_CMAKE_SEARCH_PATH "D:/Qt/Qt5.9.1/5.9.1/msvc2017_64" CACHE PATH "Additional Qt5 search path" )
+SET(OPENMITTSU_CMAKE_SEARCH_PATH "D:/Qt/5.9.2/msvc2017_64" CACHE PATH "Additional Qt5 search path" )
 set(OPENMITTSU_CUSTOM_VERSION_STRING "" CACHE STRING "Disables Git version number checking and uses the custom string instead. Should be of the form 0.1.2-34-567890ab, i.e. major.minor.patch-commitsSinceTag-shortHash")
 
 SET(CMAKE_PREFIX_PATH "${OPENMITTSU_CMAKE_SEARCH_PATH}/lib/cmake/")

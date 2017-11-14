@@ -17,7 +17,7 @@
 namespace openmittsu {
 	namespace tasks {
 
-		IdentityReceiverCallbackTask::IdentityReceiverCallbackTask(std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, openmittsu::protocol::ContactId const& identityToFetch) : CertificateBasedCallbackTask(serverConfiguration->getApiServerCertificateAsBase64()), m_urlString(serverConfiguration->getApiServerFetchPublicKeyForIdUrl()), m_agentString(serverConfiguration->getApiServerAgent()), CallbackTask(), m_identityToFetch(identityToFetch) {
+		IdentityReceiverCallbackTask::IdentityReceiverCallbackTask(std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, openmittsu::protocol::ContactId const& identityToFetch) : CertificateBasedCallbackTask(serverConfiguration->getApiServerCertificateAsBase64()), CallbackTask(), m_urlString(serverConfiguration->getApiServerFetchPublicKeyForIdUrl()), m_agentString(serverConfiguration->getApiServerAgent()), m_identityToFetch(identityToFetch) {
 			if (m_urlString.isEmpty() || m_urlString.isNull()) {
 				throw openmittsu::exceptions::IllegalArgumentException() << "No identity download URL available from server configuration.";
 			}
