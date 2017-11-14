@@ -216,9 +216,12 @@ namespace openmittsu {
 			void announceNewMessage(openmittsu::protocol::GroupId const& group, QString const& messageUuid);
 		private:
 			QSqlDatabase database;
-			QString const m_driverName;
+			QString const m_driverNameCrypto;
+			QString const m_driverNameStandard;
 			QString const m_connectionName;
 			QString const m_password;
+
+			bool m_usingCryptoDb;
 
 			openmittsu::protocol::ContactId m_selfContact;
 

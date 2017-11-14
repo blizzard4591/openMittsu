@@ -23,15 +23,29 @@ namespace openmittsu {
 
 		using namespace openmittsu::dataproviders::messages;
 
-Database::Database(QString const& filename, QString const& password, QDir const& mediaStorageLocation) : MessageStorage(), database(), m_driverName("QSQLITE"), m_connectionName("openMittsuDatabaseConnection"), m_password(password), m_selfContact(0), m_contactAndGroupDataProvider(*this), m_mediaFileStorage(mediaStorageLocation, *this) {
-	if (!QSqlDatabase::isDriverAvailable(m_driverName)) {
-		throw openmittsu::exceptions::InternalErrorException() << "Required SQL driver " << m_driverName.toStdString() << " not available. Available are: " << QSqlDatabase::drivers().join(", ").toStdString();
+Database::Database(QString const& filename, QString const& password, QDir const& mediaStorageLocation) : MessageStorage(), database(), m_driverNameCrypto("QSQLCIPHER"), m_driverNameStandard("QSQLITE"), m_connectionName("openMittsuDatabaseConnection"), m_password(password), m_selfContact(0), m_contactAndGroupDataProvider(*this), m_mediaFileStorage(mediaStorageLocation, *this) {
+	if (!(QSqlDatabase::isDriverAvailable(m_driverNameCrypto) || QSqlDatabase::isDriverAvailable(m_driverNameStandard))) {
+		throw openmittsu::exceptions::InternalErrorException() << "Neither the SQL driver " << m_driverNameCrypto.toStdString() << " nor the driver " << m_driverNameStandard.toStdString() << " are available. Available are: " << QSqlDatabase::drivers().join(", ").toStdString();
 	}
 
-	database = QSqlDatabase::addDatabase(m_driverName, m_connectionName);
+	if (QSqlDatabase::isDriverAvailable(m_driverNameCrypto)) {
+		database = QSqlDatabase::addDatabase(m_driverNameCrypto, m_connectionName);
+		m_usingCryptoDb = true;
+	} else {
+		database = QSqlDatabase::addDatabase(m_driverNameStandard, m_connectionName);
+		m_usingCryptoDb = false;
+	}
 	database.setDatabaseName(filename);
 	if (!database.open()) {
 		throw openmittsu::exceptions::InternalErrorException() << "Could not open database file.";
+	} else if (database.isOpenError()) {
+		throw openmittsu::exceptions::InternalErrorException() << "Could not open database file, error: " << database.lastError().text().toStdString();
+	} else if (!database.isOpen()) {
+		throw openmittsu::exceptions::InternalErrorException() << "Could not open database file, open failed.";
+	}
+
+	if (m_usingCryptoDb) {
+		database.exec(QStringLiteral("pragma key='%1'").arg(m_password));
 	}
 
 	QStringList const tables = database.tables(QSql::AllTables);
@@ -51,12 +65,18 @@ Database::Database(QString const& filename, QString const& password, QDir const&
 	setupQueueTimer();
 }
 
-Database::Database(QString const& filename, openmittsu::protocol::ContactId const& selfContact, openmittsu::crypto::KeyPair const& selfLongTermKeyPair, QString const& password, QDir const& mediaStorageLocation) : MessageStorage(), database(), m_driverName("QSQLITE"), m_connectionName("openMittsuDatabaseConnection"), m_password(password), m_selfContact(selfContact), m_contactAndGroupDataProvider(*this), m_mediaFileStorage(mediaStorageLocation, *this) {
-	if (!QSqlDatabase::isDriverAvailable(m_driverName)) {
-		throw openmittsu::exceptions::InternalErrorException() << "Required SQL driver " << m_driverName.toStdString() << " not available. Available are: " << QSqlDatabase::drivers().join(", ").toStdString();
+Database::Database(QString const& filename, openmittsu::protocol::ContactId const& selfContact, openmittsu::crypto::KeyPair const& selfLongTermKeyPair, QString const& password, QDir const& mediaStorageLocation) : MessageStorage(), database(), m_driverNameCrypto("QSQLCIPHER"), m_driverNameStandard("QSQLITE"), m_connectionName("openMittsuDatabaseConnection"), m_password(password), m_selfContact(selfContact), m_contactAndGroupDataProvider(*this), m_mediaFileStorage(mediaStorageLocation, *this) {
+	if (!(QSqlDatabase::isDriverAvailable(m_driverNameCrypto) || QSqlDatabase::isDriverAvailable(m_driverNameStandard))) {
+		throw openmittsu::exceptions::InternalErrorException() << "Neither the SQL driver " << m_driverNameCrypto.toStdString() << " nor the driver " << m_driverNameStandard.toStdString() << " are available. Available are: " << QSqlDatabase::drivers().join(", ").toStdString();
 	}
 
-	database = QSqlDatabase::addDatabase(m_driverName, m_connectionName);
+	if (QSqlDatabase::isDriverAvailable(m_driverNameCrypto)) {
+		database = QSqlDatabase::addDatabase(m_driverNameCrypto, m_connectionName);
+		m_usingCryptoDb = true;
+	} else {
+		database = QSqlDatabase::addDatabase(m_driverNameStandard, m_connectionName);
+		m_usingCryptoDb = false;
+	}
 	database.setDatabaseName(filename);
 	if (!database.open()) {
 		throw openmittsu::exceptions::InternalErrorException() << "Could not open database file.";
@@ -64,6 +84,10 @@ Database::Database(QString const& filename, openmittsu::protocol::ContactId cons
 		throw openmittsu::exceptions::InternalErrorException() << "Could not open database file, error: " << database.lastError().text().toStdString();
 	} else if (!database.isOpen()) {
 		throw openmittsu::exceptions::InternalErrorException() << "Could not open database file, open failed.";
+	}
+
+	if (m_usingCryptoDb) {
+		database.exec(QStringLiteral("pragma key='%1'").arg(m_password));
 	}
 
 	QStringList const tables = database.tables(QSql::AllTables);

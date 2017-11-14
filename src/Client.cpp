@@ -86,6 +86,11 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 	OPENMITTSU_CONNECT(&m_connectionTimer, timeout(), this, connectionTimerOnTimer());
 	OPENMITTSU_CONNECT(m_messageCenter.get(), newUnreadMessageAvailable(openmittsu::widgets::ChatTab*), this, messageCenterOnHasUnreadMessages(openmittsu::widgets::ChatTab*));
 
+	// Check whether QSqlCipher is available
+	if (!QSqlDatabase::isDriverAvailable(QStringLiteral("QSQLCIPHER"))) {
+		QMessageBox::warning(this, tr("Database driver not available"), tr("openMittsu relies on SqlCipher and QSqlCipher for securely storing the database.\nThe QSQLCIPHER driver is not available. It should reside in the sqldrivers\\ subdirectory of openMittsu.\nWe will use the unencrypted SQLITE driver instead."));
+	}
+
 	// Load stored settings
 	this->m_optionMaster = std::make_shared<openmittsu::utility::OptionMaster>();
 	QString const databaseFile = m_optionMaster->getOptionAsQString(openmittsu::utility::OptionMaster::Options::FILEPATH_DATABASE);
