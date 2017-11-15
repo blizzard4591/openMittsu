@@ -201,7 +201,7 @@ namespace openmittsu {
 			if (m_isMessageFromUs) {
 				throw openmittsu::exceptions::InternalErrorException() << "ChatWidgetItem::buildFromLabel() was called on a message originating from us!";
 			} else {
-				return m_contact.getNickname();
+				return m_contact.getName();
 			}
 		}
 

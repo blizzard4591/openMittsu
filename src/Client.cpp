@@ -345,7 +345,12 @@ void Client::contactRegistryOnIdentitiesChanged() {
 			if (contactId == selfIdentity) {
 				continue;
 			}
-			ContactListWidgetItem* clwi = new ContactListWidgetItem(contactId, false, it.value());
+			ContactListWidgetItem* clwi = nullptr;
+			if (it->isNull() || it->isEmpty()) {
+				clwi = new ContactListWidgetItem(contactId, false, contactId.toQString());
+			} else {
+				clwi = new ContactListWidgetItem(contactId, false, *it);
+			}
 			openmittsu::protocol::AccountStatus const status = m_database->getContactAccountStatus(contactId);
 			if (status == openmittsu::protocol::AccountStatus::STATUS_INACTIVE) {
 				clwi->setBackgroundColor(QColor::fromRgb(255, 255, 51));
