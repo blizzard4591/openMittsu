@@ -11,16 +11,44 @@ openMittsu is governed by the GNU GPL v2.0 license, but includes works from diff
  - [Qt 5](https://www.qt.io/)
  - [LibSodium >= 1.0.12](https://download.libsodium.org/doc/)
  - [LibQrEncode](https://fukuchi.org/works/qrencode/) or [LibQrEncode-win32](https://code.google.com/p/qrencode-win32/)
+ - [LibSqlCipher >= 3.4.1](https://github.com/blizzard4591/sqlcipher)
+ - [QSqlCipher](https://github.com/blizzard4591/qt5-sqlcipher)
  
 ## Supported Platforms
 Currently, the application has been built and tested on:
- - Windows 7 using Visual Studio 2015
  - Windows 7 using Visual Studio 2017
  - Windows 10 using Visual Studio 2017
  - Debian 9 using GCC 6.3 (AMD64)
  - Debian 9 using GCC 6.3 (PPC)
  
 Other platforms should work with no or minimal changes.
+
+## Binaries
+Currently we only provide binaries for Windows x64 at https://downloads.openmittsu.de/ - Scroll down to find the latest build. Do not forget to install the Visual Studio Redistributable (vcredist_x64.exe).
+
+## How to use
+The application stores your ID, contacts and messages in a database.
+A new database can be created using the "Load Backup" Wizard available from Database -> Load Backup.
+You can either import an ID backup (containing only your ID and private key, no contacts or messages), or import a full data backup.
+ - ID Backup:
+   1. Export the identity from the Threema App. To do this, in the Threema App-menu, select "My Backups" and then create an ID Backup. 
+   After entering a password, a string of the form "AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA" is displayed.
+   2. In openMittsu, click on Database, Load Backup, ID Backup.
+   3. Enter the generated backup string and the password.
+   4. Enter a secure password for the database. If SqlCipher support is available, the database is encrypted using this password.
+   5. Choose a suitable location (an empty folder) and let the application save the generated database there.
+ - Data Backup:
+	1. Export the data from the Threema App. To do this, in the Threema App-menu, select "My Backups" and then create a Data Backup. 
+	After entering a password and waiting for the backup to complete, transfer the backup to your computer.
+	Now, extract the backup (a .zip file) to a secure folder (in your home directory for example) using the chosen backup password. 7zip or WinRAR can do this on Windows.
+	2. In openMittsu, click on Database, Load Backup, Data Backup.
+	3. Point openMittsu to where you extracted the backup and enter the chosen backup password.
+	4. Enter a secure password for the database. If SqlCipher support is available, the database is encrypted using this password.
+	5. Choose a suitable location (an empty folder) and let the application save the generated database there.
+
+Load the created database from the central GUI and point the file dialog to the directory where you chose to store the database.
+After entering the password, the file should be displayed as loaded and active and contacts etc. should appear, if there are any.
+Click Connect to connect to the Threema servers and chat!
 
 ## How to build
 1. Clone this repository or extract the sources from the archive.
@@ -36,12 +64,27 @@ git submodule update --init --recursive
 3. Run CMake on the main directory. Point CMake to the installation locations of libSodium and LibQrEncode, if required, using `LIBSODIUM_INCLUDE_DIRS`, `LIBSODIUM_LIBRARIES`, `LIBQRENCODE_INCLUDE_DIR` and `LIBQRENCODE_LIBRARY`, respectively.
 4. Once Makefiles or a solution (MSVS) has been successfully generated, start the build process.
 	On Windows, choosing a DEBUG configuration causes the application to show an additional terminal window containinig run-time debug information and logs.
-
+5. Adding support for encrypted databases using SqlCipher: This is where it gets messy. You need the Qt5 private development headers (```apt-get install qtbase5-dev qtbase5-private-dev```) and libsqlcipher (```apt-get install libsqlcipher0 libsqlcipher-dev```).
+	You need to make sure that you are using the latest version of libsqlcipher (at this time 3.4.1) - if not, you will get SEGMENTATION FAULTS. Debian Stretch currently still ships version 3.2.0, which is TOO OLD! This version still links against OpenSSL 1.0.x, which is incompatible with the version of OpenSSL linked by Qt.
+	A (patched) version of libsqlcipher which also builds under Windows (build using ```nmake -f Makefile.msc```, adapt paths in Makefile.msc to Windows SDK on variable TCC and RCC, adapt paths to OpenSSL binaries (use non-light installers from https://slproweb.com/products/Win32OpenSSL.html) at all locations referencing OpenSSL) is available from https://github.com/blizzard4591/sqlcipher.
+	Now you need to build the wrapper between SqlCipher and Qt, which is available from https://github.com/blizzard4591/qt5-sqlcipher.
+	Clone the repository (```git clone https://github.com/blizzard4591/qt5-sqlcipher.git```), configure with cmake (create build/ directory in the cloned folder, execute ```cmake ..```). 
+	If you are using Windows, you first need to change two entries in CMakeLists.txt:
+		There are two lines marked with ```# Change this by hand if needed```, right below the variables SQLCIPHER_INCLUDE_DIRS and SQLCIPHER_LIBRARIES are defined. 
+		Update the paths to point to your checkout of sqlcipher (INCLUDE_DIRS) and to your sqlite3.lib file created by nmake:
+		```
+			set(SQLCIPHER_INCLUDE_DIRS "C:/somePath/sqlcipher")
+			set(SQLCIPHER_LIBRARIES "C:/somePath/sqlcipher/sqlite3.lib")
+		```
+	Now build QSqlCipher. If everything went well there should be a library in sqldrivers/.
+	You can run ```qsqlcipher-test``` to see if your version of SqlCipher produces Segfaults or not - if you do not get past Test 5.2, update your installed version of libsqlcipher.
+	The library created here (and sqlite3.dll in the case of Windows) need to be in openMittsus main directory (the QSqlCipher module MUST be in a subfolder named "sqldrivers"!).
+	
 Prerequisites on Debian/Ubuntu: 
 ```
 apt-get install libqt5core5a libqt5gui5 libqt5multimedia5 libqt5multimedia5-plugins libqt5sql5 libqt5sql5-sqlite libqt5widgets5 qt5-qmake qtbase5-dev qtbase5-dev-tools qtmultimedia5-dev libqrencode-dev git
 ```
-To install a more recent version of libsodium, you need to have the backports repository in your APT configuration.
+To install a more recent version of libsodium (at least 1.0.12), you need to have the backports repository in your APT configuration.
 ```
 apt-get -t stretch-backports install libsodium-dev libsodium18
 ```
@@ -54,9 +97,10 @@ sudo zypper install libqt5-qtbase-devel libqt5-qtmultimedia-devel libsodium-deve
 ### Detailed steps - Linux
 
 Adjust the paths to your system. The ones below are a current Qt version installed on OSX via brew.
+Look above for hints on how to add SqlCipher (encrypted database storage) support!
 ```bash
 cd my-projects/ # or wherever you want to clone this
-git checkout https://github.com/blizzard4591/openMittsu.git
+git clone https://github.com/blizzard4591/openMittsu.git
 cd openMittsu
 mkdir build
 cd build
@@ -101,37 +145,7 @@ make # optionally add -j 4 for multi-threaded compilation with 4 threads
 	Click `Configure` again, and no more errors should appear - otherwise fill an issue.
 	Click `Generate` and open the generated solution file in the build directory.
 	You can now build either a Debug or a Release build of openMittsu by using the standard Visual Studio target selection.
-	
-## How to use
-The application requires two input files.
- - The contact database. This is a simple text file of the format:
-```
-# This is a comment line.
-# Format of this file: 
-# IDENTITY : PUBKEY : Nickname
-# where 
-# - IDENTITY is an eight character ID of the form [A-Z0-9]{8} and stands for a users public id,
-# - PUBKEY is an 64 character key of the form [a-fA-F0-9]{64} and stands for a users 32-Byte long-term public key,
-# - Nickname is an optional screen-name for the given identity.
-# You can also find IDENTITY and PUBKEY of your contacts in the contacts.csv of a Threema data backup.
-
-ABCD1234 : aabbccddeeff00112233445566778899aabbccddeeff00112233445566778899 : Mr. Smith
-
-# GROUPID : GROUPOWNER_IDENTITY : IDENTITY, IDENTITY, IDENTITY : Group Name
-# where 
-# - IDENTITY is an eight character ID of the form [A-Z0-9]{8} and stands for a users public id,
-# - GROUPID is an 16 character key of the form [a-fA-F0-9]{16} and stands for a groups unique identifier,
-# - GROUPOWNER_IDENTITY is an eight character ID of the form [A-Z0-9]{8} and stands for the group owners public id,
-# - Group Name is the displayed title of the group.
-# You can also find IDENTITY, GROUPID and GROUPOWNER_IDENTITY in the groups.csv of a Threema data backup.
-```
- - The client configuration, containing the ID and private key used by this client.
- It can easily be generated using the application.
-   1. Export the identity from the Threema App. To do this, in the Threema App-menu, select "My Backups" and then create an ID Backup. 
-   After entering a password, a string of the form "AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA" is displayed.
-   2. In openMittsu, click on Identity, Load Backup.
-   3. Enter the generated backup string and the password.
-   4. Choose a suitable location and let the application save the generated client configuration there.
+7. Look above for hints on how to add SqlCipher (encrypted database storage) support!	
 
 ## FAQ
 ### What is openMittsu?
