@@ -259,6 +259,7 @@ namespace openmittsu {
 			QString insertMediaItem(QByteArray const& data);
 			void removeMediaItem(QString const& uuid);
 			void setupQueueTimer();
+			void setKey(QString const& password);
 		private slots:
 			void onQueueTimeoutTimerFire();
 		};

@@ -46,9 +46,7 @@ Database::Database(QString const& filename, QString const& password, QDir const&
 		throw openmittsu::exceptions::InternalErrorException() << "Could not open database file, open failed.";
 	}
 
-	if (m_usingCryptoDb) {
-		database.exec(QStringLiteral("pragma key='%1'").arg(m_password));
-	}
+	setKey(m_password);
 
 	QStringList const tables = database.tables(QSql::AllTables);
 	if (!tables.contains(QStringLiteral("sqlite_master"))) {
@@ -90,9 +88,7 @@ Database::Database(QString const& filename, openmittsu::protocol::ContactId cons
 		throw openmittsu::exceptions::InternalErrorException() << "Could not open database file, open failed.";
 	}
 
-	if (m_usingCryptoDb) {
-		database.exec(QStringLiteral("pragma key='%1'").arg(m_password));
-	}
+	setKey(m_password);
 
 	QStringList const tables = database.tables(QSql::AllTables);
 	if (!tables.contains(QStringLiteral("sqlite_master"))) {
@@ -119,6 +115,17 @@ Database::~Database() {
 	if (database.isOpen()) {
 		database.close();
 		database.removeDatabase(m_connectionName);
+	}
+}
+
+void Database::setKey(QString const& password) {
+	if (m_usingCryptoDb) {
+		QSqlQuery query(database);
+		query.prepare(QStringLiteral("PRAGMA key = '%1';").arg(password));
+		query.exec();
+
+		LOGGER_DEBUG("Key returned {} entries (should be -1). Last Error: {}", query.size(), query.lastError().text().toStdString());
+		query.finish();
 	}
 }
 
