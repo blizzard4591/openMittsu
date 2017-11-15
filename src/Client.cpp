@@ -262,11 +262,11 @@ void Client::btnConnectOnClick() {
 			return;
 		}
 
-		setupProtocolClient();
-		m_messageCenter->setStorage(m_database);
-
 		m_ui.btnConnect->setEnabled(false);
 		m_ui.btnConnect->setText(tr("Connecting..."));
+
+		setupProtocolClient();
+		m_messageCenter->setStorage(m_database);
 		QTimer::singleShot(0, m_protocolClient.get(), SLOT(connectToServer()));
 	} else if (m_connectionState == ConnectionState::STATE_CONNECTING) {
 		// No click should be possible in this state
