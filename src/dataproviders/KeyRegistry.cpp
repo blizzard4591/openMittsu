@@ -11,7 +11,7 @@
 namespace openmittsu {
 	namespace dataproviders {
 
-		KeyRegistry::KeyRegistry() : QObject(), m_mutex(), m_isCacheValid(false), m_cachedSelfContactId(0) {
+		KeyRegistry::KeyRegistry() : QObject(), m_mutex(), m_isCacheValid(false), m_cachedSelfContactId(0), m_serverLongTermPublicKey(), m_database() {
 			throw;
 		}
 

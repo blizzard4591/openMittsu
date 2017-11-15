@@ -29,9 +29,11 @@ Database::Database(QString const& filename, QString const& password, QDir const&
 	}
 
 	if (QSqlDatabase::isDriverAvailable(m_driverNameCrypto)) {
+		LOGGER()->info("Using the crypto-database interface (QSQLCIPHER).");
 		database = QSqlDatabase::addDatabase(m_driverNameCrypto, m_connectionName);
 		m_usingCryptoDb = true;
 	} else {
+		LOGGER()->info("Using the non-crypto-database interface (QSQLITE).");
 		database = QSqlDatabase::addDatabase(m_driverNameStandard, m_connectionName);
 		m_usingCryptoDb = false;
 	}
@@ -71,9 +73,11 @@ Database::Database(QString const& filename, openmittsu::protocol::ContactId cons
 	}
 
 	if (QSqlDatabase::isDriverAvailable(m_driverNameCrypto)) {
+		LOGGER()->info("Using the crypto-database interface (QSQLCIPHER).");
 		database = QSqlDatabase::addDatabase(m_driverNameCrypto, m_connectionName);
 		m_usingCryptoDb = true;
 	} else {
+		LOGGER()->info("Using the non-crypto-database interface (QSQLITE).");
 		database = QSqlDatabase::addDatabase(m_driverNameStandard, m_connectionName);
 		m_usingCryptoDb = false;
 	}
