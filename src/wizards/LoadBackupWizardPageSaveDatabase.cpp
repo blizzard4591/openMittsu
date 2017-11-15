@@ -56,7 +56,7 @@ namespace openmittsu {
 #if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 9, 0))
 				if (!folder.exists() || !folder.isEmpty()) {
 #else
-				if (!folder.exists() || folder.count() > 0) {
+				if (!folder.exists() || folder.entryList(QDir::NoDotAndDotDot).size() > 0) {
 #endif
 					m_ui->edtSaveDatabaseLocation->setText("");
 					QMessageBox::warning(this, tr("Invalid database storage location"), tr("Please select an existing and empty folder!"));
