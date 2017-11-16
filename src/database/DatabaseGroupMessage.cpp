@@ -251,22 +251,25 @@ namespace openmittsu {
 		}
 
 		QString DatabaseGroupMessage::getContentAsText() const {
-			if (getMessageType() != GroupMessageType::TEXT) {
-				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as text because it has a different type!";
+			GroupMessageType const messageType = getMessageType();
+			if ((messageType != GroupMessageType::TEXT) && (messageType != GroupMessageType::SET_IMAGE) && (messageType != GroupMessageType::SET_TITLE) && (messageType != GroupMessageType::GROUP_CREATION) && (messageType != GroupMessageType::LEAVE)) {
+				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as text because it has type " << GroupMessageTypeHelper::toString(messageType) << "!";
 			}
 			return queryField(QStringLiteral("body")).toString();
 		}
 
 		openmittsu::utility::Location DatabaseGroupMessage::getContentAsLocation() const {
-			if (getMessageType() != GroupMessageType::LOCATION) {
-				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as location because it has a different type!";
+			GroupMessageType const messageType = getMessageType();
+			if (messageType != GroupMessageType::LOCATION) {
+				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as location because it has type " << GroupMessageTypeHelper::toString(messageType) << "!";
 			}
 			return openmittsu::utility::Location::fromDatabaseString(queryField(QStringLiteral("body")).toString());
 		}
 
 		QByteArray DatabaseGroupMessage::getContentAsImage() const {
-			if (getMessageType() != GroupMessageType::IMAGE) {
-				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as image because it has a different type!";
+			GroupMessageType const messageType = getMessageType();
+			if (messageType != GroupMessageType::IMAGE) {
+				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as image because it has type " << GroupMessageTypeHelper::toString(messageType) << "!";
 			}
 			return getMediaItem(getUid());
 		}

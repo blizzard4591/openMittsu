@@ -244,22 +244,25 @@ namespace openmittsu {
 		}
 
 		QString DatabaseContactMessage::getContentAsText() const {
-			if (getMessageType() != ContactMessageType::TEXT) {
-				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as text because it has a different type!";
+			ContactMessageType const messageType = getMessageType();
+			if (messageType != ContactMessageType::TEXT) {
+				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as text because it has type " << ContactMessageTypeHelper::toString(messageType) << "!";
 			}
 			return queryField(QStringLiteral("body")).toString();
 		}
 
 		openmittsu::utility::Location DatabaseContactMessage::getContentAsLocation() const {
-			if (getMessageType() != ContactMessageType::LOCATION) {
-				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as location because it has a different type!";
+			ContactMessageType const messageType = getMessageType();
+			if (messageType != ContactMessageType::LOCATION) {
+				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as location because it has type " << ContactMessageTypeHelper::toString(messageType) << "!";
 			}
 			return openmittsu::utility::Location::fromDatabaseString(queryField(QStringLiteral("body")).toString());
 		}
 
 		QByteArray DatabaseContactMessage::getContentAsImage() const {
-			if (getMessageType() != ContactMessageType::IMAGE) {
-				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as image because it has a different type!";
+			ContactMessageType const messageType = getMessageType();
+			if (messageType != ContactMessageType::IMAGE) {
+				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as image because it has type " << ContactMessageTypeHelper::toString(messageType) << "!";
 			}
 			return getMediaItem(getUid());
 		}
