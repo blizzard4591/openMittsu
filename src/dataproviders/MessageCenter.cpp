@@ -436,9 +436,10 @@ namespace openmittsu {
 
 		void MessageCenter::setNetworkSentMessageAcceptor(std::shared_ptr<NetworkSentMessageAcceptor> const& newNetworkSentMessageAcceptor) {
 			this->m_networkSentMessageAcceptor = newNetworkSentMessageAcceptor;
-			OPENMITTSU_CONNECT(m_networkSentMessageAcceptor.get(), readyToAcceptMessages(), this, tryResendingMessagesToNetwork());
-
-			tryResendingMessagesToNetwork();
+			if (m_networkSentMessageAcceptor) {
+				OPENMITTSU_CONNECT(m_networkSentMessageAcceptor.get(), readyToAcceptMessages(), this, tryResendingMessagesToNetwork());
+				tryResendingMessagesToNetwork();
+			}
 		}
 
 		void MessageCenter::tryResendingMessagesToNetwork() {
