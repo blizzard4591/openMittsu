@@ -409,7 +409,7 @@ namespace openmittsu {
 			openmittsu::protocol::ContactId const& receiver = message.getMessageHeader().getReceiver();
 			openmittsu::protocol::ContactId const& sender = message.getMessageHeader().getSender();
 
-			if (!(receiver == m_ourContactId)) {
+			if (receiver != m_ourContactId) {
 				LOGGER()->critical("Received an incoming text message packet, but we are not the receiver.\nIt was intended for {} from sender {}.", receiver.toString(), sender.toString());
 			} else {
 				if (needToWaitForMissingIdentity(sender, &message)) {
@@ -503,14 +503,14 @@ namespace openmittsu {
 
 		bool ProtocolClient::needToWaitForMissingIdentity(openmittsu::protocol::ContactId const& contactId, openmittsu::messages::MessageWithEncryptedPayload const*const messageWithEncryptedPayload) {
 			if (missingIdentityProcessors.contains(contactId)) {
-				LOGGER_DEBUG("Enqueing message on existing MissingIdentityProcessor for ID {}.", contactId.toString());
+				LOGGER()->info("Enqueing incoming message on existing MissingIdentityProcessor for ID {}.", contactId.toString());
 				missingIdentityProcessors.constFind(contactId).value()->enqueueMessage(*messageWithEncryptedPayload);
 				return true;
 			} else if ((!m_cryptoBox->getKeyRegistry().hasIdentity(contactId))) {
 				std::shared_ptr<MissingIdentityProcessor> missingIdentityProcessor = std::make_shared<MissingIdentityProcessor>(contactId);
 				missingIdentityProcessor->enqueueMessage(*messageWithEncryptedPayload);
 				missingIdentityProcessors.insert(contactId, missingIdentityProcessor);
-				LOGGER_DEBUG("Enqueing MissingIdentityProcessor for ID {}.", contactId.toString());
+				LOGGER()->info("Enqueing MissingIdentityProcessor for ID {}.", contactId.toString());
 
 				openmittsu::tasks::CallbackTask* callbackTask = new openmittsu::tasks::IdentityReceiverCallbackTask(m_serverConfiguration, contactId);
 
@@ -575,8 +575,8 @@ namespace openmittsu {
 
 		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupCreationMessageContent const> groupCreationMessageContent, openmittsu::messages::MessageWithEncryptedPayload const*const messageWithEncryptedPayload) {
 			QSet<openmittsu::protocol::ContactId> const groupMembers = groupCreationMessageContent->getGroupMembers();
-			QSet<openmittsu::protocol::ContactId>::const_iterator it = groupMembers.constBegin();
-			QSet<openmittsu::protocol::ContactId>::const_iterator end = groupMembers.constEnd();
+			auto it = groupMembers.constBegin();
+			auto const end = groupMembers.constEnd();
 
 			QSet<openmittsu::protocol::ContactId> missingIds;
 			for (; it != end; ++it) {
@@ -602,10 +602,10 @@ namespace openmittsu {
 				std::shared_ptr<MissingIdentityProcessor> missingIdentityProcessor = std::make_shared<MissingIdentityProcessor>(groupCreationMessageContent->getGroupId(), missingIds);
 				missingIdentityProcessor->enqueueMessage(*messageWithEncryptedPayload);
 				groupsWithMissingIdentities.insert(groupCreationMessageContent->getGroupId(), missingIdentityProcessor);
-				QSet<openmittsu::protocol::ContactId>::const_iterator itMissing = missingIds.constBegin();
-				QSet<openmittsu::protocol::ContactId>::const_iterator endMissing = missingIds.constEnd();
+				auto itMissing = missingIds.constBegin();
+				auto const endMissing = missingIds.constEnd();
 				for (; itMissing != endMissing; ++itMissing) {
-					LOGGER_DEBUG("Enqueing MissingIdentityProcessor for group member with ID {}.", itMissing->toString());
+					LOGGER()->info("Enqueing MissingIdentityProcessor for group member with ID {}.", itMissing->toString());
 					missingIdentityProcessors.insert(*itMissing, missingIdentityProcessor);
 
 					openmittsu::tasks::CallbackTask* callbackTask = new openmittsu::tasks::IdentityReceiverCallbackTask(m_serverConfiguration, *itMissing);
