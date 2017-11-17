@@ -134,6 +134,7 @@ namespace openmittsu {
 			// Connection Keep-Alive
 			std::unique_ptr<QTimer> keepAliveTimer;
 			uint32_t keepAliveCounter;
+			quint64 failedReconnectAttempts;
 
 			// Statistics
 			quint64 messagesReceived;

@@ -47,7 +47,7 @@ namespace openmittsu {
 
 		ProtocolClient::ProtocolClient(std::shared_ptr<openmittsu::crypto::FullCryptoBox> cryptoBox, openmittsu::protocol::ContactId const& ourContactId, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster, std::shared_ptr<openmittsu::network::MessageCenterWrapper> const& messageCenterWrapper, openmittsu::protocol::PushFromId const& pushFromId)
 			: QObject(nullptr), m_cryptoBox(std::move(cryptoBox)), m_messageCenterWrapper(messageCenterWrapper), m_pushFromIdPtr(std::make_unique<openmittsu::protocol::PushFromId>(pushFromId)),
-			m_isSetupDone(false), m_isNetworkSessionReady(false), m_isConnected(false), m_isAllowedToSend(false), m_isDisconnecting(false), m_socket(nullptr), m_networkSession(nullptr), m_ourContactId(ourContactId), m_serverConfiguration(serverConfiguration), m_optionMaster(optionMaster), outgoingMessagesTimer(nullptr), acknowledgmentWaitingTimer(nullptr), keepAliveTimer(nullptr), keepAliveCounter(0) {
+			m_isSetupDone(false), m_isNetworkSessionReady(false), m_isConnected(false), m_isAllowedToSend(false), m_isDisconnecting(false), m_socket(nullptr), m_networkSession(nullptr), m_ourContactId(ourContactId), m_serverConfiguration(serverConfiguration), m_optionMaster(optionMaster), outgoingMessagesTimer(nullptr), acknowledgmentWaitingTimer(nullptr), keepAliveTimer(nullptr), keepAliveCounter(0), failedReconnectAttempts(0) {
 			// Intentionally left empty.
 		}
 
@@ -99,10 +99,12 @@ namespace openmittsu {
 			keepAliveTimer->stop();
 			outgoingMessagesTimer->stop();
 
-			if (!m_isDisconnecting && m_optionMaster->getOptionAsBool(openmittsu::utility::OptionMaster::Options::BOOLEAN_RECONNECT_ON_CONNECTION_LOSS)) {
+			if (!m_isDisconnecting && (failedReconnectAttempts < 3) && m_optionMaster->getOptionAsBool(openmittsu::utility::OptionMaster::Options::BOOLEAN_RECONNECT_ON_CONNECTION_LOSS)) {
 				LOGGER()->info("Trying to reconnect...");
 				connectToServer();
 				return;
+			} else if (failedReconnectAttempts >= 3) {
+				failedReconnectAttempts = 0;
 			}
 
 			if (emitSignal) {
@@ -953,6 +955,7 @@ namespace openmittsu {
 
 			if (m_socket->write(m_cryptoBox->getClientShortTermKeyPair().getPublicKey()) != openmittsu::crypto::Key::getPublicKeyLength()) {
 				LOGGER()->critical("Could not write the short term public key to server.");
+				++failedReconnectAttempts;
 				emit connectToFinished(-5, "Could not write the short term public key to server.");
 				return;
 			}
@@ -960,6 +963,7 @@ namespace openmittsu {
 			QByteArray const clientNoncePrefix(m_cryptoBox->getClientNonceGenerator().getNoncePrefix());
 			if (m_socket->write(clientNoncePrefix) != clientNoncePrefix.size()) {
 				LOGGER()->critical("Could not write the client nonce prefix to server.");
+				++failedReconnectAttempts;
 				emit connectToFinished(-6, "Could not write the client nonce prefix to server.");
 				return;
 			}
@@ -971,6 +975,7 @@ namespace openmittsu {
 			// Wait for server answer
 			if (!waitForData(PROTO_SERVERHELLO_LENGTH_BYTES)) {
 				LOGGER()->critical("Got no reply from server, there are {} of {} bytes available.", m_socket->bytesAvailable(), PROTO_SERVERHELLO_LENGTH_BYTES);
+				++failedReconnectAttempts;
 				emit connectToFinished(-7, "Server did not reply after Client Hello (incorrect IP or port?).");
 				return;
 			}
@@ -979,6 +984,7 @@ namespace openmittsu {
 			QByteArray const serverHello = m_socket->read(PROTO_SERVERHELLO_LENGTH_BYTES);
 			if (serverHello.size() != (PROTO_SERVERHELLO_LENGTH_BYTES)) {
 				LOGGER()->critical("Could not read enough data from server, even though it should be available.");
+				++failedReconnectAttempts;
 				emit connectToFinished(-8, "Could not read enough data from server, even though it should be available.");
 				return;
 			}
@@ -994,6 +1000,7 @@ namespace openmittsu {
 
 			if (m_cryptoBox->getClientNonceGenerator().getNoncePrefix() != clientNoncePrefixCopy) {
 				LOGGER()->critical("The Server returned a different client nonce prefix: {} vs. {}", QString(m_cryptoBox->getClientNonceGenerator().getNoncePrefix().toHex()).toStdString(), QString(clientNoncePrefixCopy.toHex()).toStdString());
+				++failedReconnectAttempts;
 				emit connectToFinished(-10, "The Server returned a different client nonce prefix");
 				return;
 			}
@@ -1007,6 +1014,7 @@ namespace openmittsu {
 			// Write authentication package to server
 			if (m_socket->write(authenticationPackageEncrypted) != (crypto_box_MACBYTES + PROTO_AUTHENTICATION_UNENCRYPTED_LENGTH_BYTES)) {
 				LOGGER()->critical("Could not write the authentication package to server.");
+				++failedReconnectAttempts;
 				emit connectToFinished(-16, "Could not write the authentication package to server.");
 				return;
 			}
@@ -1014,6 +1022,7 @@ namespace openmittsu {
 
 			if (!waitForData(PROTO_AUTHENTICATION_REPLY_LENGTH_BYTES)) {
 				LOGGER()->critical("Got no reply from server for AuthAck, we have {} of {} bytes available.", m_socket->bytesAvailable(), PROTO_AUTHENTICATION_REPLY_LENGTH_BYTES);
+				++failedReconnectAttempts;
 				emit connectToFinished(-17, "Server did not reply after sending client authentication (invalid identity?).");
 				return;
 			}
@@ -1023,6 +1032,7 @@ namespace openmittsu {
 			QByteArray authenticationAcknowledgment = m_socket->read(PROTO_AUTHENTICATION_REPLY_LENGTH_BYTES);
 			if (authenticationAcknowledgment.size() != (PROTO_AUTHENTICATION_REPLY_LENGTH_BYTES)) {
 				LOGGER()->critical("Could not read authentication acknowledgment data from Server, even though it should be available.");
+				++failedReconnectAttempts;
 				emit connectToFinished(-18, "Could not read authentication acknowledgment data from Server, even though it should be available.");
 				return;
 			}
@@ -1031,7 +1041,7 @@ namespace openmittsu {
 			QByteArray authenticationAcknowledgmentDecrypted = m_cryptoBox->decryptFromServer(authenticationAcknowledgment);
 
 			LOGGER_DEBUG("Handshake finished!");
-			emit connectToFinished(0, "Success");
+			failedReconnectAttempts = 0;
 			connectionStart = QDateTime::currentDateTime();
 			m_isConnected = true;
 			m_isAllowedToSend = false;
@@ -1042,6 +1052,8 @@ namespace openmittsu {
 				LOGGER_DEBUG("Socket has {} Bytes available after handshake.", m_socket->bytesAvailable());
 				QTimer::singleShot(0, this, SLOT(socketOnReadyRead()));
 			}
+
+			emit connectToFinished(0, "Success");
 		}
 
 		QDateTime const& ProtocolClient::getConnectedSince() const {
