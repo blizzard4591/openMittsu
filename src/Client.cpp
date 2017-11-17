@@ -193,12 +193,20 @@ void Client::closeEvent(QCloseEvent* event) {
 
 void Client::setupProtocolClient() {
 	if (m_protocolClient != nullptr) {
+		OPENMITTSU_DISCONNECT(m_protocolClient.get(), connectToFinished(int, QString), this, protocolClientOnConnectToFinished(int, QString));
+		OPENMITTSU_DISCONNECT(m_protocolClient.get(), readyConnect(), this, protocolClientOnReadyConnect());
+		OPENMITTSU_DISCONNECT(m_protocolClient.get(), lostConnection(), this, protocolClientOnLostConnection());
+		OPENMITTSU_DISCONNECT(m_protocolClient.get(), duplicateIdUsageDetected(), this, protocolClientOnDuplicateIdUsageDetected());
+
 		this->m_messageCenter->setNetworkSentMessageAcceptor(nullptr);
 		if (m_protocolClient->getIsConnected()) {
 			m_protocolClient->disconnectFromServer();
 		}
+
+		QEventLoop eventLoop;
+		OPENMITTSU_CONNECT(m_protocolClient.get(), teardownComplete(), &eventLoop, quit());
 		QMetaObject::invokeMethod(m_protocolClient.get(), "teardown", Qt::QueuedConnection);
-		m_protocolClient->deleteLater();
+
 		m_protocolClient.reset();
 	}
 

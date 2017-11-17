@@ -104,6 +104,8 @@ namespace openmittsu {
 			void resendGroupSetup(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& recipients);
 
 			void databaseOnMessageChanged(QString const& uuid);
+			void databaseOnContactHasNewMessage(openmittsu::protocol::ContactId const& identity, QString const& messageUuid);
+			void databaseOnGroupHasNewMessage(openmittsu::protocol::GroupId const& group, QString const& messageUuid);
 			void tryResendingMessagesToNetwork();
 		private:
 			MessageCenter(const MessageCenter &); // hide copy constructor

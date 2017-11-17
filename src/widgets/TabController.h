@@ -14,6 +14,8 @@ namespace openmittsu {
 	}
 
 	namespace widgets {
+		class ChatTab;
+
 		class TabController : public QObject {
 			Q_OBJECT
 		public:
@@ -22,8 +24,8 @@ namespace openmittsu {
 			virtual bool hasTab(openmittsu::protocol::ContactId const& contact) const = 0;
 			virtual bool hasTab(openmittsu::protocol::GroupId const& group) const = 0;
 
-			virtual QWidget* getTab(openmittsu::protocol::ContactId const& contact) const = 0;
-			virtual QWidget* getTab(openmittsu::protocol::GroupId const& group) const = 0;
+			virtual ChatTab* getTab(openmittsu::protocol::ContactId const& contact) const = 0;
+			virtual ChatTab* getTab(openmittsu::protocol::GroupId const& group) const = 0;
 
 			virtual void openTab(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::BackedContact const& backedContact) = 0;
 			virtual void openTab(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::BackedGroup const& backedGroup) = 0;

@@ -32,6 +32,24 @@ namespace openmittsu {
 			emit messageChanged(uuid);
 		}
 
+		void MessageCenter::databaseOnContactHasNewMessage(openmittsu::protocol::ContactId const& identity, QString const&) {
+			if (m_tabController) {
+				if (m_tabController->hasTab(identity)) {
+					openmittsu::widgets::ChatTab* const chatTab = m_tabController->getTab(identity);
+					emit newUnreadMessageAvailable(chatTab);
+				}
+			}
+		}
+		
+		void MessageCenter::databaseOnGroupHasNewMessage(openmittsu::protocol::GroupId const& group, QString const&) {
+			if (m_tabController) {
+				if (m_tabController->hasTab(group)) {
+					openmittsu::widgets::ChatTab* const chatTab = m_tabController->getTab(group);
+					emit newUnreadMessageAvailable(chatTab);
+				}
+			}
+		}
+
 		bool MessageCenter::sendText(openmittsu::protocol::ContactId const& receiver, QString const& text) {
 			if (this->m_storage == nullptr) {
 				return false;
@@ -436,9 +454,10 @@ namespace openmittsu {
 
 		void MessageCenter::setNetworkSentMessageAcceptor(std::shared_ptr<NetworkSentMessageAcceptor> const& newNetworkSentMessageAcceptor) {
 			this->m_networkSentMessageAcceptor = newNetworkSentMessageAcceptor;
-			OPENMITTSU_CONNECT(m_networkSentMessageAcceptor.get(), readyToAcceptMessages(), this, tryResendingMessagesToNetwork());
-
-			tryResendingMessagesToNetwork();
+			if (m_networkSentMessageAcceptor) {
+				OPENMITTSU_CONNECT(m_networkSentMessageAcceptor.get(), readyToAcceptMessages(), this, tryResendingMessagesToNetwork());
+				tryResendingMessagesToNetwork();
+			}
 		}
 
 		void MessageCenter::tryResendingMessagesToNetwork() {
@@ -452,11 +471,15 @@ namespace openmittsu {
 			if (m_storage != nullptr) {
 				OPENMITTSU_DISCONNECT(dynamic_cast<QObject*>(m_storage.get()), messageChanged(QString const&), this, databaseOnMessageChanged(QString const&));
 				OPENMITTSU_DISCONNECT(dynamic_cast<QObject*>(m_storage.get()), haveQueuedMessages(), this, tryResendingMessagesToNetwork());
+				OPENMITTSU_DISCONNECT(dynamic_cast<QObject*>(newStorage.get()), contactHasNewMessage(openmittsu::protocol::ContactId const&, QString const&), this, databaseOnContactHasNewMessage(openmittsu::protocol::ContactId const&, QString const&));
+				OPENMITTSU_DISCONNECT(dynamic_cast<QObject*>(newStorage.get()), groupHasNewMessage(openmittsu::protocol::GroupId const&, QString const&), this, databaseOnGroupHasNewMessage(openmittsu::protocol::GroupId const&, QString const&));
 			}
 
 			this->m_storage = newStorage;
 			OPENMITTSU_CONNECT(dynamic_cast<QObject*>(newStorage.get()), messageChanged(QString const&), this, databaseOnMessageChanged(QString const&));
 			OPENMITTSU_CONNECT(dynamic_cast<QObject*>(newStorage.get()), haveQueuedMessages(), this, tryResendingMessagesToNetwork());
+			OPENMITTSU_CONNECT(dynamic_cast<QObject*>(newStorage.get()), contactHasNewMessage(openmittsu::protocol::ContactId const&, QString const&), this, databaseOnContactHasNewMessage(openmittsu::protocol::ContactId const&, QString const&));
+			OPENMITTSU_CONNECT(dynamic_cast<QObject*>(newStorage.get()), groupHasNewMessage(openmittsu::protocol::GroupId const&, QString const&), this, databaseOnGroupHasNewMessage(openmittsu::protocol::GroupId const&, QString const&));
 		}
 
 		/*
@@ -473,6 +496,8 @@ namespace openmittsu {
 			if (this->m_networkSentMessageAcceptor != nullptr) {
 				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
 			}
+
+			sendReceipt(sender, messageId, openmittsu::messages::contact::ReceiptMessageContent::ReceiptType::RECEIVED);
 		}
 
 		void MessageCenter::processReceivedContactMessageImage(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& image) {
@@ -488,6 +513,8 @@ namespace openmittsu {
 			if (this->m_networkSentMessageAcceptor != nullptr) {
 				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
 			}
+
+			sendReceipt(sender, messageId, openmittsu::messages::contact::ReceiptMessageContent::ReceiptType::RECEIVED);
 		}
 		
 		void MessageCenter::processReceivedContactMessageLocation(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, openmittsu::utility::Location const& location) {
@@ -501,6 +528,8 @@ namespace openmittsu {
 			if (this->m_networkSentMessageAcceptor != nullptr) {
 				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
 			}
+
+			sendReceipt(sender, messageId, openmittsu::messages::contact::ReceiptMessageContent::ReceiptType::RECEIVED);
 		}
 
 		void MessageCenter::processReceivedContactMessageReceiptReceived(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageId const& referredMessageId) {
