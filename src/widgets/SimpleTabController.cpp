@@ -31,11 +31,11 @@ namespace openmittsu {
 			return m_groupTabs.contains(group);
 		}
 
-		QWidget* SimpleTabController::getTab(openmittsu::protocol::ContactId const& contact) const {
+		ChatTab* SimpleTabController::getTab(openmittsu::protocol::ContactId const& contact) const {
 			return m_contactTabs.value(contact);
 		}
 
-		QWidget* SimpleTabController::getTab(openmittsu::protocol::GroupId const& group) const {
+		ChatTab* SimpleTabController::getTab(openmittsu::protocol::GroupId const& group) const {
 			return m_groupTabs.value(group);
 		}
 

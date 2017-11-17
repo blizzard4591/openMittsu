@@ -19,8 +19,8 @@ namespace openmittsu {
 			virtual bool hasTab(openmittsu::protocol::ContactId const& contact) const override;
 			virtual bool hasTab(openmittsu::protocol::GroupId const& group) const override;
 
-			virtual QWidget* getTab(openmittsu::protocol::ContactId const& contact) const override;
-			virtual QWidget* getTab(openmittsu::protocol::GroupId const& group) const override;
+			virtual ChatTab* getTab(openmittsu::protocol::ContactId const& contact) const override;
+			virtual ChatTab* getTab(openmittsu::protocol::GroupId const& group) const override;
 
 			virtual void openTab(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::BackedContact const& backedContact) override;
 			virtual void openTab(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::BackedGroup const& backedGroup) override;
