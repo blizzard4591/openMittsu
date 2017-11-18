@@ -214,6 +214,8 @@ namespace openmittsu {
 			void announceGroupChanged(openmittsu::protocol::GroupId const& group);
 			void announceNewMessage(openmittsu::protocol::ContactId const& contact, QString const& messageUuid);
 			void announceNewMessage(openmittsu::protocol::GroupId const& group, QString const& messageUuid);
+			void announceReceivedNewMessage(openmittsu::protocol::ContactId const& contact);
+			void announceReceivedNewMessage(openmittsu::protocol::GroupId const& group);
 		private:
 			QSqlDatabase database;
 			QString const m_driverNameCrypto;

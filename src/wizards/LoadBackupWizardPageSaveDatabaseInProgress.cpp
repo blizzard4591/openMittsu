@@ -16,7 +16,7 @@
 namespace openmittsu {
 	namespace wizards {
 
-		LoadBackupWizardPageSaveDatabaseInProgress::LoadBackupWizardPageSaveDatabaseInProgress(QWidget* parent) : QWizardPage(parent), m_ui(std::make_unique<Ui::LoadBackupWizardPageSaveDatabaseInProgress>()), m_isComplete(false), m_completedWithSuccess(false) {
+		LoadBackupWizardPageSaveDatabaseInProgress::LoadBackupWizardPageSaveDatabaseInProgress(LoadBackupWizard* parent) : QWizardPage(parent), m_parent(parent), m_ui(std::make_unique<Ui::LoadBackupWizardPageSaveDatabaseInProgress>()), m_isComplete(false), m_completedWithSuccess(false) {
 			m_ui->setupUi(this);
 		}
 
@@ -42,7 +42,8 @@ namespace openmittsu {
 				OPENMITTSU_DISCONNECT_NOTHROW(m_backupReader.get(), finished(bool, QString const&), this, onFinished(bool, QString const&));
 			}
 
-			m_backupReader = std::make_unique<openmittsu::backup::BackupReader>(backupLocation, backupPassword, databaseLocation.absoluteFilePath(openmittsu::database::Database::getDefaultDatabaseFileName()), databaseLocation, databasePassword);
+			m_databaseFileName = databaseLocation.absoluteFilePath(openmittsu::database::Database::getDefaultDatabaseFileName());
+			m_backupReader = std::make_unique<openmittsu::backup::BackupReader>(backupLocation, backupPassword, m_databaseFileName, databaseLocation, databasePassword);
 			OPENMITTSU_CONNECT_QUEUED(m_backupReader.get(), progressUpdated(int), this, onProgressUpdated(int));
 			OPENMITTSU_CONNECT_QUEUED(m_backupReader.get(), finished(bool, QString const&), this, onFinished(bool, QString const&));
 
@@ -79,6 +80,9 @@ namespace openmittsu {
 			} else {
 				m_ui->lblStatus->setText(QStringLiteral("Import successful!\n"));
 				m_completedWithSuccess = true;
+				if (m_parent != nullptr) {
+					m_parent->setDatabaseFileName(m_databaseFileName);
+				}
 			}
 
 			emit completeChanged();

@@ -2,6 +2,7 @@
 #include <QtNetwork>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QIcon>
 
 #include <algorithm>
@@ -16,6 +17,7 @@
 #include "src/wizards/BackupCreationWizard.h"
 #include "src/wizards/GroupCreationWizard.h"
 #include "src/wizards/LoadBackupWizard.h"
+#include "src/wizards/FirstUseWizard.h"
 
 #include "src/dialogs/ShowIdentityAndPublicKeyDialog.h"
 #include "src/dialogs/ContactAddDialog.h"
@@ -94,6 +96,7 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 	// Load stored settings
 	this->m_optionMaster = std::make_shared<openmittsu::utility::OptionMaster>();
 	QString const databaseFile = m_optionMaster->getOptionAsQString(openmittsu::utility::OptionMaster::Options::FILEPATH_DATABASE);
+	bool showFirstUseWizard = false;
 	if (!databaseFile.isEmpty()) {
 		while (true) {
 			bool ok = false;
@@ -117,6 +120,8 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 				break;
 			}
 		}
+	} else {
+		showFirstUseWizard = true;
 	}
 
 	OPENMITTSU_CONNECT(m_ui.btnConnect, clicked(), this, btnConnectOnClick());
@@ -142,6 +147,7 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 	OPENMITTSU_CONNECT(m_ui.actionImport_legacy_contacts_and_groups, triggered(), this, menuDatabaseImportLegacyContactsAndGroupsOnClick());
 	OPENMITTSU_CONNECT(m_ui.actionStatistics, triggered(), this, menuAboutStatisticsOnClick());
 	OPENMITTSU_CONNECT(m_ui.actionOptions, triggered(), this, menuFileOptionsOnClick());
+	OPENMITTSU_CONNECT(m_ui.actionShow_First_Use_Wizard, triggered(), this, menuFileShowFirstUseWizardOnClick());
 	OPENMITTSU_CONNECT(m_ui.actionExit, triggered(), this, menuFileExitOnClick());
 
 	m_protocolClientThread.start();
@@ -158,6 +164,10 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 	// Restore Window location and size
 	restoreGeometry(m_optionMaster->getOptionAsQByteArray(openmittsu::utility::OptionMaster::Options::BINARY_MAINWINDOW_GEOMETRY));
 	restoreState(m_optionMaster->getOptionAsQByteArray(openmittsu::utility::OptionMaster::Options::BINARY_MAINWINDOW_STATE));
+
+	if (showFirstUseWizard) {
+		menuFileShowFirstUseWizardOnClick();
+	}
 }
 
 Client::~Client() {
@@ -286,19 +296,19 @@ void Client::btnConnectOnClick() {
 	}
 }
 
-bool Client::validateDatabaseFile(QDir const& databaseLocation, QString const& password, bool quiet) {
+bool Client::validateDatabaseFile(QString const& databaseFileName, QString const& password, bool quiet) {
 	try {
-		if (!databaseLocation.exists()) {
-			return false;
-		}
-		QString const databaseFilePath = databaseLocation.filePath(openmittsu::database::Database::getDefaultDatabaseFileName());
-
-		QFile inputFile(databaseFilePath);
-		if (!inputFile.exists()) {
+		QFileInfo fileInfo(databaseFileName);
+		if (!fileInfo.exists()) {
 			return false;
 		}
 
-		openmittsu::database::Database db(databaseFilePath, password, databaseLocation);
+		QDir const folder(fileInfo.absolutePath());
+		if (!folder.exists()) {
+			return false;
+		}
+		
+		openmittsu::database::Database db(databaseFileName, password, folder);
 		return true;
 	} catch (openmittsu::exceptions::BaseException& iex) {
 		if (!quiet) {
@@ -309,31 +319,38 @@ bool Client::validateDatabaseFile(QDir const& databaseLocation, QString const& p
 }
 
 void Client::btnOpenDatabaseOnClick() {
-	QString const folderName = QFileDialog::getExistingDirectory(this, tr("Select a folder containing an openmittsu database file"));
-	QDir const folder(folderName);
-	if (folderName.isNull() || folderName.isEmpty() || !folder.exists()) {
+	QString const fileName = QFileDialog::getOpenFileName(this, tr("Select an openMittsu database file"), "", "*.sqlite");
+	if (!fileName.isEmpty() && QFile::exists(fileName)) {
+		openDatabaseFile(fileName);
+	}
+}
+
+void Client::openDatabaseFile(QString const& fileName) {
+	QFileInfo fileInfo(fileName);
+	if (!fileInfo.exists()) {
+		QMessageBox::warning(this, tr("Database file does not exist"), tr("The selected database file does not exist. Please check the access permissions!"));
 		return;
 	}
 
-	QString const databaseFilePath = folder.filePath(openmittsu::database::Database::getDefaultDatabaseFileName());
-	if (!QFile::exists(databaseFilePath)) {
-		QMessageBox::warning(this, tr("Folder does not contain database file"), tr("The selected folder does not contain a recognized openMittsu database file."));
+	QDir const folder(fileInfo.absolutePath());
+	if (!folder.exists()) {
+		LOGGER()->warn("The selected Database file exists, but the parent directory does not? Strange!");
 		return;
 	}
 
 	bool ok = false;
-	QString const password = QInputDialog::getText(this, tr("Database password"), tr("Please enter the database password:"), QLineEdit::Password, QString(), &ok);
+	QString const password = QInputDialog::getText(this, tr("Database Password"), tr("Please enter the database password:"), QLineEdit::Password, QString(), &ok);
 	if (!ok || password.isNull()) {
 		return;
 	}
 
-	if (!validateDatabaseFile(folder, password, false)) {
+	if (!validateDatabaseFile(fileName, password, false)) {
 		return;
 	}
 
-	m_database = std::make_shared<openmittsu::database::Database>(databaseFilePath, password, folder);
-	this->m_optionMaster->setOption(openmittsu::utility::OptionMaster::Options::FILEPATH_DATABASE, databaseFilePath);
-	updateDatabaseInfo(databaseFilePath);
+	m_database = std::make_shared<openmittsu::database::Database>(fileName, password, folder);
+	this->m_optionMaster->setOption(openmittsu::utility::OptionMaster::Options::FILEPATH_DATABASE, fileName);
+	updateDatabaseInfo(fileName);
 
 	contactRegistryOnIdentitiesChanged();
 }
@@ -344,8 +361,8 @@ void Client::contactRegistryOnIdentitiesChanged() {
 	
 	if (m_database) {
 		QHash<openmittsu::protocol::ContactId, QString> knownIdentities = m_database->getKnownContactsWithNicknames();
-		QHash<openmittsu::protocol::ContactId, QString>::const_iterator it = knownIdentities.constBegin();
-		QHash<openmittsu::protocol::ContactId, QString>::const_iterator end = knownIdentities.constEnd();
+		auto it = knownIdentities.constBegin();
+		auto const end = knownIdentities.constEnd();
 
 		openmittsu::protocol::ContactId const selfIdentity = m_database->getSelfContact();
 		for (; it != end; ++it) {
@@ -381,8 +398,8 @@ void Client::contactRegistryOnIdentitiesChanged() {
 
 		// Groups
 		QSet<openmittsu::protocol::GroupId> knownGroups = m_database->getKnownGroups();
-		QSet<openmittsu::protocol::GroupId>::const_iterator itGroups = knownGroups.constBegin();
-		QSet<openmittsu::protocol::GroupId>::const_iterator endGroups = knownGroups.constEnd();
+		auto itGroups = knownGroups.constBegin();
+		auto const endGroups = knownGroups.constEnd();
 
 		for (; itGroups != endGroups; ++itGroups) {
 			openmittsu::protocol::GroupId const groupId = *itGroups;
@@ -681,6 +698,19 @@ void Client::menuFileOptionsOnClick() {
 	}
 }
 
+void Client::menuFileShowFirstUseWizardOnClick() {
+	openmittsu::wizards::FirstUseWizard firstUseWizard(this);
+	int const result = firstUseWizard.exec();
+	if (result == 1) {
+		openmittsu::wizards::FirstUseWizard::UserChoice const userChoice = firstUseWizard.getUserChoice();
+		if (userChoice == openmittsu::wizards::FirstUseWizard::UserChoice::LOAD_DATABASE) {
+			btnOpenDatabaseOnClick();
+		} else if (userChoice == openmittsu::wizards::FirstUseWizard::UserChoice::CREATE_DATABASE) {
+			menuIdentityLoadBackupOnClick();
+		}
+	}
+}
+
 void Client::menuFileExitOnClick() {
 	this->close();
 }
@@ -815,7 +845,13 @@ void Client::menuIdentityCreateBackupOnClick() {
 
 void Client::menuIdentityLoadBackupOnClick() {
 	openmittsu::wizards::LoadBackupWizard loadBackupWizard(this);
-	loadBackupWizard.exec();
+	int const result = loadBackupWizard.exec();
+	if (result == 1) {
+		QString const dbFileName = loadBackupWizard.getDatabaseFileName();
+		if (!dbFileName.isEmpty() && !dbFileName.isNull()) {
+			openDatabaseFile(dbFileName);
+		}
+	}
 }
 
 void Client::menuDatabaseImportLegacyContactsAndGroupsOnClick() {

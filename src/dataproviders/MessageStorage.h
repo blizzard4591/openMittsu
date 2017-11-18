@@ -102,6 +102,8 @@ namespace openmittsu {
 			void groupChanged(openmittsu::protocol::GroupId const& changedGroupId);
 			void contactHasNewMessage(openmittsu::protocol::ContactId const& identity, QString const& messageUuid);
 			void groupHasNewMessage(openmittsu::protocol::GroupId const& group, QString const& messageUuid);
+			void receivedNewContactMessage(openmittsu::protocol::ContactId const& identity);
+			void receivedNewGroupMessage(openmittsu::protocol::GroupId const& group);
 			void messageChanged(QString const& uuid);
 			void haveQueuedMessages();
 		};

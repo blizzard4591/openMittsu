@@ -39,6 +39,7 @@ private slots:
 	void listContactsOnContextMenu(QPoint const& pos);
 
 	void menuFileOptionsOnClick();
+	void menuFileShowFirstUseWizardOnClick();
 	void menuFileExitOnClick();
 	void menuAboutLicenseOnClick();
 	void menuAboutAboutOnClick();
@@ -101,7 +102,8 @@ private:
 	std::shared_ptr<openmittsu::database::Database> m_database;
 	std::shared_ptr<openmittsu::utility::AudioNotification> m_audioNotifier;
 
-	bool validateDatabaseFile(QDir const& databaseLocation, QString const& password, bool quiet = false);
+	void openDatabaseFile(QString const& fileName);
+	bool validateDatabaseFile(QString const& databaseFileName, QString const& password, bool quiet = false);
 	void updateDatabaseInfo(QString const& currentFileName);
 	void uiFocusOnOverviewTab();
 	void showNotYetImplementedInfo();

@@ -35,6 +35,9 @@ namespace openmittsu {
 			explicit LoadBackupWizard(QWidget* parent = nullptr);
 			virtual ~LoadBackupWizard();
 
+			QString getDatabaseFileName() const;
+			void setDatabaseFileName(QString const& fileName);
+
 			friend class LoadBackupWizardPageSaveDatabase;
 		public slots:
 			void pageNextOnClick(int pageId);
@@ -50,6 +53,7 @@ namespace openmittsu {
 
 			QString m_backupString;
 			QString m_backupPassword;
+			QString m_databaseFileName;
 		};
 
 	}

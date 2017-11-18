@@ -131,6 +131,7 @@ namespace openmittsu {
 			insertContactMessage(database, contact, messageId, uuid, false, false, true, UserMessageState::DELIVERED, sentAt, sentAt, receivedAt, openmittsu::protocol::MessageTime(), openmittsu::protocol::MessageTime(), type, body, isStatusMessage, true, true, caption);
 
 			database.announceNewMessage(contact, uuid);
+			database.announceReceivedNewMessage(contact);
 		}
 
 		void DatabaseContactMessage::insertContactMessagesFromBackup(Database& database, QList<openmittsu::backup::ContactMessageBackupObject> const& messages) {

@@ -1087,6 +1087,14 @@ void Database::announceNewMessage(openmittsu::protocol::GroupId const& group, QS
 	emit groupHasNewMessage(group, messageUuid);
 }
 
+void Database::announceReceivedNewMessage(openmittsu::protocol::ContactId const& contact) {
+	emit receivedNewContactMessage(contact);
+}
+
+void Database::announceReceivedNewMessage(openmittsu::protocol::GroupId const& group) {
+	emit receivedNewGroupMessage(group);
+}
+
 void Database::sendAllWaitingMessages(openmittsu::dataproviders::SentMessageAcceptor& messageAcceptor) {
 	{
 		QSqlQuery query(database);

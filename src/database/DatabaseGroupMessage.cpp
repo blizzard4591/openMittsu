@@ -132,6 +132,7 @@ namespace openmittsu {
 			insertGroupMessage(database, group, sender, messageId, uuid, false, false, true, UserMessageState::DELIVERED, sentAt, sentAt, receivedAt, openmittsu::protocol::MessageTime(), openmittsu::protocol::MessageTime(), type, body, isStatusMessage, true, true, caption);
 
 			database.announceNewMessage(group, uuid);
+			database.announceReceivedNewMessage(group);
 		}
 
 		void DatabaseGroupMessage::insertGroupMessagesFromBackup(Database& database, QList<openmittsu::backup::GroupMessageBackupObject> const& messages) {

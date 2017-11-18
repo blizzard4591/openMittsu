@@ -32,7 +32,7 @@ namespace openmittsu {
 			emit messageChanged(uuid);
 		}
 
-		void MessageCenter::databaseOnContactHasNewMessage(openmittsu::protocol::ContactId const& identity, QString const&) {
+		void MessageCenter::databaseOnReceivedNewContactMessage(openmittsu::protocol::ContactId const& identity) {
 			if (m_tabController) {
 				if (m_tabController->hasTab(identity)) {
 					openmittsu::widgets::ChatTab* const chatTab = m_tabController->getTab(identity);
@@ -41,7 +41,7 @@ namespace openmittsu {
 			}
 		}
 		
-		void MessageCenter::databaseOnGroupHasNewMessage(openmittsu::protocol::GroupId const& group, QString const&) {
+		void MessageCenter::databaseOnReceivedNewGroupMessage(openmittsu::protocol::GroupId const& group) {
 			if (m_tabController) {
 				if (m_tabController->hasTab(group)) {
 					openmittsu::widgets::ChatTab* const chatTab = m_tabController->getTab(group);
@@ -471,15 +471,15 @@ namespace openmittsu {
 			if (m_storage != nullptr) {
 				OPENMITTSU_DISCONNECT(dynamic_cast<QObject*>(m_storage.get()), messageChanged(QString const&), this, databaseOnMessageChanged(QString const&));
 				OPENMITTSU_DISCONNECT(dynamic_cast<QObject*>(m_storage.get()), haveQueuedMessages(), this, tryResendingMessagesToNetwork());
-				OPENMITTSU_DISCONNECT(dynamic_cast<QObject*>(newStorage.get()), contactHasNewMessage(openmittsu::protocol::ContactId const&, QString const&), this, databaseOnContactHasNewMessage(openmittsu::protocol::ContactId const&, QString const&));
-				OPENMITTSU_DISCONNECT(dynamic_cast<QObject*>(newStorage.get()), groupHasNewMessage(openmittsu::protocol::GroupId const&, QString const&), this, databaseOnGroupHasNewMessage(openmittsu::protocol::GroupId const&, QString const&));
+				OPENMITTSU_DISCONNECT(dynamic_cast<QObject*>(m_storage.get()), receivedNewContactMessage(openmittsu::protocol::ContactId const&), this, databaseOnReceivedNewContactMessage(openmittsu::protocol::ContactId const&));
+				OPENMITTSU_DISCONNECT(dynamic_cast<QObject*>(m_storage.get()), receivedNewGroupMessage(openmittsu::protocol::GroupId const&), this, databaseOnReceivedNewGroupMessage(openmittsu::protocol::GroupId const&));
 			}
 
 			this->m_storage = newStorage;
 			OPENMITTSU_CONNECT(dynamic_cast<QObject*>(newStorage.get()), messageChanged(QString const&), this, databaseOnMessageChanged(QString const&));
 			OPENMITTSU_CONNECT(dynamic_cast<QObject*>(newStorage.get()), haveQueuedMessages(), this, tryResendingMessagesToNetwork());
-			OPENMITTSU_CONNECT(dynamic_cast<QObject*>(newStorage.get()), contactHasNewMessage(openmittsu::protocol::ContactId const&, QString const&), this, databaseOnContactHasNewMessage(openmittsu::protocol::ContactId const&, QString const&));
-			OPENMITTSU_CONNECT(dynamic_cast<QObject*>(newStorage.get()), groupHasNewMessage(openmittsu::protocol::GroupId const&, QString const&), this, databaseOnGroupHasNewMessage(openmittsu::protocol::GroupId const&, QString const&));
+			OPENMITTSU_CONNECT(dynamic_cast<QObject*>(newStorage.get()), receivedNewContactMessage(openmittsu::protocol::ContactId const&), this, databaseOnReceivedNewContactMessage(openmittsu::protocol::ContactId const&));
+			OPENMITTSU_CONNECT(dynamic_cast<QObject*>(newStorage.get()), receivedNewGroupMessage(openmittsu::protocol::GroupId const&), this, databaseOnReceivedNewGroupMessage(openmittsu::protocol::GroupId const&));
 		}
 
 		/*

@@ -99,7 +99,10 @@ namespace openmittsu {
 					try {
 						openmittsu::backup::IdentityBackup data(openmittsu::backup::IdentityBackup::fromBackupString(m_backupString, m_backupPassword));
 
-						openmittsu::database::Database db(databaseLocation.absoluteFilePath(openmittsu::database::Database::getDefaultDatabaseFileName()), data.getClientContactId(), data.getClientLongTermKeyPair(), databasePassword, databaseLocation);
+						m_databaseFileName = "";
+						QString const dbFileName = databaseLocation.absoluteFilePath(openmittsu::database::Database::getDefaultDatabaseFileName());
+						openmittsu::database::Database db(dbFileName, data.getClientContactId(), data.getClientLongTermKeyPair(), databasePassword, databaseLocation);
+						m_databaseFileName = dbFileName;
 					} catch (openmittsu::exceptions::BaseException& be) {
 						back();
 						QMessageBox::warning(this, tr("Error while writing Database"), tr("An error occured while writing the database.\nProblem: %1").arg(be.what()));
@@ -109,6 +112,14 @@ namespace openmittsu {
 					}
 				}
 			}
+		}
+
+		QString LoadBackupWizard::getDatabaseFileName() const {
+			return m_databaseFileName;
+		}
+
+		void LoadBackupWizard::setDatabaseFileName(QString const& fileName) {
+			m_databaseFileName = fileName;
 		}
 
 	}
