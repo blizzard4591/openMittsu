@@ -16,7 +16,7 @@
 namespace openmittsu {
 	namespace wizards {
 
-		LoadBackupWizardPageSaveDatabaseInProgress::LoadBackupWizardPageSaveDatabaseInProgress(LoadBackupWizard* parent) : QWizardPage(parent), m_parent(parent), m_ui(std::make_unique<Ui::LoadBackupWizardPageSaveDatabaseInProgress>()), m_isComplete(false), m_completedWithSuccess(false) {
+		LoadBackupWizardPageSaveDatabaseInProgress::LoadBackupWizardPageSaveDatabaseInProgress(LoadBackupWizard* parent) : QWizardPage(parent), m_ui(std::make_unique<Ui::LoadBackupWizardPageSaveDatabaseInProgress>()), m_parent(parent), m_isComplete(false), m_completedWithSuccess(false) {
 			m_ui->setupUi(this);
 		}
 

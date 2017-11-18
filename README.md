@@ -79,19 +79,27 @@ git submodule update --init --recursive
 	Now build QSqlCipher. If everything went well there should be a library in sqldrivers/.
 	You can run ```qsqlcipher-test``` to see if your version of SqlCipher produces Segfaults or not - if you do not get past Test 5.2, update your installed version of libsqlcipher.
 	The library created here (and sqlite3.dll in the case of Windows) need to be in openMittsus main directory (the QSqlCipher module MUST be in a subfolder named "sqldrivers"!).
+	On Linux, you also have the option of installing QSqlCipher as a global Qt5 plugin. On Debian 9 x64, the system-wide storage for plugins is in ```/usr/lib/x86_64-linux-gnu/qt5/plugins```. For copying the plugin there you need root privileges. The command would look like ```sudo cp ./sqldrivers/libqsqlcipher.so /usr/lib/x86_64-linux-gnu/qt5/plugins/sqldrivers/```.
 	
 Prerequisites on Debian/Ubuntu: 
 ```
-apt-get install libqt5core5a libqt5gui5 libqt5multimedia5 libqt5multimedia5-plugins libqt5sql5 libqt5sql5-sqlite libqt5widgets5 qt5-qmake qtbase5-dev qtbase5-dev-tools qtmultimedia5-dev libqrencode-dev git
+apt-get install libqt5core5a libqt5gui5 libqt5multimedia5 libqt5multimedia5-plugins libqt5sql5 libqt5sql5-sqlite libqt5widgets5 qt5-qmake qtbase5-dev qtbase5-dev-tools qtmultimedia5-dev libqrencode-dev git g++ libssl-dev make cmake qtbase5-dev qtbase5-private-dev pkgconf
 ```
-To install a more recent version of libsodium (at least 1.0.12), you need to have the backports repository in your APT configuration.
+Important: If you are using Debian 9: To install a more recent version of libsodium (at least 1.0.12) and a fixed version of SqlCipher, you need to have the buster repository in your APT configuration.
+To do this safely, add ```deb http://ftp.halifax.rwth-aachen.de/debian/ buster main``` (or use any mirror that you like) to ```/etc/apt/sources.list``` and then do not forget to change its priority by adding a file ```buster.pref``` in ```/etc/apt/preferences.d/``` with the content:
 ```
-apt-get -t stretch-backports install libsodium-dev libsodium18
+Package: *
+Pin: release buster
+Pin-Priority: 250
+```
+After running ```apt-get update```, you can install the additional packages using:
+```
+apt-get -t buster install libsodium-dev libsodium18 sqlcipher libsqlcipher0 libsqlcipher-dev
 ```
 
-Prerequisites on openSuse: 
+Prerequisites on openSuse (incomplete): 
 ```
-sudo zypper install libqt5-qtbase-devel libqt5-qtmultimedia-devel libsodium-devel qrencode-devel git
+sudo zypper install libqt5-qtbase-devel libqt5-qtmultimedia-devel libsodium-devel qrencode-devel git g++ cmake
 ```
 
 ### Detailed steps - Linux
@@ -100,10 +108,7 @@ Adjust the paths to your system. The ones below are a current Qt version install
 Look above for hints on how to add SqlCipher (encrypted database storage) support!
 ```bash
 cd my-projects/ # or wherever you want to clone this
-git clone https://github.com/blizzard4591/openMittsu.git
-cd openMittsu
-mkdir build
-cd build
+
 # If you are on Mac OSX (install Qt5 using Homebrew, and then find the suitable paths for your installation)
 export Qt5Core_DIR=/usr/local/Cellar/qt5/5.7.0/lib/cmake/Qt5Core/
 export Qt5Gui_DIR=/usr/local/Cellar/qt5/5.7.0/lib/cmake/Qt5Gui/
@@ -111,10 +116,27 @@ export Qt5Widgets_DIR=/usr/local/Cellar/qt5/5.7.0/lib/cmake/Qt5Widgets/
 export Qt5Network_DIR=/usr/local/Cellar/qt5/5.7.0/lib/cmake/Qt5Network/
 export Qt5Multimedia_DIR=/usr/local/Cellar/qt5/5.7.0/lib/cmake/Qt5Multimedia
 
+# First build QSqlCipher
+git clone https://github.com/blizzard4591/qt5-sqlcipher.git
+cd qt5-sqlcipher
+mkdir build
+cd build
+# If you are on Windows, the next step required some more parameters to cmake, aka the paths to SqlCipher include and library.
+cmake .. # or cmake .. -G Xcode
+make
+# Either later on copy the created library in sqldrivers/ by hand to openMittsu, or install into system wide Qt5 plugin folders (look for the location of libqsqlite.so)
+
+# Build openMittsu
+git clone https://github.com/blizzard4591/openMittsu.git
+cd openMittsu
+mkdir build
+cd build
+
 cmake .. # or cmake .. -G Xcode, optionally add -DOPENMITTSU_DEBUG=On
 make # optionally add -j 4 for multi-threaded compilation with 4 threads
 ./openMittsu
 ```
+
 
 ### Detailed steps - Windows
 1. Install CMake from https://cmake.org/download/
