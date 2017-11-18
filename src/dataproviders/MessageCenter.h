@@ -19,6 +19,7 @@
 #include "src/widgets/TabController.h"
 
 #include "src/dataproviders/MessageStorage.h"
+#include "src/dataproviders/MessageQueue.h"
 #include "src/dataproviders/ReceivedMessageAcceptor.h"
 #include "src/dataproviders/NetworkSentMessageAcceptor.h"
 
@@ -116,6 +117,7 @@ namespace openmittsu {
 			std::shared_ptr<openmittsu::utility::OptionMaster> const m_optionMaster;
 			std::shared_ptr<NetworkSentMessageAcceptor> m_networkSentMessageAcceptor;
 			std::shared_ptr<openmittsu::dataproviders::MessageStorage> m_storage;
+			MessageQueue m_messageQueue;
 
 			void openTabForIncomingMessage(openmittsu::protocol::ContactId const& sender);
 			void openTabForIncomingMessage(openmittsu::protocol::GroupId const& group);

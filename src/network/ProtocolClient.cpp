@@ -823,8 +823,8 @@ namespace openmittsu {
 						if (missingIdentityProcessor->hasFinishedSuccessfully()) {
 							LOGGER()->info("MissingIdentityProcessor finished successfully, now processing {} queued messages.", missingIdentityProcessor->getQueuedMessages().size());
 							std::list<openmittsu::messages::MessageWithEncryptedPayload> queuedMessages(missingIdentityProcessor->getQueuedMessages());
-							std::list<openmittsu::messages::MessageWithEncryptedPayload>::const_iterator it = queuedMessages.cbegin();
-							std::list<openmittsu::messages::MessageWithEncryptedPayload>::const_iterator end = queuedMessages.cend();
+							auto it = queuedMessages.cbegin();
+							auto const end = queuedMessages.cend();
 							for (; it != end; ++it) {
 								handleIncomingMessage(*it);
 							}

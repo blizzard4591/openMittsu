@@ -224,6 +224,8 @@ namespace openmittsu {
 			bool m_usingCryptoDb;
 
 			openmittsu::protocol::ContactId m_selfContact;
+			openmittsu::crypto::KeyPair m_selfLongTermKeyPair;
+			std::unique_ptr<openmittsu::backup::IdentityBackup> m_identityBackup;
 
 			openmittsu::dataproviders::DatabaseContactAndGroupDataProvider m_contactAndGroupDataProvider;
 			ExternalMediaFileStorage m_mediaFileStorage;
@@ -260,6 +262,7 @@ namespace openmittsu {
 			void removeMediaItem(QString const& uuid);
 			void setupQueueTimer();
 			void setKey(QString const& password);
+			void updateCachedIdentityBackup();
 		private slots:
 			void onQueueTimeoutTimerFire();
 		};

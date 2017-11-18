@@ -489,6 +489,8 @@ namespace openmittsu {
 			if (this->m_storage == nullptr) {
 				LOGGER()->warn("We received a contact text message from sender {} with message ID #{} sent at {} with text {} that could not be saved as the storage system is not ready.", sender.toString(), messageId.toString(), timeSent.toString(), message.toStdString());
 				return;
+			} else if (!this->m_storage->hasContact(sender)) {
+
 			}
 
 			openTabForIncomingMessage(sender);
@@ -616,9 +618,11 @@ namespace openmittsu {
 			if (this->m_storage == nullptr) {
 				LOGGER()->warn("We received a group text message from sender {} for group {} with message ID #{} sent at {} with text {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), message.toStdString());
 				return;
-			} else if (!this->m_storage->hasGroup(group)) {
-				LOGGER()->error("Received group text message from sender {} for UNKNOWN group {} with message ID #{} sent at {} with text {}.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), message.toStdString());
-				// TODO
+			}
+
+			if (!checkAndFixGroupMembership(group, sender)) {
+				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::TEXT, message));
+				return;
 			}
 
 			openTabForIncomingMessage(group);
@@ -632,9 +636,11 @@ namespace openmittsu {
 			if (this->m_storage == nullptr) {
 				LOGGER()->warn("We received a group image message from sender {} for group {} with message ID #{} sent at {} with image {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), QString(image.toHex()).toStdString());
 				return;
-			} else if (!this->m_storage->hasGroup(group)) {
-				LOGGER()->error("Received group image message from sender {} for UNKNOWN group {} with message ID #{} sent at {} with image {}.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), QString(image.toHex()).toStdString());
-				// TODO
+			}
+
+			if (!checkAndFixGroupMembership(group, sender)) {
+				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::IMAGE, image));
+				return;
 			}
 
 			QString const caption = parseCaptionFromImage(image);
@@ -650,9 +656,13 @@ namespace openmittsu {
 			if (this->m_storage == nullptr) {
 				LOGGER()->warn("We received a group location message from sender {} for group {} with message ID #{} sent at {} with location {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), location.toString());
 				return;
-			} else if (!this->m_storage->hasGroup(group)) {
-				LOGGER()->error("Received group location message from sender {} for UNKNOWN group {} with message ID #{} sent at {} with image {}.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), location.toString());
-				// TODO
+			}
+
+			if (!checkAndFixGroupMembership(group, sender)) {
+				QVariant locationVariant;
+				locationVariant.setValue(location);
+				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::LOCATION, locationVariant));
+				return;
 			}
 
 			openTabForIncomingMessage(group);
@@ -692,6 +702,38 @@ namespace openmittsu {
 			if (this->m_networkSentMessageAcceptor != nullptr) {
 				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
 			}
+
+			QVector<MessageQueue::ReceivedGroupMessage> queuedMessages = m_messageQueue.getAndRemoveQueuedMessages(group);
+			auto it = queuedMessages.constBegin();
+			auto const end = queuedMessages.constEnd();
+			for (; it != end; ++it) {
+				messages::GroupMessageType const messageType = it->messageType;
+				switch (messageType) {
+					case messages::GroupMessageType::IMAGE:
+						processReceivedGroupMessageImage(it->group, it->sender, it->messageId, it->timeSent, it->timeReceived, it->content.toByteArray());
+						break;
+					case messages::GroupMessageType::LEAVE:
+						processReceivedGroupLeave(it->group, it->sender, it->messageId, it->timeSent, it->timeReceived);
+						break;
+					case messages::GroupMessageType::LOCATION:
+						processReceivedGroupMessageLocation(it->group, it->sender, it->messageId, it->timeSent, it->timeReceived, it->content.value<openmittsu::utility::Location>());
+						break;
+					case messages::GroupMessageType::SET_IMAGE:
+						processReceivedGroupSetImage(it->group, it->sender, it->messageId, it->timeSent, it->timeReceived, it->content.toByteArray());
+						break;
+					case messages::GroupMessageType::SET_TITLE:
+						processReceivedGroupSetTitle(it->group, it->sender, it->messageId, it->timeSent, it->timeReceived, it->content.toString());
+						break;
+					case messages::GroupMessageType::SYNC_REQUEST:
+						processReceivedGroupSyncRequest(it->group, it->sender, it->messageId, it->timeSent, it->timeReceived);
+						break;
+					case messages::GroupMessageType::TEXT:
+						processReceivedGroupMessageText(it->group, it->sender, it->messageId, it->timeSent, it->timeReceived, it->content.toString());
+						break;
+					default:
+						throw openmittsu::exceptions::InternalErrorException() << "Group Message queue contains a message of type \"" << messages::GroupMessageTypeHelper::toString(messageType) << "\", which is unhandled. This should never happen!";
+				}
+			}
 		}
 
 		void MessageCenter::processReceivedGroupSetImage(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& image) {
@@ -700,6 +742,11 @@ namespace openmittsu {
 				return;
 			} else if (sender != group.getOwner()) {
 				LOGGER()->warn("We received a group set image message from sender {} for group {} with message ID #{} sent at {} with members {} that did not come from the group owner. Ignoring.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), QString(image.toHex()).toStdString());
+				return;
+			}
+
+			if (!checkAndFixGroupMembership(group, sender)) {
+				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::SET_IMAGE, image));
 				return;
 			}
 
@@ -718,6 +765,11 @@ namespace openmittsu {
 				return;
 			}
 
+			if (!checkAndFixGroupMembership(group, sender)) {
+				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::SET_TITLE, groupTitle));
+				return;
+			}
+
 			this->m_storage->storeReceivedGroupSetTitle(group, sender, messageId, timeSent, timeReceived, groupTitle);
 			if (this->m_networkSentMessageAcceptor != nullptr) {
 				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
@@ -730,6 +782,14 @@ namespace openmittsu {
 				return;
 			} else if (sender == group.getOwner()) {
 				LOGGER()->warn("We received a group sync request message from sender {} for group {} with message ID #{} sent at {} that did come from the group owner. Ignoring.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString());
+				return;
+			} else if (group.getOwner() != m_storage->getSelfContact()) {
+				LOGGER()->warn("We received a group sync request message from sender {} for group {} with message ID #{} sent at {}, but we are not the group owner. Ignoring.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString());
+				return;
+			}
+
+			if (!checkAndFixGroupMembership(group, sender)) {
+				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::SYNC_REQUEST, QVariant()));
 				return;
 			}
 
@@ -744,6 +804,11 @@ namespace openmittsu {
 		void MessageCenter::processReceivedGroupLeave(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived) {
 			if (this->m_storage == nullptr) {
 				LOGGER()->warn("We received a group leave message from sender {} for group {} with message ID #{} sent at {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString());
+				return;
+			}
+
+			if (!checkAndFixGroupMembership(group, sender)) {
+				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::LEAVE, QVariant()));
 				return;
 			}
 
@@ -991,6 +1056,7 @@ namespace openmittsu {
 				}
 			}
 		}
+
 	}
 }
 

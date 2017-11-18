@@ -15,6 +15,7 @@
 #include "src/crypto/Crc32.h"
 #include "src/exceptions/InternalErrorException.h"
 #include "src/utility/Logging.h"
+#include "src/utility/MakeUnique.h"
 #include "src/utility/QObjectConnectionMacro.h"
 
 
@@ -23,7 +24,7 @@ namespace openmittsu {
 
 		using namespace openmittsu::dataproviders::messages;
 
-Database::Database(QString const& filename, QString const& password, QDir const& mediaStorageLocation) : MessageStorage(), database(), m_driverNameCrypto("QSQLCIPHER"), m_driverNameStandard("QSQLITE"), m_connectionName("openMittsuDatabaseConnection"), m_password(password), m_selfContact(0), m_contactAndGroupDataProvider(*this), m_mediaFileStorage(mediaStorageLocation, *this) {
+Database::Database(QString const& filename, QString const& password, QDir const& mediaStorageLocation) : MessageStorage(), database(), m_driverNameCrypto("QSQLCIPHER"), m_driverNameStandard("QSQLITE"), m_connectionName("openMittsuDatabaseConnection"), m_password(password), m_selfContact(0), m_selfLongTermKeyPair(), m_identityBackup(), m_contactAndGroupDataProvider(*this), m_mediaFileStorage(mediaStorageLocation, *this) {
 	if (!(QSqlDatabase::isDriverAvailable(m_driverNameCrypto) || QSqlDatabase::isDriverAvailable(m_driverNameStandard))) {
 		throw openmittsu::exceptions::InternalErrorException() << "Neither the SQL driver " << m_driverNameCrypto.toStdString() << " nor the driver " << m_driverNameStandard.toStdString() << " are available. Available are: " << QSqlDatabase::drivers().join(", ").toStdString();
 	}
@@ -55,17 +56,18 @@ Database::Database(QString const& filename, QString const& password, QDir const&
 
 	createOrUpdateTables();
 
-	openmittsu::backup::IdentityBackup backupData = this->getBackup();
-	m_selfContact = backupData.getClientContactId();
+	updateCachedIdentityBackup();
+	m_selfContact = m_identityBackup->getClientContactId();
+	m_selfLongTermKeyPair = m_identityBackup->getClientLongTermKeyPair();
 
-	if (!hasContact(backupData.getClientContactId())) {
-		storeNewContact(backupData.getClientContactId(), backupData.getClientLongTermKeyPair());
+	if (!hasContact(m_selfContact)) {
+		storeNewContact(m_selfContact, m_selfLongTermKeyPair);
 	}
 
 	setupQueueTimer();
 }
 
-Database::Database(QString const& filename, openmittsu::protocol::ContactId const& selfContact, openmittsu::crypto::KeyPair const& selfLongTermKeyPair, QString const& password, QDir const& mediaStorageLocation) : MessageStorage(), database(), m_driverNameCrypto("QSQLCIPHER"), m_driverNameStandard("QSQLITE"), m_connectionName("openMittsuDatabaseConnection"), m_password(password), m_selfContact(selfContact), m_contactAndGroupDataProvider(*this), m_mediaFileStorage(mediaStorageLocation, *this) {
+Database::Database(QString const& filename, openmittsu::protocol::ContactId const& selfContact, openmittsu::crypto::KeyPair const& selfLongTermKeyPair, QString const& password, QDir const& mediaStorageLocation) : MessageStorage(), database(), m_driverNameCrypto("QSQLCIPHER"), m_driverNameStandard("QSQLITE"), m_connectionName("openMittsuDatabaseConnection"), m_password(password), m_selfContact(selfContact), m_selfLongTermKeyPair(selfLongTermKeyPair), m_identityBackup(std::make_unique<openmittsu::backup::IdentityBackup>(selfContact, selfLongTermKeyPair)), m_contactAndGroupDataProvider(*this), m_mediaFileStorage(mediaStorageLocation, *this) {
 	if (!(QSqlDatabase::isDriverAvailable(m_driverNameCrypto) || QSqlDatabase::isDriverAvailable(m_driverNameStandard))) {
 		throw openmittsu::exceptions::InternalErrorException() << "Neither the SQL driver " << m_driverNameCrypto.toStdString() << " nor the driver " << m_driverNameStandard.toStdString() << " are available. Available are: " << QSqlDatabase::drivers().join(", ").toStdString();
 	}
@@ -879,10 +881,12 @@ void Database::removeMediaItem(QString const& uuid) {
 }
 
 openmittsu::backup::IdentityBackup Database::getBackup() {
-	QString const identityBackup = getOptionValueInternal(QStringLiteral("identity"), true);
-	openmittsu::backup::IdentityBackup backupData(openmittsu::backup::IdentityBackup::fromBackupString(identityBackup, m_password));
+	return *m_identityBackup;
+}
 
-	return backupData;
+void Database::updateCachedIdentityBackup() {
+	QString const identityBackup = getOptionValueInternal(QStringLiteral("identity"), true);
+	m_identityBackup = std::make_unique<openmittsu::backup::IdentityBackup>(openmittsu::backup::IdentityBackup::fromBackupString(identityBackup, m_password));
 }
 
 openmittsu::protocol::ContactId const& Database::getSelfContact() const {

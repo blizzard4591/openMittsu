@@ -12,6 +12,10 @@ namespace openmittsu {
 			//
 		}
 
+		Location::Location() : m_latitude(0.0), m_longitude(0.0), m_height(0.0), m_address(""), m_description("") {
+			//
+		}
+
 		QString Location::toDatabaseString() const {
 			QJsonArray jsonArray;
 			jsonArray.push_back(m_latitude);
