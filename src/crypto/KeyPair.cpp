@@ -6,7 +6,7 @@
 #include "src/exceptions/InvalidInputException.h"
 #include "src/protocol/ProtocolSpecs.h"
 #include "src/utility/Logging.h"
-#include "pbkdf2-sha256.h"
+#include "src/crypto/pbkdf2-sha256.h"
 #include "src/encoding/Base32.h"
 
 #include <string>

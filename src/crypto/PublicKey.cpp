@@ -3,15 +3,8 @@
 #include "sodium.h"
 #include "src/exceptions/IllegalArgumentException.h"
 #include "src/exceptions/InternalErrorException.h"
-#include "src/crypto/pbkdf2-sha256.h"
-#include "src/encoding/Base32.h"
 
-#include <string>
 #include <cstring>
-#include <algorithm>
-
-#include <QByteArray>
-#include <QString>
 
 namespace openmittsu {
 	namespace crypto {

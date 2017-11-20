@@ -38,7 +38,7 @@ namespace openmittsu {
 			QByteArray password8Bit = password.toUtf8();
 
 			// Generate the encryption key for the Backup from the Salt and the Password
-			PKCS5_PBKDF2_HMAC(reinterpret_cast<unsigned char*>(password8Bit.data()), password8Bit.size(), reinterpret_cast<unsigned char*>(salt.data()), BACKUP_SALT_BYTES, BACKUP_KEY_PBKDF_ITERATIONS, BACKUP_ENCRYPTION_KEY_BYTES, reinterpret_cast<unsigned char*>(encryptionKey.data()));
+			openmittsu_PKCS5_PBKDF2_HMAC(reinterpret_cast<unsigned char*>(password8Bit.data()), password8Bit.size(), reinterpret_cast<unsigned char*>(salt.data()), BACKUP_SALT_BYTES, BACKUP_KEY_PBKDF_ITERATIONS, BACKUP_ENCRYPTION_KEY_BYTES, reinterpret_cast<unsigned char*>(encryptionKey.data()));
 
 			QByteArray nonceBytes(crypto_stream_NONCEBYTES, 0x00);
 
@@ -99,7 +99,7 @@ namespace openmittsu {
 
 			// The Salt used in the PBKDF2 Key Derivation process is embedded in the first 8 bytes of the Backup.
 			QByteArray password8Bit = password.toUtf8();
-			PKCS5_PBKDF2_HMAC(reinterpret_cast<unsigned char*>(password8Bit.data()), password8Bit.size(), decodedBase32Ptr, BACKUP_SALT_BYTES, BACKUP_KEY_PBKDF_ITERATIONS, BACKUP_ENCRYPTION_KEY_BYTES, encryptionKey);
+			openmittsu_PKCS5_PBKDF2_HMAC(reinterpret_cast<unsigned char*>(password8Bit.data()), password8Bit.size(), decodedBase32Ptr, BACKUP_SALT_BYTES, BACKUP_KEY_PBKDF_ITERATIONS, BACKUP_ENCRYPTION_KEY_BYTES, encryptionKey);
 
 			unsigned char nonceBytes[crypto_stream_NONCEBYTES];
 			sodium_memzero(nonceBytes, crypto_stream_NONCEBYTES);

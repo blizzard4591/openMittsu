@@ -304,9 +304,8 @@ int Database::getTableVersion(Tables const& table) {
 }
 
 int Database::createTableIfMissingAndGetVersion(Tables const& table, int createStatementVersion) {
-	QSqlQuery query(database);
-
 	if (!doesTableExist(table)) {
+		QSqlQuery query(database);
 		if (!query.exec(getCreateStatementForTable(table))) {
 			throw openmittsu::exceptions::InternalErrorException() << "Could not create required table '" << getTableName(table).toStdString() << "'. Query error: " << query.lastError().text().toStdString();
 		}

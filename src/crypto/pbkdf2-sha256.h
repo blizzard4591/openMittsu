@@ -46,55 +46,55 @@ typedef struct {
 	unsigned char ipad[64];	/*!< HMAC: inner padding        */
 	unsigned char opad[64];	/*!< HMAC: outer padding        */
 	int is224;		/*!< 0 => SHA-256, else SHA-224 */
-} sha2_context;
+} openmittsu_sha2_context;
 
 /*
 * SHA-256 context setup
 */
-void sha2_starts(sha2_context *ctx, int is224);
+void openmittsu_sha2_starts(openmittsu_sha2_context *ctx, int is224);
 
 /*
 * SHA-256 process buffer
 */
-void sha2_update(sha2_context *ctx, const unsigned char *input, size_t ilen);
+void openmittsu_sha2_update(openmittsu_sha2_context *ctx, const unsigned char *input, size_t ilen);
 
 /*
 * SHA-256 final digest
 */
-void sha2_finish(sha2_context *ctx, unsigned char output[32]);
+void openmittsu_sha2_finish(openmittsu_sha2_context *ctx, unsigned char output[32]);
 
 /*
 * output = SHA-256( input buffer )
 */
-void sha2(const unsigned char *input, size_t ilen, unsigned char output[32], int is224);
+void openmittsu_sha2(const unsigned char *input, size_t ilen, unsigned char output[32], int is224);
 
 /*
 * SHA-256 HMAC context setup
 */
-void sha2_hmac_starts(sha2_context *ctx, const unsigned char *key, size_t keylen, int is224);
+void openmittsu_sha2_hmac_starts(openmittsu_sha2_context *ctx, const unsigned char *key, size_t keylen, int is224);
 
 /*
 * SHA-256 HMAC process buffer
 */
-void sha2_hmac_update(sha2_context *ctx, const unsigned char *input, size_t ilen);
+void openmittsu_sha2_hmac_update(openmittsu_sha2_context *ctx, const unsigned char *input, size_t ilen);
 
 /*
 * SHA-256 HMAC final digest
 */
-void sha2_hmac_finish(sha2_context *ctx, unsigned char output[32]);
+void openmittsu_sha2_hmac_finish(openmittsu_sha2_context *ctx, unsigned char output[32]);
 
 /*
 * SHA-256 HMAC context reset
 */
-void sha2_hmac_reset(sha2_context *ctx);
+void openmittsu_sha2_hmac_reset(openmittsu_sha2_context *ctx);
 
 /*
 * output = HMAC-SHA-256( hmac key, input buffer )
 */
-void sha2_hmac(const unsigned char *key, size_t keylen, const unsigned char *input, size_t ilen, unsigned char output[32], int is224);
+void openmittsu_sha2_hmac(const unsigned char *key, size_t keylen, const unsigned char *input, size_t ilen, unsigned char output[32], int is224);
 
 
-void PKCS5_PBKDF2_HMAC(unsigned char const* password, size_t plen, unsigned char const* salt, size_t slen, const unsigned long iteration_count, const unsigned long key_length, unsigned char *output);
+void openmittsu_PKCS5_PBKDF2_HMAC(unsigned char const* password, size_t plen, unsigned char const* salt, size_t slen, const unsigned long iteration_count, const unsigned long key_length, unsigned char *output);
 
 #ifdef __cplusplus
 }
