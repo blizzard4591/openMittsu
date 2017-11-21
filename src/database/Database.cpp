@@ -126,8 +126,8 @@ void Database::setKey(QString const& password) {
 		bool needsEncoding = false;
 		for (int i = 0; i < password.size(); ++i) {
 			ushort const unicodeCodepoint = password.at(i).unicode();
-			// Non-printable, above 127 or the ' character
-			if (((unicodeCodepoint < 32) || (unicodeCodepoint > 126)) || (unicodeCodepoint == 39)) {
+			// Non-printable, above 127 or the ' or \ character
+			if (((unicodeCodepoint < 32) || (unicodeCodepoint > 126)) || (unicodeCodepoint == 39) || (unicodeCodepoint == 92)) {
 				needsEncoding = true;
 				break;
 			}
