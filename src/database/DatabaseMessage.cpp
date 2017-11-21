@@ -90,7 +90,7 @@ namespace openmittsu {
 			return QSqlQuery(m_database.database);
 		}
 
-		QByteArray DatabaseMessage::getMediaItem(QString const& uuid) const {
+		MediaFileItem DatabaseMessage::getMediaItem(QString const& uuid) const {
 			return m_database.getMediaItem(uuid);
 		}
 

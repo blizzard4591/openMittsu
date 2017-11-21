@@ -42,18 +42,30 @@ namespace openmittsu {
 
 		void ContactImageChatWidgetItem::onMessageDataChanged() {
 			QPixmap pixmap;
-			pixmap.loadFromData(m_contactMessage.getContentAsImage());
-			m_lblImage->setPixmap(pixmap);
-			m_lblCaption->setText(preprocessLinks(m_contactMessage.getCaption()));
+			openmittsu::database::MediaFileItem const image = m_contactMessage.getContentAsImage();
+			if (image.isAvailable()) {
+				pixmap.loadFromData(image.getData());
+				m_lblImage->setPixmap(pixmap);
+				m_lblCaption->setText(preprocessLinks(m_contactMessage.getCaption()));
+			} else {
+				pixmap = image.getPixmapWithErrorMessage(500, 500);
+				m_lblImage->setPixmap(pixmap);
+				m_lblCaption->setText("");
+			}
 
 			ContactChatWidgetItem::onMessageDataChanged();
 		}
 
 		void ContactImageChatWidgetItem::copyToClipboard() {
 			QClipboard *clipboard = QApplication::clipboard();
-			QPixmap pixmap;
-			pixmap.loadFromData(m_contactMessage.getContentAsImage());
-			clipboard->setPixmap(pixmap);
+			openmittsu::database::MediaFileItem const image = m_contactMessage.getContentAsImage();
+			if (image.isAvailable()) {
+				QPixmap pixmap;
+				pixmap.loadFromData(image.getData());
+				clipboard->setPixmap(pixmap);
+			} else {
+				clipboard->setPixmap(image.getPixmapWithErrorMessage(500, 500));
+			}
 		}
 
 	}

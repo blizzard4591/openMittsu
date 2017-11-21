@@ -101,7 +101,7 @@ namespace openmittsu {
 			return getMessage().getContentAsLocation();
 		}
 
-		QByteArray BackedMessage::getContentAsImage() const {
+		openmittsu::database::MediaFileItem BackedMessage::getContentAsImage() const {
 			return getMessage().getContentAsImage();
 		}
 

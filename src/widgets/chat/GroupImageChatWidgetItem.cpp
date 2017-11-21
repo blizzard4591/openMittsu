@@ -40,18 +40,30 @@ namespace openmittsu {
 
 		void GroupImageChatWidgetItem::onMessageDataChanged() {
 			QPixmap pixmap;
-			pixmap.loadFromData(m_groupMessage.getContentAsImage());
-			m_lblImage->setPixmap(pixmap);
-			m_lblCaption->setText(preprocessLinks(m_groupMessage.getCaption()));
+			openmittsu::database::MediaFileItem const image = m_groupMessage.getContentAsImage();
+			if (image.isAvailable()) {
+				pixmap.loadFromData(image.getData());
+				m_lblImage->setPixmap(pixmap);
+				m_lblCaption->setText(preprocessLinks(m_groupMessage.getCaption()));
+			} else {
+				pixmap = image.getPixmapWithErrorMessage(500, 500);
+				m_lblImage->setPixmap(pixmap);
+				m_lblCaption->setText("");
+			}
 
 			GroupChatWidgetItem::onMessageDataChanged();
 		}
 
 		void GroupImageChatWidgetItem::copyToClipboard() {
 			QClipboard *clipboard = QApplication::clipboard();
-			QPixmap pixmap;
-			pixmap.loadFromData(m_groupMessage.getContentAsImage());
-			clipboard->setPixmap(pixmap);
+			openmittsu::database::MediaFileItem const image = m_groupMessage.getContentAsImage();
+			if (image.isAvailable()) {
+				QPixmap pixmap;
+				pixmap.loadFromData(image.getData());
+				clipboard->setPixmap(pixmap);
+			} else {
+				clipboard->setPixmap(image.getPixmapWithErrorMessage(500, 500));
+			}
 		}
 
 	}

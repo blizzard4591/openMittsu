@@ -867,7 +867,7 @@ void Database::setOptionValue(QString const& optionName, QByteArray const& optio
 	setOptionInternal(optionName, QString(optionValue.toHex()), false);
 }
 
-QByteArray Database::getMediaItem(QString const& uuid) const {
+MediaFileItem Database::getMediaItem(QString const& uuid) const {
 	return m_mediaFileStorage.getMediaItem(uuid);
 }
 
@@ -1026,7 +1026,7 @@ QString Database::getGroupDescription(openmittsu::protocol::GroupId const& group
 	return m_contactAndGroupDataProvider.getGroupDescription(group);
 }
 
-QByteArray Database::getGroupImage(openmittsu::protocol::GroupId const& group) const {
+MediaFileItem Database::getGroupImage(openmittsu::protocol::GroupId const& group) const {
 	if (!hasGroup(group)) {
 		throw openmittsu::exceptions::InternalErrorException() << "Could not get group image, the given group " << group.toString() << " is unknown!";
 	}
@@ -1113,9 +1113,14 @@ void Database::sendAllWaitingMessages(openmittsu::dataproviders::SentMessageAcce
 					throw openmittsu::exceptions::InternalErrorException() << "A waiting message has type AUDIO?!";
 					break;
 				case ContactMessageType::IMAGE:
-					messageAcceptor.processSentContactMessageImage(receiver, messageId, message.getCreatedAt(), message.getContentAsImage(), message.getCaption());
-					message.setIsQueued(true);
+				{
+					MediaFileItem const image = message.getContentAsImage();
+					if (image.isAvailable()) {
+						messageAcceptor.processSentContactMessageImage(receiver, messageId, message.getCreatedAt(), image.getData(), message.getCaption());
+						message.setIsQueued(true);
+					}
 					break;
+				}
 				case ContactMessageType::LOCATION:
 					messageAcceptor.processSentContactMessageLocation(receiver, messageId, message.getCreatedAt(), message.getContentAsLocation());
 					message.setIsQueued(true);
@@ -1153,9 +1158,14 @@ void Database::sendAllWaitingMessages(openmittsu::dataproviders::SentMessageAcce
 					throw openmittsu::exceptions::InternalErrorException() << "A waiting message has type AUDIO?!";
 					break;
 				case GroupMessageType::IMAGE:
-					messageAcceptor.processSentGroupMessageImage(group, m_contactAndGroupDataProvider.getGroupMembers(group, false), messageId, message.getCreatedAt(), message.getContentAsImage(), message.getCaption());
-					message.setIsQueued(true);
-					break;
+				{
+					MediaFileItem const image = message.getContentAsImage();
+					if (image.isAvailable()) {
+						messageAcceptor.processSentGroupMessageImage(group, m_contactAndGroupDataProvider.getGroupMembers(group, false), messageId, message.getCreatedAt(), image.getData(), message.getCaption());
+						message.setIsQueued(true);
+						break;
+					}
+				}
 				case GroupMessageType::LOCATION:
 					messageAcceptor.processSentGroupMessageLocation(group, m_contactAndGroupDataProvider.getGroupMembers(group, false), messageId, message.getCreatedAt(), message.getContentAsLocation());
 					message.setIsQueued(true);
@@ -1175,9 +1185,14 @@ void Database::sendAllWaitingMessages(openmittsu::dataproviders::SentMessageAcce
 					message.setIsQueued(true);
 					break;
 				case GroupMessageType::SET_IMAGE:
-					messageAcceptor.processSentGroupSetImage(group, m_contactAndGroupDataProvider.getGroupMembers(group, false), messageId, message.getCreatedAt(), m_contactAndGroupDataProvider.getGroupImage(group));
-					message.setIsQueued(true);
-					break;
+				{
+					MediaFileItem const image = m_contactAndGroupDataProvider.getGroupImage(group);
+					if (image.isAvailable()) {
+						messageAcceptor.processSentGroupSetImage(group, m_contactAndGroupDataProvider.getGroupMembers(group, false), messageId, message.getCreatedAt(), image.getData());
+						message.setIsQueued(true);
+						break;
+					}
+				}
 				case GroupMessageType::SET_TITLE:
 					messageAcceptor.processSentGroupSetTitle(group, m_contactAndGroupDataProvider.getGroupMembers(group, false), messageId, message.getCreatedAt(), m_contactAndGroupDataProvider.getGroupTitle(group));
 					message.setIsQueued(true);

@@ -260,7 +260,7 @@ namespace openmittsu {
 			return openmittsu::utility::Location::fromDatabaseString(queryField(QStringLiteral("body")).toString());
 		}
 
-		QByteArray DatabaseContactMessage::getContentAsImage() const {
+		MediaFileItem DatabaseContactMessage::getContentAsImage() const {
 			ContactMessageType const messageType = getMessageType();
 			if (messageType != ContactMessageType::IMAGE) {
 				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as image because it has type " << ContactMessageTypeHelper::toString(messageType) << "!";

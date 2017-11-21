@@ -16,7 +16,7 @@ namespace openmittsu {
 			virtual bool hasMediaItem(QString const& uuid) const override;
 			virtual int getMediaItemCount() const override;
 
-			virtual QByteArray getMediaItem(QString const& uuid) const override;
+			virtual MediaFileItem getMediaItem(QString const& uuid) const override;
 			virtual QString insertMediaItem(QByteArray const& data) override;
 			virtual void removeMediaItem(QString const& uuid) override;
 

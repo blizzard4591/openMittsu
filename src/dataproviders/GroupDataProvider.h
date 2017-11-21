@@ -10,6 +10,7 @@
 #include <memory>
 #include <utility>
 
+#include "src/database/MediaFileItem.h"
 #include "src/dataproviders/ContactDataProvider.h"
 #include "src/dataproviders/messages/GroupMessageCursor.h"
 #include "src/protocol/ContactId.h"
@@ -36,7 +37,7 @@ namespace openmittsu {
 			virtual QString getGroupTitle(openmittsu::protocol::GroupId const& group) const = 0;
 			virtual QString getGroupDescription(openmittsu::protocol::GroupId const& group) const = 0;
 			virtual bool getGroupHasImage(openmittsu::protocol::GroupId const& group) const = 0;
-			virtual QByteArray getGroupImage(openmittsu::protocol::GroupId const& group) const = 0;
+			virtual openmittsu::database::MediaFileItem getGroupImage(openmittsu::protocol::GroupId const& group) const = 0;
 			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const = 0;
 			virtual bool getGroupIsAwaitingSync(openmittsu::protocol::GroupId const& group) const = 0;
 

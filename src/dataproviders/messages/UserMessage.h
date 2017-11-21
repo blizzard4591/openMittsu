@@ -1,6 +1,7 @@
 #ifndef OPENMITTSU_DATAPROVIDERS_USERMESSAGE_H_
 #define OPENMITTSU_DATAPROVIDERS_USERMESSAGE_H_
 
+#include "src/database/MediaFileItem.h"
 #include "src/dataproviders/messages/Message.h"
 #include "src/dataproviders/messages/UserMessageState.h"
 #include "src/utility/Location.h"
@@ -28,7 +29,7 @@ namespace openmittsu {
 
 				virtual QString getContentAsText() const = 0;
 				virtual openmittsu::utility::Location getContentAsLocation() const = 0;
-				virtual QByteArray getContentAsImage() const = 0;
+				virtual openmittsu::database::MediaFileItem getContentAsImage() const = 0;
 
 				virtual QString getCaption() const = 0;
 			};

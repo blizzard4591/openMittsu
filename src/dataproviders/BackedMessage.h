@@ -44,7 +44,7 @@ namespace openmittsu {
 
 			QString getContentAsText() const;
 			openmittsu::utility::Location getContentAsLocation() const;
-			QByteArray getContentAsImage() const;
+			openmittsu::database::MediaFileItem getContentAsImage() const;
 
 			QString getCaption() const;
 

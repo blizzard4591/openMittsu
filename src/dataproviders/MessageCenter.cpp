@@ -925,7 +925,10 @@ namespace openmittsu {
 			sendGroupCreation(group, m_storage->getGroupMembers(group, false), recipients, false);
 			sendGroupTitle(group, backedGroup.getTitle(), recipients, false);
 			if (backedGroup.hasImage()) {
-				sendGroupImage(group, backedGroup.getImage(), recipients, false);
+				openmittsu::database::MediaFileItem const groupImage = backedGroup.getImage();
+				if (groupImage.isAvailable()) {
+					sendGroupImage(group, groupImage.getData(), recipients, false);
+				}
 			}
 		}
 

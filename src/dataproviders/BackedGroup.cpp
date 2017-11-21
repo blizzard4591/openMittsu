@@ -35,7 +35,7 @@ namespace openmittsu {
 			return m_dataProvider.getGroupMessageCount(m_groupId);
 		}
 
-		QByteArray BackedGroup::getImage() const {
+		openmittsu::database::MediaFileItem BackedGroup::getImage() const {
 			return m_dataProvider.getGroupImage(m_groupId);
 		}
 

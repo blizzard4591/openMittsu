@@ -44,7 +44,7 @@ namespace openmittsu {
 			return DatabaseUtilities::countQuery(m_database.database, QStringLiteral("media"));
 		}
 
-		QByteArray ExternalMediaFileStorage::getMediaItem(QString const& uuid) const {
+		MediaFileItem ExternalMediaFileStorage::getMediaItem(QString const& uuid) const {
 			QSqlQuery query(m_database.database);
 			query.prepare(QStringLiteral("SELECT `uid`, `size`, `checksum`, `nonce`, `key` FROM `media` WHERE `uid` = :uuid"));
 			query.bindValue(QStringLiteral(":uuid"), QVariant(uuid));
@@ -65,7 +65,8 @@ namespace openmittsu {
 
 				QFile file(m_storagePath.filePath(buildFilename(uuid)));
 				if (!file.open(QFile::ReadOnly)) {
-					throw openmittsu::exceptions::InternalErrorException() << "Could not fetch media item for uuid \"" << uuid.toStdString() << "\". Could not open or read file.";
+					LOGGER()->warn("Could not fetch media item for uuid \"{}\". Could not open or read file.", uuid.toStdString());
+					return MediaFileItem(MediaFileItem::ItemStatus::UNAVAILABLE_EXTERNAL_FILE_DELETED);
 				}
 				
 				QByteArray const data = file.readAll();
@@ -73,14 +74,17 @@ namespace openmittsu {
 
 				QByteArray const decryptedData = decrypt(data, key, nonce);
 				if (decryptedData.size() != size) {
-					throw openmittsu::exceptions::InternalErrorException() << "Could not fetch media item for uuid \"" << uuid.toStdString() << "\". File size " << decryptedData.size() << " Bytes does not match expected size of " << size << " Bytes!";
+					LOGGER()->warn("Could not fetch media item for uuid \"{}\". File size {} Bytes does not match expected size of {} Bytes!", uuid.toStdString(), decryptedData.size(), size);
+					return MediaFileItem(MediaFileItem::ItemStatus::UNAVAILABLE_DECRYPTION_FAILED);
 				} else if(specifiedChecksum != openmittsu::crypto::Crc32::checksum(decryptedData)) {
-					throw openmittsu::exceptions::InternalErrorException() << "Could not fetch media item for uuid \"" << uuid.toStdString() << "\". The specified checksum (" << openmittsu::crypto::Crc32::toString(specifiedChecksum).toStdString() << ") did not match the checksum of the retrieved object (" << openmittsu::crypto::Crc32::toString(openmittsu::crypto::Crc32::checksum(decryptedData)).toStdString() << ").";
+					LOGGER()->warn("Could not fetch media item for uuid \"{}\". The specified checksum {} did not match the checksum of the retrieved object {}.", uuid.toStdString(), openmittsu::crypto::Crc32::toString(specifiedChecksum).toStdString(), openmittsu::crypto::Crc32::toString(openmittsu::crypto::Crc32::checksum(decryptedData)).toStdString());
+					return MediaFileItem(MediaFileItem::ItemStatus::UNAVAILABLE_FILE_CORRUPTED);
 				}
 
-				return decryptedData;
+				return MediaFileItem(decryptedData);
 			} else {
-				throw openmittsu::exceptions::InternalErrorException() << "Could not execute media query for uuid \"" << uuid.toStdString() << "\" table 'media'. Query error: " << query.lastError().text().toStdString();
+				LOGGER()->warn("Could not execute media query for uuid \"{}\" table 'media'. Query error: {}", uuid.toStdString(), query.lastError().text().toStdString());
+				return MediaFileItem(MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE);
 			}
 		}
 

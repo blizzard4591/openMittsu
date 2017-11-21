@@ -7,6 +7,8 @@
 #include <QList>
 #include <QString>
 
+#include "src/database/MediaFileItem.h"
+
 namespace openmittsu {
 	namespace backup {
 		class ContactMediaItemBackupObject;
@@ -22,7 +24,7 @@ namespace openmittsu {
 			virtual bool hasMediaItem(QString const& uuid) const = 0;
 			virtual int getMediaItemCount() const = 0;
 
-			virtual QByteArray getMediaItem(QString const& uuid) const = 0;
+			virtual MediaFileItem getMediaItem(QString const& uuid) const = 0;
 			virtual QString insertMediaItem(QByteArray const& data) = 0;
 			virtual void removeMediaItem(QString const& uuid) = 0;
 

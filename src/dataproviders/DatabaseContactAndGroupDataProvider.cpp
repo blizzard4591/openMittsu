@@ -116,10 +116,10 @@ namespace openmittsu {
 			return true;
 		}
 
-		QByteArray DatabaseContactAndGroupDataProvider::getGroupImage(openmittsu::protocol::GroupId const& group) const {
+		openmittsu::database::MediaFileItem DatabaseContactAndGroupDataProvider::getGroupImage(openmittsu::protocol::GroupId const& group) const {
 			QVariant const result = queryField(group, QStringLiteral("avatar_uuid"));
 			if (result.isNull() || result.toString().isEmpty()) {
-				return QByteArray();
+				return openmittsu::database::MediaFileItem(openmittsu::database::MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE);
 			}
 
 			return m_database.getMediaItem(result.toString());

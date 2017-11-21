@@ -267,7 +267,7 @@ namespace openmittsu {
 			return openmittsu::utility::Location::fromDatabaseString(queryField(QStringLiteral("body")).toString());
 		}
 
-		QByteArray DatabaseGroupMessage::getContentAsImage() const {
+		MediaFileItem DatabaseGroupMessage::getContentAsImage() const {
 			GroupMessageType const messageType = getMessageType();
 			if (messageType != GroupMessageType::IMAGE) {
 				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as image because it has type " << GroupMessageTypeHelper::toString(messageType) << "!";

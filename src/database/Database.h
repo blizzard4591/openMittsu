@@ -116,7 +116,7 @@ namespace openmittsu {
 			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const override;
 			QString getGroupTitle(openmittsu::protocol::GroupId const& group) const;
 			QString getGroupDescription(openmittsu::protocol::GroupId const& group) const;
-			QByteArray getGroupImage(openmittsu::protocol::GroupId const& group) const;
+			MediaFileItem getGroupImage(openmittsu::protocol::GroupId const& group) const;
 			bool getGroupIsAwaitingSync(openmittsu::protocol::GroupId const& group) const;
 
 			QHash<openmittsu::protocol::GroupId, std::pair<QSet<openmittsu::protocol::ContactId>, QString>> getKnownGroupsWithMembersAndTitles() const;
@@ -259,7 +259,7 @@ namespace openmittsu {
 			bool hasOptionInternal(QString const& optionName, bool isInternalOption = false);
 			void setOptionInternal(QString const& optionName, QString const& optionValue, bool isInternalOption = false);
 			void setBackup(openmittsu::protocol::ContactId selfId, openmittsu::crypto::KeyPair key);
-			QByteArray getMediaItem(QString const& uuid) const;
+			MediaFileItem getMediaItem(QString const& uuid) const;
 			QString insertMediaItem(QByteArray const& data);
 			void removeMediaItem(QString const& uuid);
 			void setupQueueTimer();

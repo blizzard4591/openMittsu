@@ -38,7 +38,7 @@ namespace openmittsu {
 			virtual int getMessageCount() const override;
 
 			bool hasImage() const;
-			QByteArray getImage() const;
+			openmittsu::database::MediaFileItem getImage() const;
 
 			bool hasMember(openmittsu::protocol::ContactId const& identity) const;
 

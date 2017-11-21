@@ -29,7 +29,7 @@ namespace openmittsu {
 			virtual QString getGroupTitle(openmittsu::protocol::GroupId const& group) const override;
 			virtual QString getGroupDescription(openmittsu::protocol::GroupId const& group) const override;
 			virtual bool getGroupHasImage(openmittsu::protocol::GroupId const& group) const override;
-			virtual QByteArray getGroupImage(openmittsu::protocol::GroupId const& group) const override;
+			virtual openmittsu::database::MediaFileItem getGroupImage(openmittsu::protocol::GroupId const& group) const override;
 			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const override;
 			virtual bool getGroupIsAwaitingSync(openmittsu::protocol::GroupId const& group) const override;
 

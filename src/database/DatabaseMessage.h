@@ -11,6 +11,7 @@ namespace openmittsu {
 	namespace database {
 
 		class Database;
+		class MediaFileItem;
 
 		class DatabaseMessage : public virtual openmittsu::dataproviders::messages::Message {
 		public:
@@ -49,7 +50,7 @@ namespace openmittsu {
 			QVariant queryField(QString const& fieldName) const;
 			void setFields(QVariantMap const& fieldsAndValues);
 
-			QByteArray getMediaItem(QString const& uuid) const;
+			MediaFileItem getMediaItem(QString const& uuid) const;
 
 			void announceMessageChanged();
 		private:
