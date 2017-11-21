@@ -20,11 +20,8 @@ namespace openmittsu {
 		}
 
 		const char* BaseException::what() const NOEXCEPT {
-			std::string errorString = this->stream.str();
-			char* result = new char[errorString.size() + 1];
-			result[errorString.size()] = '\0';
-			std::copy(errorString.begin(), errorString.end(), result);
-			return result;
+			errorString = this->stream.str();
+			return errorString.c_str();
 		}
 
 		const char* BaseException::name() const NOEXCEPT {
