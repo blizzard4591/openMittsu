@@ -123,10 +123,23 @@ Database::~Database() {
 void Database::setKey(QString const& password) {
 	if (m_usingCryptoDb) {
 		QSqlQuery query(database);
-		query.prepare(QStringLiteral("PRAGMA key = '%1';").arg(password));
-		query.exec();
+		bool needsEncoding = false;
+		for (int i = 0; i < password.size(); ++i) {
+			ushort const unicodeCodepoint = password.at(i).unicode();
+			// Non-printable, above 127 or the ' character
+			if (((unicodeCodepoint < 32) || (unicodeCodepoint > 126)) || (unicodeCodepoint == 39)) {
+				needsEncoding = true;
+				break;
+			}
+		}
 
-		LOGGER_DEBUG("Key returned {} entries (should be -1). Last Error: {}", query.size(), query.lastError().text().toStdString());
+		if (needsEncoding) {
+			LOGGER()->info("The password contains non-printable or non-basic-ASCII characters. Converting to UTF-8 and stringifying resulting hexadecimal sequence.");
+			query.exec(QStringLiteral("PRAGMA key = '%1';").arg(QString(password.toUtf8().toHex())));
+		} else {
+			query.exec(QStringLiteral("PRAGMA key = '%1';").arg(password));
+		}
+
 		query.finish();
 	}
 }
