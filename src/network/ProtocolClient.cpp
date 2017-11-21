@@ -381,6 +381,7 @@ namespace openmittsu {
 				keepAliveTimer->start();
 			} else if (packetTypeByte == (PROTO_PACKET_SIGNATURE_CONNECTION_DUPLICATE)) {
 				LOGGER()->warn("Received a CONNECTION_DUPLICATE warning, we will be forcefully disconnected after this. Message from Server: {}", QString::fromUtf8(packetContents).toStdString());
+				failedReconnectAttempts = std::numeric_limits<decltype(failedReconnectAttempts)>::max();
 
 				emit duplicateIdUsageDetected();
 			} else {
