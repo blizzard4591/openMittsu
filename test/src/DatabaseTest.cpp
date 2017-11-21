@@ -253,7 +253,8 @@ TEST_F(DatabaseTestFramework, contactMessages) {
 		ASSERT_TRUE(cursorD.next());
 		std::shared_ptr<openmittsu::dataproviders::messages::ContactMessage> imageMessage = cursorD.getMessage();
 		ASSERT_EQ(imageMessage->getContactId(), contactIdD);
-		ASSERT_EQ(imageMessage->getContentAsImage(), imageData);
+		ASSERT_TRUE(imageMessage->getContentAsImage().isAvailable());
+		ASSERT_EQ(imageMessage->getContentAsImage().getData(), imageData);
 	}
 }
 
@@ -392,10 +393,9 @@ TEST_F(DatabaseTestFramework, groups) {
 	ASSERT_TRUE(knownGroupsContainingMember.contains(groupC));
 
 	ASSERT_THROW(db->getGroupImage(nonExistantGroupId), openmittsu::exceptions::InternalErrorException);
-	QByteArray const emptyImage;
-	ASSERT_EQ(emptyImage, db->getGroupImage(groupA));
-	ASSERT_EQ(emptyImage, db->getGroupImage(groupB));
-	ASSERT_EQ(emptyImage, db->getGroupImage(groupC));
+	ASSERT_FALSE(db->getGroupImage(groupA).isAvailable());
+	ASSERT_FALSE(db->getGroupImage(groupB).isAvailable());
+	ASSERT_FALSE(db->getGroupImage(groupC).isAvailable());
 	ASSERT_EQ(0, db->getMediaItemCount());
 
 	QByteArray const testDataA(QStringLiteral("testDataA").toUtf8());
@@ -403,18 +403,20 @@ TEST_F(DatabaseTestFramework, groups) {
 	ASSERT_THROW(db->storeReceivedGroupSetImage(nonExistantGroupId, nonExistantContactId, messageC, openmittsu::protocol::MessageTime::fromDatabase(123), openmittsu::protocol::MessageTime::fromDatabase(456), testDataA), openmittsu::exceptions::InternalErrorException);
 	ASSERT_NO_THROW(db->storeReceivedGroupSetImage(groupC, contactIdD, messageC, openmittsu::protocol::MessageTime::fromDatabase(123), openmittsu::protocol::MessageTime::fromDatabase(456), testDataA));
 
-	ASSERT_EQ(emptyImage, db->getGroupImage(groupA));
-	ASSERT_EQ(emptyImage, db->getGroupImage(groupB));
-	ASSERT_EQ(testDataA, db->getGroupImage(groupC));
+	ASSERT_FALSE(db->getGroupImage(groupA).isAvailable());
+	ASSERT_FALSE(db->getGroupImage(groupB).isAvailable());
+	ASSERT_TRUE(db->getGroupImage(groupC).isAvailable());
+	ASSERT_EQ(testDataA, db->getGroupImage(groupC).getData());
 	ASSERT_EQ(2, db->getMediaItemCount());
 
 	QByteArray const testDataB(QStringLiteral("longerTestDataB").toUtf8());
 	openmittsu::protocol::MessageId const messageD = this->getFreeMessageId();
 	ASSERT_NO_THROW(db->storeReceivedGroupSetImage(groupC, contactIdD, messageD, openmittsu::protocol::MessageTime::fromDatabase(789), openmittsu::protocol::MessageTime::fromDatabase(1011), testDataB));
 
-	ASSERT_EQ(emptyImage, db->getGroupImage(groupA));
-	ASSERT_EQ(emptyImage, db->getGroupImage(groupB));
-	ASSERT_EQ(testDataB, db->getGroupImage(groupC));
+	ASSERT_FALSE(db->getGroupImage(groupA).isAvailable());
+	ASSERT_FALSE(db->getGroupImage(groupB).isAvailable());
+	ASSERT_TRUE(db->getGroupImage(groupC).isAvailable());
+	ASSERT_EQ(testDataB, db->getGroupImage(groupC).getData());
 	ASSERT_EQ(3, db->getMediaItemCount());
 }
 
@@ -554,7 +556,8 @@ TEST_F(DatabaseTestFramework, groupMessages) {
 		ASSERT_TRUE(cursorD.next());
 		std::shared_ptr<openmittsu::dataproviders::messages::GroupMessage> imageMessage = cursorD.getMessage();
 		ASSERT_EQ(imageMessage->getGroupId(), groupC);
-		ASSERT_EQ(imageMessage->getContentAsImage(), imageData);
+		ASSERT_TRUE(imageMessage->getContentAsImage().isAvailable());
+		ASSERT_EQ(imageMessage->getContentAsImage().getData(), imageData);
 	}
 }
 
