@@ -232,7 +232,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 # the following targets: gtest, gtest_main, gmock
 # and gmock_main
 add_subdirectory("${CMAKE_BINARY_DIR}/googletest-src"
-                 "${CMAKE_BINARY_DIR}/googletest-build")
+                 "${CMAKE_BINARY_DIR}/googletest-build" EXCLUDE_FROM_ALL)
  
 
 # Main Sources
@@ -480,6 +480,16 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A chat client for Threema-style chat netw
 set(CPACK_DEBIAN_PACKAGE_SECTION "net")
 set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "")
 set(DEBIAN_PACKAGE_BUILDS_DEPENDS "debhelper (>= 9), cmake (>= 3), qt5-qmake, qtbase5-dev, qtbase5-dev-tools, qtmultimedia5-dev, libsodium-dev, libqrencode-dev, gcc, g++")
+
+find_program(DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
+if (DPKG_PROGRAM)
+	execute_process(COMMAND ${DPKG_PROGRAM} --print-architecture OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE OUTPUT_STRIP_TRAILING_WHITESPACE)
+	set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_${OPENMITTSU_CPP_VERSION_MAJOR}.${OPENMITTSU_CPP_VERSION_MINOR}.${OPENMITTSU_CPP_VERSION_PATCH}-${OPENMITTSU_CPP_VERSION_COMMITS_AHEAD}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
+else (DPKG_PROGRAM)
+	set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_${OPENMITTSU_CPP_VERSION_MAJOR}.${OPENMITTSU_CPP_VERSION_MINOR}.${OPENMITTSU_CPP_VERSION_PATCH}-${OPENMITTSU_CPP_VERSION_COMMITS_AHEAD}_${CMAKE_SYSTEM_NAME}")
+	SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
+endif(DPKG_PROGRAM)
+
 SET(CPACK_PACKAGE_EXECUTABLES "openMittsu;OpenMittsu")
 SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
 if (WIN32 AND NOT UNIX)
