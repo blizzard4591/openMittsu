@@ -436,7 +436,10 @@ install(TARGETS openMittsu
 install(TARGETS openMittsuVersionInfo
    RUNTIME
    DESTINATION bin)
-
+install(TARGETS openMittsuTests
+   RUNTIME
+   DESTINATION bin)
+   
 if (MSVC)
 	set(OPENMITTSU_WINDEPLOYQT_EXE "${Qt5Core_DIR}/../../../bin/windeployqt.exe")
 	
@@ -467,9 +470,9 @@ set(CPACK_PACKAGE_VERSION_MINOR "${OPENMITTSU_CPP_VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH "${OPENMITTSU_CPP_VERSION_PATCH}")
 
 set(CPACK_PACKAGE_VERSION "${OPENMITTSU_CPP_VERSION_MAJOR}.${OPENMITTSU_CPP_VERSION_MINOR}.${OPENMITTSU_CPP_VERSION_PATCH}plus${OPENMITTSU_CPP_VERSION_COMMITS_AHEAD}")
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt5core5a, libqt5gui5, libqt5multimedia5, libqt5multimedia5-plugins, libqt5network5, libqt5sql5, libqt5sql5-sqlite, libqt5widgets5, openssl, libsodium13, libqrencode3")
-set(CPACK_PACKAGE_CONTACT "Philipp Berger <admin@philippberger.de>")
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Philipp Berger <admin@philippberger.de>")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt5core5a, libqt5gui5, libqt5multimedia5, libqt5multimedia5-plugins, libqt5network5, libqt5sql5, libqt5sql5-sqlite, libqt5sql5-sqlcipher, libqt5widgets5, libsodium18 (>= 1.0.12), libqrencode3")
+set(CPACK_PACKAGE_CONTACT "Philipp Berger <packaging@openmittsu.de>")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Philipp Berger <packaging@openmittsu.de>")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A chat client for Threema-style chat networks")
 set(CPACK_DEBIAN_PACKAGE_SECTION "net")
 set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "")
