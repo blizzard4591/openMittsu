@@ -432,13 +432,16 @@ include(InstallRequiredSystemLibraries)
 
 install(TARGETS openMittsu
    RUNTIME
-   DESTINATION bin)
+   DESTINATION bin
+   COMPONENT installComponent)
 install(TARGETS openMittsuVersionInfo
    RUNTIME
-   DESTINATION bin)
+   DESTINATION bin
+   COMPONENT installComponent)
 install(TARGETS openMittsuTests
    RUNTIME
-   DESTINATION bin)
+   DESTINATION bin
+   COMPONENT installComponent)
    
 if (MSVC)
 	set(OPENMITTSU_WINDEPLOYQT_EXE "${Qt5Core_DIR}/../../../bin/windeployqt.exe")
@@ -493,4 +496,8 @@ endif(WIN32 AND NOT UNIX)
 set(CPACK_SOURCE_IGNORE_FILES ".git")
 set(CPACK_BUNDLE_NAME "openmittsu")
 set(CPACK_SOURCE_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
+
+set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
+set(CPACK_COMPONENTS_ALL installComponent)
+
 INCLUDE(CPack)
