@@ -24,7 +24,9 @@ Currently, the application has been built and tested on:
 Other platforms should work with no or minimal changes.
 
 ## Binaries
-Currently we only provide binaries for Windows x64 at https://downloads.openmittsu.de/ - Scroll down to find the latest build. Do not forget to install the Visual Studio Redistributable (vcredist_x64.exe).
+Currently we only provide binaries for  the following platforms:
+ - Windows 32bit (x86) and 64bit (x64) at https://downloads.openmittsu.de/ - Scroll down to find the latest build. Do not forget to install the Visual Studio Redistributable (vcredist_x64.exe).
+ - Debian/Ubuntu amd64 at https://downloads.openmittsu.de/deb/ - Read the hints on package dependencies.
 
 ## How to use
 The application stores your ID, contacts and messages in a database.
