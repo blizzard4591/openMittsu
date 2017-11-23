@@ -528,8 +528,6 @@ void Database::storeReceivedGroupMessageLocation(openmittsu::protocol::GroupId c
 void Database::storeReceivedGroupLeave(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived) {
 	if (!hasGroup(group)) {
 		throw openmittsu::exceptions::InternalErrorException() << "The given group " << group.toString() << " is not known, can not store group leave request!";
-	} else if (group.getOwner() != getSelfContact()) {
-		throw openmittsu::exceptions::InternalErrorException() << "The given group " << group.toString() << " is owned by us, can not store group leave request from " << sender.toString() << "!";
 	}
 
 	DatabaseGroupMessage::insertGroupMessageFromThem(*this, group, sender, messageId, generateUuid(), timeSent, timeReceived, GroupMessageType::LEAVE, QStringLiteral(""), true, QStringLiteral(""));
