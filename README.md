@@ -26,7 +26,15 @@ Other platforms should work with no or minimal changes.
 ## Binaries
 Currently we only provide binaries for  the following platforms:
  - Windows 32bit (x86) and 64bit (x64) at https://downloads.openmittsu.de/ - Scroll down to find the latest build. Do not forget to install the Visual Studio Redistributable (vcredist_x64.exe).
- - Debian/Ubuntu amd64 at https://downloads.openmittsu.de/deb/ - Read the hints on package dependencies.
+ - Debian 9 amd64 using our APT repository:
+
+	1. First, add the GPG key for the repository:
+		```wget -O - https://packages.openmittsu.de/openmittsu.packages.gpg.key|apt-key add -```
+	2. Now, add the repository. As root or using sudo, create a file called "buster.list" in /etc/apt/sources.list.d/ with the following contents:
+		```deb https://packages.openmittsu.de/apt/debian stretch main```
+	3. You can now install (or update) openMittsu using:
+		```sudo apt-get update```
+		```sudo apt-get install openmittsu```
 
 ## How to use
 The application stores your ID, contacts and messages in a database.
