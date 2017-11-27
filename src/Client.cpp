@@ -93,6 +93,18 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 		QMessageBox::warning(this, tr("Database driver not available"), tr("openMittsu relies on SqlCipher and QSqlCipher for securely storing the database.\nThe QSQLCIPHER driver is not available. It should reside in the sqldrivers\\ subdirectory of openMittsu.\nWe will use the unencrypted SQLITE driver instead."));
 	}
 
+	// Check whether OpenSSL is available
+	{
+		QSslCertificate const testCertificate = QSslCertificate(QByteArray::fromBase64(m_serverConfiguration->getApiServerCertificateAsBase64().toLocal8Bit()), QSsl::EncodingFormat::Pem);
+		if (testCertificate.isNull()) {
+			QMessageBox::critical(this, tr("OpenSSL support unavailable"), tr("openMittsu relies on OpenSSL for accessing https resources and it can not function without it.\nMake sure to install runtime libraries from your distribution.\nOn Windows, ssleay32.dll and libssl32.dll in the appropriate architecture are required in the same folder as openMittsu.exe"));
+			QApplication::exit(-1);
+			throw openmittsu::exceptions::InternalErrorException() << "No OpenSSL support available, terminating.";
+		} else {
+			LOGGER_DEBUG("OpenSSL context seems to work, could load certificate.");
+		}
+	}
+
 	// Load stored settings
 	this->m_optionMaster = std::make_shared<openmittsu::utility::OptionMaster>();
 	QString const databaseFile = m_optionMaster->getOptionAsQString(openmittsu::utility::OptionMaster::Options::FILEPATH_DATABASE);
