@@ -272,7 +272,7 @@ namespace openmittsu {
 			openmittsu::protocol::MessageId const messageId = this->m_storage->storeSentGroupSyncRequest(group, sentTime, willQueue);
 
 			if (willQueue) {
-				m_networkSentMessageAcceptor->processSentGroupSyncRequest(group, this->m_storage->getGroupMembers(group, true), messageId, sentTime);
+				m_networkSentMessageAcceptor->processSentGroupSyncRequest(group, { group.getOwner() }, messageId, sentTime);
 			}
 
 			return true;
