@@ -711,9 +711,7 @@ openmittsu::protocol::MessageId Database::storeSentGroupSetImage(openmittsu::pro
 }
 
 openmittsu::protocol::MessageId Database::storeSentGroupSyncRequest(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued) {
-	if (!hasGroup(group)) {
-		throw openmittsu::exceptions::InternalErrorException() << "The given group " << group.toString() << " is not known, can not store group sync request!";
-	} else if (group.getOwner() == getSelfContact()) {
+	if (group.getOwner() == getSelfContact()) {
 		throw openmittsu::exceptions::InternalErrorException() << "The given group " << group.toString() << " is owned by us, can not store group sync request from us!";
 	}
 	

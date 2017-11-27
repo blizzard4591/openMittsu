@@ -30,7 +30,7 @@ Currently we only provide binaries for  the following platforms:
 
 	1. First, add the GPG key for the repository:
 		```wget -O - https://packages.openmittsu.de/openmittsu.packages.gpg.key|apt-key add -```
-	2. Now, add the repository. As root or using sudo, create a file called "buster.list" in /etc/apt/sources.list.d/ with the following contents:
+	2. Now, add the repository. As root or using sudo, create a file called "openmittsu.list" in /etc/apt/sources.list.d/ with the following contents:
 		```deb https://packages.openmittsu.de/apt/debian stretch main```
 	3. You can now install (or update) openMittsu using:
 		```sudo apt-get update```
