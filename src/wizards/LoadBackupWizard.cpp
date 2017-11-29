@@ -8,13 +8,14 @@
 #include "src/backup/IdentityBackup.h"
 #include "src/backup/BackupReader.h"
 #include "src/database/Database.h"
+#include "src/utility/LegacyClientConfigurationImporter.h"
 #include "src/utility/MakeUnique.h"
 #include "src/utility/QObjectConnectionMacro.h"
 
 namespace openmittsu {
 	namespace wizards {
 
-		LoadBackupWizard::LoadBackupWizard(QWidget* parent) : QWizard(parent), m_ui(std::make_unique<Ui::LoadBackupWizard>()) {
+		LoadBackupWizard::LoadBackupWizard(QString const& legacyClientConfigurationFileName, QWidget* parent) : QWizard(parent), m_ui(std::make_unique<Ui::LoadBackupWizard>()), m_hasPresetBackup(false) {
 			m_ui->setupUi(this);
 
 			OPENMITTSU_CONNECT(this, currentIdChanged(int), this, pageNextOnClick(int));
@@ -28,6 +29,9 @@ namespace openmittsu {
 			m_loadBackupWizardPageIdBackupData = std::make_unique<LoadBackupWizardPageIdBackupData>(this);
 			this->setPage(Pages::PAGE_IDBACKUP_DATA, m_loadBackupWizardPageIdBackupData.get());
 
+			m_loadBackupWizardPageLegacyClientConfigurationData = std::make_unique<LoadBackupWizardPageLegacyClientConfigurationData>(legacyClientConfigurationFileName, this);
+			this->setPage(Pages::PAGE_LEGACYCLIENTCONFIGURATION, m_loadBackupWizardPageLegacyClientConfigurationData.get());
+
 			m_loadBackupWizardPageSaveDatabase = std::make_unique<LoadBackupWizardPageSaveDatabase>(*this, this);
 			this->setPage(Pages::PAGE_SELECTTARGET, m_loadBackupWizardPageSaveDatabase.get());
 
@@ -38,6 +42,17 @@ namespace openmittsu {
 			this->setPage(Pages::PAGE_DONE, m_loadBackupWizardPageDone.get());
 
 			setOption(QWizard::NoBackButtonOnLastPage, true);
+			
+			if (legacyClientConfigurationFileName.isEmpty()) {
+				this->setStartId(Pages::PAGE_SELECTBACKUPTYPE);
+			} else {
+				if (LoadBackupWizardPageLegacyClientConfigurationData::isValidClientConfiguration(legacyClientConfigurationFileName, true, this)) {
+					m_hasPresetBackup = true;
+					this->setStartId(Pages::PAGE_SELECTTARGET);
+				} else {
+					this->setStartId(Pages::PAGE_LEGACYCLIENTCONFIGURATION);
+				}
+			}
 		}
 
 		LoadBackupWizard::~LoadBackupWizard() {
@@ -59,7 +74,7 @@ namespace openmittsu {
 						back();
 						QMessageBox::warning(this, tr("Incorrect Password or Backup"), tr("Either the password is incorrect or you mistyped the Backup string!\nProblem: %1").arg(iie.what()));
 					}
-				} else {
+				} else if (hasVisitedPage(Pages::PAGE_DATABACKUP_DATA)) {
 					QString const backupLocationString = field("edtDataBackupLocation").toString();
 					QString const passwordString = field("edtDataBackupPassword").toString();
 
@@ -89,13 +104,30 @@ namespace openmittsu {
 						back();
 						QMessageBox::warning(this, tr("Incorrect Password or Backup"), tr("Either the password is incorrect or your backup is corrupted!\nProblem: %1").arg(iie.what()));
 					}
+				} else {
+					QString const clientConfigurationFilePath = field("edtClientConfigurationLocation").toString();
+
+					if (LoadBackupWizardPageLegacyClientConfigurationData::isValidClientConfiguration(clientConfigurationFilePath, false)) {
+						try {
+							openmittsu::utility::LegacyClientConfigurationImporter lcci(openmittsu::utility::LegacyClientConfigurationImporter::fromFile(clientConfigurationFilePath));
+
+							m_backupString = lcci.getBackupString();
+							m_backupPassword = lcci.getBackupPassword();
+						} catch (...) {
+							back();
+							QMessageBox::warning(this, tr("Incorrect client configuration"), tr("Something went wrong!\nDid you delete the file?"));
+						}
+					} else {
+						back();
+						QMessageBox::warning(this, tr("Incorrect client configuration"), tr("Something went wrong!\nDid you delete the file?"));
+					}
 				}
 			} else if (page(pageId) == m_loadBackupWizardPageDone.get()) {
 				QString const databaseLocationString = field("edtSaveDatabaseLocation").toString();
 				QString const databasePassword = field("edtSaveDatabasePassword").toString();
 				QDir databaseLocation(databaseLocationString);
 
-				if (hasVisitedPage(Pages::PAGE_IDBACKUP_DATA)) {
+				if (hasVisitedPage(Pages::PAGE_IDBACKUP_DATA) || hasVisitedPage(Pages::PAGE_LEGACYCLIENTCONFIGURATION) || m_hasPresetBackup) {
 					try {
 						openmittsu::backup::IdentityBackup data(openmittsu::backup::IdentityBackup::fromBackupString(m_backupString, m_backupPassword));
 

@@ -32,7 +32,7 @@ namespace openmittsu {
 		}
 
 		int LoadBackupWizardPageSaveDatabase::nextId() const {
-			if (m_loadBackupWizard.hasVisitedPage(LoadBackupWizard::Pages::PAGE_IDBACKUP_DATA)) {
+			if (m_loadBackupWizard.hasVisitedPage(LoadBackupWizard::Pages::PAGE_IDBACKUP_DATA) || m_loadBackupWizard.hasVisitedPage(LoadBackupWizard::Pages::PAGE_LEGACYCLIENTCONFIGURATION) || m_loadBackupWizard.m_hasPresetBackup) {
 				return LoadBackupWizard::Pages::PAGE_DONE;
 			} else {
 				return LoadBackupWizard::Pages::PAGE_DATABASE_SAVE_IN_PROGRESS;
