@@ -46,6 +46,7 @@
 #include "src/exceptions/InternalErrorException.h"
 #include "src/exceptions/IllegalArgumentException.h"
 #include "src/exceptions/InvalidInputException.h"
+#include "src/exceptions/InvalidPasswordOrDatabaseException.h"
 #include "src/exceptions/ProtocolErrorException.h"
 
 #include "src/tasks/IdentityReceiverCallbackTask.h"
@@ -110,27 +111,11 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 	QString const databaseFile = m_optionMaster->getOptionAsQString(openmittsu::utility::OptionMaster::Options::FILEPATH_DATABASE);
 	bool showFirstUseWizard = false;
 	if (!databaseFile.isEmpty()) {
-		while (true) {
-			bool ok = false;
-			QString const password = QInputDialog::getText(this, tr("Database password"), tr("Please enter the database password for file \"%1\":").arg(databaseFile), QLineEdit::Password, QString(), &ok);
-			if (ok && !password.isNull()) {
-				try {
-					QDir location(databaseFile);
-					location.cdUp();
-
-					this->m_database = std::make_shared<openmittsu::database::Database>(databaseFile, password, location);
-					updateDatabaseInfo(databaseFile);
-					break;
-				} catch (openmittsu::exceptions::InternalErrorException&) {
-					LOGGER_DEBUG("Removing key \"FILEPATH_DATABASE\" from stored settings as the file is not valid.");
-					m_optionMaster->setOption(openmittsu::utility::OptionMaster::Options::FILEPATH_DATABASE, "");
-					break;
-				} catch (openmittsu::exceptions::InvalidInputException&) {
-					QMessageBox::information(this, tr("Invalid password"), tr("The entered database password was invalid."));
-				}
-			} else {
-				break;
-			}
+		if (!QFile::exists(databaseFile)) {
+			LOGGER_DEBUG("Removing key \"FILEPATH_DATABASE\" from stored settings as the file is not valid.");
+			m_optionMaster->setOption(openmittsu::utility::OptionMaster::Options::FILEPATH_DATABASE, "");
+		} else {
+			openDatabaseFile(databaseFile);
 		}
 	} else {
 		showFirstUseWizard = true;
@@ -338,33 +323,38 @@ void Client::btnOpenDatabaseOnClick() {
 }
 
 void Client::openDatabaseFile(QString const& fileName) {
-	QFileInfo fileInfo(fileName);
-	if (!fileInfo.exists()) {
-		QMessageBox::warning(this, tr("Database file does not exist"), tr("The selected database file does not exist. Please check the access permissions!"));
+	if (!QFile::exists(fileName)) {
+		QMessageBox::warning(this, tr("Database file does not exist"), tr("The selected database file \"%1\" does not exist. Please check the access permissions!").arg(fileName));
 		return;
 	}
 
-	QDir const folder(fileInfo.absolutePath());
-	if (!folder.exists()) {
-		LOGGER()->warn("The selected Database file exists, but the parent directory does not? Strange!");
-		return;
+	QString password;
+	while (true) {
+		bool ok = false;
+		QString const password = QInputDialog::getText(this, tr("Database password"), tr("Please enter the database password for file \"%1\":").arg(fileName), QLineEdit::Password, QString(), &ok);
+		if (ok && !password.isNull()) {
+			try {
+				QDir location(fileName);
+				location.cdUp();
+
+				this->m_database = std::make_shared<openmittsu::database::Database>(fileName, password, location);
+				this->m_optionMaster->setOption(openmittsu::utility::OptionMaster::Options::FILEPATH_DATABASE, fileName);
+				updateDatabaseInfo(fileName);
+
+				contactRegistryOnIdentitiesChanged();
+				break;
+			} catch (openmittsu::exceptions::InternalErrorException&) {
+				LOGGER_DEBUG("Removing key \"FILEPATH_DATABASE\" from stored settings as the file is not valid.");
+				m_optionMaster->setOption(openmittsu::utility::OptionMaster::Options::FILEPATH_DATABASE, "");
+				break;
+			} catch (openmittsu::exceptions::InvalidPasswordOrDatabaseException&) {
+				QMessageBox::information(this, tr("Invalid password"), tr("The entered database password was invalid."));
+			}
+		} else {
+			m_optionMaster->setOption(openmittsu::utility::OptionMaster::Options::FILEPATH_DATABASE, "");
+			break;
+		}
 	}
-
-	bool ok = false;
-	QString const password = QInputDialog::getText(this, tr("Database Password"), tr("Please enter the database password:"), QLineEdit::Password, QString(), &ok);
-	if (!ok || password.isNull()) {
-		return;
-	}
-
-	if (!validateDatabaseFile(fileName, password, false)) {
-		return;
-	}
-
-	m_database = std::make_shared<openmittsu::database::Database>(fileName, password, folder);
-	this->m_optionMaster->setOption(openmittsu::utility::OptionMaster::Options::FILEPATH_DATABASE, fileName);
-	updateDatabaseInfo(fileName);
-
-	contactRegistryOnIdentitiesChanged();
 }
 
 void Client::contactRegistryOnIdentitiesChanged() {

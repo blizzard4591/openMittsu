@@ -14,6 +14,7 @@
 #include <iostream>
 #include "src/crypto/Crc32.h"
 #include "src/exceptions/InternalErrorException.h"
+#include "src/exceptions/InvalidPasswordOrDatabaseException.h"
 #include "src/utility/Logging.h"
 #include "src/utility/MakeUnique.h"
 #include "src/utility/QObjectConnectionMacro.h"
@@ -51,7 +52,7 @@ Database::Database(QString const& filename, QString const& password, QDir const&
 
 	QStringList const tables = database.tables(QSql::AllTables);
 	if (!tables.contains(QStringLiteral("sqlite_master"))) {
-		throw openmittsu::exceptions::InternalErrorException() << "SQLITE master table does not exist, invalid database.";
+		throw openmittsu::exceptions::InvalidPasswordOrDatabaseException() << "SQLITE master table does not exist, invalid database or incorrect password.";
 	}
 
 	createOrUpdateTables();
@@ -1190,7 +1191,7 @@ void Database::sendAllWaitingMessages(openmittsu::dataproviders::SentMessageAcce
 					throw openmittsu::exceptions::InternalErrorException() << "A waiting message has type VIDEO?!";
 					break;
 				case GroupMessageType::SYNC_REQUEST:
-					messageAcceptor.processSentGroupSyncRequest(group, m_contactAndGroupDataProvider.getGroupMembers(group, false), messageId, message.getCreatedAt());
+					messageAcceptor.processSentGroupSyncRequest(group, { group.getOwner() }, messageId, message.getCreatedAt());
 					message.setIsQueued(true);
 					break;
 				case GroupMessageType::SET_IMAGE:
