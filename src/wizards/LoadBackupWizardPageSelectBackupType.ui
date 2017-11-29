@@ -51,6 +51,16 @@
     </widget>
    </item>
    <item>
+    <widget class="QRadioButton" name="rbtnLegacyClientConfiguration">
+     <property name="text">
+      <string>OpenMittsu 0.9.2 client configuration (legacy)</string>
+     </property>
+     <attribute name="buttonGroup">
+      <string notr="true">buttonGroup</string>
+     </attribute>
+    </widget>
+   </item>
+   <item>
     <widget class="QLabel" name="lblExplanation">
      <property name="text">
       <string>An ID Backup comes in the form of a text-string that looks like this: HTTH-C2A1-O1Q2-.... It contains only your private key and ID - no contacts or messages.

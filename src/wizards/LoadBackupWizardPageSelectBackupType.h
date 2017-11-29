@@ -22,7 +22,8 @@ namespace openmittsu {
 			enum class SelectedBackupType {
 				Invalid,
 				IdBackup,
-				DataBackup
+				DataBackup,
+				LegacyClientConfiguration
 			};
 			SelectedBackupType getSelectedBackupType() const;
 		private slots:

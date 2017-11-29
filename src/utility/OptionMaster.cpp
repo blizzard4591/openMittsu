@@ -58,6 +58,8 @@ namespace openmittsu {
 			registerOption(OptionGroups::GROUP_GENERAL, Options::FILEPATH_DATABASE, QStringLiteral("options/database/databaseFile"), tr("The file path where the main database file is stored."), "", OptionTypes::TYPE_FILEPATH, OptionStorage::STORAGE_SIMPLE);
 			registerOption(OptionGroups::GROUP_INTERNAL, Options::BINARY_MAINWINDOW_GEOMETRY, QStringLiteral("options/internal/clientMainWindowGeometry"), "", QByteArray(), OptionTypes::TYPE_BINARY, OptionStorage::STORAGE_SIMPLE);
 			registerOption(OptionGroups::GROUP_INTERNAL, Options::BINARY_MAINWINDOW_STATE, QStringLiteral("options/internal/clientMainWindowState"), "", QByteArray(), OptionTypes::TYPE_BINARY, OptionStorage::STORAGE_SIMPLE);
+			registerOption(OptionGroups::GROUP_INTERNAL, Options::FILEPATH_LEGACY_CONTACTS_DATABASE, QStringLiteral("options/database/contactsFile"), "", "", OptionTypes::TYPE_FILEPATH, OptionStorage::STORAGE_SIMPLE);
+			registerOption(OptionGroups::GROUP_INTERNAL, Options::FILEPATH_LEGACY_CLIENT_CONFIGURATION, QStringLiteral("options/database/clientConfigurationFile"), "", "", OptionTypes::TYPE_FILEPATH, OptionStorage::STORAGE_SIMPLE);
 
 			ensureOptionsExist();
 		}

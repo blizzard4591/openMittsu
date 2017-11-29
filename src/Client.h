@@ -55,8 +55,8 @@ private slots:
 	void menuIdentityShowFingerprintOnClick();
 	void menuIdentityShowPublicKeyOnClick();
 	void menuIdentityCreateBackupOnClick();
-	void menuIdentityLoadBackupOnClick();
-	void menuDatabaseImportLegacyContactsAndGroupsOnClick();
+	void menuIdentityLoadBackupOnClick(QString const& legacyClientConfigurationFileName = "");
+	void menuDatabaseImportLegacyContactsAndGroupsOnClick(QString const& legacyContactsFileName = "");
 
 	// Updater
 	void updaterFoundNewVersion(int versionMajor, int versionMinor, int versionPatch, int commitsSinceTag, QString gitHash, QString channel, QString link);

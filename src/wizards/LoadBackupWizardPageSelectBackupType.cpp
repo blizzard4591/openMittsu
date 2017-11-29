@@ -28,8 +28,10 @@ namespace openmittsu {
 		int LoadBackupWizardPageSelectBackupType::nextId() const {
 			if (m_ui->rbtnDataBackup->isChecked()) {
 				return LoadBackupWizard::Pages::PAGE_DATABACKUP_DATA;
-			} else {
+			} else if (m_ui->rbtnIdBackup->isChecked()) {
 				return LoadBackupWizard::Pages::PAGE_IDBACKUP_DATA;
+			} else {
+				return LoadBackupWizard::Pages::PAGE_LEGACYCLIENTCONFIGURATION;
 			}
 		}
 
@@ -38,6 +40,8 @@ namespace openmittsu {
 				return SelectedBackupType::DataBackup;
 			} else if (m_ui->rbtnIdBackup->isChecked()) {
 				return SelectedBackupType::IdBackup;
+			} else if (m_ui->rbtnLegacyClientConfiguration->isChecked()) {
+				return SelectedBackupType::LegacyClientConfiguration;
 			} else {
 				return SelectedBackupType::Invalid;
 			}
