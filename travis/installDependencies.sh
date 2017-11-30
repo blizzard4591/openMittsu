@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+echo "0"
+pwd
+
 if [ $TRAVIS_OS_NAME = linux ]; then
   CURRENT_DIR=`pwd`
   sudo add-apt-repository ppa:ondrej/php -y
