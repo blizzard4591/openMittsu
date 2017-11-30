@@ -11,8 +11,8 @@ CXXFLAGS="-Werror"
 if [ "$CC" = "clang" ]; then CFLAGS+=" -Qunused-arguments"; fi
 if [ "$CXX" = "clang++" ]; then CXXFLAGS+=" -Qunused-arguments"; fi
 
-# build librepcb
+git pull --unshallow
 mkdir build
 cd build
-cmake .. -DOPENMITTSU_DEBUG=OFF -DCMAKE_BUILD_TYPE=Release
+cmake .. -DOPENMITTSU_DEBUG=OFF -DCMAKE_BUILD_TYPE=Release -DOPENMITTSU_CUSTOM_VERSION_STRING="$TRAVIS_TAG-$TRAVIS_COMMIT"
 make -j8

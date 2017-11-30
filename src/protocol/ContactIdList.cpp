@@ -5,6 +5,7 @@
 #include "src/utility/ByteArrayConversions.h"
 
 #include <QHash>
+#include <QStringList>
 
 namespace openmittsu {
 	namespace protocol {
