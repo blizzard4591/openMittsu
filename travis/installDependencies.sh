@@ -1,19 +1,16 @@
 #!/usr/bin/env bash
 
-# set shell settings (see https://sipb.mit.edu/doc/safe-shell/)
-set -eufv -o pipefail
-
 if [ $TRAVIS_OS_NAME = linux ]; then 
 	sudo add-apt-repository ppa:ondrej/php -y
 	if [ -n "${QT_PPA}" ]
 	then
 		sudo add-apt-repository "${QT_PPA}" -y
-		sudo apt-get update -qq
-		sudo apt-get install -qq "${QT_BASE}-meta-full"
+		sudo apt-get update -q
+		sudo apt-get install -y "${QT_BASE}-meta-full"
 		source "/opt/${QT_BASE}/bin/${QT_BASE}-env.sh"
 	else
-		sudo apt-get update -qq
-		sudo apt-get install -qq qt5-default qttools5-dev-tools libqt5core5a libqt5gui5 libqt5multimedia5 libqt5multimedia5-plugins libqt5sql5 libqt5sql5-sqlite libqt5widgets5 qt5-qmake qtbase5-dev qtbase5-dev-tools qtmultimedia5-dev qtbase5-dev qtbase5-private-dev
+		sudo apt-get update -q
+		sudo apt-get install -y qt5-default qttools5-dev-tools libqt5core5a libqt5gui5 libqt5multimedia5 libqt5multimedia5-plugins libqt5sql5 libqt5sql5-sqlite libqt5widgets5 qt5-qmake qtbase5-dev qtbase5-dev-tools qtmultimedia5-dev qtbase5-dev qtbase5-private-dev
 	fi
 
 	sudo apt-get install -yqq  libqrencode-dev git g++ libssl-dev make cmake pkgconf libsodium-dev libsodium18 zlib1g zlib1g-dev openssl
