@@ -2,6 +2,7 @@
 #define OPENMITTSU_BACKUP_SIMPLECSVLINESPLITTER_H_
 
 #include <QString>
+#include <QStringList>
 #include <QHash>
 #include <cstdint>
 
