@@ -17,7 +17,7 @@ notifications:
     on_failure: always
     on_success: change
     recipients:
-		- packaging@openmittsu.de
+        - packaging@openmittsu.de
 
 #
 # Configurations
@@ -33,20 +33,20 @@ matrix:
     - os: osx
       compiler: gcc
       env: 
-	  after_failure:
+      after_failure:
         - find build -iname '*err*.log' -type f -print -exec cat {} \;
     # OS X + Clang
     - os: osx
       compiler: clang
       env: 
-	  after_failure:
+      after_failure:
         - find build -iname '*err*.log' -type f -print -exec cat {} \;
-	# Ubuntu 14.04 + GCC 4.8 + Qt 5.2
+    # Ubuntu 14.04 + GCC 4.8 + Qt 5.2
     - os: linux
       dist: trusty
       compiler: gcc
       env: DEPLOY_APPIMAGE=false QT_BASE="trusty"
-	  after_failure:
+      after_failure:
         - find build -iname '*err*.log' -type f -print -exec cat {} \;
     # Ubuntu 14.04 + Clang + Qt from PPA (https://launchpad.net/~beineri) + AppImage deployment
     - os: linux
