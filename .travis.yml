@@ -43,7 +43,7 @@ matrix:
 
 after_failure:
   - find build -iname '*err*.log' -type f -print -exec cat {} \;
-      
+
 install:
   - source ./travis/installDependencies.sh # source required because it modifies the environment
 
