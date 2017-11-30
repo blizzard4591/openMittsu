@@ -44,8 +44,14 @@ matrix:
 after_failure:
   - find build -iname '*err*.log' -type f -print -exec cat {} \;
 
+before_install:
+  - chmod +x ./travis/installDependencies.sh
+  - chmod +x ./travis/build.sh
+  - chmod +x ./travis/runTests.sh
+  - chmod +x ./travis/buildAppimage.sh
+
 install:
-  - ./travis/installDependencies.sh
+  - source ./travis/installDependencies.sh
 
 script:
   - ./travis/build.sh
