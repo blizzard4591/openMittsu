@@ -48,7 +48,7 @@ before_install:
   - chmod +x ./travis/installDependencies.sh
   - chmod +x ./travis/build.sh
   - chmod +x ./travis/runTests.sh
-  - chmod +x ./travis/buildAppimage.sh
+  - chmod +x ./travis/buildAppImage.sh
 
 install:
   - source ./travis/installDependencies.sh
@@ -56,7 +56,7 @@ install:
 script:
   - ./travis/build.sh
   - ./travis/runTests.sh
-  - ./travis/buildAppimage.sh
+  - ./travis/buildAppImage.sh
 
 deploy:
   provider: bintray
