@@ -15,7 +15,7 @@ namespace openmittsu {
 			format.setSampleSize(16);
 			format.setCodec("audio/pcm");
 			format.setByteOrder(QAudioFormat::LittleEndian);
-			format.setSampleType(QAudioFormat::UnSignedInt);
+			format.setSampleType(QAudioFormat::SignedInt);
 			audioOutput = std::make_unique<QAudioOutput>(format, this);
 
 			OPENMITTSU_CONNECT(audioOutput.get(), stateChanged(QAudio::State), this, audioOutputOnStateChanged(QAudio::State));
