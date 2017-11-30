@@ -13,7 +13,13 @@ if(Libsodium_INCLUDE_DIRS AND Libsodium_LIBRARIES)
 else()
 	find_package(PkgConfig QUIET)
 	if(PKG_CONFIG_FOUND)
-		pkg_check_modules(_SODIUM QUIET sodium)
+		pkg_check_modules(Libsodium QUIET libsodium)
+		if (Libsodium_FOUND)
+			set(_Libsodium_HAS_PKG_CONFIG ON)
+			if (NOT Libsodium_INCLUDE_DIRS)
+				set(Libsodium_INCLUDE_DIRS "${Libsodium_INCLUDEDIR}")
+			endif()
+		endif()
 	endif()
  
 	if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -41,7 +47,7 @@ else()
 		NAMES sodium.h
 		HINTS
 			ENV sodiumPath
-			${_SODIUM_INCLUDE_DIRS}
+			${Libsodium_INCLUDE_DIRS}
 			/usr/include /usr/local/include /opt/local/include /sw/include
 	)
 	
@@ -80,12 +86,12 @@ else()
  
 	find_library(SODIUM_LIB
 		NAMES ${LIB_PREFIX}sodium.${LIB_POSTFIX}
-		HINTS ${Libsodium_INCLUDE_DIRS}/../lib ${Libsodium_INCLUDE_DIRS}/../lib64 ${Libsodium_INCLUDE_DIRS}/lib${_lib_suffix} ${Libsodium_INCLUDE_DIRS}/../Build/Release/${_lib_suffix_win} ${Libsodium_INCLUDE_DIRS}/../../../Build/Release/${_lib_suffix_win} ${Libsodium_INCLUDE_DIRS}/../${_lib_suffix_win}/Release/v141/static ${_SODIUM_LIBRARY_DIRS} /usr/lib /usr/local/lib /opt/local/lib /sw/lib
+		HINTS ${Libsodium_INCLUDE_DIRS}/../lib ${Libsodium_INCLUDE_DIRS}/../lib64 ${Libsodium_INCLUDE_DIRS}/lib${_lib_suffix} ${Libsodium_INCLUDE_DIRS}/../Build/Release/${_lib_suffix_win} ${Libsodium_INCLUDE_DIRS}/../../../Build/Release/${_lib_suffix_win} ${Libsodium_INCLUDE_DIRS}/../${_lib_suffix_win}/Release/v141/static ${Libsodium_LIBRARY_DIRS} ${Libsodium_LIBRARIES} /usr/lib /usr/local/lib /opt/local/lib /sw/lib
 	)
 	
 	find_library(SODIUM_LIB_DEBUG
 		NAMES ${LIB_PREFIX}sodium.${LIB_POSTFIX}
-		HINTS ${Libsodium_INCLUDE_DIRS}/../lib ${Libsodium_INCLUDE_DIRS}/../lib64 ${Libsodium_INCLUDE_DIRS}/lib${_lib_suffix} ${Libsodium_INCLUDE_DIRS}/../Build/Debug/${_lib_suffix_win} ${Libsodium_INCLUDE_DIRS}/../../../Build/Debug/${_lib_suffix_win} ${Libsodium_INCLUDE_DIRS}/../${_lib_suffix_win}/Debug/v141/static ${_SODIUM_LIBRARY_DIRS} /usr/lib /usr/local/lib /opt/local/lib /sw/lib
+		HINTS ${Libsodium_INCLUDE_DIRS}/../lib ${Libsodium_INCLUDE_DIRS}/../lib64 ${Libsodium_INCLUDE_DIRS}/lib${_lib_suffix} ${Libsodium_INCLUDE_DIRS}/../Build/Debug/${_lib_suffix_win} ${Libsodium_INCLUDE_DIRS}/../../../Build/Debug/${_lib_suffix_win} ${Libsodium_INCLUDE_DIRS}/../${_lib_suffix_win}/Debug/v141/static ${Libsodium_LIBRARY_DIRS} ${Libsodium_LIBRARIES} /usr/lib /usr/local/lib /opt/local/lib /sw/lib
 	)
  
 	set(Libsodium_INCLUDE_DIRS ${Libsodium_INCLUDE_DIRS} CACHE PATH "libSodium include dir")
@@ -94,7 +100,9 @@ else()
 	elseif(SODIUM_LIB)
 		set(Libsodium_LIBRARIES "${SODIUM_LIB}" CACHE STRING "libSodium libraries")
 	else()
-		set(Libsodium_LIBRARIES "")
+		if (NOT _Libsodium_HAS_PKG_CONFIG)
+			set(Libsodium_LIBRARIES "")
+		endif()
 	endif()
  
 	find_package_handle_standard_args(Libsodium FOUND_VAR Libsodium_FOUND REQUIRED_VARS Libsodium_LIBRARIES Libsodium_INCLUDE_DIRS)
