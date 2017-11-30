@@ -342,6 +342,34 @@ void Database::createOrUpdateTables() {
 	int versionTableMedia = createTableIfMissingAndGetVersion(Tables::Media, 1);
 	int versionTableSettings = createTableIfMissingAndGetVersion(Tables::Settings, 1);
 
+	if (versionTableVersions != 1) {
+		LOGGER()->warn("Table TableVersions has version {} instead of {}.", versionTableVersions, 1);
+	}
+	if (versionTableContacts != 1) {
+		LOGGER()->warn("Table Contacts has version {} instead of {}.", versionTableContacts, 1);
+	}
+	if (versionTableContactMessages != 1) {
+		LOGGER()->warn("Table ContactMessages has version {} instead of {}.", versionTableContactMessages, 1);
+	}
+	if (versionTableControlMessages != 1) {
+		LOGGER()->warn("Table ControlMessages has version {} instead of {}.", versionTableControlMessages, 1);
+	}
+	if (versionTableFeatureLevels != 1) {
+		LOGGER()->warn("Table FeatureLevels has version {} instead of {}.", versionTableFeatureLevels, 1);
+	}
+	if (versionTableGroups != 1) {
+		LOGGER()->warn("Table Groups has version {} instead of {}.", versionTableGroups, 1);
+	}
+	if (versionTableGroupMessages != 1) {
+		LOGGER()->warn("Table GroupMessages has version {} instead of {}.", versionTableGroupMessages, 1);
+	}
+	if (versionTableMedia != 1) {
+		LOGGER()->warn("Table Media has version {} instead of {}.", versionTableMedia, 1);
+	}
+	if (versionTableSettings != 1) {
+		LOGGER()->warn("Table Settings has version {} instead of {}.", versionTableSettings, 1);
+	}
+
 	// No updates neccessary as of yet.
 }
 

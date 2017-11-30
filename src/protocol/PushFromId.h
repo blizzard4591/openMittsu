@@ -2,6 +2,9 @@
 #define OPENMITTSU_PROTOCOL_PUSHFROMID_H_
 
 #include <QByteArray>
+#include <QString>
+
+#include <string>
 
 namespace openmittsu {
 	namespace protocol {

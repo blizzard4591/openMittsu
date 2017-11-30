@@ -414,9 +414,9 @@ target_link_libraries(openMittsu ${LIBQRENCODE_LIBRARY})
 add_dependencies(openMittsuTests gtest)
 
 # Use the required modules from Qt 5.
-target_link_libraries(openMittsuCore Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network Qt5::Multimedia Qt5::Sql)
+target_link_libraries(openMittsuCore Qt5::Core Qt5::Network Qt5::Multimedia Qt5::Sql)
 target_link_libraries(openMittsu openMittsuCore Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network Qt5::Multimedia Qt5::Sql)
-target_link_libraries(openMittsuTests openMittsuCore Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network Qt5::Multimedia Qt5::Sql)
+target_link_libraries(openMittsuTests openMittsuCore Qt5::Core Qt5::Network Qt5::Multimedia Qt5::Sql)
 target_link_libraries(openMittsuVersionInfo Qt5::Core)
 
 # Link against libc++abi if requested.

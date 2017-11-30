@@ -5,7 +5,6 @@
 #include "src/protocol/GroupId.h"
 
 #include <QObject>
-#include <QWidget>
 
 namespace openmittsu {
 	namespace dataproviders {

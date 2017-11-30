@@ -1,7 +1,7 @@
 #include "Init.h"
 #include "Client.h"
 
-#include "src/utility/ExceptionHandlingApplication.h"
+#include "src/ExceptionHandlingApplication.h"
 #include "src/utility/OptionMaster.h"
 #include "src/utility/Version.h"
 

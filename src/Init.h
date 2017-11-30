@@ -8,8 +8,11 @@
 #include <QByteArray>
 #include <QFile>
 #include <QFontDatabase>
-#include <QMessageBox>
 #include <QStringList>
+
+#ifndef OPENMITTSU_TESTS
+#include <QMessageBox>
+#endif
 
 #include "sodium.h"
 
@@ -73,14 +76,18 @@ bool initializeFonts() {
 		QFile res(fileName);
 		if ((!res.exists()) || (res.open(QFile::ReadOnly) == false)) {
 			LOGGER()->critical("Failed to load font \"{}\": file could not be opened for reading.", (*it).toStdString());
+#ifndef OPENMITTSU_TESTS
 			QMessageBox::critical(nullptr, "Error while loading fonts", "A critical error occurred while loading and preparing the embedded fonts.\nThe program will now terminate.\nCode 1");
+#endif
 			return false;
 		} else {
 			QByteArray fontData(res.readAll());
 			fontId = QFontDatabase::addApplicationFontFromData(fontData);
 			if (fontId == -1) {
 				LOGGER()->critical("Failed to load font \"{}\": addApplicationFontFromData returned -1.", (*it).toStdString());
+#ifndef OPENMITTSU_TESTS
 				QMessageBox::critical(nullptr, "Error while loading fonts", "A critical error occurred while loading and preparing the embedded fonts.\nThe program will now terminate.\nCode 2");
+#endif
 				return false;
 			}
 		}
@@ -92,7 +99,9 @@ bool initializeLibSodium() {
 	int sodiumInitRet = sodium_init();
 	if (sodiumInitRet == -1) {
 		LOGGER()->critical("Could not initialize LibSodium, sodium_init() returned -1.");
+#ifndef OPENMITTSU_TESTS
 		QMessageBox::critical(nullptr, "Error while initializing LibSodium", "A critical error occurred while loading and initializing LibSodium.\nThe program will now terminate.\n");
+#endif
 		return false;
 	}
 

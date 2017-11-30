@@ -45,6 +45,16 @@ else
   brew link --force qt5
   brew link --force sqlcipher
   brew link --force qrencode
+
+  export PATH="/usr/local/opt/qt/bin:$PATH"
+  QT_VERSION=`qmake -v | grep -Eo [0-9]+\\.[0-9]+\\.[0-9]+`
+  set(ENV{Qt5Core_DIR} "/usr/local/Cellar/qt/$QT_VERSION/lib/cmake:$ENV{Qt5Core_DIR}")
+  set(ENV{Qt5Gui_DIR} "/usr/local/Cellar/qt/$QT_VERSION/lib/cmake:$ENV{Qt5Gui_DIR}")
+  set(ENV{Qt5Widgets_DIR} "/usr/local/Cellar/qt/$QT_VERSION/lib/cmake:$ENV{Qt5Widgets_DIR}")
+  set(ENV{Qt5Network_DIR} "/usr/local/Cellar/qt/$QT_VERSION/lib/cmake:$ENV{Qt5Network_DIR}")
+  set(ENV{Qt5Multimedia_DIR} "/usr/local/Cellar/qt/$QT_VERSION/lib/cmake:$ENV{Qt5Multimedia_DIR}")
+  set(ENV{Qt5Sql_DIR} "/usr/local/Cellar/qt/$QT_VERSION/lib/cmake:$ENV{Qt5Sql_DIR}")
+
 fi
 
 cd $CURRENT_DIR

@@ -720,7 +720,7 @@ void Client::menuFileOptionsOnClick() {
 		QMessageBox::warning(this, "No database loaded", "Before you can use this feature you need to load a database from file (see main screen) or create one using a backup of your existing ID (see Identity -> Load Backup).");
 	} else {
 		openmittsu::dialogs::OptionsDialog optionsDialog(m_optionMaster, this);
-		int result = optionsDialog.exec();
+		optionsDialog.exec();
 	}
 }
 

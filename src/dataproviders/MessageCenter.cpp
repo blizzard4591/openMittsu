@@ -8,9 +8,6 @@
 #include "src/utility/Logging.h"
 #include "src/utility/QExifImageHeader.h"
 #include "src/utility/QObjectConnectionMacro.h"
-#include "src/widgets/chat/ChatTabWidget.h"
-#include "src/widgets/SimpleContactChatTab.h"
-#include "src/widgets/SimpleGroupChatTab.h"
 
 #include <QFile>
 #include <QTextStream>

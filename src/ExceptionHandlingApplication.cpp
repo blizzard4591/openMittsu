@@ -1,4 +1,4 @@
-#include "src/utility/ExceptionHandlingApplication.h"
+#include "src/ExceptionHandlingApplication.h"
 
 #include <iostream>
 #include <QMessageBox>

@@ -1,6 +1,5 @@
 #include "src/network/ProtocolClient.h"
 
-#include <QMessageBox>
 #include <QMutex>
 #include <QByteArray>
 
