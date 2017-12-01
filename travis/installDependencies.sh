@@ -9,7 +9,7 @@ if [ $TRAVIS_OS_NAME = linux ]; then
   then
     sudo add-apt-repository "${QT_PPA}" -y
     sudo apt-get update -q
-    sudo apt-get install -y "${QT_BASE}-meta-full"
+    sudo apt-get install -y "${QT_BASE}-meta-full -${QT_BASE}doc "
     source "/opt/${QT_BASE}/bin/${QT_BASE}-env.sh"
   else
     sudo apt-get update -q

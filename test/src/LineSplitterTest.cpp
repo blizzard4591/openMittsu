@@ -1,10 +1,15 @@
 #include "gtest/gtest.h"
 
+#include <QByteArray>
 #include <QMap>
 #include <QString>
 #include <iostream>
 
 #include "src/backup/SimpleCsvLineSplitter.h"
+
+#ifndef qUtf8Printable
+#define qUtf8Printable(string) QString(string).toUtf8().constData()
+#endif
 
 QT_BEGIN_NAMESPACE
 inline void PrintTo(const QString& str, ::std::ostream* os) {
