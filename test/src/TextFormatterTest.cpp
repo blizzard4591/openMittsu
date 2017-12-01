@@ -6,6 +6,10 @@
 
 #include "src/utility/TextFormatter.h"
 
+#ifndef qUtf8Printable
+#define qUtf8Printable(string) QString(string).toUtf8().constData()
+#endif
+
 QT_BEGIN_NAMESPACE
 inline void PrintTo(const QString& str, ::std::ostream* os) {
 	*os << qUtf8Printable(str);  // whatever needed to print bar to os
