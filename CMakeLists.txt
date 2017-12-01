@@ -20,6 +20,7 @@ set(SPDLOG_MODULE_BASEPATH "${PROJECT_SOURCE_DIR}/3rdparty/spdlog")
 # SpdLog Configuration via #defines
 add_definitions(-DSPDLOG_DEBUG_ON)
 
+option(OPENMITTSU_ALLOW_MISSING_QSQLCIPHER "Sets whether OpenMittsu will run even with QSqlCipher being unavailable (no encryption)." OFF)
 option(OPENMITTSU_LINK_LIBCXXABI "Sets whether libc++abi should be linked." OFF)
 option(OPENMITTSU_USE_LIBCXX "Sets whether the standard library is libc++." OFF)
 option(OPENMITTSU_DEBUG "Sets whether debug checks, assertions and logging should be turned on. Has no effect on builds under MSVC besides turning on debug logging level." OFF)
@@ -195,6 +196,12 @@ elseif(${OPENMITTSU_MAKE_UNIQUE_TEST_RUN_RESULT} EQUAL 0)
 else()
 	set(OPENMITTSU_CONFIG_HAVE_MAKE_UNIQUE OFF)
 	message(FATAL_ERROR "Failed to run std::make_unique testing program, please contact a developer! Extended Information: ${OPENMITTSU_MAKE_UNIQUE_TEST_RUN_RESULT} - ${OPENMITTSU_MAKE_UNIQUE_TEST_RUN_OUTPUT}") 
+endif()
+
+if (OPENMITTSU_ALLOW_MISSING_QSQLCIPHER)
+	SET(OPENMITTSU_CONFIG_ALLOW_MISSING_QSQLCIPHER ON)
+else()
+	SET(OPENMITTSU_CONFIG_ALLOW_MISSING_QSQLCIPHER OFF)
 endif()
 
 # Configure a file to pass the OpenMittsu version to the source code

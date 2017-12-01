@@ -15,10 +15,12 @@
 #include "src/crypto/Crc32.h"
 #include "src/exceptions/InternalErrorException.h"
 #include "src/exceptions/InvalidPasswordOrDatabaseException.h"
+#include "src/exceptions/MissingQSqlCipherException.h"
 #include "src/utility/Logging.h"
 #include "src/utility/MakeUnique.h"
 #include "src/utility/QObjectConnectionMacro.h"
 
+#include "Config.h"
 
 namespace openmittsu {
 	namespace database {
@@ -35,9 +37,14 @@ Database::Database(QString const& filename, QString const& password, QDir const&
 		database = QSqlDatabase::addDatabase(m_driverNameCrypto, m_connectionName);
 		m_usingCryptoDb = true;
 	} else {
+#ifdef OPENMITTSU_CONFIG_ALLOW_MISSING_QSQLCIPHER
 		LOGGER()->info("Using the non-crypto-database interface (QSQLITE).");
 		database = QSqlDatabase::addDatabase(m_driverNameStandard, m_connectionName);
 		m_usingCryptoDb = false;
+#else
+		LOGGER()->error("QSqlCipher is not available, no encryption available. Quiting!");
+		throw openmittsu::exceptions::MissingQSqlCipherException() << "QSqlCipher is not available, no encryption available!";
+#endif
 	}
 	database.setDatabaseName(filename);
 	if (!database.open()) {

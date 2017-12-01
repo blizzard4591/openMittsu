@@ -2,7 +2,7 @@
     "package": {
         "name": "OpenMittsu-Nightly-Linux-x86_64",
         "repo": "OpenMittsu",
-        "subject": "openmittsu",
+        "subject": "blizzard4591",
         "desc": "Nightly Builds from Travis-CI.",
         "website_url": "https://www.OpenMittsu.de",
         "issue_tracker_url": "https://github.com/blizzard4591/openMittsu/issues",
@@ -21,7 +21,7 @@
     },
     "files": [
         {
-            "includePattern": "*.AppImage",
+            "includePattern": "(.*).AppImage",
             "uploadPattern": "OpenMittsu-Nightly-Linux-x86_64.AppImage",
             "matrixParams": {"override": 1}
         }

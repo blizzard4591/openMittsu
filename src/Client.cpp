@@ -91,7 +91,11 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 
 	// Check whether QSqlCipher is available
 	if (!QSqlDatabase::isDriverAvailable(QStringLiteral("QSQLCIPHER"))) {
+#ifdef OPENMITTSU_CONFIG_ALLOW_MISSING_QSQLCIPHER
 		QMessageBox::warning(this, tr("Database driver not available"), tr("openMittsu relies on SqlCipher and QSqlCipher for securely storing the database.\nThe QSQLCIPHER driver is not available. It should reside in the sqldrivers\\ subdirectory of openMittsu.\nWe will use the unencrypted SQLITE driver instead."));
+#else
+		QMessageBox::warning(this, tr("Database driver not available"), tr("openMittsu relies on SqlCipher and QSqlCipher for securely storing the database.\nThe QSQLCIPHER driver is not available. It should reside in the sqldrivers\\ subdirectory of openMittsu.\nSince no encryption is available, OpenMittsu will now terminate."));
+#endif
 	}
 
 	// Check whether OpenSSL is available
