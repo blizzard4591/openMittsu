@@ -25,6 +25,7 @@ option(OPENMITTSU_LINK_LIBCXXABI "Sets whether libc++abi should be linked." OFF)
 option(OPENMITTSU_USE_LIBCXX "Sets whether the standard library is libc++." OFF)
 option(OPENMITTSU_DEBUG "Sets whether debug checks, assertions and logging should be turned on. Has no effect on builds under MSVC besides turning on debug logging level." OFF)
 option(OPENMITTSU_DISABLE_VERSION_UPDATE_CHECK "Disables the version check on start-up. Useful for custom builds or added privacy." OFF)
+option(OPENMITTSU_ENABLE_TESTS "Enables tests." ON)
 SET(OPENMITTSU_CMAKE_SEARCH_PATH "D:/Qt/5.9.2/msvc2017_64" CACHE PATH "Additional Qt5 search path" )
 set(OPENMITTSU_CUSTOM_VERSION_STRING "" CACHE STRING "Disables Git version number checking and uses the custom string instead. Should be of the form 0.1.2-34-567890ab, i.e. major.minor.patch-commitsSinceTag-shortHash")
 
@@ -225,7 +226,8 @@ include_directories("${PROJECT_BINARY_DIR}/include")
 #
 ##########################################################
 # In Gentoo Linux, googletest libs are installed as dependency (dev-cpp/gtest)
-if (NOT CMAKE_BUILD_TYPE MATCHES "^Gentoo")
+if (OPENMITTSU_ENABLE_TESTS
+    AND NOT CMAKE_BUILD_TYPE MATCHES "^Gentoo")
 	# Download and unpack googletest at configure time
 	configure_file("${PROJECT_SOURCE_DIR}/cmake/GoogleTest.cmake.in" googletest-download/CMakeLists.txt)
 	execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
@@ -409,32 +411,40 @@ add_executable(openMittsu ${OPENMITTSU_HEADERS} ${OPENMITTSU_SOURCES_C} ${OPENMI
 
 add_executable(openMittsuVersionInfo ${OPENMITTSU_BUILDTOOLS_VERSIONINFO_HEADERS} ${OPENMITTSU_BUILDTOOLS_VERSIONINFO_SOURCES_CPP} ${OPENMITTSU_HEADERS_GENERATED} ${OPENMITTSU_SOURCES_GENERATED})
 
-add_executable(openMittsuTests ${OPENMITTSU_TEST_MAIN_FILE} ${OPENMITTSU_TEST_FILES}
-	${OPENMITTSU_RESOURCESOURCES}
-)
+if (OPENMITTSU_ENABLE_TESTS)
+	add_executable(openMittsuTests ${OPENMITTSU_TEST_MAIN_FILE} ${OPENMITTSU_TEST_FILES}
+		${OPENMITTSU_RESOURCESOURCES}
+	)
+endif (OPENMITTSU_ENABLE_TESTS)
 
 if (MSVC)
 	set_target_properties(openMittsu PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
 endif(MSVC)
 
 # Add target link dependencies
-target_link_libraries(openMittsuCore ${Libsodium_LIBRARIES} gtest)
+target_link_libraries(openMittsuCore ${Libsodium_LIBRARIES})
 target_link_libraries(openMittsu ${LIBQRENCODE_LIBRARY})
 
-add_dependencies(openMittsuTests gtest)
+if (OPENMITTSU_ENABLE_TESTS)
+	add_dependencies(openMittsuTests gtest)
+endif (OPENMITTSU_ENABLE_TESTS)
 
 # Use the required modules from Qt 5.
 target_link_libraries(openMittsuCore Qt5::Core Qt5::Network Qt5::Multimedia Qt5::Sql)
 target_link_libraries(openMittsu openMittsuCore Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network Qt5::Multimedia Qt5::Sql)
-target_link_libraries(openMittsuTests openMittsuCore Qt5::Core Qt5::Network Qt5::Multimedia Qt5::Sql)
 target_link_libraries(openMittsuVersionInfo Qt5::Core)
+if (OPENMITTSU_ENABLE_TESTS)
+	target_link_libraries(openMittsuTests openMittsuCore Qt5::Core Qt5::Network Qt5::Multimedia Qt5::Sql)
+endif (OPENMITTSU_ENABLE_TESTS)
 
 # Link against libc++abi if requested.
 if (OPENMITTSU_LINK_LIBCXXABI)
 	target_link_libraries(openMittsu "c++abi")
 	target_link_libraries(openMittsuCore "c++abi")
 	target_link_libraries(openMittsuVersionInfo "c++abi")
-	target_link_libraries(openMittsuTests "c++abi")
+if (OPENMITTSU_ENABLE_TESTS)
+		target_link_libraries(openMittsuTests "c++abi")
+endif (OPENMITTSU_ENABLE_TESTS)
 endif(OPENMITTSU_LINK_LIBCXXABI)
 
 # Targets, CPACK...
@@ -448,11 +458,13 @@ install(TARGETS openMittsuVersionInfo
    RUNTIME
    DESTINATION bin
    COMPONENT installComponent)
-install(TARGETS openMittsuTests
-   RUNTIME
-   DESTINATION bin
-   COMPONENT installComponent)
-   
+if (OPENMITTSU_ENABLE_TESTS)
+	install(TARGETS openMittsuTests
+	   RUNTIME
+	   DESTINATION bin
+	   COMPONENT installComponent)
+endif (OPENMITTSU_ENABLE_TESTS)
+
 if (MSVC)
 	set(OPENMITTSU_WINDEPLOYQT_EXE "${Qt5Core_DIR}/../../../bin/windeployqt.exe")
 	
