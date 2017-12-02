@@ -23,6 +23,12 @@ if [ $TRAVIS_OS_NAME = linux ]; then
 	sudo apt-get install -yq g++-6
 	sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 90
 
+	which $CC
+	which $CXX
+	# workaround clang not system wide, fail on sudo make install for adms
+	export CC=`which $CC`
+	export CXX=`which $CXX`
+	
 	mkdir build-dependencies
 	pushd build-dependencies
 
@@ -41,6 +47,8 @@ if [ $TRAVIS_OS_NAME = linux ]; then
 			make
 			./qsqlcipher-test
 			sudo make install
+			echo "Files in Deploy Dir:"
+			find $DEPLOY_DIR -type f
 		popd
 
 	popd
