@@ -15,7 +15,6 @@
     "version": {
         "name": "nightly",
         "desc": "Nightly Build from Travis-CI.",
-        "released": "today",
         "vcs_tag": "master",
         "gpgSign": false
     },
