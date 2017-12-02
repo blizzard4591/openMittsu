@@ -87,7 +87,7 @@ else
 		cd build
 		echo "QT_VERSION = $QT_VERSION"
 		echo "Path for Copyto is: /usr/local/Cellar/qt/$QT_VERSION/plugins/sqldrivers"
-		cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DQSQLCIPHER_COPYTO_DIR="/usr/local/Cellar/qt/$QT_VERSION/plugins/sqldrivers"
+		cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DQSQLCIPHER_COPYTO_DIR=/usr/local/Cellar/qt/$QT_VERSION/plugins/sqldrivers
 		sudo make
 		sudo ./qsqlcipher-test
 		sudo make install

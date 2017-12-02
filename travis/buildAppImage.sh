@@ -22,11 +22,13 @@ then
 		echo "AppImages:"
 		find . -type f -name '*.AppImage'
 	else
+		echo ".app Files:"
+		find . -name '*.app'
 		echo "Allll the files:"
 		find . -type f
-		/usr/local/opt/qt5/bin/macdeployqt openmittsu.app -always-overwrite -verbose=2
+		/usr/local/Cellar/qt/$QT_VERSION/bin/macdeployqt openmittsu.app -always-overwrite -verbose=2
 		curl -o /tmp/macdeployqtfix.py https://raw.githubusercontent.com/aurelien-rainone/macdeployqtfix/master/macdeployqtfix.py
 		python /tmp/macdeployqtfix.py ./openmittsu.app/Contents/MacOS/openmittsu /usr/local/Cellar/qt/$QT_VERSION/
-		/usr/local/opt/qt5/bin/macdeployqt openmittsu.app -dmg -verbose=2
+		/usr/local/Cellar/qt/$QT_VERSION/bin/macdeployqt openmittsu.app -dmg -verbose=2
 	fi
 fi
