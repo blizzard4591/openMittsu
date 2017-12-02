@@ -15,3 +15,6 @@
 
 // Whether std::make_unique is supported by the compiler
 #cmakedefine OPENMITTSU_CONFIG_HAVE_MAKE_UNIQUE
+
+// Whether OpenMittsu will run even with QSqlCipher being unavailable
+#cmakedefine OPENMITTSU_CONFIG_ALLOW_MISSING_QSQLCIPHER
