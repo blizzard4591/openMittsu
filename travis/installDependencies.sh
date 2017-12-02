@@ -59,7 +59,16 @@ else
   pushd build-dependencies
 
   git clone https://github.com/blizzard4591/qt5-sqlcipher.git
-  pushd qt5-sqlcipher && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DQSQLCIPHER_COPYTO_DIR=/usr/local/Cellar/qt/$QT_VERSION/plugins/sqldrivers && sudo make && sudo make install && popd
+  pushd qt5-sqlcipher
+    mkdir build
+    cd build
+	echo "QT_VERSION = $QT_VERSION"
+	echo "Path for Copyto is: /usr/local/Cellar/qt/$QT_VERSION/plugins/sqldrivers"
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DQSQLCIPHER_COPYTO_DIR="/usr/local/Cellar/qt/$QT_VERSION/plugins/sqldrivers"
+    sudo make
+    sudo ./qsqlcipher-test
+    sudo make install
+  popd
   echo "Mac QSqlCipher files:"
   find . -type f
   popd

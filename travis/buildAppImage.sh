@@ -8,11 +8,13 @@ if [ "${DEPLOY_APPIMAGE-}" = "true" ]
 then
   if [ $TRAVIS_OS_NAME = linux ]; then
     mkdir -p ./build/openMittsu.AppDir/usr/bin
+	mkdir -p ./build/openMittsu.AppDir/usr/lib/x86_64-linux-gnu/qt5/plugins/sqldrivers
     cp ./build/openMittsu ./build/openMittsu.AppDir/usr/bin
     cp ./build/openMittsuTests ./build/openMittsu.AppDir/usr/bin
     cp ./build/openMittsuVersionInfo ./build/openMittsu.AppDir/usr/bin
     cp ./resources/icon.svg ./build/openMittsu.AppDir/openmittsu.svg
     cp ./travis/openmittsu.desktop ./build/openMittsu.AppDir/openmittsu.desktop
+	cp ./build-dependencies/qt5-sqlcipher/builds/sqldrivers/libqsqlcipher.so ./build/openMittsu.AppDir/usr/lib/x86_64-linux-gnu/qt5/plugins/sqldrivers
     LD_LIBRARY_PATH="" linuxdeployqt ./build/openMittsu.AppDir/usr/bin/openMittsu -appimage
 	echo "AppImages:"
     find . -type f -name '*.AppImage'
