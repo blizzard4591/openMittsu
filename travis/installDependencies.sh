@@ -54,6 +54,15 @@ else
   export Qt5Network_DIR="/usr/local/Cellar/qt/$QT_VERSION/lib/cmake:$Qt5Network_DIR"
   export Qt5Multimedia_DIR="/usr/local/Cellar/qt/$QT_VERSION/lib/cmake:$Qt5Multimedia_DIR"
   export Qt5Sql_DIR="/usr/local/Cellar/qt/$QT_VERSION/lib/cmake:$Qt5Sql_DIR"
+  
+  mkdir build-dependencies
+  pushd build-dependencies
+
+  git clone https://github.com/blizzard4591/qt5-sqlcipher.git
+  pushd qt5-sqlcipher && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DQSQLCIPHER_COPYTO_DIR=/usr/local/Cellar/qt/$QT_VERSION/plugins/sqldrivers && sudo make && sudo make install && popd
+  echo "Mac QSqlCipher files:"
+  find . -type f
+  popd
 fi
 
 cd $CURRENT_DIR
