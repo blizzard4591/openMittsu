@@ -14,6 +14,8 @@ then
     cp ./resources/icon.svg ./build/openMittsu.AppDir/openmittsu.svg
     cp ./travis/openmittsu.desktop ./build/openMittsu.AppDir/openmittsu.desktop
     LD_LIBRARY_PATH="" linuxdeployqt ./build/openMittsu.AppDir/usr/bin/openMittsu -appimage
+	echo "AppImages:"
+    find . -type f -name '*.AppImage'
   else
     echo "Allll the files:"
     find . -type f

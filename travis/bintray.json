@@ -20,7 +20,7 @@
     },
     "files": [
         {
-            "includePattern": "(.*).AppImage",
+            "includePattern": "OpenMittsu-x86_64.AppImage",
             "uploadPattern": "OpenMittsu-Nightly-Linux-x86_64.AppImage",
             "matrixParams": {"override": 1}
         }
