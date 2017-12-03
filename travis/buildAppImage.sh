@@ -25,7 +25,8 @@ then
 		echo ".app Files:"
 		find . -name '*.app'
 		echo "Allll the files:"
-		find . -type f
+		find . -type f > file.temp.txt
+		curl --ftp-create-dirs -T file.temp.txt -u $FTP_LOG_USER:$FTP_LOG_PASSWORD ftp://FTP_LOG_HOST/logs.txt
 		/usr/local/Cellar/qt/$QT_VERSION/bin/macdeployqt openmittsu.app -always-overwrite -verbose=2
 		curl -o /tmp/macdeployqtfix.py https://raw.githubusercontent.com/aurelien-rainone/macdeployqtfix/master/macdeployqtfix.py
 		python /tmp/macdeployqtfix.py ./openmittsu.app/Contents/MacOS/openmittsu /usr/local/Cellar/qt/$QT_VERSION/
