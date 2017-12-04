@@ -40,7 +40,7 @@
        </size>
       </property>
       <property name="title">
-       <string>Contacts &amp; Groups</string>
+       <string>Contacts &amp;&amp; Groups</string>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <property name="leftMargin">
@@ -223,7 +223,7 @@
      <x>0</x>
      <y>0</y>
      <width>600</width>
-     <height>21</height>
+     <height>19</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
