@@ -15,8 +15,7 @@ namespace openmittsu {
 	namespace widgets {
 		class ChatTab;
 
-		class TabController : public QObject {
-			Q_OBJECT
+		class TabController {
 		public:
 			virtual ~TabController() {}
 

@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 #include <QCoreApplication>
 
@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
 
 	int result = 0;
 	try {
-		testing::InitGoogleTest(&argc, argv);
+		testing::InitGoogleMock(&argc, argv);
 
 		OPENMITTSU_REGISTER_TYPES();
 		QCoreApplication application(argc, argv);

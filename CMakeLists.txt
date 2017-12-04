@@ -235,6 +235,8 @@ execute_process(COMMAND "${CMAKE_COMMAND}" --build .
 # Prevent GoogleTest from overriding our compiler/linker options
 # when building with Visual Studio
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+set(BUILD_GMOCK ON)
  
 # Add googletest directly to our build. This adds
 # the following targets: gtest, gtest_main, gmock
@@ -421,10 +423,11 @@ if (MSVC)
 endif(MSVC)
 
 # Add target link dependencies
-target_link_libraries(openMittsuCore ${Libsodium_LIBRARIES} gtest)
+target_link_libraries(openMittsuCore ${Libsodium_LIBRARIES})
 target_link_libraries(openMittsu ${LIBQRENCODE_LIBRARY})
+target_link_libraries(openMittsuCore gmock gtest)
 
-add_dependencies(openMittsuTests gtest)
+add_dependencies(openMittsuTests gmock gtest)
 
 # Use the required modules from Qt 5.
 target_link_libraries(openMittsuCore Qt5::Core Qt5::Network Qt5::Multimedia Qt5::Sql)

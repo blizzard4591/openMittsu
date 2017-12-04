@@ -10,7 +10,7 @@ namespace openmittsu {
 		class ChatTab;
 		class ChatTabWidget;
 
-		class SimpleTabController : public openmittsu::widgets::TabController {
+		class SimpleTabController : public QObject, public openmittsu::widgets::TabController {
 			Q_OBJECT
 		public:
 			SimpleTabController(ChatTabWidget* chatTabWidget);
