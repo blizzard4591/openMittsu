@@ -1,5 +1,7 @@
 cmake_minimum_required (VERSION 2.8.11)
 
+cmake_policy(SET CMP0071 NEW)
+
 # Set project name
 project (openMittsu CXX C)
 
@@ -112,6 +114,9 @@ elseif(MSVC)
 	add_definitions(/wd4250)
 	# Warns if a switch does not cover all cases
 	#add_definitions(/we4061) # Disabled because it blows out in the std library
+	
+	# Because Google is not merging the fix
+	add_definitions(/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
 else(CLANG)
 	set(OPENMITTSU_COMPILED_BY "Clang (LLVM)")
 	# As CLANG is not set as a variable, we need to set it in case we have not matched another compiler.
@@ -228,8 +233,7 @@ include_directories("${PROJECT_BINARY_DIR}/include")
 #
 ##########################################################
 # In Gentoo Linux, googletest libs are installed as dependency (dev-cpp/gtest)
-if (OPENMITTSU_ENABLE_TESTS
-    AND NOT CMAKE_BUILD_TYPE MATCHES "^Gentoo")
+if (OPENMITTSU_ENABLE_TESTS AND NOT CMAKE_BUILD_TYPE MATCHES "^Gentoo")
 	# Download and unpack googletest at configure time
 	configure_file("${PROJECT_SOURCE_DIR}/cmake/GoogleTest.cmake.in" googletest-download/CMakeLists.txt)
 	execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
