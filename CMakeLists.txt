@@ -441,7 +441,7 @@ target_link_libraries(openMittsuCore Qt5::Core Qt5::Network Qt5::Multimedia Qt5:
 target_link_libraries(openMittsu openMittsuCore Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network Qt5::Multimedia Qt5::Sql)
 target_link_libraries(openMittsuVersionInfo Qt5::Core)
 if (OPENMITTSU_ENABLE_TESTS)
-	target_link_libraries(openMittsuTests openMittsuCore Qt5::Core Qt5::Network Qt5::Multimedia Qt5::Sql)
+	target_link_libraries(openMittsuTests openMittsuCore Qt5::Core Qt5::Network Qt5::Multimedia Qt5::Sql gtest)
 endif (OPENMITTSU_ENABLE_TESTS)
 
 # Link against libc++abi if requested.
@@ -458,19 +458,19 @@ endif(OPENMITTSU_LINK_LIBCXXABI)
 include(InstallRequiredSystemLibraries)
 
 install(TARGETS openMittsu
-   RUNTIME
-   DESTINATION bin
-   COMPONENT OpenMittsu)
+	RUNTIME
+	DESTINATION bin
+	COMPONENT OpenMittsu)
 install(TARGETS openMittsuVersionInfo
-   RUNTIME
-   DESTINATION bin
-   COMPONENT OpenMittsu)
+	RUNTIME
+	DESTINATION bin
+	COMPONENT OpenMittsu)
 
 if (OPENMITTSU_ENABLE_TESTS)
 	install(TARGETS openMittsuTests
-	   RUNTIME
-	   DESTINATION bin
-	   COMPONENT OpenMittsu)
+		RUNTIME
+		DESTINATION bin
+		COMPONENT OpenMittsu)
 endif (OPENMITTSU_ENABLE_TESTS)
 
 if (MSVC)
@@ -486,6 +486,8 @@ if (MSVC)
 	if ("$ENV{VCINSTALLDIR}" STREQUAL "")
 		get_filename_component(OPENMITTSU_VCINSTALLDIR "${CMAKE_LINKER}" DIRECTORY)
 		file(TO_NATIVE_PATH "${OPENMITTSU_VCINSTALLDIR}/../../" VCINSTALLDIR_NATIVEPATH)
+		
+		STRING(REGEX REPLACE "^(.+)\\\\VC\\\\.+" "\\1\\\\VC" VCINSTALLDIR_NATIVEPATH ${VCINSTALLDIR_NATIVEPATH})
 		
 		set(ENV{VCINSTALLDIR} "${VCINSTALLDIR_NATIVEPATH}")
 	endif()
@@ -505,7 +507,7 @@ if (NOT "${OPENMITTSU_ADDITIONAL_INSTALL_FILES}" STREQUAL "")
 		endif()
 	endforeach()
 endif()
-   
+
 # CPack
 set(CPACK_PACKAGE_NAME "openmittsu")
 set(CPACK_PACKAGE_VENDOR "OpenMittsu project team")
@@ -562,15 +564,20 @@ endif(DPKG_PROGRAM)
 SET(CPACK_PACKAGE_EXECUTABLES "openMittsu;OpenMittsu")
 SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
 if (WIN32 AND NOT UNIX)
-  SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\openMittsu.exe")
-  SET(CPACK_NSIS_DISPLAY_NAME "openMittsu")
-  SET(CPACK_NSIS_HELP_LINK "https:\\\\\\\\www.openmittsu.de")
-  SET(CPACK_NSIS_URL_INFO_ABOUT "https:\\\\\\\\www.openmittsu.de")
-  SET(CPACK_NSIS_CONTACT "mail@openmittsu.de")
-  SET(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+	SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\openMittsu.exe")
+	SET(CPACK_NSIS_DISPLAY_NAME "openMittsu")
+	SET(CPACK_NSIS_HELP_LINK "https:\\\\\\\\www.openmittsu.de")
+	SET(CPACK_NSIS_URL_INFO_ABOUT "https:\\\\\\\\www.openmittsu.de")
+	SET(CPACK_NSIS_CONTACT "mail@openmittsu.de")
+	SET(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+	if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+		SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "ExecWait '\\\"$INSTDIR\\\\bin\\\\vcredist_x64.exe\\\" /install /passive /norestart'")
+	else()
+		SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "ExecWait '\\\"$INSTDIR\\\\bin\\\\vcredist_x86.exe\\\" /install /passive /norestart'")
+	endif()
 else(WIN32 AND NOT UNIX)
-  SET(CPACK_STRIP_FILES "bin/openMittsu")
-  SET(CPACK_SOURCE_STRIP_FILES "")
+	SET(CPACK_STRIP_FILES "bin/openMittsu")
+	SET(CPACK_SOURCE_STRIP_FILES "")
 endif(WIN32 AND NOT UNIX)
 set(CPACK_SOURCE_IGNORE_FILES ".git")
 set(CPACK_BUNDLE_NAME "openmittsu")
