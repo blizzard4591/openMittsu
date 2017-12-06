@@ -125,7 +125,7 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 			openDatabaseFile(databaseFile);
 		}
 	} else {
-		if (!legacyClientConfiguration.isEmpty()) {
+		if (!legacyClientConfiguration.isEmpty() && QFile::exists(legacyClientConfiguration)) {
 			showFromBackupWizard = true;
 		} else {
 			showFirstUseWizard = true;
@@ -176,7 +176,7 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 	if (showFirstUseWizard) {
 		menuFileShowFirstUseWizardOnClick();
 	} else if (showFromBackupWizard) {
-		auto const resultButton = QMessageBox::question(this, tr("Legacy client configuration found"), tr("Welcome.\nIt seems that you used an older version of openMittsu before that used the plaintext client configuration file to store your ID.\nThis has been replaced by an encrypted database storing both your ID, contacts, groups and messages.\nIf you want, your legacy ID file can be converted into a modern openMittsu database. Click yes to import the old file."));
+		auto const resultButton = QMessageBox::question(this, tr("Legacy client configuration found"), tr("Welcome.\nIt seems that you used an older version of openMittsu before that used a plaintext client configuration file to store your ID.\nThis has been replaced by an encrypted database storing both your ID, contacts, groups and messages.\nIf you want, your legacy ID file can be converted into a modern openMittsu database. Click yes to import the old file."));
 		if (resultButton == QMessageBox::StandardButton::Yes) {
 			menuIdentityLoadBackupOnClick(legacyClientConfiguration);
 			m_optionMaster->setOption(openmittsu::utility::OptionMaster::Options::FILEPATH_LEGACY_CLIENT_CONFIGURATION, "");
@@ -185,8 +185,8 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 
 	if (m_database) {
 		QString const legacyContactsFile = m_optionMaster->getOptionAsQString(openmittsu::utility::OptionMaster::Options::FILEPATH_LEGACY_CONTACTS_DATABASE);
-		if (!legacyContactsFile.isEmpty()) {
-			auto const resultButton = QMessageBox::question(this, tr("Legacy contacts file found"), tr("Welcome.\nIt seems that you used an older version of openMittsu before that used the plaintext contacts file to store your contacts and groups.\nThis has been replaced by an encrypted database storing both your ID, contacts, groups and messages.\nIf you want, your legacy ID file can be converted into a modern openMittsu database. Click yes to import the old file."));
+		if (!legacyContactsFile.isEmpty() && QFile::exists(legacyContactsFile)) {
+			auto const resultButton = QMessageBox::question(this, tr("Legacy contacts file found"), tr("Welcome.\nIt seems that you used an older version of openMittsu before that used a plaintext contacts file to store your contacts and groups.\nThis has been replaced by an encrypted database storing both your ID, contacts, groups and messages.\nIf you want, your legacy contacts file can be imported into your openMittsu database.\nClick \"Yes\" to import the old file (located at %1), or \"No\" to leave it for now.\nYou can always come back later and import it via Database -> Import openMittsu....").arg(legacyContactsFile));
 			if (resultButton == QMessageBox::StandardButton::Yes) {
 				menuDatabaseImportLegacyContactsAndGroupsOnClick(legacyContactsFile);
 				m_optionMaster->setOption(openmittsu::utility::OptionMaster::Options::FILEPATH_LEGACY_CONTACTS_DATABASE, "");

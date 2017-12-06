@@ -32,7 +32,7 @@ matrix:
     # OS X + Clang
     - os: osx
       compiler: clang
-      #env: DEPLOY_APPIMAGE=true
+      env: DEPLOY_APPIMAGE=true
     # Ubuntu 14.04 + GCC 4.8 + Qt 5.2
     - os: linux
       compiler: gcc

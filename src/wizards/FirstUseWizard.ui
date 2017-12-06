@@ -118,7 +118,7 @@
     <item>
      <widget class="QLabel" name="label_2">
       <property name="text">
-       <string>b) You have not yet created an openMittsu Database, or you want to start using a different Threem ID.</string>
+       <string>b) You have not yet created an openMittsu Database, or you want to start using a different Threema ID.</string>
       </property>
      </widget>
     </item>
