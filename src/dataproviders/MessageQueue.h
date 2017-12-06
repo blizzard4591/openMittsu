@@ -54,6 +54,8 @@ namespace openmittsu {
 			void storeContactMessage(ReceivedContactMessage const& message);
 			void storeGroupMessage(ReceivedGroupMessage const& message);
 
+			bool hasMessageForGroup(openmittsu::protocol::GroupId const& group) const;
+
 			QVector<ReceivedContactMessage> getAndRemoveQueuedMessages(openmittsu::protocol::ContactId const& sender);
 			QVector<ReceivedGroupMessage> getAndRemoveQueuedMessages(openmittsu::protocol::GroupId const& group);
 		private:

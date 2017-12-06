@@ -27,7 +27,7 @@ else()
 		set(_lib_suffix_win "x64")
 	else()
 		set(_lib_suffix 32)
-		set(_lib_suffix_win "x86")
+		set(_lib_suffix_win "Win32")
 	endif()
 	
 	IF (WIN32)

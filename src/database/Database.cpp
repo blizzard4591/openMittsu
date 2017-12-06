@@ -749,6 +749,8 @@ openmittsu::protocol::MessageId Database::storeSentGroupSetImage(openmittsu::pro
 openmittsu::protocol::MessageId Database::storeSentGroupSyncRequest(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued) {
 	if (group.getOwner() == getSelfContact()) {
 		throw openmittsu::exceptions::InternalErrorException() << "The given group " << group.toString() << " is owned by us, can not store group sync request from us!";
+	} else if (!hasContact(group.getOwner())) {
+		throw openmittsu::exceptions::InternalErrorException() << "The given group " << group.toString() << " is owned by " << group.getOwner().toString() << ", which is unknown!";
 	}
 	
 	return DatabaseGroupMessage::insertGroupMessageFromUs(*this, group, generateUuid(), timeCreated, GroupMessageType::SYNC_REQUEST, QStringLiteral(""), isQueued, true, QStringLiteral(""));

@@ -1,5 +1,9 @@
 cmake_minimum_required (VERSION 2.8.11)
 
+if(POLICY CMP0071)
+	cmake_policy(SET CMP0071 NEW)
+endif()
+
 # Set project name
 project (openMittsu CXX C)
 
@@ -25,7 +29,9 @@ option(OPENMITTSU_LINK_LIBCXXABI "Sets whether libc++abi should be linked." OFF)
 option(OPENMITTSU_USE_LIBCXX "Sets whether the standard library is libc++." OFF)
 option(OPENMITTSU_DEBUG "Sets whether debug checks, assertions and logging should be turned on. Has no effect on builds under MSVC besides turning on debug logging level." OFF)
 option(OPENMITTSU_DISABLE_VERSION_UPDATE_CHECK "Disables the version check on start-up. Useful for custom builds or added privacy." OFF)
+option(OPENMITTSU_ENABLE_TESTS "Enables tests." ON)
 option(OPENMITTSU_USE_NSIS "Use NSIS generator to produce a Windows installer." OFF)
+
 SET(OPENMITTSU_CMAKE_SEARCH_PATH "D:/Qt/5.9.2/msvc2017_64" CACHE PATH "Additional Qt5 search path" )
 set(OPENMITTSU_CUSTOM_VERSION_STRING "" CACHE STRING "Disables Git version number checking and uses the custom string instead. Should be of the form 0.1.2-34-567890ab, i.e. major.minor.patch-commitsSinceTag-shortHash")
 
@@ -110,6 +116,9 @@ elseif(MSVC)
 	add_definitions(/wd4250)
 	# Warns if a switch does not cover all cases
 	#add_definitions(/we4061) # Disabled because it blows out in the std library
+	
+	# Because Google is not merging the fix
+	add_definitions(/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
 else(CLANG)
 	set(OPENMITTSU_COMPILED_BY "Clang (LLVM)")
 	# As CLANG is not set as a variable, we need to set it in case we have not matched another compiler.
@@ -225,24 +234,27 @@ include_directories("${PROJECT_BINARY_DIR}/include")
 # Google Testing Framework
 #
 ##########################################################
-# Download and unpack googletest at configure time
-configure_file("${PROJECT_SOURCE_DIR}/cmake/GoogleTest.cmake.in" googletest-download/CMakeLists.txt)
-execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
-  WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/googletest-download" )
-execute_process(COMMAND "${CMAKE_COMMAND}" --build .
-  WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/googletest-download" )
- 
-# Prevent GoogleTest from overriding our compiler/linker options
-# when building with Visual Studio
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+# In Gentoo Linux, googletest libs are installed as dependency (dev-cpp/gtest)
+if (OPENMITTSU_ENABLE_TESTS AND NOT CMAKE_BUILD_TYPE MATCHES "^Gentoo")
+	# Download and unpack googletest at configure time
+	configure_file("${PROJECT_SOURCE_DIR}/cmake/GoogleTest.cmake.in" googletest-download/CMakeLists.txt)
+	execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
+	  WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/googletest-download" )
+	execute_process(COMMAND "${CMAKE_COMMAND}" --build .
+	  WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/googletest-download" )
 
-set(BUILD_GMOCK ON)
- 
-# Add googletest directly to our build. This adds
-# the following targets: gtest, gtest_main, gmock
-# and gmock_main
-add_subdirectory("${CMAKE_BINARY_DIR}/googletest-src"
-                 "${CMAKE_BINARY_DIR}/googletest-build" EXCLUDE_FROM_ALL)
+	# Prevent GoogleTest from overriding our compiler/linker options
+	# when building with Visual Studio
+	set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+	set(BUILD_GMOCK ON)
+
+	# Add googletest directly to our build. This adds
+	# the following targets: gtest, gtest_main, gmock
+	# and gmock_main
+	add_subdirectory("${CMAKE_BINARY_DIR}/googletest-src"
+	                 "${CMAKE_BINARY_DIR}/googletest-build" EXCLUDE_FROM_ALL)
+endif()
  
 
 # Main Sources
@@ -414,9 +426,11 @@ add_executable(openMittsu ${OPENMITTSU_HEADERS} ${OPENMITTSU_SOURCES_C} ${OPENMI
 
 add_executable(openMittsuVersionInfo ${OPENMITTSU_BUILDTOOLS_VERSIONINFO_HEADERS} ${OPENMITTSU_BUILDTOOLS_VERSIONINFO_SOURCES_CPP} ${OPENMITTSU_HEADERS_GENERATED} ${OPENMITTSU_SOURCES_GENERATED} ${ICON_RESOURCE_FILE})
 
-add_executable(openMittsuTests ${OPENMITTSU_TEST_MAIN_FILE} ${OPENMITTSU_TEST_FILES}
-	${OPENMITTSU_RESOURCESOURCES} ${ICON_RESOURCE_FILE}
-)
+if (OPENMITTSU_ENABLE_TESTS)
+	add_executable(openMittsuTests ${OPENMITTSU_TEST_MAIN_FILE} ${OPENMITTSU_TEST_FILES}
+		${OPENMITTSU_RESOURCESOURCES} ${ICON_RESOURCE_FILE}
+	)
+endif (OPENMITTSU_ENABLE_TESTS)
 
 if (MSVC)
 	set_target_properties(openMittsu PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
@@ -425,40 +439,48 @@ endif(MSVC)
 # Add target link dependencies
 target_link_libraries(openMittsuCore ${Libsodium_LIBRARIES})
 target_link_libraries(openMittsu ${LIBQRENCODE_LIBRARY})
-target_link_libraries(openMittsuCore gmock gtest)
 
-add_dependencies(openMittsuTests gmock gtest)
+if (OPENMITTSU_ENABLE_TESTS)
+	add_dependencies(openMittsuTests gmock gtest)
+endif (OPENMITTSU_ENABLE_TESTS)
 
 # Use the required modules from Qt 5.
 target_link_libraries(openMittsuCore Qt5::Core Qt5::Network Qt5::Multimedia Qt5::Sql)
 target_link_libraries(openMittsu openMittsuCore Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network Qt5::Multimedia Qt5::Sql)
-target_link_libraries(openMittsuTests openMittsuCore Qt5::Core Qt5::Network Qt5::Multimedia Qt5::Sql)
 target_link_libraries(openMittsuVersionInfo Qt5::Core)
+if (OPENMITTSU_ENABLE_TESTS)
+	target_link_libraries(openMittsuTests openMittsuCore Qt5::Core Qt5::Network Qt5::Multimedia Qt5::Sql gmock gtest)
+endif (OPENMITTSU_ENABLE_TESTS)
 
 # Link against libc++abi if requested.
 if (OPENMITTSU_LINK_LIBCXXABI)
 	target_link_libraries(openMittsu "c++abi")
 	target_link_libraries(openMittsuCore "c++abi")
 	target_link_libraries(openMittsuVersionInfo "c++abi")
-	target_link_libraries(openMittsuTests "c++abi")
+	if (OPENMITTSU_ENABLE_TESTS)
+		target_link_libraries(openMittsuTests "c++abi")
+	endif (OPENMITTSU_ENABLE_TESTS)
 endif(OPENMITTSU_LINK_LIBCXXABI)
 
 # Targets, CPACK...
 include(InstallRequiredSystemLibraries)
 
 install(TARGETS openMittsu
-   RUNTIME
-   DESTINATION bin
-   COMPONENT OpenMittsu)
+	RUNTIME
+	DESTINATION bin
+	COMPONENT OpenMittsu)
 install(TARGETS openMittsuVersionInfo
-   RUNTIME
-   DESTINATION bin
-   COMPONENT OpenMittsu)
-install(TARGETS openMittsuTests
-   RUNTIME
-   DESTINATION bin
-   COMPONENT OpenMittsu)
-   
+	RUNTIME
+	DESTINATION bin
+	COMPONENT OpenMittsu)
+
+if (OPENMITTSU_ENABLE_TESTS)
+	install(TARGETS openMittsuTests
+		RUNTIME
+		DESTINATION bin
+		COMPONENT OpenMittsu)
+endif (OPENMITTSU_ENABLE_TESTS)
+
 if (MSVC)
 	# Custom target for packaging.
 	if(OPENMITTSU_USE_NSIS)
@@ -472,6 +494,8 @@ if (MSVC)
 	if ("$ENV{VCINSTALLDIR}" STREQUAL "")
 		get_filename_component(OPENMITTSU_VCINSTALLDIR "${CMAKE_LINKER}" DIRECTORY)
 		file(TO_NATIVE_PATH "${OPENMITTSU_VCINSTALLDIR}/../../" VCINSTALLDIR_NATIVEPATH)
+		
+		STRING(REGEX REPLACE "^(.+)\\\\VC\\\\.+" "\\1\\\\VC" VCINSTALLDIR_NATIVEPATH ${VCINSTALLDIR_NATIVEPATH})
 		
 		set(ENV{VCINSTALLDIR} "${VCINSTALLDIR_NATIVEPATH}")
 	endif()
@@ -491,7 +515,7 @@ if (NOT "${OPENMITTSU_ADDITIONAL_INSTALL_FILES}" STREQUAL "")
 		endif()
 	endforeach()
 endif()
-   
+
 # CPack
 set(CPACK_PACKAGE_NAME "openmittsu")
 set(CPACK_PACKAGE_VENDOR "OpenMittsu project team")
@@ -548,15 +572,20 @@ endif(DPKG_PROGRAM)
 SET(CPACK_PACKAGE_EXECUTABLES "openMittsu;OpenMittsu")
 SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
 if (WIN32 AND NOT UNIX)
-  SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\openMittsu.exe")
-  SET(CPACK_NSIS_DISPLAY_NAME "openMittsu")
-  SET(CPACK_NSIS_HELP_LINK "https:\\\\\\\\www.openmittsu.de")
-  SET(CPACK_NSIS_URL_INFO_ABOUT "https:\\\\\\\\www.openmittsu.de")
-  SET(CPACK_NSIS_CONTACT "mail@openmittsu.de")
-  SET(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+	SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\openMittsu.exe")
+	SET(CPACK_NSIS_DISPLAY_NAME "openMittsu")
+	SET(CPACK_NSIS_HELP_LINK "https:\\\\\\\\www.openmittsu.de")
+	SET(CPACK_NSIS_URL_INFO_ABOUT "https:\\\\\\\\www.openmittsu.de")
+	SET(CPACK_NSIS_CONTACT "mail@openmittsu.de")
+	SET(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+	if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+		SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "ExecWait '\\\"$INSTDIR\\\\bin\\\\vcredist_x64.exe\\\" /install /passive /norestart'")
+	else()
+		SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "ExecWait '\\\"$INSTDIR\\\\bin\\\\vcredist_x86.exe\\\" /install /passive /norestart'")
+	endif()
 else(WIN32 AND NOT UNIX)
-  SET(CPACK_STRIP_FILES "bin/openMittsu")
-  SET(CPACK_SOURCE_STRIP_FILES "")
+	SET(CPACK_STRIP_FILES "bin/openMittsu")
+	SET(CPACK_SOURCE_STRIP_FILES "")
 endif(WIN32 AND NOT UNIX)
 set(CPACK_SOURCE_IGNORE_FILES ".git")
 set(CPACK_BUNDLE_NAME "openmittsu")

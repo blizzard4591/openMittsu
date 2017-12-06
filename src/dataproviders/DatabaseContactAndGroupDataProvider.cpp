@@ -133,7 +133,11 @@ namespace openmittsu {
 			query.bindValue(QStringLiteral(":id"), QVariant(group.groupIdWithoutOwnerToQString()));
 			query.bindValue(QStringLiteral(":creator"), QVariant(group.getOwner().toQString()));
 
-			if (query.exec() && query.isSelect() && query.next()) {
+			if (query.exec() && query.isSelect()) {
+				if (!query.next()) {
+					throw openmittsu::exceptions::InternalErrorException() << "Could not execute group member enumeration query for group " << group.toString() << " on table groups. Group does not exist!";
+				}
+
 				QString const memberString(query.value(QStringLiteral("members")).toString());
 				QSet<openmittsu::protocol::ContactId> result = openmittsu::protocol::ContactIdList::fromString(memberString).getContactIds();
 				

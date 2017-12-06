@@ -47,6 +47,13 @@ namespace openmittsu {
 			}
 		}
 
+		bool MessageQueue::hasMessageForGroup(openmittsu::protocol::GroupId const& group) const {
+			if (m_storedGroupMessages.contains(group)) {
+				return m_storedGroupMessages.constFind(group)->size() > 0;
+			}
+			return false;
+		}
+
 		QVector<MessageQueue::ReceivedContactMessage> MessageQueue::getAndRemoveQueuedMessages(openmittsu::protocol::ContactId const& sender) {
 			QMutexLocker lock(&m_mutex);
 			if (m_storedContactMessages.contains(sender)) {
