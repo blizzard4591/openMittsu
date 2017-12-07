@@ -775,7 +775,7 @@ namespace openmittsu {
 
 		void MessageCenter::processReceivedGroupSyncRequest(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived) {
 			if (this->m_storage == nullptr) {
-				LOGGER()->warn("We received a group set title message from sender {} for group {} with message ID #{} sent at {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString());
+				LOGGER()->warn("We received a group sync request message from sender {} for group {} with message ID #{} sent at {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString());
 				return;
 			} else if (sender == group.getOwner()) {
 				LOGGER()->warn("We received a group sync request message from sender {} for group {} with message ID #{} sent at {} that did come from the group owner. Ignoring.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString());

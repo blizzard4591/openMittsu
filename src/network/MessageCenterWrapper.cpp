@@ -95,7 +95,7 @@ namespace openmittsu {
 		}
 
 		void MessageCenterWrapper::processReceivedGroupSyncRequest(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived) {
-			QMetaObject::invokeMethod(m_messageCenter.get(), "processReceivedGroupSetTitle", Qt::QueuedConnection, Q_ARG(openmittsu::protocol::GroupId, group), Q_ARG(openmittsu::protocol::ContactId, sender), Q_ARG(openmittsu::protocol::MessageId, messageId), Q_ARG(openmittsu::protocol::MessageTime, timeSent), Q_ARG(openmittsu::protocol::MessageTime, timeReceived));
+			QMetaObject::invokeMethod(m_messageCenter.get(), "processReceivedGroupSyncRequest", Qt::QueuedConnection, Q_ARG(openmittsu::protocol::GroupId, group), Q_ARG(openmittsu::protocol::ContactId, sender), Q_ARG(openmittsu::protocol::MessageId, messageId), Q_ARG(openmittsu::protocol::MessageTime, timeSent), Q_ARG(openmittsu::protocol::MessageTime, timeReceived));
 		}
 
 		void MessageCenterWrapper::processReceivedGroupLeave(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived) {
