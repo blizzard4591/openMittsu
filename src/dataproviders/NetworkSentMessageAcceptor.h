@@ -12,6 +12,10 @@
 #include <memory>
 
 namespace openmittsu {
+	namespace test {
+		class MockNetworkSentMessageAcceptor;
+	}
+
 	namespace dataproviders {
 
 		class NetworkSentMessageAcceptor : public QObject, public SentMessageAcceptor {
@@ -45,11 +49,15 @@ namespace openmittsu {
 
 			virtual bool isConnected() const;
 			virtual void sendMessageReceivedAcknowledgement(openmittsu::protocol::ContactId const& messageSender, openmittsu::protocol::MessageId const& messageId);
+
+			friend class openmittsu::test::MockNetworkSentMessageAcceptor;
 		signals:
 			void readyToAcceptMessages();
 		private slots:
 			void onConnectToFinished(int errCode);
 		private:
+			NetworkSentMessageAcceptor() {} // For Mock-testing only
+
 			std::weak_ptr<openmittsu::network::ProtocolClient> m_protocolClient;
 
 			void send(openmittsu::messages::contact::PreliminaryContactMessage const& message);

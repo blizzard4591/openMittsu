@@ -983,7 +983,9 @@ namespace openmittsu {
 		}
 
 		void MessageCenter::requestSyncForGroupIfApplicable(openmittsu::protocol::GroupId const& group) {
-			this->sendSyncRequest(group);
+			if (!m_messageQueue.hasMessageForGroup(group)) {
+				this->sendSyncRequest(group);
+			}
 		}
 
 		bool MessageCenter::checkAndFixGroupMembership(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender) {

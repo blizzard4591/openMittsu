@@ -66,13 +66,13 @@ namespace openmittsu {
 				STORAGE_DATABASE
 			};
 
-			void setDatabase(std::shared_ptr<openmittsu::database::Database> const& database);
+			virtual void setDatabase(std::shared_ptr<openmittsu::database::Database> const& database);
 
-			bool getOptionAsBool(Options const& option) const;
-			QString getOptionAsQString(Options const& option) const;
-			QByteArray getOptionAsQByteArray(Options const& option) const;
+			virtual bool getOptionAsBool(Options const& option) const;
+			virtual QString getOptionAsQString(Options const& option) const;
+			virtual QByteArray getOptionAsQByteArray(Options const& option) const;
 
-			void setOption(Options const& option, QVariant const& value);
+			virtual void setOption(Options const& option, QVariant const& value);
 
 			void registerOptions();
 		private:

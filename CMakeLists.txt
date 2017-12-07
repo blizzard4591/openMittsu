@@ -247,6 +247,8 @@ if (OPENMITTSU_ENABLE_TESTS AND NOT CMAKE_BUILD_TYPE MATCHES "^Gentoo")
 	# when building with Visual Studio
 	set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
+	set(BUILD_GMOCK ON)
+
 	# Add googletest directly to our build. This adds
 	# the following targets: gtest, gtest_main, gmock
 	# and gmock_main
@@ -439,7 +441,7 @@ target_link_libraries(openMittsuCore ${Libsodium_LIBRARIES})
 target_link_libraries(openMittsu ${LIBQRENCODE_LIBRARY})
 
 if (OPENMITTSU_ENABLE_TESTS)
-	add_dependencies(openMittsuTests gtest)
+	add_dependencies(openMittsuTests gmock gtest)
 endif (OPENMITTSU_ENABLE_TESTS)
 
 # Use the required modules from Qt 5.
@@ -447,7 +449,7 @@ target_link_libraries(openMittsuCore Qt5::Core Qt5::Network Qt5::Multimedia Qt5:
 target_link_libraries(openMittsu openMittsuCore Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network Qt5::Multimedia Qt5::Sql)
 target_link_libraries(openMittsuVersionInfo Qt5::Core)
 if (OPENMITTSU_ENABLE_TESTS)
-	target_link_libraries(openMittsuTests openMittsuCore Qt5::Core Qt5::Network Qt5::Multimedia Qt5::Sql gtest)
+	target_link_libraries(openMittsuTests openMittsuCore Qt5::Core Qt5::Network Qt5::Multimedia Qt5::Sql gmock gtest)
 endif (OPENMITTSU_ENABLE_TESTS)
 
 # Link against libc++abi if requested.
@@ -455,9 +457,9 @@ if (OPENMITTSU_LINK_LIBCXXABI)
 	target_link_libraries(openMittsu "c++abi")
 	target_link_libraries(openMittsuCore "c++abi")
 	target_link_libraries(openMittsuVersionInfo "c++abi")
-if (OPENMITTSU_ENABLE_TESTS)
+	if (OPENMITTSU_ENABLE_TESTS)
 		target_link_libraries(openMittsuTests "c++abi")
-endif (OPENMITTSU_ENABLE_TESTS)
+	endif (OPENMITTSU_ENABLE_TESTS)
 endif(OPENMITTSU_LINK_LIBCXXABI)
 
 # Targets, CPACK...
