@@ -24,7 +24,9 @@ namespace openmittsu {
 		void NetworkSentMessageAcceptor::send(openmittsu::messages::contact::PreliminaryContactMessage const& message) {
 			auto sPtr = m_protocolClient.lock();
 			if (sPtr) {
-				QMetaObject::invokeMethod(sPtr.get(), "sendContactMessage", Qt::QueuedConnection, Q_ARG(openmittsu::messages::contact::PreliminaryContactMessage, message));
+				if (!QMetaObject::invokeMethod(sPtr.get(), "sendContactMessage", Qt::QueuedConnection, Q_ARG(openmittsu::messages::contact::PreliminaryContactMessage, message))) {
+					throw openmittsu::exceptions::InternalErrorException() << "Could not invoke method sendContactMessage in " << __FILE__ << "  at line " << __LINE__ << ".";
+				}
 			} else {
 				LOGGER()->error("NetworkSentMessageAcceptor::send(PreliminaryContactMessage) invoked, but the ProtocolClient pointer is null!");
 			}
@@ -33,7 +35,9 @@ namespace openmittsu {
 		void NetworkSentMessageAcceptor::sendMessageReceivedAcknowledgement(openmittsu::protocol::ContactId const& messageSender, openmittsu::protocol::MessageId const& messageId) {
 			auto sPtr = m_protocolClient.lock();
 			if (sPtr) {
-				QMetaObject::invokeMethod(sPtr.get(), "sendMessageReceivedAcknowledgement", Qt::QueuedConnection, Q_ARG(openmittsu::protocol::ContactId, messageSender), Q_ARG(openmittsu::protocol::MessageId, messageId));
+				if (!QMetaObject::invokeMethod(sPtr.get(), "sendMessageReceivedAcknowledgement", Qt::QueuedConnection, Q_ARG(openmittsu::protocol::ContactId, messageSender), Q_ARG(openmittsu::protocol::MessageId, messageId))) {
+					throw openmittsu::exceptions::InternalErrorException() << "Could not invoke method sendMessageReceivedAcknowledgement in " << __FILE__ << "  at line " << __LINE__ << ".";
+				}
 			} else {
 				LOGGER()->error("NetworkSentMessageAcceptor::sendMessageReceivedAcknowledgement invoked, but the ProtocolClient pointer is null!");
 			}
@@ -42,7 +46,9 @@ namespace openmittsu {
 		void NetworkSentMessageAcceptor::send(openmittsu::messages::group::PreliminaryGroupMessage const& message) {
 			auto sPtr = m_protocolClient.lock();
 			if (sPtr) {
-				QMetaObject::invokeMethod(sPtr.get(), "sendGroupMessage", Qt::QueuedConnection, Q_ARG(openmittsu::messages::group::PreliminaryGroupMessage, message));
+				if (!QMetaObject::invokeMethod(sPtr.get(), "sendGroupMessage", Qt::QueuedConnection, Q_ARG(openmittsu::messages::group::PreliminaryGroupMessage, message))) {
+					throw openmittsu::exceptions::InternalErrorException() << "Could not invoke method sendGroupMessage in " << __FILE__ << "  at line " << __LINE__ << ".";
+				}
 			}
 		}
 

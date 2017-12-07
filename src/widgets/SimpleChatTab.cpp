@@ -172,7 +172,9 @@ namespace openmittsu {
 				openmittsu::tasks::FileDownloaderCallbackTask* fileDownloaderCallbackTask = new openmittsu::tasks::FileDownloaderCallbackTask(QUrl(urlString));
 				OPENMITTSU_CONNECT(fileDownloaderCallbackTask, finished(openmittsu::tasks::CallbackTask*), this, fileDownloaderCallbackTaskFinished(openmittsu::tasks::CallbackTask*));
 
-				QMetaObject::invokeMethod(fileDownloaderCallbackTask, "start", Qt::QueuedConnection);
+				if (!QMetaObject::invokeMethod(fileDownloaderCallbackTask, "start", Qt::QueuedConnection)) {
+					throw openmittsu::exceptions::InternalErrorException() << "Could not invoke method start in " << __FILE__ << "  at line " << __LINE__ << ".";
+				}
 			}
 		}
 
@@ -247,7 +249,9 @@ namespace openmittsu {
 		}
 
 		void SimpleChatTab::scrollDownChatWidget() {
-			QMetaObject::invokeMethod(m_ui->chatWidget, "scrollToBottom", Qt::QueuedConnection);
+			if (!QMetaObject::invokeMethod(m_ui->chatWidget, "scrollToBottom", Qt::QueuedConnection)) {
+				throw openmittsu::exceptions::InternalErrorException() << "Could not invoke method scrollToBottom in " << __FILE__ << "  at line " << __LINE__ << ".";
+			}
 		}
 
 		void SimpleChatTab::internalOnReceivedFocus() {

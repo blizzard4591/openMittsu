@@ -55,7 +55,9 @@ namespace openmittsu {
 				try {
 					QEventLoop loop;
 					OPENMITTSU_CONNECT(this, teardownComplete(), &loop, quit());
-					QMetaObject::invokeMethod(this, "teardown", Qt::QueuedConnection);
+					if (!QMetaObject::invokeMethod(this, "teardown", Qt::QueuedConnection)) {
+						throw openmittsu::exceptions::InternalErrorException() << "Could not invoke method teardown in " << __FILE__ << "  at line " << __LINE__ << ".";
+					}
 					loop.exec();
 				} catch (...) {
 					LOGGER()->critical("Caught exception in ProtocolClient dtor, this will probably crash with an exception when auto-destruction takes over.");
@@ -787,7 +789,9 @@ namespace openmittsu {
 
 			OPENMITTSU_CONNECT_QUEUED(callbackTask, finished(openmittsu::tasks::CallbackTask*), this, callbackTaskFinished(openmittsu::tasks::CallbackTask*));
 
-			QMetaObject::invokeMethod(callbackTask, "start", Qt::QueuedConnection);
+			if (!QMetaObject::invokeMethod(callbackTask, "start", Qt::QueuedConnection)) {
+				throw openmittsu::exceptions::InternalErrorException() << "Could not invoke method start in " << __FILE__ << "  at line " << __LINE__ << ".";
+			}
 		}
 
 		void ProtocolClient::callbackTaskFinished(openmittsu::tasks::CallbackTask* callbackTask) {

@@ -240,7 +240,9 @@ void Client::setupProtocolClient() {
 
 		QEventLoop eventLoop;
 		OPENMITTSU_CONNECT(m_protocolClient.get(), teardownComplete(), &eventLoop, quit());
-		QMetaObject::invokeMethod(m_protocolClient.get(), "teardown", Qt::QueuedConnection);
+		if (!QMetaObject::invokeMethod(m_protocolClient.get(), "teardown", Qt::QueuedConnection)) {
+			throw openmittsu::exceptions::InternalErrorException() << "Could not invoke method teardown in " << __FILE__ << "  at line " << __LINE__ << ".";
+		}
 
 		m_protocolClient.reset();
 	}
@@ -266,7 +268,9 @@ void Client::setupProtocolClient() {
 
 	OPENMITTSU_CONNECT(m_protocolClient.get(), setupDone(), &eventLoop, quit());
 
-	QMetaObject::invokeMethod(m_protocolClient.get(), "setup", Qt::QueuedConnection);
+	if (!QMetaObject::invokeMethod(m_protocolClient.get(), "setup", Qt::QueuedConnection)) {
+		throw openmittsu::exceptions::InternalErrorException() << "Could not invoke method setup in " << __FILE__ << "  at line " << __LINE__ << ".";
+	}
 	eventLoop.exec(); // blocks until "finished()" has been called
 
 	m_messageCenter->setNetworkSentMessageAcceptor(std::make_shared<openmittsu::dataproviders::NetworkSentMessageAcceptor>(m_protocolClient));
@@ -275,7 +279,9 @@ void Client::setupProtocolClient() {
 void Client::threadFinished() {
 	LOGGER_DEBUG("Client::threadFinished - the worker thread finished.");
 	if (m_protocolClient != nullptr) {
-		QMetaObject::invokeMethod(m_protocolClient.get(), "teardown", Qt::QueuedConnection);
+		if (!QMetaObject::invokeMethod(m_protocolClient.get(), "teardown", Qt::QueuedConnection)) {
+			throw openmittsu::exceptions::InternalErrorException() << "Could not invoke method teardown in " << __FILE__ << "  at line " << __LINE__ << ".";
+		}
 		m_protocolClient->deleteLater();
 		m_protocolClient.reset();
 	}
