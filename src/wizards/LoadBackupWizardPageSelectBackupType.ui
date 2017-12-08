@@ -63,7 +63,7 @@
    <item>
     <widget class="QLabel" name="lblExplanation">
      <property name="text">
-      <string>An ID Backup comes in the form of a text-string that looks like this: HTTH-C2A1-O1Q2-.... It contains only your private key and ID - no contacts or messages.
+      <string>An ID Backup comes in the form of a text-string that looks like this: THTH-C2A1-O1Q2-.... It contains only your private key and ID - no contacts or messages.
 A data backup on the other hand contains your private key, your ID plus all contacts, groups and messages. A data backup is exported by Threema as a password-protected *.zip file. If you chose to also included media files in your data backup, these can be imported as well.</string>
      </property>
      <property name="wordWrap">
