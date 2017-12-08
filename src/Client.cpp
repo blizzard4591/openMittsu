@@ -94,7 +94,7 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 #ifdef OPENMITTSU_CONFIG_ALLOW_MISSING_QSQLCIPHER
 		QMessageBox::warning(this, tr("Database driver not available"), tr("openMittsu relies on SqlCipher and QSqlCipher for securely storing the database.\nThe QSQLCIPHER driver is not available. It should reside in the sqldrivers\\ subdirectory of openMittsu.\nWe will use the unencrypted SQLITE driver instead."));
 #else
-		QMessageBox::warning(this, tr("Database driver not available"), tr("openMittsu relies on SqlCipher and QSqlCipher for securely storing the database.\nThe QSQLCIPHER driver is not available. It should reside in the sqldrivers\\ subdirectory of openMittsu.\nSince no encryption is available, OpenMittsu will now terminate."));
+		QMessageBox::critical(this, tr("Database driver not available"), tr("openMittsu relies on SqlCipher and QSqlCipher for securely storing the database.\nThe QSQLCIPHER driver is not available. It should reside in the sqldrivers\\ subdirectory of openMittsu.\nSince no encryption is available, OpenMittsu will now terminate."));
 #endif
 	}
 
@@ -377,12 +377,12 @@ void Client::openDatabaseFile(QString const& fileName) {
 
 				contactRegistryOnIdentitiesChanged();
 				break;
+			} catch (openmittsu::exceptions::InvalidPasswordOrDatabaseException&) {
+				QMessageBox::information(this, tr("Invalid password"), tr("The entered database password was invalid."));
 			} catch (openmittsu::exceptions::InternalErrorException&) {
 				LOGGER_DEBUG("Removing key \"FILEPATH_DATABASE\" from stored settings as the file is not valid.");
 				m_optionMaster->setOption(openmittsu::utility::OptionMaster::Options::FILEPATH_DATABASE, "");
 				break;
-			} catch (openmittsu::exceptions::InvalidPasswordOrDatabaseException&) {
-				QMessageBox::information(this, tr("Invalid password"), tr("The entered database password was invalid."));
 			}
 		} else {
 			m_optionMaster->setOption(openmittsu::utility::OptionMaster::Options::FILEPATH_DATABASE, "");

@@ -60,6 +60,11 @@ Database::Database(QString const& filename, QString const& password, QDir const&
 	QStringList const tables = database.tables(QSql::AllTables);
 	if (!tables.contains(QStringLiteral("sqlite_master"))) {
 		throw openmittsu::exceptions::InvalidPasswordOrDatabaseException() << "SQLITE master table does not exist, invalid database or incorrect password.";
+	} else {
+		QSqlQuery query(database);
+		if (!query.exec(QStringLiteral("SELECT `type`, `name`, `sql`, `tbl_name` FROM `sqlite_master`"))) {
+			throw openmittsu::exceptions::InvalidPasswordOrDatabaseException() << "SQLITE master table not readable, invalid database or incorrect password.";
+		}
 	}
 
 	createOrUpdateTables();
