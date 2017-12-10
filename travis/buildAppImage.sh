@@ -22,18 +22,8 @@ then
 		echo "AppImages:"
 		find . -type f -name '*.AppImage'
 	else
-		echo ".app Files:"
-		find . -name '*.app'
-		echo "Allll the files:"
-		find . -type f > file.temp.txt
-		tar cfvz build.tar.gz ./build
-		curl --ftp-create-dirs -T file.temp.txt -u $FTP_LOG_USER:$FTP_LOG_PASSWORD ftp://$FTP_LOG_HOST/logs.txt
-		curl --ftp-create-dirs -T build.tar.gz -u $FTP_LOG_USER:$FTP_LOG_PASSWORD ftp://$FTP_LOG_HOST/buildMac.tar.gz 
-		/usr/local/Cellar/qt/$QT_VERSION/bin/macdeployqt openmittsu.app -always-overwrite -verbose=2
-		curl -o /tmp/macdeployqtfix.py https://raw.githubusercontent.com/aurelien-rainone/macdeployqtfix/master/macdeployqtfix.py
-		python /tmp/macdeployqtfix.py ./openmittsu.app/Contents/MacOS/openmittsu /usr/local/Cellar/qt/$QT_VERSION/
-		/usr/local/Cellar/qt/$QT_VERSION/bin/macdeployqt openmittsu.app -dmg -verbose=2
-		echo ".dmg Files:"
-		find . -name '*.dmg'
+		sudo wget -c $MACOS_SCRIPT_PACKAGE -O /usr/local/bin/macOsPackage.sh
+		sudo chmod a+x /usr/local/bin/macOsPackage.sh
+		/usr/local/bin/macOsPackage.sh
 	fi
 fi
