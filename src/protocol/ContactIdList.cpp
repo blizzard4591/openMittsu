@@ -38,6 +38,22 @@ namespace openmittsu {
 			return result;
 		}
 
+		QString ContactIdList::toStringS(QString const& separator) const {
+			QString result = "";
+			result.reserve(m_contactIds.size() * (ContactId::getSizeOfContactIdInBytes() + 1));
+
+			auto it = m_contactIds.constBegin();
+			auto const end = m_contactIds.constEnd();
+			for (; it != end; ++it) {
+				if (!result.isEmpty()) {
+					result.append(separator);
+				}
+				result.append(it->toQString());
+			}
+
+			return result;
+		}
+
 		ContactIdList ContactIdList::fromString(QString const& contactIdsString, QChar const& separator) {
 			QSet<ContactId> result;
 			QStringList const splitMembers = contactIdsString.split(separator, QString::SkipEmptyParts);

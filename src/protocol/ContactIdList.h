@@ -17,6 +17,7 @@ namespace openmittsu {
 
 			QSet<ContactId> const& getContactIds() const;
 			QString toString(QChar const& separator = QChar(';')) const;
+			QString toStringS(QString const& separator = QString(", ")) const;
 
 			static ContactIdList fromString(QString const& contactIdsString, QChar const& separator = QChar(';'));
 

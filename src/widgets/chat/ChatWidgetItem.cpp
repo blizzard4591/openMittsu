@@ -252,7 +252,8 @@ namespace openmittsu {
 			// Activate RichText parsing
 			label->setTextFormat(Qt::RichText);
 			// Make links accessible
-			label->setTextInteractionFlags(Qt::LinksAccessibleByMouse | Qt::TextSelectableByKeyboard | Qt::TextSelectableByMouse);
+			label->setTextInteractionFlags(Qt::LinksAccessibleByMouse | Qt::LinksAccessibleByKeyboard | Qt::TextSelectableByKeyboard | Qt::TextSelectableByMouse);
+			label->setOpenExternalLinks(true);
 		}
 
 		bool ChatWidgetItem::isMessageFromUs() const {
