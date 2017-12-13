@@ -90,9 +90,14 @@ Database::Database(QString const& filename, openmittsu::protocol::ContactId cons
 		database = QSqlDatabase::addDatabase(m_driverNameCrypto, m_connectionName);
 		m_usingCryptoDb = true;
 	} else {
+#ifdef OPENMITTSU_CONFIG_ALLOW_MISSING_QSQLCIPHER
 		LOGGER()->info("Using the non-crypto-database interface (QSQLITE).");
 		database = QSqlDatabase::addDatabase(m_driverNameStandard, m_connectionName);
 		m_usingCryptoDb = false;
+#else
+		LOGGER()->error("QSqlCipher is not available, no encryption available. Quiting!");
+		throw openmittsu::exceptions::MissingQSqlCipherException() << "QSqlCipher is not available, no encryption available!";
+#endif
 	}
 	database.setDatabaseName(filename);
 	if (!database.open()) {
