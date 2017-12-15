@@ -1,6 +1,6 @@
 #include "src/database/DatabaseContactMessageCursor.h"
 
-#include "src/database/Database.h"
+#include "src/database/SimpleDatabase.h"
 #include "src/exceptions/InternalErrorException.h"
 #include "src/utility/Logging.h"
 
@@ -12,7 +12,7 @@ namespace openmittsu {
 
 		using namespace openmittsu::dataproviders::messages;
 
-		DatabaseContactMessageCursor::DatabaseContactMessageCursor(Database& database, openmittsu::protocol::ContactId const& contact) : DatabaseMessageCursor(database), ContactMessageCursor(), m_contact(contact) {
+		DatabaseContactMessageCursor::DatabaseContactMessageCursor(SimpleDatabase& database, openmittsu::protocol::ContactId const& contact) : DatabaseMessageCursor(database), ContactMessageCursor(), m_contact(contact) {
 			//
 		}
 
@@ -20,7 +20,7 @@ namespace openmittsu {
 			//
 		}
 
-		DatabaseContactMessageCursor::DatabaseContactMessageCursor(Database& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId) : DatabaseMessageCursor(database), ContactMessageCursor(), m_contact(contact) {
+		DatabaseContactMessageCursor::DatabaseContactMessageCursor(SimpleDatabase& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId) : DatabaseMessageCursor(database), ContactMessageCursor(), m_contact(contact) {
 			if (!seek(messageId)) {
 				throw openmittsu::exceptions::InternalErrorException() << "No message from contact \"" << contact.toString() << "\" and message ID \"" << messageId.toString() << "\" exists, invalid entry point.";
 			}

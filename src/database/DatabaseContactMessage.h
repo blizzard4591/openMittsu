@@ -15,12 +15,9 @@ namespace openmittsu {
 	}
 
 	namespace database {
-
-		class Database;
-
 		class DatabaseContactMessage : public virtual DatabaseUserMessage, public virtual openmittsu::dataproviders::messages::ContactMessage {
 		public:
-			explicit DatabaseContactMessage(Database& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId);
+			explicit DatabaseContactMessage(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId);
 			virtual ~DatabaseContactMessage();
 
 			virtual openmittsu::protocol::ContactId const& getContactId() const override;
@@ -30,14 +27,14 @@ namespace openmittsu {
 			virtual openmittsu::utility::Location getContentAsLocation() const override;
 			virtual MediaFileItem getContentAsImage() const override;
 
-			static int getContactMessageCount(Database const& database);
-			static int getContactMessageCount(Database const& database, openmittsu::protocol::ContactId const& contact);
+			static int getContactMessageCount(InternalDatabaseInterface* database);
+			static int getContactMessageCount(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact);
 
-			static bool exists(Database& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId);
-			static openmittsu::protocol::MessageId insertContactMessageFromUs(Database& database, openmittsu::protocol::ContactId const& contact, QString const& uuid, openmittsu::protocol::MessageTime const& createdAt, openmittsu::dataproviders::messages::ContactMessageType const& type, QString const& body, bool isQueued, bool isStatusMessage, QString const& caption);
-			static void insertContactMessageFromThem(Database& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId, QString const& uuid, openmittsu::protocol::MessageTime const& sentAt, openmittsu::protocol::MessageTime const& receivedAt, openmittsu::dataproviders::messages::ContactMessageType const& type, QString const& body, bool isStatusMessage, QString const& caption);
-			static void insertContactMessagesFromBackup(Database& database, QList<openmittsu::backup::ContactMessageBackupObject> const& messages);
-			static bool resetQueueStatus(Database& database, int maxAgeInSeconds);
+			static bool exists(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId);
+			static openmittsu::protocol::MessageId insertContactMessageFromUs(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, QString const& uuid, openmittsu::protocol::MessageTime const& createdAt, openmittsu::dataproviders::messages::ContactMessageType const& type, QString const& body, bool isQueued, bool isStatusMessage, QString const& caption);
+			static void insertContactMessageFromThem(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId, QString const& uuid, openmittsu::protocol::MessageTime const& sentAt, openmittsu::protocol::MessageTime const& receivedAt, openmittsu::dataproviders::messages::ContactMessageType const& type, QString const& body, bool isStatusMessage, QString const& caption);
+			static void insertContactMessagesFromBackup(InternalDatabaseInterface* database, QList<openmittsu::backup::ContactMessageBackupObject> const& messages);
+			static bool resetQueueStatus(InternalDatabaseInterface* database, int maxAgeInSeconds);
 		protected:
 			virtual QString getWhereString() const override;
 			virtual void bindWhereStringValues(QSqlQuery& query) const override;
@@ -45,7 +42,7 @@ namespace openmittsu {
 		private:
 			openmittsu::protocol::ContactId const m_contact;
 
-			static void insertContactMessage(Database& database, openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& apiId, QString const& uuid, bool isOutgoing, bool isRead, bool isSaved, openmittsu::dataproviders::messages::UserMessageState const& messageState, openmittsu::protocol::MessageTime const& createdAt, openmittsu::protocol::MessageTime const& sentAt, openmittsu::protocol::MessageTime const& receivedAt, openmittsu::protocol::MessageTime const& seenAt, openmittsu::protocol::MessageTime const& modifiedAt, openmittsu::dataproviders::messages::ContactMessageType const& type, QString const& body, bool isStatusMessage, bool isQueued, bool isSent, QString const& caption);
+			static void insertContactMessage(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& apiId, QString const& uuid, bool isOutgoing, bool isRead, bool isSaved, openmittsu::dataproviders::messages::UserMessageState const& messageState, openmittsu::protocol::MessageTime const& createdAt, openmittsu::protocol::MessageTime const& sentAt, openmittsu::protocol::MessageTime const& receivedAt, openmittsu::protocol::MessageTime const& seenAt, openmittsu::protocol::MessageTime const& modifiedAt, openmittsu::dataproviders::messages::ContactMessageType const& type, QString const& body, bool isStatusMessage, bool isQueued, bool isSent, QString const& caption);
 		};
 
 	}

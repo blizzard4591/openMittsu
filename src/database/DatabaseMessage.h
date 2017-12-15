@@ -10,12 +10,12 @@
 namespace openmittsu {
 	namespace database {
 
-		class Database;
+		class InternalDatabaseInterface;
 		class MediaFileItem;
 
 		class DatabaseMessage : public virtual openmittsu::dataproviders::messages::Message {
 		public:
-			explicit DatabaseMessage(Database& database, openmittsu::protocol::MessageId const& messageId);
+			explicit DatabaseMessage(InternalDatabaseInterface* database, openmittsu::protocol::MessageId const& messageId);
 			virtual ~DatabaseMessage();
 
 			virtual openmittsu::protocol::ContactId getSender() const override;
@@ -54,7 +54,7 @@ namespace openmittsu {
 
 			void announceMessageChanged();
 		private:
-			Database& m_database;
+			InternalDatabaseInterface * m_database;
 			openmittsu::protocol::MessageId const m_messageId;
 		};
 

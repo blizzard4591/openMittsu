@@ -6,11 +6,11 @@
 
 namespace openmittsu {
 	namespace database {
-		class Database;
+		class SimpleDatabase;
 
 		class ExternalMediaFileStorage : public MediaFileStorage {
 		public:
-			explicit ExternalMediaFileStorage(QDir const& storagePath, openmittsu::database::Database& database);
+			explicit ExternalMediaFileStorage(QDir const& storagePath, openmittsu::database::SimpleDatabase& database);
 			virtual ~ExternalMediaFileStorage();
 
 			virtual bool hasMediaItem(QString const& uuid) const override;

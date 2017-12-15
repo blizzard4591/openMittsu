@@ -1,7 +1,7 @@
 #include "src/database/DatabaseContactMessage.h"
 
 #include "src/backup/ContactMessageBackupObject.h"
-#include "src/database/Database.h"
+#include "src/database/InternalDatabaseInterface.h"
 #include "src/database/DatabaseUtilities.h"
 #include "src/exceptions/InternalErrorException.h"
 #include "src/utility/Logging.h"
@@ -14,7 +14,7 @@ namespace openmittsu {
 
 		using namespace openmittsu::dataproviders::messages;
 
-		DatabaseContactMessage::DatabaseContactMessage(Database& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId) : DatabaseMessage(database, messageId), DatabaseUserMessage(database, messageId), ContactMessage(), m_contact(contact) {
+		DatabaseContactMessage::DatabaseContactMessage(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId) : DatabaseMessage(database, messageId), DatabaseUserMessage(database, messageId), ContactMessage(), m_contact(contact) {
 			if (!exists(database, contact, messageId)) {
 				throw openmittsu::exceptions::InternalErrorException() << "No message from contact \"" << contact.toString() << "\" and message ID \"" << messageId.toString() << "\" exists, can not manipulate.";
 			}
@@ -28,16 +28,16 @@ namespace openmittsu {
 			return m_contact;
 		}
 
-		int DatabaseContactMessage::getContactMessageCount(Database const& database) {
-			return openmittsu::database::DatabaseUtilities::countQuery(database.database, QStringLiteral("contact_messages"));
+		int DatabaseContactMessage::getContactMessageCount(InternalDatabaseInterface* database) {
+			return openmittsu::database::DatabaseUtilities::countQuery(database, QStringLiteral("contact_messages"));
 		}
 		
-		int DatabaseContactMessage::getContactMessageCount(Database const& database, openmittsu::protocol::ContactId const& contact) {
-			return openmittsu::database::DatabaseUtilities::countQuery(database.database, QStringLiteral("contact_messages"), { { QStringLiteral("identity"), contact.toQString() } });
+		int DatabaseContactMessage::getContactMessageCount(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact) {
+			return openmittsu::database::DatabaseUtilities::countQuery(database, QStringLiteral("contact_messages"), { { QStringLiteral("identity"), contact.toQString() } });
 		}
 
-		bool DatabaseContactMessage::exists(Database& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId) {
-			QSqlQuery query(database.database);
+		bool DatabaseContactMessage::exists(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId) {
+			QSqlQuery query(database->getQueryObject());
 			query.prepare(QStringLiteral("SELECT `apiid` FROM `contact_messages` WHERE `identity` = :identity AND `apiid` = :apiid;"));
 			query.bindValue(QStringLiteral(":identity"), QVariant(contact.toQString()));
 			query.bindValue(QStringLiteral(":apiid"), QVariant(messageId.toQString()));
@@ -64,8 +64,8 @@ namespace openmittsu {
 			return QStringLiteral("contact_messages");
 		}
 
-		void DatabaseContactMessage::insertContactMessage(Database& database, openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& apiId, QString const& uuid, bool isOutgoing, bool isRead, bool isSaved, UserMessageState const& messageState, openmittsu::protocol::MessageTime const& createdAt, openmittsu::protocol::MessageTime const& sentAt, openmittsu::protocol::MessageTime const& receivedAt, openmittsu::protocol::MessageTime const& seenAt, openmittsu::protocol::MessageTime const& modifiedAt, ContactMessageType const& type, QString const& body, bool isStatusMessage, bool isQueued, bool isSent, QString const& caption) {
-			QSqlQuery query(database.database);
+		void DatabaseContactMessage::insertContactMessage(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& apiId, QString const& uuid, bool isOutgoing, bool isRead, bool isSaved, UserMessageState const& messageState, openmittsu::protocol::MessageTime const& createdAt, openmittsu::protocol::MessageTime const& sentAt, openmittsu::protocol::MessageTime const& receivedAt, openmittsu::protocol::MessageTime const& seenAt, openmittsu::protocol::MessageTime const& modifiedAt, ContactMessageType const& type, QString const& body, bool isStatusMessage, bool isQueued, bool isSent, QString const& caption) {
+			QSqlQuery query(database->getQueryObject());
 
 			query.prepare(QStringLiteral("INSERT INTO `contact_messages` (`identity`, `apiid`, `uid`, `is_outbox`, `is_read`, `is_saved`, `messagestate`, `sort_by`, `created_at`, `sent_at`, `received_at`, `seen_at`, `modified_at`, `contact_message_type`, `body`, `is_statusmessage`, `is_queued`, `is_sent`, `caption`) VALUES "
 										 "(:identity, :apiid, :uid, :isOutbox, :isRead, :isSaved, :messageState, :sortBy, :createdAt, :sentAt, :receivedAt, :seenAt, :modifiedAt, :type, :body, :isStatusMessage, :isQueued, :isSent, :caption);"));
@@ -95,8 +95,8 @@ namespace openmittsu {
 			}
 		}
 
-		bool DatabaseContactMessage::resetQueueStatus(Database& database, int maxAgeInSeconds) {
-			QSqlQuery query(database.database);
+		bool DatabaseContactMessage::resetQueueStatus(InternalDatabaseInterface* database, int maxAgeInSeconds) {
+			QSqlQuery query(database->getQueryObject());
 
 			openmittsu::protocol::MessageTime const limit(QDateTime::currentDateTime().addSecs(-maxAgeInSeconds));
 			query.prepare(QStringLiteral("SELECT `identity`, `apiid`, `uid` FROM `contact_messages` WHERE `is_outbox` = 1 AND `is_queued` = 1 AND `is_sent` = 0 AND ((`modified_at` <= %1) OR (`modified_at` IS NULL));").arg(limit.getMessageTimeMSecs()));
@@ -117,7 +117,7 @@ namespace openmittsu {
 			return hasAtLeastOneEntry;
 		}
 
-		openmittsu::protocol::MessageId DatabaseContactMessage::insertContactMessageFromUs(Database& database, openmittsu::protocol::ContactId const& contact, QString const& uuid, openmittsu::protocol::MessageTime const& createdAt, ContactMessageType const& type, QString const& body, bool isQueued, bool isStatusMessage, QString const& caption) {
+		openmittsu::protocol::MessageId DatabaseContactMessage::insertContactMessageFromUs(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, QString const& uuid, openmittsu::protocol::MessageTime const& createdAt, ContactMessageType const& type, QString const& body, bool isQueued, bool isStatusMessage, QString const& caption) {
 			openmittsu::protocol::MessageId const messageId = database.getNextMessageId(contact);
 
 			insertContactMessage(database, contact, messageId, uuid, true, false, true, UserMessageState::SENDING, createdAt, openmittsu::protocol::MessageTime(), openmittsu::protocol::MessageTime(), openmittsu::protocol::MessageTime(), openmittsu::protocol::MessageTime(), type, body, isStatusMessage, isQueued, false, caption);
@@ -127,14 +127,14 @@ namespace openmittsu {
 			return messageId;
 		}
 
-		void DatabaseContactMessage::insertContactMessageFromThem(Database& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId, QString const& uuid, openmittsu::protocol::MessageTime const& sentAt, openmittsu::protocol::MessageTime const& receivedAt, ContactMessageType const& type, QString const& body, bool isStatusMessage, QString const& caption) {
+		void DatabaseContactMessage::insertContactMessageFromThem(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId, QString const& uuid, openmittsu::protocol::MessageTime const& sentAt, openmittsu::protocol::MessageTime const& receivedAt, ContactMessageType const& type, QString const& body, bool isStatusMessage, QString const& caption) {
 			insertContactMessage(database, contact, messageId, uuid, false, false, true, UserMessageState::DELIVERED, sentAt, sentAt, receivedAt, openmittsu::protocol::MessageTime(), openmittsu::protocol::MessageTime(), type, body, isStatusMessage, true, true, caption);
 
 			database.announceNewMessage(contact, uuid);
 			database.announceReceivedNewMessage(contact);
 		}
 
-		void DatabaseContactMessage::insertContactMessagesFromBackup(Database& database, QList<openmittsu::backup::ContactMessageBackupObject> const& messages) {
+		void DatabaseContactMessage::insertContactMessagesFromBackup(InternalDatabaseInterface* database, QList<openmittsu::backup::ContactMessageBackupObject> const& messages) {
 			auto startTime = std::chrono::high_resolution_clock::now();
 			QVariantList identity;
 			identity.reserve(messages.size());

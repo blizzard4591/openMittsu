@@ -12,13 +12,10 @@
 
 namespace openmittsu {
 	namespace database {
-
-		class Database;
-
 		class DatabaseContactMessageCursor : public virtual DatabaseMessageCursor, public virtual openmittsu::dataproviders::messages::ContactMessageCursor {
 		public:
-			explicit DatabaseContactMessageCursor(Database& database, openmittsu::protocol::ContactId const& contact);
-			explicit DatabaseContactMessageCursor(Database& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId);
+			explicit DatabaseContactMessageCursor(SimpleDatabase& database, openmittsu::protocol::ContactId const& contact);
+			explicit DatabaseContactMessageCursor(SimpleDatabase& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId);
 			virtual ~DatabaseContactMessageCursor();
 
 			virtual openmittsu::protocol::ContactId const& getContactId() const override;

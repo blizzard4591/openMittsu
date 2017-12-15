@@ -1,7 +1,8 @@
 #include "src/database/DatabaseMessage.h"
 
-#include "src/database/Database.h"
+#include "src/database/InternalDatabaseInterface.h"
 #include "src/database/DatabaseUtilities.h"
+#include "src/database/MediaFileItem.h"
 #include "src/exceptions/InternalErrorException.h"
 #include "src/utility/Logging.h"
 
@@ -12,7 +13,7 @@ namespace openmittsu {
 
 		using namespace openmittsu::dataproviders::messages;
 
-		DatabaseMessage::DatabaseMessage(Database& database, openmittsu::protocol::MessageId const& messageId) : Message(), m_database(database), m_messageId(messageId) {
+		DatabaseMessage::DatabaseMessage(InternalDatabaseInterface* database, openmittsu::protocol::MessageId const& messageId) : Message(), m_database(database), m_messageId(messageId) {
 			//
 		}
 
@@ -25,7 +26,7 @@ namespace openmittsu {
 		}
 
 		QVariant DatabaseMessage::queryField(QString const& fieldName) const {
-			QSqlQuery query(m_database.database);
+			QSqlQuery query(m_database->getQueryObject());
 
 			query.prepare(QStringLiteral("SELECT `%1` FROM `%2` WHERE %3 AND `apiid` = :apiid;").arg(fieldName).arg(getTableName()).arg(getWhereString()));
 			bindWhereStringValues(query);
@@ -42,7 +43,7 @@ namespace openmittsu {
 
 		void DatabaseMessage::setFields(QVariantMap const& fieldsAndValues) {
 			if (fieldsAndValues.size() > 0) {
-				QSqlQuery query(m_database.database);
+				QSqlQuery query(m_database->getQueryObject());
 
 				DatabaseUtilities::prepareSetFieldsUpdateQuery(query, QStringLiteral("UPDATE `%1` SET %3 WHERE %2 AND `apiid` = :apiid;").arg(getTableName()).arg(getWhereString()), fieldsAndValues);
 				bindWhereStringValues(query);
@@ -87,15 +88,15 @@ namespace openmittsu {
 		}
 
 		QSqlQuery DatabaseMessage::getNewQuery() {
-			return QSqlQuery(m_database.database);
+			return QSqlQuery(m_database->getQueryObject());
 		}
 
 		MediaFileItem DatabaseMessage::getMediaItem(QString const& uuid) const {
-			return m_database.getMediaItem(uuid);
+			return m_database->getMediaItem(uuid);
 		}
 
 		void DatabaseMessage::announceMessageChanged() {
-			m_database.announceMessageChanged(getUid());
+			m_database->announceMessageChanged(getUid());
 		}
 
 		void DatabaseMessage::setIsSent() {

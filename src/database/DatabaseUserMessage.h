@@ -11,12 +11,9 @@
 
 namespace openmittsu {
 	namespace database {
-
-		class Database;
-
 		class DatabaseUserMessage : public virtual DatabaseMessage, public virtual openmittsu::dataproviders::messages::UserMessage {
 		public:
-			explicit DatabaseUserMessage(Database& database, openmittsu::protocol::MessageId const& messageId);
+			explicit DatabaseUserMessage(InternalDatabaseInterface* database, openmittsu::protocol::MessageId const& messageId);
 			virtual ~DatabaseUserMessage();
 
 			virtual bool isRead() const override;

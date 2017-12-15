@@ -1,6 +1,6 @@
 #include "src/database/DatabaseMessageCursor.h"
 
-#include "src/database/Database.h"
+#include "src/database/SimpleDatabase.h"
 #include "src/exceptions/InternalErrorException.h"
 #include "src/utility/Logging.h"
 
@@ -11,7 +11,7 @@ namespace openmittsu {
 
 		using namespace openmittsu::dataproviders::messages;
 
-		DatabaseMessageCursor::DatabaseMessageCursor(Database& database) : m_database(database), m_messageId(0), m_isMessageIdValid(false) {
+		DatabaseMessageCursor::DatabaseMessageCursor(SimpleDatabase& database) : m_database(database), m_messageId(0), m_isMessageIdValid(false) {
 			//
 		}
 		
@@ -203,7 +203,7 @@ namespace openmittsu {
 			return getFollowingMessageId(false);
 		}
 
-		Database& DatabaseMessageCursor::getDatabase() const {
+		SimpleDatabase& DatabaseMessageCursor::getDatabase() const {
 			return m_database;
 		}
 

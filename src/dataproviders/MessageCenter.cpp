@@ -464,7 +464,7 @@ namespace openmittsu {
 			}
 		}
 
-		void MessageCenter::setStorage(std::shared_ptr<openmittsu::dataproviders::MessageStorage> const& newStorage) {
+		void MessageCenter::setStorage(std::shared_ptr<openmittsu::database::Database> const& newStorage) {
 			if (m_storage != nullptr) {
 				OPENMITTSU_DISCONNECT(dynamic_cast<QObject*>(m_storage.get()), messageChanged(QString const&), this, databaseOnMessageChanged(QString const&));
 				OPENMITTSU_DISCONNECT(dynamic_cast<QObject*>(m_storage.get()), haveQueuedMessages(), this, tryResendingMessagesToNetwork());

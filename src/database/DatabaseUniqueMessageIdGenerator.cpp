@@ -1,11 +1,11 @@
 #include "src/database/DatabaseUniqueMessageIdGenerator.h"
 
-#include "src/database/Database.h"
+#include "src/database/SimpleDatabase.h"
 
 namespace openmittsu {
 	namespace database {
 
-		DatabaseUniqueMessageIdGenerator::DatabaseUniqueMessageIdGenerator(Database& database) : m_database(database) {
+		DatabaseUniqueMessageIdGenerator::DatabaseUniqueMessageIdGenerator(SimpleDatabase& database) : m_database(database) {
 			//
 		}
 
