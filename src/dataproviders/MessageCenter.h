@@ -42,7 +42,11 @@ namespace openmittsu {
 		public:
 			MessageCenter(std::shared_ptr<openmittsu::widgets::TabController> const& tabController, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster);
 			virtual ~MessageCenter();
+		signals:
+			void newUnreadMessageAvailable(openmittsu::widgets::ChatTab* source);
 
+			void messageChanged(QString const& uuid);
+		public slots:
 			bool sendText(openmittsu::protocol::ContactId const& receiver, QString const& text);
 			bool sendImage(openmittsu::protocol::ContactId const& receiver, QByteArray const& image, QString const& caption);
 			bool sendLocation(openmittsu::protocol::ContactId const& receiver, openmittsu::utility::Location const& location);
@@ -63,11 +67,7 @@ namespace openmittsu {
 
 			void setNetworkSentMessageAcceptor(std::shared_ptr<NetworkSentMessageAcceptor> const& newNetworkSentMessageAcceptor);
 			void setStorage(std::shared_ptr<openmittsu::dataproviders::MessageStorage> const& newStorage);
-		signals:
-			void newUnreadMessageAvailable(openmittsu::widgets::ChatTab* source);
 
-			void messageChanged(QString const& uuid);
-		public slots:
 			virtual void processReceivedContactMessageText(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& message) override;
 			virtual void processReceivedContactMessageImage(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& image) override;
 			virtual void processReceivedContactMessageLocation(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, openmittsu::utility::Location const& location) override;
