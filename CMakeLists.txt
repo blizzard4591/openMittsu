@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.1.0)
 
 if(POLICY CMP0071)
 	cmake_policy(SET CMP0071 NEW)
@@ -24,6 +24,18 @@ set(SPDLOG_MODULE_BASEPATH "${PROJECT_SOURCE_DIR}/3rdparty/spdlog")
 # SpdLog Configuration via #defines
 add_definitions(-DSPDLOG_DEBUG_ON)
 
+# Distribution info
+set(OPENMITTSU_DIST True)
+set(OPENMITTSU_DIST_TYPE "Other" CACHE STRING "OpenMittsu Distribution type")
+set_property(CACHE OPENMITTSU_DIST_TYPE PROPERTY STRINGS Deb Zip Installer AppImage Other)
+if(OPENMITTSU_DIST_TYPE STREQUAL "Snap")
+  set(OPENMITTSU_DIST_SNAP True)
+elseif(OPENMITTSU_DIST_TYPE STREQUAL "AppImage")
+  set(OPENMITTSU_DIST_APPIMAGE True)
+elseif(OPENMITTSU_DIST_TYPE STREQUAL "Other")
+  unset(OPENMITTSU_DIST)
+endif()
+
 option(OPENMITTSU_ALLOW_MISSING_QSQLCIPHER "Sets whether OpenMittsu will run even with QSqlCipher being unavailable (no encryption)." OFF)
 option(OPENMITTSU_LINK_LIBCXXABI "Sets whether libc++abi should be linked." OFF)
 option(OPENMITTSU_USE_LIBCXX "Sets whether the standard library is libc++." OFF)
@@ -31,6 +43,7 @@ option(OPENMITTSU_DEBUG "Sets whether debug checks, assertions and logging shoul
 option(OPENMITTSU_DISABLE_VERSION_UPDATE_CHECK "Disables the version check on start-up. Useful for custom builds or added privacy." OFF)
 option(OPENMITTSU_ENABLE_TESTS "Enables tests." ON)
 option(OPENMITTSU_USE_NSIS "Use NSIS generator to produce a Windows installer." OFF)
+option(OPENMITTSU_WITH_APP_BUNDLE "Enable Application Bundle for macOS" ON)
 
 SET(OPENMITTSU_CMAKE_SEARCH_PATH "D:/Qt/5.9.2/msvc2017_64" CACHE PATH "Additional Qt5 search path" )
 set(OPENMITTSU_CUSTOM_VERSION_STRING "" CACHE STRING "Disables Git version number checking and uses the custom string instead. Should be of the form 0.1.2-34-567890ab, i.e. major.minor.patch-commitsSinceTag-shortHash")
@@ -38,6 +51,30 @@ set(OPENMITTSU_CUSTOM_VERSION_STRING "" CACHE STRING "Disables Git version numbe
 SET(CMAKE_PREFIX_PATH "${OPENMITTSU_CMAKE_SEARCH_PATH}/lib/cmake/")
 
 SET(OPENMITTSU_ADDITIONAL_INSTALL_FILES "" CACHE STRING "A semicolon separated list of files that will be copied to the bin directory on install.")
+
+if(APPLE AND WITH_APP_BUNDLE AND "${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr/local")
+	set(CMAKE_INSTALL_PREFIX "/Applications")
+	set(CMAKE_INSTALL_MANDIR "/usr/local/share/man")
+endif()
+
+if(MINGW OR WIN32)
+	set(CLI_INSTALL_DIR    ".")
+	set(BIN_INSTALL_DIR    ".")
+	set(PLUGIN_INSTALL_DIR ".")
+	set(DATA_INSTALL_DIR   "share")
+elseif(APPLE AND WITH_APP_BUNDLE)
+	set(CLI_INSTALL_DIR    "/usr/local/bin")
+	set(BIN_INSTALL_DIR    ".")
+	set(PLUGIN_INSTALL_DIR "openMittsu.app/Contents/PlugIns")
+	set(DATA_INSTALL_DIR   "openMittsu.app/Contents/Resources")
+else()
+	include(GNUInstallDirs)
+
+	set(CLI_INSTALL_DIR    "${CMAKE_INSTALL_BINDIR}")
+	set(BIN_INSTALL_DIR    "${CMAKE_INSTALL_BINDIR}")
+	set(PLUGIN_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/openmittsu")
+	set(DATA_INSTALL_DIR   "${CMAKE_INSTALL_DATADIR}/openmittsu")
+endif()
 
 if (OPENMITTSU_DEBUG)
 	SET(OPENMITTSU_CONFIG_DEBUG_FLAG_SET ON)
@@ -60,14 +97,35 @@ endif(OPENMITTSU_DISABLE_VERSION_UPDATE_CHECK)
 set(OPENMITTSU_CPP_TESTS_BASE_PATH "${PROJECT_SOURCE_DIR}/test")
 
 # Find the Qt library
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Gui REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Network REQUIRED)
-find_package(Qt5Multimedia REQUIRED)
-find_package(Qt5Sql REQUIRED)
+if (NOT APPLE)
+	find_package(Qt5Core REQUIRED)
+	find_package(Qt5Gui REQUIRED)
+	find_package(Qt5Widgets REQUIRED)
+	find_package(Qt5Network REQUIRED)
+	find_package(Qt5Multimedia REQUIRED)
+	find_package(Qt5Sql REQUIRED)
+else()
+	find_package(Qt5Core REQUIRED HINTS /usr/local/Cellar/qt/*/lib/cmake ENV PATH)
+	find_package(Qt5Gui REQUIRED HINTS /usr/local/Cellar/qt/*/lib/cmake ENV PATH)
+	find_package(Qt5Widgets REQUIRED HINTS /usr/local/Cellar/qt/*/lib/cmake ENV PATH)
+	find_package(Qt5Network REQUIRED HINTS /usr/local/Cellar/qt/*/lib/cmake ENV PATH)
+	find_package(Qt5Multimedia REQUIRED HINTS /usr/local/Cellar/qt/*/lib/cmake ENV PATH)
+	find_package(Qt5Sql REQUIRED HINTS /usr/local/Cellar/qt/*/lib/cmake ENV PATH)
+	find_package(Qt5MacExtras REQUIRED HINTS /usr/local/Cellar/qt/*/lib/cmake ENV PATH)
+endif()
+
 find_package(Libsodium 1.0.12 REQUIRED)
 find_package(Libqrencode REQUIRED)
+
+if(APPLE)
+	set(CMAKE_MACOSX_RPATH TRUE)
+	find_program(MACDEPLOYQT_EXE macdeployqt HINTS /usr/local/opt/qt5/bin ENV PATH)
+	if(NOT MACDEPLOYQT_EXE)
+		message(FATAL_ERROR "macdeployqt is required to build in macOS")
+	else()
+		message(STATUS "Using macdeployqt: ${MACDEPLOYQT_EXE}")
+	endif()
+endif()
 
 if (Libsodium_FOUND)
 	#message(STATUS "Found LibSodium! ${Libsodium_INCLUDE_DIRS} ${Libsodium_LIBRARIES}")
@@ -526,6 +584,28 @@ set(CPACK_PACKAGE_VERSION_PATCH "${OPENMITTSU_CPP_VERSION_PATCH}")
 
 if(WIN32)
 	set(CPACK_PACKAGE_INSTALL_DIRECTORY "OpenMittsu")
+elseif(APPLE AND WITH_APP_BUNDLE)
+	configure_file(${CMAKE_SOURCE_DIR}/share/macosx/Info.plist.cmake ${CMAKE_CURRENT_BINARY_DIR}/Info.plist)
+	set_target_properties(${PROGNAME} PROPERTIES
+						MACOSX_BUNDLE ON
+						MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_BINARY_DIR}/Info.plist)
+
+	if(QT_MAC_USE_COCOA AND EXISTS "${QT_LIBRARY_DIR}/Resources/qt_menu.nib")
+		install(DIRECTORY "${QT_LIBRARY_DIR}/Resources/qt_menu.nib"
+			DESTINATION "${DATA_INSTALL_DIR}")
+	endif()
+
+	set(CPACK_GENERATOR "DragNDrop")
+	set(CPACK_DMG_FORMAT "UDBZ")
+	set(CPACK_DMG_VOLUME_NAME "openMittsu")
+	set(CPACK_SYSTEM_NAME "OSX")
+	set(CPACK_STRIP_FILES ON)
+
+	add_custom_command(TARGET openMittsu
+					 POST_BUILD
+					 COMMAND ${MACDEPLOYQT_EXE} openMittsu.app
+					 WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/src
+					 COMMENT "Deploying app bundle")
 endif()
 
 set(CPACK_NSIS_INSTALLED_ICON_NAME "${PROJECT_SOURCE_DIR}/resources/icon-small-for-ico.ico")
