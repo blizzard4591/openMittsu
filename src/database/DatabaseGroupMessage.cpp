@@ -1,7 +1,7 @@
 #include "src/database/DatabaseGroupMessage.h"
 
 #include "src/backup/GroupMessageBackupObject.h"
-#include "src/database/Database.h"
+#include "src/database/SimpleDatabase.h"
 #include "src/database/DatabaseUtilities.h"
 #include "src/exceptions/InternalErrorException.h"
 #include "src/utility/Logging.h"
@@ -13,7 +13,7 @@ namespace openmittsu {
 
 		using namespace openmittsu::dataproviders::messages;
 
-		DatabaseGroupMessage::DatabaseGroupMessage(Database& database, openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId) : DatabaseMessage(database, messageId), DatabaseUserMessage(database, messageId), GroupMessage(), m_group(group) {
+		DatabaseGroupMessage::DatabaseGroupMessage(SimpleDatabase& database, openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId) : DatabaseMessage(database, messageId), DatabaseUserMessage(database, messageId), GroupMessage(), m_group(group) {
 			if (!exists(database, group, messageId)) {
 				throw openmittsu::exceptions::InternalErrorException() << "No message from group \"" << group.toString() << "\" and message ID \"" << messageId.toString() << "\" exists, can not manipulate.";
 			}
@@ -27,15 +27,15 @@ namespace openmittsu {
 			return m_group;
 		}
 
-		int DatabaseGroupMessage::getGroupMessageCount(Database const& database) {
+		int DatabaseGroupMessage::getGroupMessageCount(SimpleDatabase const& database) {
 			return openmittsu::database::DatabaseUtilities::countQuery(database.database, QStringLiteral("group_messages"));
 		}
 
-		int DatabaseGroupMessage::getGroupMessageCount(Database const& database, openmittsu::protocol::GroupId const& group) {
+		int DatabaseGroupMessage::getGroupMessageCount(SimpleDatabase const& database, openmittsu::protocol::GroupId const& group) {
 			return openmittsu::database::DatabaseUtilities::countQuery(database.database, QStringLiteral("group_messages"), { { QStringLiteral("group_id"), group.groupIdWithoutOwnerToQString() }, { QStringLiteral("group_creator"), group.getOwner().toQString() } });
 		}
 
-		bool DatabaseGroupMessage::exists(Database& database, openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId) {
+		bool DatabaseGroupMessage::exists(SimpleDatabase& database, openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId) {
 			QSqlQuery query(database.database);
 			query.prepare(QStringLiteral("SELECT `apiid` FROM `group_messages` WHERE `group_id` = :groupId AND `group_creator` = :groupCreator AND `apiid` = :apiid;"));
 			query.bindValue(QStringLiteral(":groupId"), QVariant(group.groupIdWithoutOwnerToQString()));
@@ -65,7 +65,7 @@ namespace openmittsu {
 			return QStringLiteral("group_messages");
 		}
 
-		void DatabaseGroupMessage::insertGroupMessage(Database& database, openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& apiId, QString const& uuid, bool isOutgoing, bool isRead, bool isSaved, UserMessageState const& messageState, openmittsu::protocol::MessageTime const& createdAt, openmittsu::protocol::MessageTime const& sentAt, openmittsu::protocol::MessageTime const& receivedAt, openmittsu::protocol::MessageTime const& seenAt, openmittsu::protocol::MessageTime const& modifiedAt, GroupMessageType const& type, QString const& body, bool isStatusMessage, bool isQueued, bool isSent, QString const& caption) {
+		void DatabaseGroupMessage::insertGroupMessage(SimpleDatabase& database, openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& apiId, QString const& uuid, bool isOutgoing, bool isRead, bool isSaved, UserMessageState const& messageState, openmittsu::protocol::MessageTime const& createdAt, openmittsu::protocol::MessageTime const& sentAt, openmittsu::protocol::MessageTime const& receivedAt, openmittsu::protocol::MessageTime const& seenAt, openmittsu::protocol::MessageTime const& modifiedAt, GroupMessageType const& type, QString const& body, bool isStatusMessage, bool isQueued, bool isSent, QString const& caption) {
 			QSqlQuery query(database.database);
 			query.prepare(QStringLiteral("INSERT INTO `group_messages` (`group_id`, `group_creator`, `apiid`, `uid`, `identity`, `is_outbox`, `is_read`, `is_saved`, `messagestate`, `sort_by`, `created_at`, `sent_at`, `received_at`, `seen_at`, `modified_at`, `group_message_type`, `body`, `is_statusmessage`, `is_queued`, `is_sent`, `caption`) VALUES "
 										 "(:groupId, :groupCreator, :apiid, :uid, :identity, :isOutbox, :isRead, :isSaved, :messageState, :sortBy, :createdAt, :sentAt, :receivedAt, :seenAt, :modifiedAt, :type, :body, :isStatusMessage, :isQueued, :isSent, :caption);"));
@@ -97,7 +97,7 @@ namespace openmittsu {
 			}
 		}
 
-		bool DatabaseGroupMessage::resetQueueStatus(Database& database, int maxAgeInSeconds) {
+		bool DatabaseGroupMessage::resetQueueStatus(SimpleDatabase& database, int maxAgeInSeconds) {
 			QSqlQuery query(database.database);
 
 			openmittsu::protocol::MessageTime const limit(QDateTime::currentDateTime().addSecs(-maxAgeInSeconds));
@@ -118,7 +118,7 @@ namespace openmittsu {
 			return hasAtLeastOneEntry;
 		}
 
-		openmittsu::protocol::MessageId DatabaseGroupMessage::insertGroupMessageFromUs(Database& database, openmittsu::protocol::GroupId const& group, QString const& uuid, openmittsu::protocol::MessageTime const& createdAt, GroupMessageType const& type, QString const& body, bool isQueued, bool isStatusMessage, QString const& caption) {
+		openmittsu::protocol::MessageId DatabaseGroupMessage::insertGroupMessageFromUs(SimpleDatabase& database, openmittsu::protocol::GroupId const& group, QString const& uuid, openmittsu::protocol::MessageTime const& createdAt, GroupMessageType const& type, QString const& body, bool isQueued, bool isStatusMessage, QString const& caption) {
 			openmittsu::protocol::MessageId const messageId = database.getNextMessageId(group);
 
 			insertGroupMessage(database, group, database.getSelfContact(), messageId, uuid, true, false, true, UserMessageState::SENDING, createdAt, openmittsu::protocol::MessageTime(), openmittsu::protocol::MessageTime(), openmittsu::protocol::MessageTime(), openmittsu::protocol::MessageTime(), type, body, isStatusMessage, isQueued, false, caption);
@@ -128,14 +128,14 @@ namespace openmittsu {
 			return messageId;
 		}
 
-		void DatabaseGroupMessage::insertGroupMessageFromThem(Database& database, openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, QString const& uuid, openmittsu::protocol::MessageTime const& sentAt, openmittsu::protocol::MessageTime const& receivedAt, GroupMessageType const& type, QString const& body, bool isStatusMessage, QString const& caption) {
+		void DatabaseGroupMessage::insertGroupMessageFromThem(SimpleDatabase& database, openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, QString const& uuid, openmittsu::protocol::MessageTime const& sentAt, openmittsu::protocol::MessageTime const& receivedAt, GroupMessageType const& type, QString const& body, bool isStatusMessage, QString const& caption) {
 			insertGroupMessage(database, group, sender, messageId, uuid, false, false, true, UserMessageState::DELIVERED, sentAt, sentAt, receivedAt, openmittsu::protocol::MessageTime(), openmittsu::protocol::MessageTime(), type, body, isStatusMessage, true, true, caption);
 
 			database.announceNewMessage(group, uuid);
 			database.announceReceivedNewMessage(group);
 		}
 
-		void DatabaseGroupMessage::insertGroupMessagesFromBackup(Database& database, QList<openmittsu::backup::GroupMessageBackupObject> const& messages) {
+		void DatabaseGroupMessage::insertGroupMessagesFromBackup(SimpleDatabase& database, QList<openmittsu::backup::GroupMessageBackupObject> const& messages) {
 			auto startTime = std::chrono::high_resolution_clock::now();
 			QVariantList groupId;
 			groupId.reserve(messages.size());

@@ -13,13 +13,10 @@
 
 namespace openmittsu {
 	namespace database {
-
-		class Database;
-
 		class DatabaseGroupMessageCursor : public virtual DatabaseMessageCursor, public virtual openmittsu::dataproviders::messages::GroupMessageCursor {
 		public:
-			explicit DatabaseGroupMessageCursor(Database& database, openmittsu::protocol::GroupId const& group);
-			explicit DatabaseGroupMessageCursor(Database& database, openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId);
+			explicit DatabaseGroupMessageCursor(SimpleDatabase& database, openmittsu::protocol::GroupId const& group);
+			explicit DatabaseGroupMessageCursor(SimpleDatabase& database, openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId);
 			virtual ~DatabaseGroupMessageCursor();
 
 			virtual openmittsu::protocol::GroupId const& getGroupId() const override;

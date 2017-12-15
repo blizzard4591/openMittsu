@@ -9,7 +9,8 @@
 
 int main(int argc, char* argv[]) {
 	std::cout << "OpenMittsu Testing Suite" << std::endl;
-	
+	std::cout << "Qt library load paths are: " << QCoreApplication::libraryPaths().join(", ").toStdString() << std::endl;
+
 	if (!initializeLogging(OPENMITTSU_LOGGING_MAX_FILESIZE, OPENMITTSU_LOGGING_MAX_FILECOUNT)) {
 		return -2;
 	}

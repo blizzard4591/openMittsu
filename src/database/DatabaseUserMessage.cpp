@@ -10,7 +10,7 @@ namespace openmittsu {
 
 		using namespace openmittsu::dataproviders::messages;
 
-		DatabaseUserMessage::DatabaseUserMessage(Database& database, openmittsu::protocol::MessageId const& messageId) : DatabaseMessage(database, messageId), UserMessage() {
+		DatabaseUserMessage::DatabaseUserMessage(InternalDatabaseInterface* database, openmittsu::protocol::MessageId const& messageId) : DatabaseMessage(database, messageId), UserMessage() {
 			//
 		}
 

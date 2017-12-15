@@ -19,6 +19,7 @@
 #include "src/updater/Updater.h"
 
 #include "src/database/Database.h"
+#include "src/utility/ThreadContainer.h"
 
 #include "src/dataproviders/KeyRegistry.h"
 #include "src/widgets/TabController.h"
@@ -96,10 +97,11 @@ private:
 
 	ConnectionState m_connectionState;
 	std::shared_ptr<openmittsu::widgets::TabController> m_tabController;
-	std::shared_ptr<openmittsu::dataproviders::MessageCenter> m_messageCenter;
+	openmittsu::utility::MessageCenterThreadContainer m_messageCenterThread;
 	std::shared_ptr<openmittsu::network::ServerConfiguration> m_serverConfiguration;
 	std::shared_ptr<openmittsu::utility::OptionMaster> m_optionMaster;
-	std::shared_ptr<openmittsu::database::Database> m_database;
+	openmittsu::utility::DatabaseThreadContainer m_databaseThread;
+
 	std::shared_ptr<openmittsu::utility::AudioNotification> m_audioNotifier;
 
 	void openDatabaseFile(QString const& fileName);

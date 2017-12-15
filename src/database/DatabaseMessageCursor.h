@@ -13,11 +13,11 @@
 
 namespace openmittsu {
 	namespace database {
-		class Database;
+		class SimpleDatabase;
 
 		class DatabaseMessageCursor : public virtual openmittsu::dataproviders::messages::MessageCursor {
 		public:
-			explicit DatabaseMessageCursor(Database& database);
+			explicit DatabaseMessageCursor(SimpleDatabase& database);
 			virtual ~DatabaseMessageCursor();
 
 			virtual bool isValid() const override;
@@ -32,13 +32,13 @@ namespace openmittsu {
 			virtual openmittsu::protocol::MessageId const& getMessageId() const override;
 			virtual QVector<QString> getLastMessages(std::size_t n) const override;
 		protected:
-			Database& getDatabase() const;
+			SimpleDatabase & getDatabase() const;
 
 			virtual QString getWhereString() const = 0;
 			virtual void bindWhereStringValues(QSqlQuery& query) const = 0;
 			virtual QString getTableName() const = 0;
 		private:
-			Database& m_database;
+			SimpleDatabase & m_database;
 			openmittsu::protocol::MessageId m_messageId;
 			bool m_isMessageIdValid;
 			qint64 m_sortByValue;

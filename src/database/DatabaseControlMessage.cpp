@@ -1,6 +1,6 @@
 #include "src/database/DatabaseControlMessage.h"
 
-#include "src/database/Database.h"
+#include "src/database/SimpleDatabase.h"
 #include "src/exceptions/InternalErrorException.h"
 #include "src/utility/Logging.h"
 
@@ -11,7 +11,7 @@ namespace openmittsu {
 
 		using namespace openmittsu::dataproviders::messages;
 
-		DatabaseControlMessage::DatabaseControlMessage(Database& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& controlMessageId, openmittsu::protocol::MessageId const& relatedMessageId, ControlMessageType const& controlMessageType) : DatabaseMessage(database, controlMessageId), ControlMessage(), m_contact(contact), m_controlMessageType(controlMessageType), m_relatedMessageId(relatedMessageId) {
+		DatabaseControlMessage::DatabaseControlMessage(SimpleDatabase& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& controlMessageId, openmittsu::protocol::MessageId const& relatedMessageId, ControlMessageType const& controlMessageType) : DatabaseMessage(database, controlMessageId), ControlMessage(), m_contact(contact), m_controlMessageType(controlMessageType), m_relatedMessageId(relatedMessageId) {
 			if (!hasControlMessageFor(database, contact, relatedMessageId, m_controlMessageType)) {
 				throw openmittsu::exceptions::InternalErrorException() << "No control message from contact \"" << contact.toString() << "\" and message ID \"" << relatedMessageId.toString() << "\" exists for type " << ControlMessageTypeHelper::toString(m_controlMessageType).toStdString() << ", can not manipulate.";
 			}
@@ -29,7 +29,7 @@ namespace openmittsu {
 			return m_controlMessageType;
 		}
 
-		bool DatabaseControlMessage::exists(Database& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId) {
+		bool DatabaseControlMessage::exists(SimpleDatabase& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId) {
 			QSqlQuery query(database.database);
 			query.prepare(QStringLiteral("SELECT `apiid` FROM `control_messages` WHERE `identity` = :identity AND `apiid` = :apiid;"));
 			query.bindValue(QStringLiteral(":identity"), QVariant(contact.toQString()));
@@ -41,7 +41,7 @@ namespace openmittsu {
 			return query.next();
 		}
 
-		bool DatabaseControlMessage::hasControlMessageFor(Database& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& relatedMessageId, ControlMessageType const& controlMessageType) {
+		bool DatabaseControlMessage::hasControlMessageFor(SimpleDatabase& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& relatedMessageId, ControlMessageType const& controlMessageType) {
 			QSqlQuery query(database.database);
 			query.prepare(QStringLiteral("SELECT `apiid` FROM `control_messages` WHERE `identity` = :identity AND `related_message_apiid` = :relatedMessageId AND `control_message_type` = :controlType;"));
 			query.bindValue(QStringLiteral(":identity"), QVariant(contact.toQString()));
@@ -54,7 +54,7 @@ namespace openmittsu {
 			return query.next();
 		}
 
-		openmittsu::protocol::MessageId DatabaseControlMessage::insertControlMessageFromUs(Database& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& relatedMessageId, openmittsu::dataproviders::messages::ControlMessageState const& messageState, openmittsu::protocol::MessageTime const& createdAt, bool isQueued, ControlMessageType const& controlMessageType) {
+		openmittsu::protocol::MessageId DatabaseControlMessage::insertControlMessageFromUs(SimpleDatabase& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& relatedMessageId, openmittsu::dataproviders::messages::ControlMessageState const& messageState, openmittsu::protocol::MessageTime const& createdAt, bool isQueued, ControlMessageType const& controlMessageType) {
 			if (!database.hasContact(contact)) {
 				throw openmittsu::exceptions::InternalErrorException() << "Could not save control message, the given contact " << contact.toString() << " is unknown!";
 			}
@@ -85,7 +85,7 @@ namespace openmittsu {
 			return messageId;
 		}
 
-		bool DatabaseControlMessage::resetQueueStatus(Database& database, int maxAgeInSeconds) {
+		bool DatabaseControlMessage::resetQueueStatus(SimpleDatabase& database, int maxAgeInSeconds) {
 			QSqlQuery query(database.database);
 
 			openmittsu::protocol::MessageTime const limit(QDateTime::currentDateTime().addSecs(-maxAgeInSeconds));
@@ -157,7 +157,7 @@ namespace openmittsu {
 			}
 		}
 
-		DatabaseControlMessage DatabaseControlMessage::fromUuid(Database& database, QString const& uuid) {
+		DatabaseControlMessage DatabaseControlMessage::fromUuid(SimpleDatabase& database, QString const& uuid) {
 			QSqlQuery query(database.database);
 			query.prepare(QStringLiteral("SELECT `identity`, `apiid`, `related_message_apiid`, `uid`, `control_message_type` FROM `control_messages` WHERE `uid` = :uid;"));
 			query.bindValue(QStringLiteral(":uid"), QVariant(uuid));
@@ -176,7 +176,7 @@ namespace openmittsu {
 			}
 		}
 		
-		DatabaseControlMessage DatabaseControlMessage::fromReceiverAndControlMessageId(Database& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& controlMessageId) {
+		DatabaseControlMessage DatabaseControlMessage::fromReceiverAndControlMessageId(SimpleDatabase& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& controlMessageId) {
 			QSqlQuery query(database.database);
 			query.prepare(QStringLiteral("SELECT `identity`, `apiid`, `related_message_apiid`, `uid`, `control_message_type` FROM `control_messages` WHERE `identity` = :identity AND `apiid` = :apiid;"));
 			query.bindValue(QStringLiteral(":identity"), QVariant(contact.toQString()));

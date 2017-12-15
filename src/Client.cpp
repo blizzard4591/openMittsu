@@ -71,23 +71,24 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 	m_updater(),
 	m_connectionState(ConnectionState::STATE_DISCONNECTED),
 	m_tabController(nullptr),
-	m_messageCenter(nullptr),
 	m_serverConfiguration(std::make_shared<openmittsu::network::ServerConfiguration>()),
 	m_optionMaster(std::make_shared<openmittsu::utility::OptionMaster>()),
-	m_database(nullptr),
 	m_audioNotifier(std::make_shared<openmittsu::utility::AudioNotification>()) 
 
 {
 	m_ui.setupUi(this);
 
 	m_tabController = std::make_shared<openmittsu::widgets::SimpleTabController>(m_ui.tabWidget);
-	m_messageCenter = std::make_shared<openmittsu::dataproviders::MessageCenter>(m_tabController, m_optionMaster);
 
+	bool messageCenterCreationSuccess = false;
+	if ((!QMetaObject::invokeMethod(m_messageCenterThread.getQObjectPtr(), "createMessageCenter", Q_RETURN_ARG(bool, messageCenterCreationSuccess), Q_ARG(std::shared_ptr<openmittsu::widgets::TabController> const&, m_tabController), Q_ARG(std::shared_ptr<openmittsu::utility::OptionMaster> const&, m_optionMaster))) || (!messageCenterCreationSuccess)) {
+		throw openmittsu::exceptions::InternalErrorException() << "Could not create MessageCenter, terminating.";
+	}
 
 	m_ui.listContacts->setContextMenuPolicy(Qt::CustomContextMenu);
 	m_connectionTimer.start(500);
 	OPENMITTSU_CONNECT(&m_connectionTimer, timeout(), this, connectionTimerOnTimer());
-	OPENMITTSU_CONNECT(m_messageCenter.get(), newUnreadMessageAvailable(openmittsu::widgets::ChatTab*), this, messageCenterOnHasUnreadMessages(openmittsu::widgets::ChatTab*));
+	OPENMITTSU_CONNECT(m_messageCenterThread.getQObjectPtr(), newUnreadMessageAvailable(openmittsu::widgets::ChatTab*), this, messageCenterOnHasUnreadMessages(openmittsu::widgets::ChatTab*));
 
 	// Check whether QSqlCipher is available
 	if (!QSqlDatabase::isDriverAvailable(QStringLiteral("QSQLCIPHER"))) {
@@ -183,7 +184,7 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 		}
 	}
 
-	if (m_database) {
+	if (m_databaseThread.getWorker().hasDatabase()) {
 		QString const legacyContactsFile = m_optionMaster->getOptionAsQString(openmittsu::utility::OptionMaster::Options::FILEPATH_LEGACY_CONTACTS_DATABASE);
 		if (!legacyContactsFile.isEmpty() && QFile::exists(legacyContactsFile)) {
 			auto const resultButton = QMessageBox::question(this, tr("Legacy contacts file found"), tr("Welcome.\nIt seems that you used an older version of openMittsu before that used a plaintext contacts file to store your contacts and groups.\nThis has been replaced by an encrypted database storing both your ID, contacts, groups and messages.\nIf you want, your legacy contacts file can be imported into your openMittsu database.\nClick \"Yes\" to import the old file (located at %1), or \"No\" to leave it for now.\nYou can always come back later and import it via Database -> Import openMittsu....").arg(legacyContactsFile));
@@ -233,7 +234,10 @@ void Client::setupProtocolClient() {
 		OPENMITTSU_DISCONNECT(m_protocolClient.get(), lostConnection(), this, protocolClientOnLostConnection());
 		OPENMITTSU_DISCONNECT(m_protocolClient.get(), duplicateIdUsageDetected(), this, protocolClientOnDuplicateIdUsageDetected());
 
-		this->m_messageCenter->setNetworkSentMessageAcceptor(nullptr);
+		if (!QMetaObject::invokeMethod(m_messageCenterThread.getWorker().getMessageCenter().get(), "setNetworkSentMessageAcceptor", Q_ARG(std::shared_ptr<openmittsu::dataproviders::NetworkSentMessageAcceptor> const&, nullptr))) {
+			throw openmittsu::exceptions::InternalErrorException() << "Could not unset NetworkSentMessageAcceptor!";
+		}
+
 		if (m_protocolClient->getIsConnected()) {
 			m_protocolClient->disconnectFromServer();
 		}
@@ -247,13 +251,14 @@ void Client::setupProtocolClient() {
 		m_protocolClient.reset();
 	}
 
-	QString const nickname = m_database->getContactNickname(m_database->getSelfContact());
-	std::shared_ptr<openmittsu::crypto::FullCryptoBox> cryptoBox = std::make_shared<openmittsu::crypto::FullCryptoBox>(openmittsu::dataproviders::KeyRegistry(m_serverConfiguration->getServerLongTermPublicKey(), m_database));
+	openmittsu::protocol::ContactId const selfContactId = m_databaseThread.getWorker().getDatabase()->getSelfContact();
+	QString const nickname = m_databaseThread.getWorker().getDatabase()->getContactNickname(selfContactId);
+	std::shared_ptr<openmittsu::crypto::FullCryptoBox> cryptoBox = std::make_shared<openmittsu::crypto::FullCryptoBox>(openmittsu::dataproviders::KeyRegistry(m_serverConfiguration->getServerLongTermPublicKey(), m_databaseThread.getWorker().getDatabase()));
 	if (nickname.compare(QStringLiteral("You"), Qt::CaseInsensitive) == 0) {
 		LOGGER()->info("Using only ID as PushFromID token (for iOS Push Receivers).");
-		m_protocolClient = std::make_unique<openmittsu::network::ProtocolClient>(cryptoBox, m_database->getSelfContact(), m_serverConfiguration, m_optionMaster, std::make_shared<openmittsu::network::MessageCenterWrapper>(m_messageCenter), openmittsu::protocol::PushFromId(m_database->getSelfContact()));
+		m_protocolClient = std::make_unique<openmittsu::network::ProtocolClient>(cryptoBox, selfContactId, m_serverConfiguration, m_optionMaster, std::make_shared<openmittsu::network::MessageCenterWrapper>(m_messageCenterThread.getWorker().getMessageCenter()), openmittsu::protocol::PushFromId(selfContactId));
 	} else {
-		m_protocolClient = std::make_unique<openmittsu::network::ProtocolClient>(cryptoBox, m_database->getSelfContact(), m_serverConfiguration, m_optionMaster, std::make_shared<openmittsu::network::MessageCenterWrapper>(m_messageCenter), openmittsu::protocol::PushFromId(nickname));
+		m_protocolClient = std::make_unique<openmittsu::network::ProtocolClient>(cryptoBox, selfContactId, m_serverConfiguration, m_optionMaster, std::make_shared<openmittsu::network::MessageCenterWrapper>(m_messageCenterThread.getWorker().getMessageCenter()), openmittsu::protocol::PushFromId(nickname));
 		LOGGER()->info("Using nickname \"{}\" as PushFromID token (for iOS Push Receivers).", nickname.toStdString());
 	}
 
@@ -273,7 +278,9 @@ void Client::setupProtocolClient() {
 	}
 	eventLoop.exec(); // blocks until "finished()" has been called
 
-	m_messageCenter->setNetworkSentMessageAcceptor(std::make_shared<openmittsu::dataproviders::NetworkSentMessageAcceptor>(m_protocolClient));
+	if (!QMetaObject::invokeMethod(m_messageCenterThread.getWorker().getMessageCenter().get(), "setNetworkSentMessageAcceptor", Q_ARG(std::shared_ptr<openmittsu::dataproviders::NetworkSentMessageAcceptor> const&, std::make_shared<openmittsu::dataproviders::NetworkSentMessageAcceptor>(m_protocolClient)))) {
+		throw openmittsu::exceptions::InternalErrorException() << "Could not set NetworkSentMessageAcceptor!";
+	}
 }
 
 void Client::threadFinished() {
@@ -296,17 +303,21 @@ void Client::updaterFoundNewVersion(int versionMajor, int versionMinor, int vers
 
 void Client::updateDatabaseInfo(QString const& currentFileName) {
 	m_ui.lblDatabase->setText(currentFileName);
-	if (m_database) {
-		m_messageCenter->setStorage(m_database);
-		m_optionMaster->setDatabase(m_database);
+	if (m_databaseThread.getWorker().hasDatabase()) {
+		if (!QMetaObject::invokeMethod(m_messageCenterThread.getWorker().getMessageCenter().get(), "setStorage", Q_ARG(std::shared_ptr<openmittsu::database::Database> const&, m_databaseThread.getWorker().getDatabase()))) {
+			throw openmittsu::exceptions::InternalErrorException() << "Could not set Database on MessageCenter!";
+		}
+		m_optionMaster->setDatabase(m_databaseThread.getWorker().getDatabase());
 
-		m_database->enableTimers();
+		if (!QMetaObject::invokeMethod(m_databaseThread.getWorker().getDatabase().get(), "enableTimers")) {
+			throw openmittsu::exceptions::InternalErrorException() << "Could not enable timers on Database!";
+		}
 	}
 }
 
 void Client::btnConnectOnClick() {
 	if (m_connectionState == ConnectionState::STATE_DISCONNECTED) {
-		if ((m_serverConfiguration == nullptr) || (m_database == nullptr)) {
+		if ((m_serverConfiguration == nullptr) || (!m_databaseThread.getWorker().hasDatabase())) {
 			QMessageBox::warning(this, "Can not connect", "Please choose a valid database file first.");
 			return;
 		}
@@ -395,7 +406,7 @@ void Client::contactRegistryOnIdentitiesChanged() {
 	LOGGER_DEBUG("Updating contacts list on IdentitiesChanged() signal.");
 	m_ui.listContacts->clear();
 	
-	if (m_database) {
+	if (m_databaseThread.getWorker().hasDatabase()) {
 		QHash<openmittsu::protocol::ContactId, QString> knownIdentities = m_database->getKnownContactsWithNicknames();
 		auto it = knownIdentities.constBegin();
 		auto const end = knownIdentities.constEnd();
@@ -499,7 +510,7 @@ void Client::protocolClientOnConnectToFinished(int errCode, QString message) {
 		m_ui.btnConnect->setEnabled(true);
 
 		// Start checking feature levels and statuses of contacts
-		if (m_database) {
+		if (m_databaseThread.getWorker().hasDatabase()) {
 			QSet<openmittsu::protocol::ContactId> const contactsRequiringAccountStatusCheck = m_database->getContactsRequiringAccountStatusCheck(86400);
 			QSet<openmittsu::protocol::ContactId> const contactsRequiringFeatureLevelCheck = m_database->getContactsRequiringFeatureLevelCheck(86400);
 			
@@ -532,7 +543,7 @@ void Client::listContactsOnDoubleClick(QListWidgetItem* item) {
 	ContactListWidgetItem* clwi = dynamic_cast<ContactListWidgetItem*>(item);
 	GroupListWidgetItem* glwi = dynamic_cast<GroupListWidgetItem*>(item);
 
-	if ((m_database == nullptr) || (m_messageCenter == nullptr) || (m_tabController == nullptr)) {
+	if ((!m_databaseThread.getWorker().hasDatabase()) || (!m_messageCenterThread.getWorker().hasMessageCenter()) || (m_tabController == nullptr)) {
 		return;
 	}
 

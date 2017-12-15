@@ -18,7 +18,6 @@
 #include "src/protocol/MessageId.h"
 #include "src/widgets/TabController.h"
 
-#include "src/dataproviders/MessageStorage.h"
 #include "src/dataproviders/MessageQueue.h"
 #include "src/dataproviders/ReceivedMessageAcceptor.h"
 #include "src/dataproviders/NetworkSentMessageAcceptor.h"
@@ -35,8 +34,6 @@ namespace openmittsu {
 	}
 
 	namespace dataproviders {
-		class MessageStorage;
-
 		class MessageCenter : public QObject, public ReceivedMessageAcceptor {
 			Q_OBJECT
 		public:
@@ -66,7 +63,7 @@ namespace openmittsu {
 			bool sendGroupImage(openmittsu::protocol::GroupId const& group, QByteArray const& image);
 
 			void setNetworkSentMessageAcceptor(std::shared_ptr<NetworkSentMessageAcceptor> const& newNetworkSentMessageAcceptor);
-			void setStorage(std::shared_ptr<openmittsu::dataproviders::MessageStorage> const& newStorage);
+			void setStorage(std::shared_ptr<openmittsu::database::Database> const& newStorage);
 
 			virtual void processReceivedContactMessageText(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& message) override;
 			virtual void processReceivedContactMessageImage(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& image) override;
@@ -116,7 +113,7 @@ namespace openmittsu {
 			std::shared_ptr<openmittsu::widgets::TabController> const m_tabController;
 			std::shared_ptr<openmittsu::utility::OptionMaster> const m_optionMaster;
 			std::shared_ptr<NetworkSentMessageAcceptor> m_networkSentMessageAcceptor;
-			std::shared_ptr<openmittsu::dataproviders::MessageStorage> m_storage;
+			std::shared_ptr<openmittsu::database::Database> m_storage;
 			MessageQueue m_messageQueue;
 
 			void openTabForIncomingMessage(openmittsu::protocol::ContactId const& sender);

@@ -1,6 +1,6 @@
 #include "src/database/DatabaseGroupMessageCursor.h"
 
-#include "src/database/Database.h"
+#include "src/database/SimpleDatabase.h"
 #include "src/exceptions/InternalErrorException.h"
 #include "src/utility/Logging.h"
 
@@ -11,11 +11,11 @@ namespace openmittsu {
 
 		using namespace openmittsu::dataproviders::messages;
 
-		DatabaseGroupMessageCursor::DatabaseGroupMessageCursor(Database& database, openmittsu::protocol::GroupId const& group) : DatabaseMessageCursor(database), GroupMessageCursor(), m_group(group) {
+		DatabaseGroupMessageCursor::DatabaseGroupMessageCursor(SimpleDatabase& database, openmittsu::protocol::GroupId const& group) : DatabaseMessageCursor(database), GroupMessageCursor(), m_group(group) {
 			//
 		}
 
-		DatabaseGroupMessageCursor::DatabaseGroupMessageCursor(Database& database, openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId) : DatabaseMessageCursor(database), m_group(group) {
+		DatabaseGroupMessageCursor::DatabaseGroupMessageCursor(SimpleDatabase& database, openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId) : DatabaseMessageCursor(database), m_group(group) {
 			if (!seek(messageId)) {
 				throw openmittsu::exceptions::InternalErrorException() << "No message from group \"" << group.toString() << "\" and message ID \"" << messageId.toString() << "\" exists, invalid entry point.";
 			}
