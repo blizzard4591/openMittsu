@@ -133,6 +133,16 @@ namespace openmittsu {
 			openmittsu::protocol::MessageId getNextMessageId(openmittsu::protocol::ContactId const& contact);
 			openmittsu::protocol::MessageId getNextMessageId(openmittsu::protocol::GroupId const& group);
 
+			// Queries
+			virtual QSqlQuery getQueryObject() override;
+			virtual bool transactionStart() override;
+			virtual bool transactionCommit() override;
+
+			// Media Files
+			virtual MediaFileItem getMediaItem(QString const& uuid) const override;
+			virtual QString insertMediaItem(QByteArray const& data) override;
+			virtual void removeMediaItem(QString const& uuid) override;
+
 			friend class DatabaseMessage;
 			friend class DatabaseContactMessage;
 			friend class DatabaseControlMessage;
@@ -253,9 +263,6 @@ namespace openmittsu {
 			bool hasOptionInternal(QString const& optionName, bool isInternalOption = false);
 			void setOptionInternal(QString const& optionName, QString const& optionValue, bool isInternalOption = false);
 			void setBackup(openmittsu::protocol::ContactId selfId, openmittsu::crypto::KeyPair key);
-			MediaFileItem getMediaItem(QString const& uuid) const;
-			QString insertMediaItem(QByteArray const& data);
-			void removeMediaItem(QString const& uuid);
 			void setupQueueTimer();
 			void setKey(QString const& password);
 			void updateCachedIdentityBackup();

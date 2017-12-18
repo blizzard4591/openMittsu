@@ -19,12 +19,11 @@
 namespace openmittsu {
 	namespace dataproviders {
 		class BackedContactMessage;
-		class MessageCenter;
 
 		class BackedContact : public QObject, public MessageSource {
 			Q_OBJECT
 		public:
-			BackedContact(openmittsu::protocol::ContactId const& contactId, openmittsu::crypto::PublicKey const& contactPublicKey, ContactDataProvider& dataProvider, openmittsu::dataproviders::MessageCenter& messageCenter);
+			BackedContact(openmittsu::protocol::ContactId const& contactId, openmittsu::crypto::PublicKey const& contactPublicKey, ContactDataProvider& dataProvider, std::shared_ptr<openmittsu::dataproviders::MessageCenter> const& messageCenter);
 			BackedContact(BackedContact const& other);
 			virtual ~BackedContact();
 
@@ -60,7 +59,7 @@ namespace openmittsu {
 			openmittsu::protocol::ContactId const m_contactId;
 			openmittsu::crypto::PublicKey const m_contactPublicKey;
 			ContactDataProvider& m_dataProvider;
-			openmittsu::dataproviders::MessageCenter& m_messageCenter;
+			std::shared_ptr<openmittsu::dataproviders::MessageCenter> m_messageCenter;
 
 			std::shared_ptr<messages::ContactMessageCursor> m_cursor;
 		private slots:

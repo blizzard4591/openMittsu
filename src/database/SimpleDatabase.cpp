@@ -1305,5 +1305,17 @@ namespace openmittsu {
 			}
 		}
 
+		QSqlQuery SimpleDatabase::getQueryObject() {
+			return QSqlQuery(database);
+		}
+
+		bool SimpleDatabase::transactionStart() {
+			return database.transaction();
+		}
+		
+		bool SimpleDatabase::transactionCommit() {
+			return database.commit();
+		}
+
 	}
 }

@@ -39,7 +39,7 @@ namespace openmittsu {
 			virtual openmittsu::protocol::MessageId getNextMessageId(openmittsu::protocol::GroupId const& group) = 0;
 
 			// Media Items
-			virtual MediaFileItem getMediaItem(QString const& uuid) = 0;
+			virtual MediaFileItem getMediaItem(QString const& uuid) const = 0;
 			virtual void removeMediaItem(QString const& uuid) = 0;
 			virtual QString insertMediaItem(QByteArray const& data) = 0;
 		};

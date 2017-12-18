@@ -7,6 +7,7 @@
 
 #include "src/backup/FileReader.h"
 
+#include "src/backup/IdentityBackup.h"
 #include "src/backup/IdentityBackupObject.h"
 #include "src/backup/ContactBackupObject.h"
 #include "src/backup/GroupBackupObject.h"
@@ -18,6 +19,8 @@
 #include "src/backup/GroupMediaItemBackupObject.h"
 #include "src/backup/GroupThumbnailMediaItemBackupObject.h"
 #include "src/backup/GroupAvatarMediaItemBackupObject.h"
+
+#include "src/database/SimpleDatabase.h"
 
 #include "src/exceptions/InvalidInputException.h"
 #include "src/utility/Logging.h"
@@ -50,7 +53,7 @@ namespace openmittsu {
 				// This will throw if the password/backup is invalid.
 				IdentityBackup const identityBackup = IdentityBackup::fromBackupString(identityBackupString, m_backupPassword);
 
-				std::shared_ptr<openmittsu::database::Database> const database = std::make_shared<openmittsu::database::Database>(m_databaseFilename, identityBackup.getClientContactId(), identityBackup.getClientLongTermKeyPair(), m_databasePassword, m_mediaStorageLocation);
+				std::shared_ptr<openmittsu::database::SimpleDatabase> const database = std::make_shared<openmittsu::database::SimpleDatabase>(m_databaseFilename, identityBackup.getClientContactId(), identityBackup.getClientLongTermKeyPair(), m_databasePassword, m_mediaStorageLocation);
 
 				{
 					FileReader<ContactBackupObject> fileReader(m_backupFilePath, QStringLiteral("contacts.csv"));

@@ -1,5 +1,6 @@
 #include "src/database/DatabaseThreadWorker.h"
 
+#include "src/database/SimpleDatabase.h"
 #include "src/exceptions/InternalErrorException.h"
 #include "src/utility/Logging.h"
 #include "src/utility/MakeUnique.h"
@@ -13,7 +14,7 @@ namespace openmittsu {
 		}
 
 		bool DatabaseThreadWorker::openDatabase(QString const& filename, QString const& password, QDir const& mediaStorageLocation) {
-			std::shared_ptr<openmittsu::database::Database> newDatabase = std::make_shared<openmittsu::database::Database>(filename, password, mediaStorageLocation);
+			std::shared_ptr<openmittsu::database::Database> newDatabase = std::make_shared<openmittsu::database::SimpleDatabase>(filename, password, mediaStorageLocation);
 			if (newDatabase) {
 				m_database = newDatabase;
 				return true;
@@ -24,7 +25,7 @@ namespace openmittsu {
 		}
 
 		bool DatabaseThreadWorker::createDatabase(QString const& filename, openmittsu::protocol::ContactId const& selfContact, openmittsu::crypto::KeyPair const& selfLongTermKeyPair, QString const& password, QDir const& mediaStorageLocation) {
-			std::shared_ptr<openmittsu::database::Database> newDatabase = std::make_shared<openmittsu::database::Database>(filename, selfContact, selfLongTermKeyPair, password, mediaStorageLocation);
+			std::shared_ptr<openmittsu::database::Database> newDatabase = std::make_shared<openmittsu::database::SimpleDatabase>(filename, selfContact, selfLongTermKeyPair, password, mediaStorageLocation);
 			if (newDatabase) {
 				m_database = newDatabase;
 				return true;
