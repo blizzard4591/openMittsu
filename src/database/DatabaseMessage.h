@@ -54,7 +54,7 @@ namespace openmittsu {
 
 			void announceMessageChanged();
 		private:
-			InternalDatabaseInterface * m_database;
+			InternalDatabaseInterface* const m_database;
 			openmittsu::protocol::MessageId const m_messageId;
 		};
 

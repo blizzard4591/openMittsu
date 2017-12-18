@@ -28,6 +28,7 @@
 #include "src/database/DatabaseGroupMessageCursor.h"
 #include "src/database/DatabaseMessage.h"
 #include "src/database/ExternalMediaFileStorage.h"
+#include "src/database/InternalDatabaseInterface.h"
 #include "src/dataproviders/messages/ContactMessageType.h"
 #include "src/dataproviders/messages/ControlMessageType.h"
 #include "src/dataproviders/messages/GroupMessageType.h"
@@ -39,7 +40,7 @@
 
 #include "src/dataproviders/BackedContact.h"
 #include "src/dataproviders/BackedGroup.h"
-#include "src/dataproviders/DatabaseContactAndGroupDataProvider.h"
+#include "src/database/DatabaseContactAndGroupDataProvider.h"
 
 namespace openmittsu {
 	namespace backup {
@@ -51,7 +52,7 @@ namespace openmittsu {
 
 	namespace database {
 
-		class SimpleDatabase : public openmittsu::database::Database {
+		class SimpleDatabase : public openmittsu::database::Database, public InternalDatabaseInterface {
 			Q_OBJECT
 			Q_INTERFACES(openmittsu::database::Database)
 		public:
@@ -140,7 +141,7 @@ namespace openmittsu {
 			friend class DatabaseGroupMessageCursor;
 			friend class DatabaseMessageCursor;
 			friend class ExternalMediaFileStorage;
-			friend class openmittsu::dataproviders::DatabaseContactAndGroupDataProvider;
+			friend class openmittsu::database::DatabaseContactAndGroupDataProvider;
 		public slots:
 			virtual void enableTimers() override;
 			virtual void sendAllWaitingMessages(openmittsu::dataproviders::SentMessageAcceptor& messageAcceptor) override;
@@ -222,7 +223,7 @@ namespace openmittsu {
 			openmittsu::crypto::KeyPair m_selfLongTermKeyPair;
 			std::unique_ptr<openmittsu::backup::IdentityBackup> m_identityBackup;
 
-			openmittsu::dataproviders::DatabaseContactAndGroupDataProvider m_contactAndGroupDataProvider;
+			openmittsu::database::DatabaseContactAndGroupDataProvider m_contactAndGroupDataProvider;
 			ExternalMediaFileStorage m_mediaFileStorage;
 
 			QTimer queueTimeoutTimer;

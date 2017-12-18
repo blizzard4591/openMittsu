@@ -5,6 +5,10 @@
 #include <QSqlQuery>
 #include <QSqlError>
 
+#include "src/protocol/ContactId.h"
+#include "src/protocol/GroupId.h"
+#include "src/protocol/MessageId.h"
+
 namespace openmittsu {
 	namespace database {
 		class MediaFileItem;
@@ -13,10 +17,31 @@ namespace openmittsu {
 		public:
 			virtual ~InternalDatabaseInterface() {}
 
-			virtual QSqlQuery getQueryObject() = 0;
-			virtual void announceMessageChanged(QString const& uuid) = 0;
+			virtual openmittsu::protocol::ContactId const& getSelfContact() const = 0;
+			virtual QString generateUuid() const = 0;
 
+			// Queries
+			virtual QSqlQuery getQueryObject() = 0;
+			virtual bool transactionStart() = 0;
+			virtual bool transactionCommit() = 0;
+			
+			// Announces
+			virtual void announceMessageChanged(QString const& uuid) = 0;
+			virtual void announceContactChanged(openmittsu::protocol::ContactId const& contact) = 0;
+			virtual void announceGroupChanged(openmittsu::protocol::GroupId const& group) = 0;
+			virtual void announceNewMessage(openmittsu::protocol::ContactId const& contact, QString const& messageUuid) = 0;
+			virtual void announceNewMessage(openmittsu::protocol::GroupId const& group, QString const& messageUuid) = 0;
+			virtual void announceReceivedNewMessage(openmittsu::protocol::ContactId const& contact) = 0;
+			virtual void announceReceivedNewMessage(openmittsu::protocol::GroupId const& group) = 0;
+
+			// Message ID
+			virtual openmittsu::protocol::MessageId getNextMessageId(openmittsu::protocol::ContactId const& contact) = 0;
+			virtual openmittsu::protocol::MessageId getNextMessageId(openmittsu::protocol::GroupId const& group) = 0;
+
+			// Media Items
 			virtual MediaFileItem getMediaItem(QString const& uuid) = 0;
+			virtual void removeMediaItem(QString const& uuid) = 0;
+			virtual QString insertMediaItem(QByteArray const& data) = 0;
 		};
 	}
 }

@@ -16,7 +16,7 @@
 namespace openmittsu {
 	namespace database {
 
-		ExternalMediaFileStorage::ExternalMediaFileStorage(QDir const& storagePath, openmittsu::database::Database& database) : MediaFileStorage(), m_storagePath(storagePath), m_database(database) {
+		ExternalMediaFileStorage::ExternalMediaFileStorage(QDir const& storagePath, InternalDatabaseInterface* database) : MediaFileStorage(), m_storagePath(storagePath), m_database(database) {
 			//
 		}
 		
@@ -29,7 +29,7 @@ namespace openmittsu {
 		}
 
 		bool ExternalMediaFileStorage::hasMediaItem(QString const& uuid) const {
-			QSqlQuery query(m_database.database);
+			QSqlQuery query(m_database->getQueryObject());
 			query.prepare(QStringLiteral("SELECT `uid` FROM `media` WHERE `uid` = :uuid"));
 			query.bindValue(QStringLiteral(":uuid"), QVariant(uuid));
 
@@ -41,11 +41,11 @@ namespace openmittsu {
 		}
 		
 		int ExternalMediaFileStorage::getMediaItemCount() const {
-			return DatabaseUtilities::countQuery(m_database.database, QStringLiteral("media"));
+			return DatabaseUtilities::countQuery(m_database, QStringLiteral("media"));
 		}
 
 		MediaFileItem ExternalMediaFileStorage::getMediaItem(QString const& uuid) const {
-			QSqlQuery query(m_database.database);
+			QSqlQuery query(m_database->getQueryObject());
 			query.prepare(QStringLiteral("SELECT `uid`, `size`, `checksum`, `nonce`, `key` FROM `media` WHERE `uid` = :uuid"));
 			query.bindValue(QStringLiteral(":uuid"), QVariant(uuid));
 
@@ -108,7 +108,7 @@ namespace openmittsu {
 			}
 			file.close();
 
-			QSqlQuery queryMedia(m_database.database);
+			QSqlQuery queryMedia(m_database->getQueryObject());
 			queryMedia.prepare(QStringLiteral("INSERT INTO `media` (`uid`, `size`, `checksum`, `nonce`, `key`) VALUES (:uid, :size, :checksum, :nonce, :key);"));
 			queryMedia.bindValue(QStringLiteral(":uid"), QVariant(uuid));
 			queryMedia.bindValue(QStringLiteral(":size"), QVariant(size));
@@ -121,7 +121,7 @@ namespace openmittsu {
 		}
 		
 		QString ExternalMediaFileStorage::insertMediaItem(QByteArray const& data) {
-			QString const uuid = m_database.generateUuid();
+			QString const uuid = m_database->generateUuid();
 			insertMediaItem(uuid, data);
 
 			return uuid;
@@ -130,7 +130,7 @@ namespace openmittsu {
 		void ExternalMediaFileStorage::removeMediaItem(QString const& uuid) {
 			QFile::remove(m_storagePath.filePath(buildFilename(uuid)));
 
-			QSqlQuery queryMedia(m_database.database);
+			QSqlQuery queryMedia(m_database->getQueryObject());
 			queryMedia.prepare(QStringLiteral("DELETE FROM `media` WHERE `uid` = :uuid;"));
 			queryMedia.bindValue(QStringLiteral(":uuid"), QVariant(uuid));
 			if (!queryMedia.exec()) {
@@ -187,7 +187,7 @@ namespace openmittsu {
 		}
 
 		void ExternalMediaFileStorage::insertMediaItemsFromBackup(QList<openmittsu::backup::ContactMediaItemBackupObject> const& items) {
-			if (!m_database.database.transaction()) {
+			if (!m_database->transactionStart()) {
 				LOGGER()->warn("ExternalMediaFileStorage: Could NOT start transaction!");
 			}
 
@@ -197,13 +197,13 @@ namespace openmittsu {
 				insertMediaItem(it->getUuid(), it->getData());
 			}
 
-			if (!m_database.database.commit()) {
+			if (!m_database->transactionCommit()) {
 				LOGGER()->info("ExternalMediaFileStorage: Could NOT commit transaction!");
 			}
 		}
 
 		void ExternalMediaFileStorage::insertMediaItemsFromBackup(QList<openmittsu::backup::GroupMediaItemBackupObject> const& items) {
-			if (!m_database.database.transaction()) {
+			if (!m_database->transactionStart()) {
 				LOGGER()->warn("ExternalMediaFileStorage: Could NOT start transaction!");
 			}
 
@@ -213,7 +213,7 @@ namespace openmittsu {
 				insertMediaItem(it->getUuid(), it->getData());
 			}
 
-			if (!m_database.database.commit()) {
+			if (!m_database->transactionCommit()) {
 				LOGGER()->info("ExternalMediaFileStorage: Could NOT commit transaction!");
 			}
 		}

@@ -5,17 +5,17 @@
 
 namespace openmittsu {
 	namespace database {
-		class SimpleDatabase;
+		class InternalDatabaseInterface;
 
 		class DatabaseUniqueMessageIdGenerator : public openmittsu::protocol::UniqueMessageIdGenerator{
 		public:
-			DatabaseUniqueMessageIdGenerator(SimpleDatabase& database);
+			DatabaseUniqueMessageIdGenerator(InternalDatabaseInterface* database);
 			virtual ~DatabaseUniqueMessageIdGenerator();
 
 			virtual openmittsu::protocol::MessageId getNextUniqueMessageId(openmittsu::protocol::ContactId const& receiver) override;
 			virtual openmittsu::protocol::MessageId getNextUniqueMessageId(openmittsu::protocol::GroupId const& receiver) override;
 		private:
-			SimpleDatabase & m_database;
+			InternalDatabaseInterface* const m_database;
 		};
 	}
 }

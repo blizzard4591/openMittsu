@@ -1,6 +1,6 @@
 #include "src/database/DatabaseMessageCursor.h"
 
-#include "src/database/SimpleDatabase.h"
+#include "src/database/InternalDatabaseInterface.h"
 #include "src/exceptions/InternalErrorException.h"
 #include "src/utility/Logging.h"
 
@@ -11,7 +11,7 @@ namespace openmittsu {
 
 		using namespace openmittsu::dataproviders::messages;
 
-		DatabaseMessageCursor::DatabaseMessageCursor(SimpleDatabase& database) : m_database(database), m_messageId(0), m_isMessageIdValid(false) {
+		DatabaseMessageCursor::DatabaseMessageCursor(InternalDatabaseInterface* database) : m_database(database), m_messageId(0), m_isMessageIdValid(false) {
 			//
 		}
 		
@@ -32,7 +32,7 @@ namespace openmittsu {
 		}
 
 		bool DatabaseMessageCursor::seek(openmittsu::protocol::MessageId const& messageId) {
-			QSqlQuery query(m_database.database);
+			QSqlQuery query(m_database->getQueryObject());
 			query.prepare(QStringLiteral("SELECT `apiid`, `uid`, `sort_by` FROM `%1` WHERE %2 AND `apiid` = :apiid;").arg(getTableName()).arg(getWhereString()));
 			query.bindValue(QStringLiteral(":apiid"), QVariant(messageId.toQString()));
 			bindWhereStringValues(query);
@@ -54,7 +54,7 @@ namespace openmittsu {
 		}
 
 		bool DatabaseMessageCursor::seekByUuid(QString const& uuid) {
-			QSqlQuery query(m_database.database);
+			QSqlQuery query(m_database->getQueryObject());
 			query.prepare(QStringLiteral("SELECT `apiid`, `uid`, `sort_by` FROM `%1` WHERE %2 AND `uid` = :uid;").arg(getTableName()).arg(getWhereString()));
 			query.bindValue(QStringLiteral(":uid"), QVariant(uuid));
 			bindWhereStringValues(query);
@@ -92,7 +92,7 @@ namespace openmittsu {
 
 #if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
 			// Check in two steps to mitigate a cool bug in the query engine.
-			QSqlQuery query(m_database.database);
+			QSqlQuery query(m_database->getQueryObject());
 			query.prepare(QStringLiteral("SELECT `apiid`, `uid`, `sort_by` FROM `%1` WHERE (%2) AND (((`sort_by` = :sortByValue) AND (`uid` %3 :uid))) ORDER BY `sort_by` %4, `uid` %4 LIMIT 1;").arg(getTableName()).arg(getWhereString()).arg(sortOrderSign).arg(sortOrder));
 			bindWhereStringValues(query);
 			query.bindValue(QStringLiteral(":sortByValue"), QVariant(m_sortByValue));
@@ -128,7 +128,7 @@ namespace openmittsu {
 				}
 			}
 #else
-			QSqlQuery query(m_database.database);
+			QSqlQuery query(m_database->getQueryObject());
 			query.prepare(QStringLiteral("SELECT `apiid`, `uid`, `sort_by` FROM `%1` WHERE %2 AND ((`sort_by` %3 :sortByValue) OR ((`sort_by` = :sortByValue) AND (`uid` %3 :uid))) ORDER BY `sort_by` %4, `uid` %4 LIMIT 1;").arg(getTableName()).arg(getWhereString()).arg(sortOrderSign).arg(sortOrder));
 			bindWhereStringValues(query);
 			query.bindValue(QStringLiteral(":sortByValue"), QVariant(m_sortByValue));
@@ -158,7 +158,7 @@ namespace openmittsu {
 				sortOrder = QStringLiteral("DESC");
 			}
 
-			QSqlQuery query(m_database.database);
+			QSqlQuery query(m_database->getQueryObject());
 			query.prepare(QStringLiteral("SELECT `apiid`, `uid`, `sort_by` FROM `%1` WHERE %2 ORDER BY `sort_by` %3, `uid` %3 LIMIT 1;").arg(getTableName()).arg(getWhereString()).arg(sortOrder));
 			bindWhereStringValues(query);
 
@@ -178,7 +178,7 @@ namespace openmittsu {
 		}
 
 		QVector<QString> DatabaseMessageCursor::getLastMessages(std::size_t n) const {
-			QSqlQuery query(m_database.database);
+			QSqlQuery query(m_database->getQueryObject());
 			query.prepare(QStringLiteral("SELECT `uid` FROM `%1` WHERE %2 ORDER BY `sort_by` DESC, `uid` DESC LIMIT %3;").arg(getTableName()).arg(getWhereString()).arg(n));
 			bindWhereStringValues(query);
 
@@ -203,7 +203,7 @@ namespace openmittsu {
 			return getFollowingMessageId(false);
 		}
 
-		SimpleDatabase& DatabaseMessageCursor::getDatabase() const {
+		InternalDatabaseInterface* DatabaseMessageCursor::getDatabase() const {
 			return m_database;
 		}
 

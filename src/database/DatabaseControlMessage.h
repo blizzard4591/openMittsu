@@ -13,7 +13,7 @@ namespace openmittsu {
 	namespace database {
 		class DatabaseControlMessage : public virtual DatabaseMessage, public virtual openmittsu::dataproviders::messages::ControlMessage {
 		public:
-			explicit DatabaseControlMessage(SimpleDatabase& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& controlMessageId, openmittsu::protocol::MessageId const& relatedMessageId, openmittsu::dataproviders::messages::ControlMessageType const& controlMessageType);
+			explicit DatabaseControlMessage(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& controlMessageId, openmittsu::protocol::MessageId const& relatedMessageId, openmittsu::dataproviders::messages::ControlMessageType const& controlMessageType);
 			virtual ~DatabaseControlMessage();
 
 			virtual openmittsu::protocol::ContactId const& getContactId() const override;
@@ -21,13 +21,13 @@ namespace openmittsu {
 			virtual openmittsu::dataproviders::messages::ControlMessageState getMessageState() const override;
 			virtual void setMessageState(openmittsu::dataproviders::messages::ControlMessageState const& messageState, openmittsu::protocol::MessageTime const& when) override;
 
-			static DatabaseControlMessage fromUuid(SimpleDatabase& database, QString const& uuid);
-			static DatabaseControlMessage fromReceiverAndControlMessageId(SimpleDatabase& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& controlMessageId);
+			static DatabaseControlMessage fromUuid(InternalDatabaseInterface* database, QString const& uuid);
+			static DatabaseControlMessage fromReceiverAndControlMessageId(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& controlMessageId);
 
-			static bool exists(SimpleDatabase& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId);
-			static bool hasControlMessageFor(SimpleDatabase& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& relatedMessageId, openmittsu::dataproviders::messages::ControlMessageType const& controlMessageType);
-			static openmittsu::protocol::MessageId insertControlMessageFromUs(SimpleDatabase& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& relatedMessageId, openmittsu::dataproviders::messages::ControlMessageState const& messageState, openmittsu::protocol::MessageTime const& createdAt, bool isQueued, openmittsu::dataproviders::messages::ControlMessageType const& controlMessageType);
-			static bool resetQueueStatus(SimpleDatabase& database, int maxAgeInSeconds);
+			static bool exists(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId);
+			static bool hasControlMessageFor(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& relatedMessageId, openmittsu::dataproviders::messages::ControlMessageType const& controlMessageType);
+			static openmittsu::protocol::MessageId insertControlMessageFromUs(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& relatedMessageId, openmittsu::dataproviders::messages::ControlMessageState const& messageState, openmittsu::protocol::MessageTime const& createdAt, bool isQueued, openmittsu::dataproviders::messages::ControlMessageType const& controlMessageType);
+			static bool resetQueueStatus(InternalDatabaseInterface* database, int maxAgeInSeconds);
 		protected:
 			virtual QString getWhereString() const override;
 			virtual void bindWhereStringValues(QSqlQuery& query) const override;

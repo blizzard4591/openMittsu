@@ -118,11 +118,11 @@ namespace openmittsu {
 		}
 
 		openmittsu::protocol::MessageId DatabaseContactMessage::insertContactMessageFromUs(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, QString const& uuid, openmittsu::protocol::MessageTime const& createdAt, ContactMessageType const& type, QString const& body, bool isQueued, bool isStatusMessage, QString const& caption) {
-			openmittsu::protocol::MessageId const messageId = database.getNextMessageId(contact);
+			openmittsu::protocol::MessageId const messageId = database->getNextMessageId(contact);
 
 			insertContactMessage(database, contact, messageId, uuid, true, false, true, UserMessageState::SENDING, createdAt, openmittsu::protocol::MessageTime(), openmittsu::protocol::MessageTime(), openmittsu::protocol::MessageTime(), openmittsu::protocol::MessageTime(), type, body, isStatusMessage, isQueued, false, caption);
 
-			database.announceNewMessage(contact, uuid);
+			database->announceNewMessage(contact, uuid);
 
 			return messageId;
 		}
@@ -130,8 +130,8 @@ namespace openmittsu {
 		void DatabaseContactMessage::insertContactMessageFromThem(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId, QString const& uuid, openmittsu::protocol::MessageTime const& sentAt, openmittsu::protocol::MessageTime const& receivedAt, ContactMessageType const& type, QString const& body, bool isStatusMessage, QString const& caption) {
 			insertContactMessage(database, contact, messageId, uuid, false, false, true, UserMessageState::DELIVERED, sentAt, sentAt, receivedAt, openmittsu::protocol::MessageTime(), openmittsu::protocol::MessageTime(), type, body, isStatusMessage, true, true, caption);
 
-			database.announceNewMessage(contact, uuid);
-			database.announceReceivedNewMessage(contact);
+			database->announceNewMessage(contact, uuid);
+			database->announceReceivedNewMessage(contact);
 		}
 
 		void DatabaseContactMessage::insertContactMessagesFromBackup(InternalDatabaseInterface* database, QList<openmittsu::backup::ContactMessageBackupObject> const& messages) {
@@ -199,11 +199,12 @@ namespace openmittsu {
 				caption.append(it->getCaption());
 			}
 
-			if (!database.database.transaction()) {
+			//if (!database.database.transaction()) {
+			if (!database->transactionStart()) {
 				LOGGER()->warn("Could NOT start transaction!");
 			}
 
-			QSqlQuery query(database.database);
+			QSqlQuery query(database->getQueryObject());
 			query.prepare(QStringLiteral("INSERT INTO `contact_messages` (`identity`, `apiid`, `uid`, `is_outbox`, `is_read`, `is_saved`, `messagestate`, `sort_by`, `created_at`, `sent_at`, `received_at`, `seen_at`, `modified_at`, `contact_message_type`, `body`, `is_statusmessage`, `is_queued`, `is_sent`, `caption`) VALUES "
 										 "(:identity, :apiid, :uid, :isOutbox, :isRead, :isSaved, :messageState, :sortBy, :createdAt, :sentAt, :receivedAt, :seenAt, :modifiedAt, :type, :body, :isStatusMessage, :isQueued, :isSent, :caption);"));
 			query.bindValue(QStringLiteral(":identity"), identity);
@@ -230,7 +231,8 @@ namespace openmittsu {
 				throw openmittsu::exceptions::InternalErrorException() << "Could not batch-insert contact message data into 'contact_messages'. Query error: " << query.lastError().text().toStdString();
 			}
 
-			if (!database.database.commit()) {
+			//if (!database.database.commit()) {
+			if (!database->transactionCommit()) {
 				LOGGER()->warn("Could NOT commit transaction!");
 			}
 
