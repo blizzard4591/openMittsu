@@ -10,7 +10,7 @@
 #include "src/dataproviders/MessageSource.h"
 
 #include "src/utility/Location.h"
-#include "src/dataproviders/ContactDataProvider.h"
+#include "src/database/Database.h"
 #include "src/dataproviders/messages/ContactMessageCursor.h"
 #include "src/dataproviders/MessageCenter.h"
 #include "src/protocol/ContactId.h"
@@ -23,7 +23,7 @@ namespace openmittsu {
 		class BackedContact : public QObject, public MessageSource {
 			Q_OBJECT
 		public:
-			BackedContact(openmittsu::protocol::ContactId const& contactId, openmittsu::crypto::PublicKey const& contactPublicKey, ContactDataProvider& dataProvider, std::shared_ptr<openmittsu::dataproviders::MessageCenter> const& messageCenter);
+			BackedContact(openmittsu::protocol::ContactId const& contactId, openmittsu::crypto::PublicKey const& contactPublicKey, openmittsu::database::DatabaseWrapper const& database, std::shared_ptr<openmittsu::dataproviders::MessageCenter> const& messageCenter);
 			BackedContact(BackedContact const& other);
 			virtual ~BackedContact();
 

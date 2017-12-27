@@ -11,10 +11,10 @@ namespace openmittsu {
 	namespace dataproviders {
 
 		BackedContact::BackedContact(openmittsu::protocol::ContactId const& contactId, openmittsu::crypto::PublicKey const& contactPublicKey, ContactDataProvider& dataProvider, openmittsu::dataproviders::MessageCenter& messageCenter) : m_contactId(contactId), m_contactPublicKey(contactPublicKey), m_dataProvider(dataProvider), m_messageCenter(messageCenter), m_cursor(dataProvider.getContactMessageCursor(contactId)) {
-			OPENMITTSU_CONNECT(&dataProvider, contactChanged(openmittsu::protocol::ContactId const&), this, slotIdentityChanged(openmittsu::protocol::ContactId const&));
-			OPENMITTSU_CONNECT(&dataProvider, contactHasNewMessage(openmittsu::protocol::ContactId const&, QString const&), this, slotNewMessage(openmittsu::protocol::ContactId const&, QString const&));
-			OPENMITTSU_CONNECT(&dataProvider, contactStartedTyping(openmittsu::protocol::ContactId const&), this, slotContactStartedTyping(openmittsu::protocol::ContactId const&));
-			OPENMITTSU_CONNECT(&dataProvider, contactStoppedTyping(openmittsu::protocol::ContactId const&), this, slotContactStoppedTyping(openmittsu::protocol::ContactId const&));
+			OPENMITTSU_CONNECT(&m_dataProvider, contactChanged(openmittsu::protocol::ContactId const&), this, slotIdentityChanged(openmittsu::protocol::ContactId const&));
+			OPENMITTSU_CONNECT(&m_dataProvider, contactHasNewMessage(openmittsu::protocol::ContactId const&, QString const&), this, slotNewMessage(openmittsu::protocol::ContactId const&, QString const&));
+			OPENMITTSU_CONNECT(&m_dataProvider, contactStartedTyping(openmittsu::protocol::ContactId const&), this, slotContactStartedTyping(openmittsu::protocol::ContactId const&));
+			OPENMITTSU_CONNECT(&m_dataProvider, contactStoppedTyping(openmittsu::protocol::ContactId const&), this, slotContactStoppedTyping(openmittsu::protocol::ContactId const&));
 		}
 
 		BackedContact::BackedContact(BackedContact const& other) : BackedContact(other.m_contactId, other.m_contactPublicKey, other.m_dataProvider, other.m_messageCenter) {
