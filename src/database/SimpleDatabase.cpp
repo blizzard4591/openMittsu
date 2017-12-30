@@ -177,9 +177,9 @@ namespace openmittsu {
 			LOGGER_DEBUG("Database queue timeout timer fired, checking database...");
 
 			bool resetQueueChangedAnItem = false;
-			resetQueueChangedAnItem = resetQueueChangedAnItem || DatabaseContactMessage::resetQueueStatus(this, 30);
-			resetQueueChangedAnItem = resetQueueChangedAnItem || DatabaseGroupMessage::resetQueueStatus(this, 30);
-			resetQueueChangedAnItem = resetQueueChangedAnItem || DatabaseControlMessage::resetQueueStatus(this, 30);
+			resetQueueChangedAnItem = resetQueueChangedAnItem || internal::DatabaseContactMessage::resetQueueStatus(this, 30);
+			resetQueueChangedAnItem = resetQueueChangedAnItem || internal::DatabaseGroupMessage::resetQueueStatus(this, 30);
+			resetQueueChangedAnItem = resetQueueChangedAnItem || internal::DatabaseControlMessage::resetQueueStatus(this, 30);
 
 			if (resetQueueChangedAnItem) {
 				emit haveQueuedMessages();
@@ -405,7 +405,7 @@ namespace openmittsu {
 			openmittsu::protocol::MessageId id(openmittsu::protocol::MessageId::random());
 
 			while (true) {
-				if (!DatabaseContactMessage::exists(this, contact, id) && !DatabaseControlMessage::exists(this, contact, id)) {
+				if (!internal::DatabaseContactMessage::exists(this, contact, id) && !internal::DatabaseControlMessage::exists(this, contact, id)) {
 					break;
 				}
 
@@ -419,7 +419,7 @@ namespace openmittsu {
 			openmittsu::protocol::MessageId id(openmittsu::protocol::MessageId::random());
 
 			while (true) {
-				if (!DatabaseGroupMessage::exists(this, group, id)) {
+				if (!internal::DatabaseGroupMessage::exists(this, group, id)) {
 					break;
 				}
 
@@ -430,7 +430,7 @@ namespace openmittsu {
 		}
 
 		openmittsu::protocol::MessageId SimpleDatabase::storeSentContactMessageText(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, QString const& message) {
-			return DatabaseContactMessage::insertContactMessageFromUs(this, receiver, generateUuid(), timeCreated, ContactMessageType::TEXT, message, isQueued, false, QStringLiteral(""));
+			return internal::DatabaseContactMessage::insertContactMessageFromUs(this, receiver, generateUuid(), timeCreated, ContactMessageType::TEXT, message, isQueued, false, QStringLiteral(""));
 		}
 
 		openmittsu::protocol::MessageId SimpleDatabase::storeSentContactMessageImage(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, QByteArray const& image, QString const& caption) {
@@ -439,15 +439,15 @@ namespace openmittsu {
 			}
 
 			QString const uuid = insertMediaItem(image);
-			return DatabaseContactMessage::insertContactMessageFromUs(this, receiver, uuid, timeCreated, ContactMessageType::IMAGE, QStringLiteral(""), isQueued, false, caption);
+			return internal::DatabaseContactMessage::insertContactMessageFromUs(this, receiver, uuid, timeCreated, ContactMessageType::IMAGE, QStringLiteral(""), isQueued, false, caption);
 		}
 
 		openmittsu::protocol::MessageId SimpleDatabase::storeSentContactMessageLocation(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, openmittsu::utility::Location const& location) {
-			return DatabaseContactMessage::insertContactMessageFromUs(this, receiver, generateUuid(), timeCreated, ContactMessageType::LOCATION, location.toDatabaseString(), isQueued, false, location.getDescription());
+			return internal::DatabaseContactMessage::insertContactMessageFromUs(this, receiver, generateUuid(), timeCreated, ContactMessageType::LOCATION, location.toDatabaseString(), isQueued, false, location.getDescription());
 		}
 
 		openmittsu::protocol::MessageId SimpleDatabase::storeSentGroupMessageText(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, QString const& message) {
-			return DatabaseGroupMessage::insertGroupMessageFromUs(this, group, generateUuid(), timeCreated, GroupMessageType::TEXT, message, isQueued, false, QStringLiteral(""));
+			return internal::DatabaseGroupMessage::insertGroupMessageFromUs(this, group, generateUuid(), timeCreated, GroupMessageType::TEXT, message, isQueued, false, QStringLiteral(""));
 		}
 
 		openmittsu::protocol::MessageId SimpleDatabase::storeSentGroupMessageImage(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, QByteArray const& image, QString const& caption) {
@@ -456,27 +456,27 @@ namespace openmittsu {
 			}
 
 			QString const uuid = insertMediaItem(image);
-			return DatabaseGroupMessage::insertGroupMessageFromUs(this, group, uuid, timeCreated, GroupMessageType::IMAGE, QStringLiteral(""), isQueued, false, caption);
+			return internal::DatabaseGroupMessage::insertGroupMessageFromUs(this, group, uuid, timeCreated, GroupMessageType::IMAGE, QStringLiteral(""), isQueued, false, caption);
 		}
 
 		openmittsu::protocol::MessageId SimpleDatabase::storeSentGroupMessageLocation(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, openmittsu::utility::Location const& location) {
-			return DatabaseGroupMessage::insertGroupMessageFromUs(this, group, generateUuid(), timeCreated, GroupMessageType::LOCATION, location.toDatabaseString(), isQueued, false, location.getDescription());
+			return internal::DatabaseGroupMessage::insertGroupMessageFromUs(this, group, generateUuid(), timeCreated, GroupMessageType::LOCATION, location.toDatabaseString(), isQueued, false, location.getDescription());
 		}
 
 		openmittsu::protocol::MessageId SimpleDatabase::storeSentContactMessageReceiptReceived(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, openmittsu::protocol::MessageId const& referredMessage) {
-			return DatabaseControlMessage::insertControlMessageFromUs(this, receiver, referredMessage, ControlMessageState::SENDING, timeCreated, isQueued, ControlMessageType::RECEIVED);
+			return internal::DatabaseControlMessage::insertControlMessageFromUs(this, receiver, referredMessage, ControlMessageState::SENDING, timeCreated, isQueued, ControlMessageType::RECEIVED);
 		}
 
 		openmittsu::protocol::MessageId SimpleDatabase::storeSentContactMessageReceiptSeen(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, openmittsu::protocol::MessageId const& referredMessage) {
-			return DatabaseControlMessage::insertControlMessageFromUs(this, receiver, referredMessage, ControlMessageState::SENDING, timeCreated, isQueued, ControlMessageType::READ);
+			return internal::DatabaseControlMessage::insertControlMessageFromUs(this, receiver, referredMessage, ControlMessageState::SENDING, timeCreated, isQueued, ControlMessageType::READ);
 		}
 
 		openmittsu::protocol::MessageId SimpleDatabase::storeSentContactMessageReceiptAgree(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, openmittsu::protocol::MessageId const& referredMessage) {
-			return DatabaseControlMessage::insertControlMessageFromUs(this, receiver, referredMessage, ControlMessageState::SENDING, timeCreated, isQueued, ControlMessageType::AGREE);
+			return internal::DatabaseControlMessage::insertControlMessageFromUs(this, receiver, referredMessage, ControlMessageState::SENDING, timeCreated, isQueued, ControlMessageType::AGREE);
 		}
 
 		openmittsu::protocol::MessageId SimpleDatabase::storeSentContactMessageReceiptDisagree(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, openmittsu::protocol::MessageId const& referredMessage) {
-			return DatabaseControlMessage::insertControlMessageFromUs(this, receiver, referredMessage, ControlMessageState::SENDING, timeCreated, isQueued, ControlMessageType::DISAGREE);
+			return internal::DatabaseControlMessage::insertControlMessageFromUs(this, receiver, referredMessage, ControlMessageState::SENDING, timeCreated, isQueued, ControlMessageType::DISAGREE);
 		}
 
 		openmittsu::protocol::MessageId SimpleDatabase::storeSentContactMessageNotificationTypingStarted(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued) {
@@ -490,21 +490,21 @@ namespace openmittsu {
 		}
 
 		void SimpleDatabase::storeReceivedContactMessageText(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& message) {
-			DatabaseContactMessage::insertContactMessageFromThem(this, sender, messageId, generateUuid(), timeSent, timeReceived, ContactMessageType::TEXT, message, false, QStringLiteral(""));
+			internal::DatabaseContactMessage::insertContactMessageFromThem(this, sender, messageId, generateUuid(), timeSent, timeReceived, ContactMessageType::TEXT, message, false, QStringLiteral(""));
 		}
 
 		void SimpleDatabase::storeReceivedContactMessageImage(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& image, QString const& caption) {
 			QString const uuid = insertMediaItem(image);
-			DatabaseContactMessage::insertContactMessageFromThem(this, sender, messageId, uuid, timeSent, timeReceived, ContactMessageType::IMAGE, QStringLiteral(""), false, caption);
+			internal::DatabaseContactMessage::insertContactMessageFromThem(this, sender, messageId, uuid, timeSent, timeReceived, ContactMessageType::IMAGE, QStringLiteral(""), false, caption);
 		}
 
 		void SimpleDatabase::storeReceivedContactMessageLocation(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, openmittsu::utility::Location const& location) {
-			DatabaseContactMessage::insertContactMessageFromThem(this, sender, messageId, generateUuid(), timeSent, timeReceived, ContactMessageType::LOCATION, location.toDatabaseString(), false, location.getDescription());
+			internal::DatabaseContactMessage::insertContactMessageFromThem(this, sender, messageId, generateUuid(), timeSent, timeReceived, ContactMessageType::LOCATION, location.toDatabaseString(), false, location.getDescription());
 		}
 
 		void SimpleDatabase::storeReceivedContactMessageReceiptReceived(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageId const& referredMessageId) {
 			try {
-				DatabaseContactMessage message(this, sender, referredMessageId);
+				internal::DatabaseContactMessage message(this, sender, referredMessageId);
 				message.setMessageState(UserMessageState::DELIVERED, timeSent);
 			} catch (openmittsu::exceptions::InternalErrorException& iee) {
 				LOGGER()->warn("Could not saved received \"received\" receipt: {}", iee.what());
@@ -513,7 +513,7 @@ namespace openmittsu {
 
 		void SimpleDatabase::storeReceivedContactMessageReceiptSeen(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageId const& referredMessageId) {
 			try {
-				DatabaseContactMessage message(this, sender, referredMessageId);
+				internal::DatabaseContactMessage message(this, sender, referredMessageId);
 				message.setMessageState(UserMessageState::READ, timeSent);
 			} catch (openmittsu::exceptions::InternalErrorException& iee) {
 				LOGGER()->warn("Could not saved received \"seen\" receipt: {}", iee.what());
@@ -522,7 +522,7 @@ namespace openmittsu {
 
 		void SimpleDatabase::storeReceivedContactMessageReceiptAgree(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageId const& referredMessageId) {
 			try {
-				DatabaseContactMessage message(this, sender, referredMessageId);
+				internal::DatabaseContactMessage message(this, sender, referredMessageId);
 				message.setMessageState(UserMessageState::USERACK, timeSent);
 			} catch (openmittsu::exceptions::InternalErrorException& iee) {
 				LOGGER()->warn("Could not saved received \"agree\" receipt: {}", iee.what());
@@ -531,7 +531,7 @@ namespace openmittsu {
 
 		void SimpleDatabase::storeReceivedContactMessageReceiptDisagree(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageId const& referredMessageId) {
 			try {
-				DatabaseContactMessage message(this, sender, referredMessageId);
+				internal::DatabaseContactMessage message(this, sender, referredMessageId);
 				message.setMessageState(UserMessageState::USERDEC, timeSent);
 			} catch (openmittsu::exceptions::InternalErrorException& iee) {
 				LOGGER()->warn("Could not saved received \"disagree\" receipt: {}", iee.what());
@@ -555,7 +555,7 @@ namespace openmittsu {
 		}
 
 		void SimpleDatabase::storeReceivedGroupMessageText(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& message) {
-			DatabaseGroupMessage::insertGroupMessageFromThem(this, group, sender, messageId, generateUuid(), timeSent, timeReceived, GroupMessageType::TEXT, message, false, QStringLiteral(""));
+			internal::DatabaseGroupMessage::insertGroupMessageFromThem(this, group, sender, messageId, generateUuid(), timeSent, timeReceived, GroupMessageType::TEXT, message, false, QStringLiteral(""));
 		}
 
 		void SimpleDatabase::storeReceivedGroupMessageImage(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& image, QString const& caption) {
@@ -564,11 +564,11 @@ namespace openmittsu {
 			}
 
 			QString const uuid = insertMediaItem(image);
-			DatabaseGroupMessage::insertGroupMessageFromThem(this, group, sender, messageId, uuid, timeSent, timeReceived, GroupMessageType::IMAGE, QStringLiteral(""), false, caption);
+			internal::DatabaseGroupMessage::insertGroupMessageFromThem(this, group, sender, messageId, uuid, timeSent, timeReceived, GroupMessageType::IMAGE, QStringLiteral(""), false, caption);
 		}
 
 		void SimpleDatabase::storeReceivedGroupMessageLocation(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, openmittsu::utility::Location const& location) {
-			DatabaseGroupMessage::insertGroupMessageFromThem(this, group, sender, messageId, generateUuid(), timeSent, timeReceived, GroupMessageType::LOCATION, location.toDatabaseString(), false, location.getDescription());
+			internal::DatabaseGroupMessage::insertGroupMessageFromThem(this, group, sender, messageId, generateUuid(), timeSent, timeReceived, GroupMessageType::LOCATION, location.toDatabaseString(), false, location.getDescription());
 		}
 
 		void SimpleDatabase::storeReceivedGroupLeave(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived) {
@@ -576,7 +576,7 @@ namespace openmittsu {
 				throw openmittsu::exceptions::InternalErrorException() << "The given group " << group.toString() << " is not known, can not store group leave request!";
 			}
 
-			DatabaseGroupMessage::insertGroupMessageFromThem(this, group, sender, messageId, generateUuid(), timeSent, timeReceived, GroupMessageType::LEAVE, QStringLiteral(""), true, QStringLiteral(""));
+			internal::DatabaseGroupMessage::insertGroupMessageFromThem(this, group, sender, messageId, generateUuid(), timeSent, timeReceived, GroupMessageType::LEAVE, QStringLiteral(""), true, QStringLiteral(""));
 
 			QSet<openmittsu::protocol::ContactId> currentMembers = m_contactAndGroupDataProvider.getGroupMembers(group, false);
 			currentMembers.remove(sender);
@@ -590,7 +590,7 @@ namespace openmittsu {
 				throw openmittsu::exceptions::InternalErrorException() << "The given group " << group.toString() << " is not owned by us, can not store group sync request from " << sender.toString() << "!";
 			}
 
-			DatabaseGroupMessage::insertGroupMessageFromThem(this, group, sender, messageId, generateUuid(), timeSent, timeReceived, GroupMessageType::SYNC_REQUEST, QStringLiteral(""), true, QStringLiteral(""));
+			internal::DatabaseGroupMessage::insertGroupMessageFromThem(this, group, sender, messageId, generateUuid(), timeSent, timeReceived, GroupMessageType::SYNC_REQUEST, QStringLiteral(""), true, QStringLiteral(""));
 		}
 
 		void SimpleDatabase::storeReceivedGroupSetTitle(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& title) {
@@ -599,7 +599,7 @@ namespace openmittsu {
 			} else if (!(group.getOwner() == sender)) {
 				throw openmittsu::exceptions::InternalErrorException() << "The given group " << group.toString() << " is not owned by " << sender.toString() << ", can not set group title!";
 			} else {
-				DatabaseGroupMessage::insertGroupMessageFromThem(this, group, sender, messageId, generateUuid(), timeSent, timeReceived, GroupMessageType::SET_TITLE, title, true, QStringLiteral(""));
+				internal::DatabaseGroupMessage::insertGroupMessageFromThem(this, group, sender, messageId, generateUuid(), timeSent, timeReceived, GroupMessageType::SET_TITLE, title, true, QStringLiteral(""));
 				m_contactAndGroupDataProvider.setGroupTitle(group, title);
 			}
 		}
@@ -611,7 +611,7 @@ namespace openmittsu {
 				throw openmittsu::exceptions::InternalErrorException() << "The given group " << group.toString() << " is not owned by " << sender.toString() << ", can not set group image!";
 			} else {
 				QString const uuid = insertMediaItem(image);
-				DatabaseGroupMessage::insertGroupMessageFromThem(this, group, sender, messageId, uuid, timeSent, timeReceived, GroupMessageType::SET_IMAGE, QStringLiteral(""), true, QStringLiteral(""));
+				internal::DatabaseGroupMessage::insertGroupMessageFromThem(this, group, sender, messageId, uuid, timeSent, timeReceived, GroupMessageType::SET_IMAGE, QStringLiteral(""), true, QStringLiteral(""));
 				m_contactAndGroupDataProvider.setGroupImage(group, image);
 			}
 		}
@@ -629,47 +629,47 @@ namespace openmittsu {
 				result.append(c.toQString());
 			}
 
-			DatabaseGroupMessage::insertGroupMessageFromThem(this, group, sender, messageId, generateUuid(), timeSent, timeReceived, GroupMessageType::GROUP_CREATION, result, true, QStringLiteral(""));
+			internal::DatabaseGroupMessage::insertGroupMessageFromThem(this, group, sender, messageId, generateUuid(), timeSent, timeReceived, GroupMessageType::GROUP_CREATION, result, true, QStringLiteral(""));
 	
 			m_contactAndGroupDataProvider.addGroup(group, "", timeSent, members, false, false);
 		}
 
 		void SimpleDatabase::storeMessageSendFailed(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId) {
-			if (DatabaseControlMessage::exists(this, receiver, messageId)) {
-				DatabaseControlMessage message(DatabaseControlMessage::fromReceiverAndControlMessageId(this, receiver, messageId));
+			if (internal::DatabaseControlMessage::exists(this, receiver, messageId)) {
+				internal::DatabaseControlMessage message(internal::DatabaseControlMessage::fromReceiverAndControlMessageId(this, receiver, messageId));
 				message.setMessageState(ControlMessageState::SENDFAILED, openmittsu::protocol::MessageTime::now());
 			} else {
-				DatabaseContactMessage message(this, receiver, messageId);
+				internal::DatabaseContactMessage message(this, receiver, messageId);
 				message.setMessageState(UserMessageState::SENDFAILED, openmittsu::protocol::MessageTime::now());
 			}
 		}
 
 		void SimpleDatabase::storeMessageSendDone(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId) {
-			if (DatabaseControlMessage::exists(this, receiver, messageId)) {
-				DatabaseControlMessage message(DatabaseControlMessage::fromReceiverAndControlMessageId(this, receiver, messageId));
+			if (internal::DatabaseControlMessage::exists(this, receiver, messageId)) {
+				internal::DatabaseControlMessage message(internal::DatabaseControlMessage::fromReceiverAndControlMessageId(this, receiver, messageId));
 				message.setMessageState(ControlMessageState::SENT, openmittsu::protocol::MessageTime::now());
 			} else {
-				DatabaseContactMessage message(this, receiver, messageId);
+				internal::DatabaseContactMessage message(this, receiver, messageId);
 				message.setMessageState(UserMessageState::SENT, openmittsu::protocol::MessageTime::now());
 			}
 		}
 
 		void SimpleDatabase::storeMessageSendFailed(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId) {
-			DatabaseGroupMessage message(this, group, messageId);
+			internal::DatabaseGroupMessage message(this, group, messageId);
 			message.setMessageState(UserMessageState::SENDFAILED, openmittsu::protocol::MessageTime::now());
 		}
 
 		void SimpleDatabase::storeMessageSendDone(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId) {
-			DatabaseGroupMessage message(this, group, messageId);
+			internal::DatabaseGroupMessage message(this, group, messageId);
 			message.setMessageState(UserMessageState::SENT, openmittsu::protocol::MessageTime::now());
 		}
 
 		void SimpleDatabase::storeContactMessagesFromBackup(QList<openmittsu::backup::ContactMessageBackupObject> const& messages) {
-			DatabaseContactMessage::insertContactMessagesFromBackup(this, messages);
+			internal::DatabaseContactMessage::insertContactMessagesFromBackup(this, messages);
 		}
 
 		void SimpleDatabase::storeGroupMessagesFromBackup(QList<openmittsu::backup::GroupMessageBackupObject> const& messages) {
-			DatabaseGroupMessage::insertGroupMessagesFromBackup(this, messages);
+			internal::DatabaseGroupMessage::insertGroupMessagesFromBackup(this, messages);
 		}
 
 		void SimpleDatabase::storeContactMediaItemsFromBackup(QList<openmittsu::backup::ContactMediaItemBackupObject> const& items) {
@@ -724,7 +724,7 @@ namespace openmittsu {
 				m_contactAndGroupDataProvider.addGroup(group, "", timeCreated, members, false, false);
 			}
 
-			return DatabaseGroupMessage::insertGroupMessageFromUs(this, group, generateUuid(), timeCreated, GroupMessageType::GROUP_CREATION, memberString, isQueued, true, QStringLiteral(""));
+			return internal::DatabaseGroupMessage::insertGroupMessageFromUs(this, group, generateUuid(), timeCreated, GroupMessageType::GROUP_CREATION, memberString, isQueued, true, QStringLiteral(""));
 		}
 
 		openmittsu::protocol::MessageId SimpleDatabase::storeSentGroupSetTitle(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, QString const& groupTitle, bool apply) {
@@ -738,7 +738,7 @@ namespace openmittsu {
 				m_contactAndGroupDataProvider.setGroupTitle(group, groupTitle);
 			}
 
-			return DatabaseGroupMessage::insertGroupMessageFromUs(this, group, generateUuid(), timeCreated, GroupMessageType::SET_TITLE, groupTitle, isQueued, true, QStringLiteral(""));
+			return internal::DatabaseGroupMessage::insertGroupMessageFromUs(this, group, generateUuid(), timeCreated, GroupMessageType::SET_TITLE, groupTitle, isQueued, true, QStringLiteral(""));
 		}
 
 		openmittsu::protocol::MessageId SimpleDatabase::storeSentGroupSetImage(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, QByteArray const& image, bool apply) {
@@ -753,7 +753,7 @@ namespace openmittsu {
 			}
 
 			QString const uuid = insertMediaItem(image);
-			return DatabaseGroupMessage::insertGroupMessageFromUs(this, group, uuid, timeCreated, GroupMessageType::SET_IMAGE, QStringLiteral(""), isQueued, true, QStringLiteral(""));
+			return internal::DatabaseGroupMessage::insertGroupMessageFromUs(this, group, uuid, timeCreated, GroupMessageType::SET_IMAGE, QStringLiteral(""), isQueued, true, QStringLiteral(""));
 		}
 
 		openmittsu::protocol::MessageId SimpleDatabase::storeSentGroupSyncRequest(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued) {
@@ -763,7 +763,7 @@ namespace openmittsu {
 				throw openmittsu::exceptions::InternalErrorException() << "The given group " << group.toString() << " is owned by " << group.getOwner().toString() << ", which is unknown!";
 			}
 	
-			return DatabaseGroupMessage::insertGroupMessageFromUs(this, group, generateUuid(), timeCreated, GroupMessageType::SYNC_REQUEST, QStringLiteral(""), isQueued, true, QStringLiteral(""));
+			return internal::DatabaseGroupMessage::insertGroupMessageFromUs(this, group, generateUuid(), timeCreated, GroupMessageType::SYNC_REQUEST, QStringLiteral(""), isQueued, true, QStringLiteral(""));
 		}
 
 		openmittsu::protocol::MessageId SimpleDatabase::storeSentGroupLeave(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, bool apply) {
@@ -773,7 +773,7 @@ namespace openmittsu {
 				throw openmittsu::exceptions::InternalErrorException() << "The given group " << group.toString() << " is owned by us, can not store group leave request from us!";
 			}
 
-			openmittsu::protocol::MessageId const messageId = DatabaseGroupMessage::insertGroupMessageFromUs(this, group, generateUuid(), timeCreated, GroupMessageType::LEAVE, QStringLiteral(""), isQueued, true, QStringLiteral(""));
+			openmittsu::protocol::MessageId const messageId = internal::DatabaseGroupMessage::insertGroupMessageFromUs(this, group, generateUuid(), timeCreated, GroupMessageType::LEAVE, QStringLiteral(""), isQueued, true, QStringLiteral(""));
 	
 			if (apply) {
 				QSet<openmittsu::protocol::ContactId> currentMembers = m_contactAndGroupDataProvider.getGroupMembers(group, false);
@@ -983,11 +983,11 @@ namespace openmittsu {
 		}
 
 		int SimpleDatabase::getContactMessageCount() const {
-			return DatabaseContactMessage::getContactMessageCount(this);
+			return openmittsu::database::internal::DatabaseContactMessage::getContactMessageCount(this);
 		}
 
 		int SimpleDatabase::getGroupMessageCount() const {
-			return DatabaseGroupMessage::getGroupMessageCount(this);
+			return openmittsu::database::internal::DatabaseGroupMessage::getGroupMessageCount(this);
 		}
 
 		int SimpleDatabase::getMediaItemCount() const {
@@ -1108,18 +1108,18 @@ namespace openmittsu {
 			return m_contactAndGroupDataProvider.getKnownGroupsContainingMember(identity);
 		}
 
-		DatabaseContactMessageCursor SimpleDatabase::getMessageCursor(openmittsu::protocol::ContactId const& contact) {
+		internal::DatabaseContactMessageCursor SimpleDatabase::getMessageCursor(openmittsu::protocol::ContactId const& contact) {
 			if (!hasContact(contact)) {
 				throw openmittsu::exceptions::InternalErrorException() << "Could not create message cursor because the given contact " << contact.toString() << " is unknown!";
 			}
-			return DatabaseContactMessageCursor(this, contact);
+			return internal::DatabaseContactMessageCursor(this, contact);
 		}
 
-		DatabaseGroupMessageCursor SimpleDatabase::getMessageCursor(openmittsu::protocol::GroupId const& group) {
+		internal::DatabaseGroupMessageCursor SimpleDatabase::getMessageCursor(openmittsu::protocol::GroupId const& group) {
 			if (!hasGroup(group)) {
 				throw openmittsu::exceptions::InternalErrorException() << "Could not create message cursor because the given group " << group.toString() << " is unknown!";
 			}
-			return DatabaseGroupMessageCursor(this, group);
+			return internal::DatabaseGroupMessageCursor(this, group);
 		}
 
 		void SimpleDatabase::announceMessageChanged(QString const& uuid) {
@@ -1163,7 +1163,7 @@ namespace openmittsu {
 					ContactMessageType const messageType = ContactMessageTypeHelper::fromString(query.value(QStringLiteral("contact_message_type")).toString());
 					openmittsu::protocol::ContactId const receiver(query.value(QStringLiteral("identity")).toString());
 					openmittsu::protocol::MessageId const messageId(query.value(QStringLiteral("apiid")).toString());
-					DatabaseContactMessage message(this, receiver, messageId);
+					internal::DatabaseContactMessage message(this, receiver, messageId);
 
 					switch (messageType) {
 						case ContactMessageType::AUDIO:
@@ -1208,7 +1208,7 @@ namespace openmittsu {
 					GroupMessageType const messageType = GroupMessageTypeHelper::fromString(query.value(QStringLiteral("group_message_type")).toString());
 					openmittsu::protocol::GroupId const group(openmittsu::protocol::ContactId(query.value(QStringLiteral("group_creator")).toString()), query.value(QStringLiteral("group_id")).toString());
 					openmittsu::protocol::MessageId const messageId(query.value(QStringLiteral("apiid")).toString());
-					DatabaseGroupMessage message(this, group, messageId);
+					internal::DatabaseGroupMessage message(this, group, messageId);
 
 					switch (messageType) {
 						case GroupMessageType::AUDIO:
@@ -1279,7 +1279,7 @@ namespace openmittsu {
 					openmittsu::protocol::ContactId const receiver(query.value(QStringLiteral("identity")).toString());
 					openmittsu::protocol::MessageId const messageId(query.value(QStringLiteral("apiid")).toString());
 					openmittsu::protocol::MessageId const relatedMessageId(query.value(QStringLiteral("related_message_apiid")).toString());
-					DatabaseControlMessage message(this, receiver, messageId, relatedMessageId, messageType);
+					internal::DatabaseControlMessage message(this, receiver, messageId, relatedMessageId, messageType);
 
 					switch (messageType) {
 						case ControlMessageType::AGREE:

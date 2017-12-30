@@ -20,15 +20,16 @@
 #include "src/crypto/PublicKey.h"
 #include "src/crypto/KeyPair.h"
 
-#include "src/database/DatabaseMessageCursor.h"
-#include "src/database/DatabaseContactMessage.h"
-#include "src/database/DatabaseContactMessageCursor.h"
-#include "src/database/DatabaseControlMessage.h"
-#include "src/database/DatabaseGroupMessage.h"
-#include "src/database/DatabaseGroupMessageCursor.h"
-#include "src/database/DatabaseMessage.h"
-#include "src/database/ExternalMediaFileStorage.h"
-#include "src/database/InternalDatabaseInterface.h"
+#include "src/database/internal/DatabaseContactAndGroupDataProvider.h"
+#include "src/database/internal/DatabaseMessageCursor.h"
+#include "src/database/internal/DatabaseContactMessage.h"
+#include "src/database/internal/DatabaseContactMessageCursor.h"
+#include "src/database/internal/DatabaseControlMessage.h"
+#include "src/database/internal/DatabaseGroupMessage.h"
+#include "src/database/internal/DatabaseGroupMessageCursor.h"
+#include "src/database/internal/DatabaseMessage.h"
+#include "src/database/internal/ExternalMediaFileStorage.h"
+#include "src/database/internal/InternalDatabaseInterface.h"
 #include "src/dataproviders/messages/ContactMessageType.h"
 #include "src/dataproviders/messages/ControlMessageType.h"
 #include "src/dataproviders/messages/GroupMessageType.h"
@@ -40,7 +41,6 @@
 
 #include "src/dataproviders/BackedContact.h"
 #include "src/dataproviders/BackedGroup.h"
-#include "src/database/DatabaseContactAndGroupDataProvider.h"
 
 namespace openmittsu {
 	namespace backup {
@@ -52,7 +52,7 @@ namespace openmittsu {
 
 	namespace database {
 
-		class SimpleDatabase : public openmittsu::database::Database, public InternalDatabaseInterface {
+		class SimpleDatabase : public openmittsu::database::Database, public internal::InternalDatabaseInterface {
 			Q_OBJECT
 			Q_INTERFACES(openmittsu::database::Database)
 		public:
@@ -127,8 +127,8 @@ namespace openmittsu {
 			int getGroupMessageCount() const;
 			int getMediaItemCount() const;
 
-			DatabaseContactMessageCursor getMessageCursor(openmittsu::protocol::ContactId const& contact);
-			DatabaseGroupMessageCursor getMessageCursor(openmittsu::protocol::GroupId const& group);
+			internal::DatabaseContactMessageCursor getMessageCursor(openmittsu::protocol::ContactId const& contact);
+			internal::DatabaseGroupMessageCursor getMessageCursor(openmittsu::protocol::GroupId const& group);
 
 			openmittsu::protocol::MessageId getNextMessageId(openmittsu::protocol::ContactId const& contact);
 			openmittsu::protocol::MessageId getNextMessageId(openmittsu::protocol::GroupId const& group);
@@ -143,15 +143,15 @@ namespace openmittsu {
 			virtual QString insertMediaItem(QByteArray const& data) override;
 			virtual void removeMediaItem(QString const& uuid) override;
 
-			friend class DatabaseMessage;
-			friend class DatabaseContactMessage;
-			friend class DatabaseControlMessage;
-			friend class DatabaseGroupMessage;
-			friend class DatabaseContactMessageCursor;
-			friend class DatabaseGroupMessageCursor;
-			friend class DatabaseMessageCursor;
-			friend class ExternalMediaFileStorage;
-			friend class openmittsu::database::DatabaseContactAndGroupDataProvider;
+			friend class internal::DatabaseMessage;
+			friend class internal::DatabaseContactMessage;
+			friend class internal::DatabaseControlMessage;
+			friend class internal::DatabaseGroupMessage;
+			friend class internal::DatabaseContactMessageCursor;
+			friend class internal::DatabaseGroupMessageCursor;
+			friend class internal::DatabaseMessageCursor;
+			friend class internal::ExternalMediaFileStorage;
+			friend class internal::DatabaseContactAndGroupDataProvider;
 		public slots:
 			virtual void enableTimers() override;
 			virtual void sendAllWaitingMessages(openmittsu::dataproviders::SentMessageAcceptor& messageAcceptor) override;
@@ -233,8 +233,8 @@ namespace openmittsu {
 			openmittsu::crypto::KeyPair m_selfLongTermKeyPair;
 			std::unique_ptr<openmittsu::backup::IdentityBackup> m_identityBackup;
 
-			openmittsu::database::DatabaseContactAndGroupDataProvider m_contactAndGroupDataProvider;
-			ExternalMediaFileStorage m_mediaFileStorage;
+			internal::DatabaseContactAndGroupDataProvider m_contactAndGroupDataProvider;
+			internal::ExternalMediaFileStorage m_mediaFileStorage;
 
 			QTimer queueTimeoutTimer;
 
