@@ -4,20 +4,23 @@
 #include <memory>
 
 #include "src/database/Database.h"
+#include "src/database/DatabasePointerAuthority.h"
 
 namespace openmittsu {
 	namespace database {
 
 		class DatabaseWrapper : public Database {
 		public:
-			DatabaseWrapper(std::shared_ptr<Database> const& database);
+			DatabaseWrapper(DatabasePointerAuthority const& databasePointerAuthority);
 			virtual ~DatabaseWrapper();
 
+		private slots:
+			void onDatabasePointerAuthorityHasNewDatabase();
 		private:
-			std::shared_ptr<Database> const m_database;
-			bool m_isConnected;
+			DatabasePointerAuthority const& m_databasePointerAuthority;
+			std::weak_ptr<Database> m_database;
 
-
+		public:
 			void setupConnection();
 
 			// Inherited via Database
