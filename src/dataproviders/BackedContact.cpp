@@ -99,19 +99,19 @@ namespace openmittsu {
 		}
 
 		bool BackedContact::sendTextMessage(QString const& text) {
-			return m_messageCenter.sendText(m_contactId, text);
+			return m_messageCenter->sendText(m_contactId, text);
 		}
 
 		bool BackedContact::sendImageMessage(QByteArray const& image, QString const& caption) {
-			return m_messageCenter.sendImage(m_contactId, image, caption);
+			return m_messageCenter->sendImage(m_contactId, image, caption);
 		}
 
 		bool BackedContact::sendLocationMessage(openmittsu::utility::Location const& location) {
-			return m_messageCenter.sendLocation(m_contactId, location);
+			return m_messageCenter->sendLocation(m_contactId, location);
 		}
 
 		void BackedContact::sendTypingNotification(bool typingStopped) {
-			m_messageCenter.sendUserTypingStatus(m_contactId, !typingStopped);
+			m_messageCenter->sendUserTypingStatus(m_contactId, !typingStopped);
 		}
 
 		QVector<QString> BackedContact::getLastMessageUuids(std::size_t n) {

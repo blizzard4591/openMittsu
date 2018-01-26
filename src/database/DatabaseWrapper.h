@@ -71,8 +71,8 @@ namespace openmittsu {
 			virtual void storeNewContact(openmittsu::protocol::ContactId const & contact, openmittsu::crypto::PublicKey const & publicKey) override;
 			virtual void storeNewGroup(openmittsu::protocol::GroupId const & groupId, QSet<openmittsu::protocol::ContactId> const & members, bool isAwaitingSync) override;
 			virtual void sendAllWaitingMessages(openmittsu::dataproviders::SentMessageAcceptor & messageAcceptor) override;
-			virtual openmittsu::dataproviders::BackedContact getBackedContact(openmittsu::protocol::ContactId const & contact, openmittsu::dataproviders::MessageCenter & messageCenter) override;
-			virtual openmittsu::dataproviders::BackedGroup getBackedGroup(openmittsu::protocol::GroupId const & group, openmittsu::dataproviders::MessageCenter & messageCenter) override;
+			virtual std::unique_ptr<openmittsu::dataproviders::BackedContact> getBackedContact(openmittsu::protocol::ContactId const & contact, openmittsu::dataproviders::MessageCenter & messageCenter) override;
+			virtual std::unique_ptr<openmittsu::dataproviders::BackedGroup> getBackedGroup(openmittsu::protocol::GroupId const & group, openmittsu::dataproviders::MessageCenter & messageCenter) override;
 			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const & group, bool excludeSelfContact) const override;
 			virtual void enableTimers() override;
 		};

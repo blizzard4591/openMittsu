@@ -99,8 +99,8 @@ namespace openmittsu {
 
 			virtual void sendAllWaitingMessages(openmittsu::dataproviders::SentMessageAcceptor& messageAcceptor) = 0;
 
-			virtual openmittsu::dataproviders::BackedContact getBackedContact(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::MessageCenter& messageCenter) = 0;
-			virtual openmittsu::dataproviders::BackedGroup getBackedGroup(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::MessageCenter& messageCenter) = 0;
+			virtual std::unique_ptr<openmittsu::dataproviders::BackedContact> getBackedContact(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::MessageCenter& messageCenter) = 0;
+			virtual std::unique_ptr<openmittsu::dataproviders::BackedGroup> getBackedGroup(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::MessageCenter& messageCenter) = 0;
 			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const = 0;
 		signals:
 			void contactChanged(openmittsu::protocol::ContactId const& identity);
