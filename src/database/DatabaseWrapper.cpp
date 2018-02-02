@@ -41,7 +41,7 @@ namespace openmittsu {
 
 		DatabaseWrapper::DatabaseWrapper(DatabasePointerAuthority const& databasePointerAuthority) : Database(), m_databasePointerAuthority(databasePointerAuthority), m_database() {
 			OPENMITTSU_CONNECT_QUEUED(&m_databasePointerAuthority, newDatabaseAvailable(), this, onDatabasePointerAuthorityHasNewDatabase());
-			m_database = m_databasePointerAuthority.getDatabaseWeak();
+			onDatabasePointerAuthorityHasNewDatabase();
 		}
 
 		DatabaseWrapper::~DatabaseWrapper() {
@@ -50,6 +50,60 @@ namespace openmittsu {
 
 		void DatabaseWrapper::onDatabasePointerAuthorityHasNewDatabase() {
 			m_database = m_databasePointerAuthority.getDatabaseWeak();
+
+			auto ptr = m_database.lock();
+			if (ptr) {
+				OPENMITTSU_CONNECT_QUEUED(ptr.get(), contactChanged(openmittsu::protocol::ContactId const&), this, onDatabaseContactChanged(openmittsu::protocol::ContactId const&));
+				OPENMITTSU_CONNECT_QUEUED(ptr.get(), groupChanged(openmittsu::protocol::GroupId const&), this, onDatabaseGroupChanged(openmittsu::protocol::GroupId const&));
+				OPENMITTSU_CONNECT_QUEUED(ptr.get(), contactHasNewMessage(openmittsu::protocol::ContactId const&, QString const&), this, onDatabaseContactHasNewMessage(openmittsu::protocol::ContactId const&, QString const&));
+				OPENMITTSU_CONNECT_QUEUED(ptr.get(), groupHasNewMessage(openmittsu::protocol::GroupId const&, QString const&), this, onDatabaseGroupHasNewMessage(openmittsu::protocol::GroupId const&, QString const&));
+				OPENMITTSU_CONNECT_QUEUED(ptr.get(), receivedNewContactMessage(openmittsu::protocol::ContactId const&), this, onDatabaseReceivedNewContactMessage(openmittsu::protocol::ContactId const&));
+				OPENMITTSU_CONNECT_QUEUED(ptr.get(), receivedNewGroupMessage(openmittsu::protocol::GroupId const&), this, onDatabaseReceivedNewGroupMessage(openmittsu::protocol::GroupId const&));
+				OPENMITTSU_CONNECT_QUEUED(ptr.get(), messageChanged(QString const&), this, onDatabaseMessageChanged(QString const&));
+				OPENMITTSU_CONNECT_QUEUED(ptr.get(), haveQueuedMessages(), this, onDatabaseHaveQueuedMessages());
+				OPENMITTSU_CONNECT_QUEUED(ptr.get(), contactStartedTyping(openmittsu::protocol::ContactId const&), this, onDatabaseContactStartedTyping(openmittsu::protocol::ContactId const&));
+				OPENMITTSU_CONNECT_QUEUED(ptr.get(), contactStoppedTyping(openmittsu::protocol::ContactId const&), this, onDatabaseContactStoppedTyping(openmittsu::protocol::ContactId const&));
+			}
+		}
+
+		void DatabaseWrapper::onDatabaseContactChanged(openmittsu::protocol::ContactId const& identity) {
+			emit contactChanged(identity);
+		}
+		
+		void DatabaseWrapper::onDatabaseGroupChanged(openmittsu::protocol::GroupId const& changedGroupId) {
+			emit groupChanged(changedGroupId);
+		}
+		
+		void DatabaseWrapper::onDatabaseContactHasNewMessage(openmittsu::protocol::ContactId const& identity, QString const& messageUuid) {
+			emit contactHasNewMessage(identity, messageUuid);
+		}
+		
+		void DatabaseWrapper::onDatabaseGroupHasNewMessage(openmittsu::protocol::GroupId const& group, QString const& messageUuid) {
+			emit groupHasNewMessage(group, messageUuid);
+		}
+		
+		void DatabaseWrapper::onDatabaseReceivedNewContactMessage(openmittsu::protocol::ContactId const& identity) {
+			emit receivedNewContactMessage(identity);
+		}
+		
+		void DatabaseWrapper::onDatabaseReceivedNewGroupMessage(openmittsu::protocol::GroupId const& group) {
+			emit receivedNewGroupMessage(group);
+		}
+		
+		void DatabaseWrapper::onDatabaseMessageChanged(QString const& uuid) {
+			emit messageChanged(uuid);
+		}
+		
+		void DatabaseWrapper::onDatabaseHaveQueuedMessages() {
+			emit haveQueuedMessages();
+		}
+		
+		void DatabaseWrapper::onDatabaseContactStartedTyping(openmittsu::protocol::ContactId const& identity) {
+			emit contactStartedTyping(identity);
+		}
+
+		void DatabaseWrapper::onDatabaseContactStoppedTyping(openmittsu::protocol::ContactId const& identity) {
+			emit contactStoppedTyping(identity);
 		}
 
 		openmittsu::protocol::GroupStatus DatabaseWrapper::getGroupStatus(openmittsu::protocol::GroupId const& group) const {

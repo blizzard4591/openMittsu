@@ -8,9 +8,9 @@
 #include <memory>
 
 #include "src/utility/Location.h"
-#include "src/dataproviders/ContactDataProvider.h"
-#include "src/dataproviders/GroupDataProvider.h"
+#include "src/database/DatabaseWrapper.h"
 #include "src/dataproviders/MessageSource.h"
+#include "src/dataproviders/MessageCenterWrapper.h"
 #include "src/protocol/ContactId.h"
 #include "src/protocol/GroupId.h"
 
@@ -28,7 +28,7 @@ namespace openmittsu {
 		class BackedGroup : public QObject, public MessageSource {
 			Q_OBJECT
 		public:
-			BackedGroup(openmittsu::protocol::GroupId const& groupId, GroupDataProvider& dataProvider, ContactDataProvider& contactDataProvider, openmittsu::dataproviders::MessageCenter& messageCenter);
+			BackedGroup(openmittsu::protocol::GroupId const& groupId, openmittsu::database::DatabaseWrapper const& database, openmittsu::dataproviders::MessageCenter const& messageCenter);
 			BackedGroup(BackedGroup const& other);
 			virtual ~BackedGroup();
 
@@ -60,9 +60,8 @@ namespace openmittsu {
 			void newMessageAvailable(QString const& uuid);
 		private:
 			openmittsu::protocol::GroupId const m_groupId;
-			GroupDataProvider& m_dataProvider;
-			ContactDataProvider& m_contactDataProvider;
-			openmittsu::dataproviders::MessageCenter& m_messageCenter;
+			openmittsu::database::DatabaseWrapper m_database;
+			openmittsu::dataproviders::MessageCenterWrapper m_messageCenter;
 
 			std::shared_ptr<messages::GroupMessageCursor> m_cursor;
 		private slots:

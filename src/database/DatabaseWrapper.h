@@ -16,6 +16,17 @@ namespace openmittsu {
 
 		private slots:
 			void onDatabasePointerAuthorityHasNewDatabase();
+
+			void onDatabaseContactChanged(openmittsu::protocol::ContactId const& identity);
+			void onDatabaseGroupChanged(openmittsu::protocol::GroupId const& changedGroupId);
+			void onDatabaseContactHasNewMessage(openmittsu::protocol::ContactId const& identity, QString const& messageUuid);
+			void onDatabaseGroupHasNewMessage(openmittsu::protocol::GroupId const& group, QString const& messageUuid);
+			void onDatabaseReceivedNewContactMessage(openmittsu::protocol::ContactId const& identity);
+			void onDatabaseReceivedNewGroupMessage(openmittsu::protocol::GroupId const& group);
+			void onDatabaseMessageChanged(QString const& uuid);
+			void onDatabaseHaveQueuedMessages();
+			void onDatabaseContactStartedTyping(openmittsu::protocol::ContactId const& identity);
+			void onDatabaseContactStoppedTyping(openmittsu::protocol::ContactId const& identity);
 		private:
 			DatabasePointerAuthority const& m_databasePointerAuthority;
 			std::weak_ptr<Database> m_database;

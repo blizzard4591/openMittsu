@@ -5,17 +5,15 @@
 #include <QObject>
 #include <memory>
 
-#include "src/database/DatabaseContactMessage.h"
+#include "src/database/internal/DatabaseContactMessage.h"
 #include "src/dataproviders/BackedMessage.h"
 
 namespace openmittsu {
 	namespace dataproviders {
-		class MessageCenter;
-
 		class BackedContactMessage : public BackedMessage {
 			Q_OBJECT
 		public:
-			BackedContactMessage(std::shared_ptr<messages::ContactMessage> const& message, BackedContact const& sender, openmittsu::dataproviders::MessageCenter& messageCenter);
+			BackedContactMessage(std::shared_ptr<messages::ContactMessage> const& message, BackedContact const& sender, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter);
 			BackedContactMessage(BackedContactMessage const& other);
 			virtual ~BackedContactMessage();
 
@@ -28,7 +26,7 @@ namespace openmittsu {
 			virtual messages::UserMessage const& getMessage() const override;
 		private:
 			std::shared_ptr<messages::ContactMessage> const m_message;
-			openmittsu::dataproviders::MessageCenter& m_messageCenter;
+			openmittsu::dataproviders::MessageCenterWrapper m_messageCenter;
 		};
 
 	}

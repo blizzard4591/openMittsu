@@ -58,8 +58,8 @@ namespace openmittsu {
 		private:
 			openmittsu::protocol::ContactId const m_contactId;
 			openmittsu::crypto::PublicKey const m_contactPublicKey;
-			ContactDataProvider& m_dataProvider;
-			std::shared_ptr<openmittsu::dataproviders::MessageCenter> m_messageCenter;
+			openmittsu::database::DatabaseWrapper m_database;
+			openmittsu::dataproviders::MessageCenterWrapper m_messageCenter;
 
 			std::shared_ptr<messages::ContactMessageCursor> m_cursor;
 		private slots:

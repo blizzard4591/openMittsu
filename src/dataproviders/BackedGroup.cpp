@@ -9,7 +9,7 @@
 namespace openmittsu {
 	namespace dataproviders {
 
-		BackedGroup::BackedGroup(openmittsu::protocol::GroupId const& groupId, GroupDataProvider& dataProvider, ContactDataProvider& contactDataProvider, openmittsu::dataproviders::MessageCenter& messageCenter) : m_groupId(groupId), m_dataProvider(dataProvider), m_contactDataProvider(contactDataProvider), m_messageCenter(messageCenter), m_cursor(dataProvider.getGroupMessageCursor(groupId)) {
+		BackedGroup::BackedGroup(openmittsu::protocol::GroupId const& groupId, openmittsu::database::DatabaseWrapper const& database, openmittsu::dataproviders::MessageCenter const& messageCenter) : m_groupId(groupId), m_database(database), m_messageCenter(messageCenter), m_cursor(database.getGroupMessageCursor(groupId)) {
 			OPENMITTSU_CONNECT(&dataProvider, groupChanged(openmittsu::protocol::GroupId const&), this, slotGroupChanged(openmittsu::protocol::GroupId const&));
 			OPENMITTSU_CONNECT(&dataProvider, contactChanged(openmittsu::protocol::ContactId const&), this, slotIdentityChanged(openmittsu::protocol::ContactId const&));
 			OPENMITTSU_CONNECT(&dataProvider, groupHasNewMessage(openmittsu::protocol::GroupId const&, QString const&), this, slotNewMessage(openmittsu::protocol::GroupId const&, QString const&));

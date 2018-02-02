@@ -7,7 +7,7 @@
 namespace openmittsu {
 	namespace dataproviders {
 
-		BackedContactMessage::BackedContactMessage(std::shared_ptr<messages::ContactMessage> const& message, BackedContact const& sender, openmittsu::dataproviders::MessageCenter& messageCenter) : BackedMessage(message->getUid(), sender, message->isMessageFromUs(), message->getMessageId()), m_message(message), m_messageCenter(messageCenter) {
+		BackedContactMessage::BackedContactMessage(std::shared_ptr<messages::ContactMessage> const& message, BackedContact const& sender, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) : BackedMessage(message->getUid(), sender, message->isMessageFromUs(), message->getMessageId()), m_message(message), m_messageCenter(messageCenter) {
 			OPENMITTSU_CONNECT(&m_messageCenter, messageChanged(QString const&), this, onMessageChanged(QString const&));
 			loadCache();
 		}
