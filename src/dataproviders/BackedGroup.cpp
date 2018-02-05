@@ -15,7 +15,7 @@ namespace openmittsu {
 			OPENMITTSU_CONNECT(&dataProvider, groupHasNewMessage(openmittsu::protocol::GroupId const&, QString const&), this, slotNewMessage(openmittsu::protocol::GroupId const&, QString const&));
 		}
 
-		BackedGroup::BackedGroup(BackedGroup const& other) : BackedGroup(other.m_groupId, other.m_dataProvider, other.m_contactDataProvider, other.m_messageCenter) {
+		BackedGroup::BackedGroup(BackedGroup const& other) : BackedGroup(other.m_groupId, other.m_database, other.m_messageCenter) {
 			//
 		}
 
@@ -24,23 +24,23 @@ namespace openmittsu {
 		}
 
 		QString BackedGroup::getTitle() const {
-			return m_dataProvider.getGroupTitle(m_groupId);
+			return m_database.getGroupTitle(m_groupId);
 		}
 
 		QString BackedGroup::getDescription() const {
-			return m_dataProvider.getGroupDescription(m_groupId);
+			return m_database.getGroupDescription(m_groupId);
 		}
 
 		int BackedGroup::getMessageCount() const {
-			return m_dataProvider.getGroupMessageCount(m_groupId);
+			return m_database.getGroupMessageCount(m_groupId);
 		}
 
 		openmittsu::database::MediaFileItem BackedGroup::getImage() const {
-			return m_dataProvider.getGroupImage(m_groupId);
+			return m_database.getGroupImage(m_groupId);
 		}
 
 		bool BackedGroup::hasImage() const {
-			return m_dataProvider.getGroupHasImage(m_groupId);
+			return m_database.getGroupHasImage(m_groupId);
 		}
 
 		bool BackedGroup::hasMember(openmittsu::protocol::ContactId const& identity) const {
@@ -53,19 +53,19 @@ namespace openmittsu {
 		}
 
 		QSet<openmittsu::protocol::ContactId> BackedGroup::getMembers() const {
-			return m_dataProvider.getGroupMembers(m_groupId, false);
+			return m_database.getGroupMembers(m_groupId, false);
 		}
 
 		void BackedGroup::setGroupTitle(QString const& newTitle) {
-			m_dataProvider.setGroupTitle(m_groupId, newTitle);
+			m_database.setGroupTitle(m_groupId, newTitle);
 		}
 
 		void BackedGroup::setGroupImage(QByteArray const& newImage) {
-			m_dataProvider.setGroupImage(m_groupId, newImage);
+			m_database.setGroupImage(m_groupId, newImage);
 		}
 
 		void BackedGroup::setGroupMembers(QSet<openmittsu::protocol::ContactId> const& newMembers) {
-			m_dataProvider.setGroupMembers(m_groupId, newMembers);
+			m_database.setGroupMembers(m_groupId, newMembers);
 		}
 
 		void BackedGroup::slotGroupChanged(openmittsu::protocol::GroupId const& changedGroupId) {
@@ -108,7 +108,7 @@ namespace openmittsu {
 			}
 			auto message = m_cursor->getMessage();
 
-			return BackedGroupMessage(message, m_contactDataProvider.getContact(message->getSender(), m_messageCenter), m_messageCenter);
+			return BackedGroupMessage(message, m_database.getBackedContact(message->getSender(), m_messageCenter), m_messageCenter);
 		}
 
 	}

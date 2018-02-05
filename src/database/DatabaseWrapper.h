@@ -86,6 +86,38 @@ namespace openmittsu {
 			virtual std::unique_ptr<openmittsu::dataproviders::BackedGroup> getBackedGroup(openmittsu::protocol::GroupId const & group, openmittsu::dataproviders::MessageCenter & messageCenter) override;
 			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const & group, bool excludeSelfContact) const override;
 			virtual void enableTimers() override;
+
+			// Contact Data
+			virtual QString getFirstName(openmittsu::protocol::ContactId const& contact) const override;
+			virtual QString getLastName(openmittsu::protocol::ContactId const& contact) const override;
+			virtual QString getNickName(openmittsu::protocol::ContactId const& contact) const override;
+			virtual openmittsu::protocol::AccountStatus getAccountStatus(openmittsu::protocol::ContactId const& contact) const override;
+			virtual openmittsu::protocol::ContactIdVerificationStatus getVerificationStatus(openmittsu::protocol::ContactId const& contact) const override;
+			virtual openmittsu::protocol::FeatureLevel getFeatureLevel(openmittsu::protocol::ContactId const& contact) const override;
+			virtual int getColor(openmittsu::protocol::ContactId const& contact) const override;
+			virtual int getContactCount() const override;
+			virtual int getContactMessageCount(openmittsu::protocol::ContactId const& contact) const override;
+
+			virtual void setFirstName(openmittsu::protocol::ContactId const& contact, QString const& firstName) override;
+			virtual void setLastName(openmittsu::protocol::ContactId const& contact, QString const& lastName) override;
+			virtual void setNickName(openmittsu::protocol::ContactId const& contact, QString const& nickname) override;
+			virtual void setAccountStatus(openmittsu::protocol::ContactId const& contact, openmittsu::protocol::AccountStatus const& status) override;
+			virtual void setVerificationStatus(openmittsu::protocol::ContactId const& contact, openmittsu::protocol::ContactIdVerificationStatus const& verificationStatus) override;
+			virtual void setFeatureLevel(openmittsu::protocol::ContactId const& contact, openmittsu::protocol::FeatureLevel const& featureLevel) override;
+			virtual void setColor(openmittsu::protocol::ContactId const& contact, int color) override;
+
+			// Group Data
+			virtual QString getGroupTitle(openmittsu::protocol::GroupId const& group) const override;
+			virtual QString getGroupDescription(openmittsu::protocol::GroupId const& group) const override;
+			virtual bool getGroupHasImage(openmittsu::protocol::GroupId const& group) const override;
+			virtual openmittsu::database::MediaFileItem getGroupImage(openmittsu::protocol::GroupId const& group) const override;
+			virtual bool getGroupIsAwaitingSync(openmittsu::protocol::GroupId const& group) const override;
+			virtual int getGroupCount() const override;
+			virtual int getGroupMessageCount(openmittsu::protocol::GroupId const& group) const override;
+
+			virtual void setGroupTitle(openmittsu::protocol::GroupId const& group, QString const& newTitle) override;
+			virtual void setGroupImage(openmittsu::protocol::GroupId const& group, QByteArray const& newImage) override;
+			virtual void setGroupMembers(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& newMembers) override;
 		};
 
 	}
