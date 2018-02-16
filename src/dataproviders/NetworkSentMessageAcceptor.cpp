@@ -2,6 +2,7 @@
 
 #include "src/exceptions/IllegalArgumentException.h"
 #include "src/messages/PreliminaryMessageFactory.h"
+#include "src/network/ProtocolClient.h"
 #include "src/utility/Logging.h"
 #include "src/utility/QObjectConnectionMacro.h"
 

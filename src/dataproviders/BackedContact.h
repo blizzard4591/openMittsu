@@ -17,6 +17,10 @@
 #include "src/protocol/AccountStatus.h"
 
 namespace openmittsu {
+	namespace database {
+		class DatabaseWrapper;
+	}
+
 	namespace dataproviders {
 		class BackedContactMessage;
 

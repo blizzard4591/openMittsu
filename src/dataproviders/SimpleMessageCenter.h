@@ -1,5 +1,5 @@
-#ifndef OPENMITTSU_DATAPROVIDERS_MESSAGECENTER_H_
-#define OPENMITTSU_DATAPROVIDERS_MESSAGECENTER_H_
+#ifndef OPENMITTSU_DATAPROVIDERS_SIMPLEMESSAGECENTER_H_
+#define OPENMITTSU_DATAPROVIDERS_SIMPLEMESSAGECENTER_H_
 
 #include <QObject>
 #include <QString>
@@ -11,56 +11,45 @@
 #include <cstdint>
 #include <memory>
 
-#include "src/utility/Location.h"
-#include "src/utility/OptionMaster.h"
-#include "src/protocol/ContactId.h"
-#include "src/protocol/GroupId.h"
-#include "src/protocol/MessageId.h"
 #include "src/widgets/TabController.h"
 
-#include "src/dataproviders/MessageQueue.h"
+#include "src/database/DatabaseWrapper.h"
+#include "src/dataproviders/MessageCenter.h"
 #include "src/dataproviders/ReceivedMessageAcceptor.h"
 #include "src/dataproviders/NetworkSentMessageAcceptor.h"
 
-#include "src/messages/contact/ReceiptMessageContent.h"
 
 namespace openmittsu {
-	namespace database {
-		class Database;
-	}
-
-	namespace widgets {
-		class ChatTab;
+	namespace utility {
+		class OptionMaster;
 	}
 
 	namespace dataproviders {
-		class MessageCenter : public QObject, public ReceivedMessageAcceptor {
+		class MessageQueue;
+
+		class SimpleMessageCenter : public MessageCenter {
 			Q_OBJECT
 		public:
-			MessageCenter(std::shared_ptr<openmittsu::widgets::TabController> const& tabController, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster);
-			virtual ~MessageCenter();
-		signals:
-			void newUnreadMessageAvailable(openmittsu::widgets::ChatTab* source);
-
-			void messageChanged(QString const& uuid);
+			SimpleMessageCenter(openmittsu::database::DatabaseWrapper const& databaseWrapper, std::shared_ptr<openmittsu::widgets::TabController> const& tabController, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster);
+			virtual ~SimpleMessageCenter();
 		public slots:
-			bool sendText(openmittsu::protocol::ContactId const& receiver, QString const& text);
-			bool sendImage(openmittsu::protocol::ContactId const& receiver, QByteArray const& image, QString const& caption);
-			bool sendLocation(openmittsu::protocol::ContactId const& receiver, openmittsu::utility::Location const& location);
-			bool sendReceipt(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& receiptedMessageId, openmittsu::messages::contact::ReceiptMessageContent::ReceiptType const& receiptType);
+			virtual bool sendText(openmittsu::protocol::ContactId const& receiver, QString const& text) override;
+			virtual bool sendImage(openmittsu::protocol::ContactId const& receiver, QByteArray const& image, QString const& caption) override;
+			virtual bool sendLocation(openmittsu::protocol::ContactId const& receiver, openmittsu::utility::Location const& location) override;
+			virtual bool sendReceipt(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& receiptedMessageId, openmittsu::messages::contact::ReceiptMessageContent::ReceiptType const& receiptType) override;
 
-			void sendUserTypingStatus(openmittsu::protocol::ContactId const& receiver, bool isTyping);
+			virtual void sendUserTypingStatus(openmittsu::protocol::ContactId const& receiver, bool isTyping) override;
 
-			bool sendText(openmittsu::protocol::GroupId const& group, QString const& text);
-			bool sendImage(openmittsu::protocol::GroupId const& group, QByteArray const& image, QString const& caption);
-			bool sendLocation(openmittsu::protocol::GroupId const& group, openmittsu::utility::Location const& location);
-			bool sendReceipt(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& receiptedMessageId, openmittsu::messages::contact::ReceiptMessageContent::ReceiptType const& receiptType);
-			bool sendLeave(openmittsu::protocol::GroupId const& group);
-			bool sendSyncRequest(openmittsu::protocol::GroupId const& group);
+			virtual bool sendText(openmittsu::protocol::GroupId const& group, QString const& text) override;
+			virtual bool sendImage(openmittsu::protocol::GroupId const& group, QByteArray const& image, QString const& caption);
+			virtual bool sendLocation(openmittsu::protocol::GroupId const& group, openmittsu::utility::Location const& location);
+			virtual bool sendReceipt(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& receiptedMessageId, openmittsu::messages::contact::ReceiptMessageContent::ReceiptType const& receiptType);
+			virtual bool sendLeave(openmittsu::protocol::GroupId const& group);
+			virtual bool sendSyncRequest(openmittsu::protocol::GroupId const& group);
 
-			bool sendGroupCreation(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& members);
-			bool sendGroupTitle(openmittsu::protocol::GroupId const& group, QString const& title);
-			bool sendGroupImage(openmittsu::protocol::GroupId const& group, QByteArray const& image);
+			virtual bool sendGroupCreation(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& members);
+			virtual bool sendGroupTitle(openmittsu::protocol::GroupId const& group, QString const& title);
+			virtual bool sendGroupImage(openmittsu::protocol::GroupId const& group, QByteArray const& image);
 
 			void setNetworkSentMessageAcceptor(std::shared_ptr<NetworkSentMessageAcceptor> const& newNetworkSentMessageAcceptor);
 			void setStorage(std::shared_ptr<openmittsu::database::Database> const& newStorage);
@@ -106,14 +95,10 @@ namespace openmittsu {
 			void databaseOnReceivedNewGroupMessage(openmittsu::protocol::GroupId const& group);
 			void tryResendingMessagesToNetwork();
 		private:
-			MessageCenter(const MessageCenter &); // hide copy constructor
-			MessageCenter& operator=(const MessageCenter &); // hide assign op
-															 // we leave just the declarations, so the compiler will warn us 
-															 // if we try to use those two functions by accident
 			std::shared_ptr<openmittsu::widgets::TabController> const m_tabController;
 			std::shared_ptr<openmittsu::utility::OptionMaster> const m_optionMaster;
 			std::shared_ptr<NetworkSentMessageAcceptor> m_networkSentMessageAcceptor;
-			std::shared_ptr<openmittsu::database::Database> m_storage;
+			openmittsu::database::DatabaseWrapper m_storage;
 			MessageQueue m_messageQueue;
 
 			void openTabForIncomingMessage(openmittsu::protocol::ContactId const& sender);
@@ -132,4 +117,4 @@ namespace openmittsu {
 	}
 }
 
-#endif // OPENMITTSU_DATAPROVIDERS_MESSAGECENTER_H_
+#endif // OPENMITTSU_DATAPROVIDERS_SIMPLEMESSAGECENTER_H_

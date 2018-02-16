@@ -38,7 +38,7 @@ namespace openmittsu {
 		}
 
 		DatabaseWrapperFactory DatabasePointerAuthority::getDatabaseWrapperFactory() const {
-			return DatabaseWrapperFactory();
+			return DatabaseWrapperFactory(*this);
 		}
 
 	}

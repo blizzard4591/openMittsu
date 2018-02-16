@@ -383,11 +383,11 @@ namespace openmittsu {
 			}
 
 			std::shared_ptr<openmittsu::dataproviders::messages::GroupMessageCursor> DatabaseContactAndGroupDataProvider::getGroupMessageCursor(openmittsu::protocol::GroupId const& group) {
-				return std::make_shared<openmittsu::database::DatabaseGroupMessageCursor>(m_database, group);
+				return std::make_shared<openmittsu::database::internal::DatabaseGroupMessageCursor>(m_database, group);
 			}
 
 			openmittsu::dataproviders::BackedGroupMessage DatabaseContactAndGroupDataProvider::getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid, openmittsu::dataproviders::MessageCenter& messageCenter) {
-				openmittsu::database::DatabaseGroupMessageCursor cursor(m_database, group);
+				openmittsu::database::internal::DatabaseGroupMessageCursor cursor(m_database, group);
 				if (!cursor.seekByUuid(uuid)) {
 					throw openmittsu::exceptions::InternalErrorException() << "Could not find message with UUID " << uuid.toStdString() << " for group " << group.toString() << ".";
 				}
@@ -456,11 +456,11 @@ namespace openmittsu {
 			}
 
 			int DatabaseContactAndGroupDataProvider::getContactCount() const {
-				return openmittsu::database::DatabaseUtilities::countQuery(m_database, QStringLiteral("contacts"));
+				return openmittsu::database::internal::DatabaseUtilities::countQuery(m_database, QStringLiteral("contacts"));
 			}
 
 			int DatabaseContactAndGroupDataProvider::getContactMessageCount(openmittsu::protocol::ContactId const& contact) const {
-				return openmittsu::database::DatabaseContactMessage::getContactMessageCount(m_database, contact);
+				return openmittsu::database::internal::DatabaseContactMessage::getContactMessageCount(m_database, contact);
 			}
 
 			void DatabaseContactAndGroupDataProvider::addContact(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& publicKey) {
@@ -671,11 +671,11 @@ namespace openmittsu {
 			}
 
 			std::shared_ptr<openmittsu::dataproviders::messages::ContactMessageCursor> DatabaseContactAndGroupDataProvider::getContactMessageCursor(openmittsu::protocol::ContactId const& contact) {
-				return std::make_shared<openmittsu::database::DatabaseContactMessageCursor>(m_database, contact);
+				return std::make_shared<openmittsu::database::internal::DatabaseContactMessageCursor>(m_database, contact);
 			}
 
 			openmittsu::dataproviders::BackedContactMessage DatabaseContactAndGroupDataProvider::getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid, openmittsu::dataproviders::MessageCenter& messageCenter) {
-				openmittsu::database::DatabaseContactMessageCursor cursor(m_database, contact);
+				openmittsu::database::internal::DatabaseContactMessageCursor cursor(m_database, contact);
 				if (!cursor.seekByUuid(uuid)) {
 					throw openmittsu::exceptions::InternalErrorException() << "Could not find message with UUID " << uuid.toStdString() << " for contact " << contact.toString() << ".";
 				}

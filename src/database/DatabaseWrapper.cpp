@@ -4,42 +4,20 @@
 #include "src/utility/Logging.h"
 #include "src/utility/MakeUnique.h"
 #include "src/utility/QObjectConnectionMacro.h"
+#include "src/utility/Wrapping.h"
 
-#define STRINGIFY2(x) #x
-#define STRINGIFY(x) STRINGIFY2(x)
-#define OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(funcName, ...) do { \
-auto ptr = m_database.lock(); \
-if (!ptr) { \
-	LOGGER()->error("Tried aquiring database pointer in wrapper for {} and failed!", STRINGIFY(funcName)); \
-	throw openmittsu::exceptions::InternalErrorException() << "Tried aquiring database pointer in wrapper for " << STRINGIFY(funcName) << " and failed!"; \
-} \
- \
-if (!QMetaObject::invokeMethod(ptr.get(), STRINGIFY(funcName), __VA_ARGS__)) { \
-	throw openmittsu::exceptions::InternalErrorException() << "Could not invoke " << STRINGIFY(funcName) << " from Wrapper"; \
-}\
-} while (false)
-
-#define OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(funcName, returnType, ...) do { \
-returnType returnVal; \
- \
-auto ptr = m_database.lock(); \
-if (!ptr) { \
-	LOGGER()->error("Tried aquiring database pointer in wrapper for {} and failed!", STRINGIFY(funcName)); \
-	throw openmittsu::exceptions::InternalErrorException() << "Tried aquiring database pointer in wrapper for " << STRINGIFY(funcName) << " and failed!"; \
-} \
- \
-if (!QMetaObject::invokeMethod(ptr.get(), STRINGIFY(funcName), Q_RETURN_ARG(returnType, returnVal), __VA_ARGS__)) { \
-	throw openmittsu::exceptions::InternalErrorException() << "Could not invoke " << STRINGIFY(funcName) << " from Wrapper"; \
-} \
- \
-return returnVal; \
-} while (false)
-
+#include "src/database/internal/DatabaseContactMessageCursor.h"
+#include "src/database/internal/DatabaseGroupMessageCursor.h"
 
 namespace openmittsu {
 	namespace database {
 
 		DatabaseWrapper::DatabaseWrapper(DatabasePointerAuthority const& databasePointerAuthority) : Database(), m_databasePointerAuthority(databasePointerAuthority), m_database() {
+			OPENMITTSU_CONNECT_QUEUED(&m_databasePointerAuthority, newDatabaseAvailable(), this, onDatabasePointerAuthorityHasNewDatabase());
+			onDatabasePointerAuthorityHasNewDatabase();
+		}
+
+		DatabaseWrapper::DatabaseWrapper(DatabaseWrapper const& other) : Database(), m_databasePointerAuthority(other.m_databasePointerAuthority), m_database() {
 			OPENMITTSU_CONNECT_QUEUED(&m_databasePointerAuthority, newDatabaseAvailable(), this, onDatabasePointerAuthorityHasNewDatabase());
 			onDatabasePointerAuthorityHasNewDatabase();
 		}
@@ -678,5 +656,12 @@ namespace openmittsu {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(setGroupMembers, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(QSet<openmittsu::protocol::ContactId> const&, newMembers));
 		}
 
+		std::shared_ptr<openmittsu::dataproviders::messages::ContactMessageCursor> getContactMessageCursor(openmittsu::protocol::ContactId const& contact) {
+			return std::make_shared<openmittsu::database::internal::DatabaseContactMessageCursor>(m_database, group);
+		}
+		
+		std::shared_ptr <openmittsu::dataproviders::messages::GroupMessageCursor> getGroupMessageCursor(openmittsu::protocol::GroupId const& group) {
+			return std::make_shared<openmittsu::database::internal::DatabaseGroupMessageCursor>(m_database, group);
+		}
 	}
 }

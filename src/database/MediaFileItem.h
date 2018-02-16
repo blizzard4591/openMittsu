@@ -19,17 +19,18 @@ namespace openmittsu {
 				UNAVAILABLE_CRYPTO_ERROR
 			};
 
+			MediaFileItem() = default;
 			explicit MediaFileItem(QByteArray const& data);
 			explicit MediaFileItem(ItemStatus reasonOfUnavailablity);
+
 			virtual ~MediaFileItem();
 
 			QByteArray const& getData() const;
 			bool isAvailable() const;
 			QPixmap getPixmapWithErrorMessage(int width, int height) const;
 		private:
-			QByteArray const m_data;
-			ItemStatus const m_status;
-
+			QByteArray m_data;
+			ItemStatus m_status;
 		};
 
 	}

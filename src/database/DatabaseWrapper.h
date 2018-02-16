@@ -12,6 +12,7 @@ namespace openmittsu {
 		class DatabaseWrapper : public Database {
 		public:
 			DatabaseWrapper(DatabasePointerAuthority const& databasePointerAuthority);
+			DatabaseWrapper(DatabaseWrapper const& other);
 			virtual ~DatabaseWrapper();
 
 		private slots:
@@ -118,6 +119,10 @@ namespace openmittsu {
 			virtual void setGroupTitle(openmittsu::protocol::GroupId const& group, QString const& newTitle) override;
 			virtual void setGroupImage(openmittsu::protocol::GroupId const& group, QByteArray const& newImage) override;
 			virtual void setGroupMembers(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& newMembers) override;
+
+			// Controls
+			virtual std::shared_ptr<openmittsu::dataproviders::messages::ContactMessageCursor> getContactMessageCursor(openmittsu::protocol::ContactId const& contact);
+			virtual std::shared_ptr <openmittsu::dataproviders::messages::GroupMessageCursor> getGroupMessageCursor(openmittsu::protocol::GroupId const& group);
 		};
 
 	}

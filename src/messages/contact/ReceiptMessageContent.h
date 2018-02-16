@@ -51,4 +51,6 @@ namespace openmittsu {
 	}
 }
 
+Q_DECLARE_METATYPE(openmittsu::messages::contact::ReceiptMessageContent::ReceiptType)
+
 #endif // OPENMITTSU_MESSAGES_CONTACT_RECEIPTMESSAGECONTENT_H_

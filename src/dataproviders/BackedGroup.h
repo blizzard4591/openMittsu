@@ -23,12 +23,11 @@ namespace openmittsu {
 
 	namespace dataproviders {
 		class BackedGroupMessage;
-		class MessageCenter;
 
 		class BackedGroup : public QObject, public MessageSource {
 			Q_OBJECT
 		public:
-			BackedGroup(openmittsu::protocol::GroupId const& groupId, openmittsu::database::DatabaseWrapper const& database, openmittsu::dataproviders::MessageCenter const& messageCenter);
+			BackedGroup(openmittsu::protocol::GroupId const& groupId, openmittsu::database::DatabaseWrapper const& database, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter);
 			BackedGroup(BackedGroup const& other);
 			virtual ~BackedGroup();
 
