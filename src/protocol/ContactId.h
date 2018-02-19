@@ -12,6 +12,7 @@ namespace openmittsu {
 
 		class ContactId {
 		public:
+			ContactId();
 			explicit ContactId(quint64 contactId);
 			explicit ContactId(QString const& identityString);
 			ContactId(QByteArray const& contactIdBytes);
@@ -34,8 +35,6 @@ namespace openmittsu {
 			friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<ContactId, true>;
 		private:
 			quint64 contactId;
-
-			ContactId();
 		};
 
 		uint qHash(ContactId const& key, uint seed);

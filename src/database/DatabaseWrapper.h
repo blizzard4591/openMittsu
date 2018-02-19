@@ -38,7 +38,7 @@ namespace openmittsu {
 			// Inherited via Database
 			virtual openmittsu::protocol::GroupStatus getGroupStatus(openmittsu::protocol::GroupId const & group) const override;
 			virtual openmittsu::protocol::ContactStatus getContactStatus(openmittsu::protocol::ContactId const & contact) const override;
-			virtual openmittsu::protocol::ContactId const & getSelfContact() const override;
+			virtual openmittsu::protocol::ContactId getSelfContact() const override;
 			virtual bool hasContact(openmittsu::protocol::ContactId const & identity) const override;
 			virtual bool hasGroup(openmittsu::protocol::GroupId const & group) const override;
 			virtual bool isDeleteted(openmittsu::protocol::GroupId const & group) const override;
@@ -98,6 +98,7 @@ namespace openmittsu {
 			virtual int getColor(openmittsu::protocol::ContactId const& contact) const override;
 			virtual int getContactCount() const override;
 			virtual int getContactMessageCount(openmittsu::protocol::ContactId const& contact) const override;
+			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::ContactId const& contact, std::size_t n) const override;
 
 			virtual void setFirstName(openmittsu::protocol::ContactId const& contact, QString const& firstName) override;
 			virtual void setLastName(openmittsu::protocol::ContactId const& contact, QString const& lastName) override;
@@ -115,14 +116,11 @@ namespace openmittsu {
 			virtual bool getGroupIsAwaitingSync(openmittsu::protocol::GroupId const& group) const override;
 			virtual int getGroupCount() const override;
 			virtual int getGroupMessageCount(openmittsu::protocol::GroupId const& group) const override;
+			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::GroupId const& group, std::size_t n) const override;
 
 			virtual void setGroupTitle(openmittsu::protocol::GroupId const& group, QString const& newTitle) override;
 			virtual void setGroupImage(openmittsu::protocol::GroupId const& group, QByteArray const& newImage) override;
 			virtual void setGroupMembers(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& newMembers) override;
-
-			// Controls
-			virtual std::shared_ptr<openmittsu::dataproviders::messages::ContactMessageCursor> getContactMessageCursor(openmittsu::protocol::ContactId const& contact);
-			virtual std::shared_ptr <openmittsu::dataproviders::messages::GroupMessageCursor> getGroupMessageCursor(openmittsu::protocol::GroupId const& group);
 		};
 
 	}

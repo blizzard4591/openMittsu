@@ -37,7 +37,7 @@ namespace openmittsu {
 			// Information
 			virtual openmittsu::protocol::GroupStatus getGroupStatus(openmittsu::protocol::GroupId const& group) const = 0;
 			virtual openmittsu::protocol::ContactStatus getContactStatus(openmittsu::protocol::ContactId const& contact) const = 0;
-			virtual openmittsu::protocol::ContactId const& getSelfContact() const = 0;
+			virtual openmittsu::protocol::ContactId getSelfContact() const = 0;
 
 			virtual bool hasContact(openmittsu::protocol::ContactId const& identity) const = 0;
 			virtual bool hasGroup(openmittsu::protocol::GroupId const& group) const = 0;
@@ -116,6 +116,9 @@ namespace openmittsu {
 			virtual int getContactCount() const = 0;
 			virtual int getContactMessageCount(openmittsu::protocol::ContactId const& contact) const = 0;
 
+			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::ContactId const& contact, std::size_t n) const = 0;
+			virtual openmittsu::dataproviders::ContactMessage getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const = 0;
+
 			virtual void setFirstName(openmittsu::protocol::ContactId const& contact, QString const& firstName) = 0;
 			virtual void setLastName(openmittsu::protocol::ContactId const& contact, QString const& lastName) = 0;
 			virtual void setNickName(openmittsu::protocol::ContactId const& contact, QString const& nickname) = 0;
@@ -132,6 +135,8 @@ namespace openmittsu {
 			virtual bool getGroupIsAwaitingSync(openmittsu::protocol::GroupId const& group) const = 0;
 			virtual int getGroupCount() const = 0;
 			virtual int getGroupMessageCount(openmittsu::protocol::GroupId const& group) const = 0;
+
+			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::GroupId const& group, std::size_t n) const = 0;
 
 			virtual void setGroupTitle(openmittsu::protocol::GroupId const& group, QString const& newTitle) = 0;
 			virtual void setGroupImage(openmittsu::protocol::GroupId const& group, QByteArray const& newImage) = 0;

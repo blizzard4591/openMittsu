@@ -83,12 +83,16 @@ namespace openmittsu {
 			void setOptionValue(QString const& optionName, bool const& optionValue);
 			void setOptionValue(QString const& optionName, QByteArray const& optionValue);
 
-			virtual openmittsu::dataproviders::BackedContact getBackedContact(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::MessageCenter& messageCenter) override;
-			virtual openmittsu::dataproviders::BackedGroup getBackedGroup(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::MessageCenter& messageCenter) override;
+			virtual openmittsu::dataproviders::BackedContact getBackedContact(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) override;
+			virtual openmittsu::dataproviders::BackedGroup getBackedGroup(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) override;
 
 			virtual openmittsu::protocol::GroupStatus getGroupStatus(openmittsu::protocol::GroupId const& group) const override;
 			virtual openmittsu::protocol::ContactStatus getContactStatus(openmittsu::protocol::ContactId const& contact) const override;
-			virtual openmittsu::protocol::ContactId const& getSelfContact() const override;
+			virtual openmittsu::protocol::ContactId getSelfContact() const override;
+
+			/** AHHH FUCK THIS **/
+			virtual openmittsu::dataproviders::BackedContactMessage getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const override;
+
 
 			openmittsu::crypto::PublicKey getContactPublicKey(openmittsu::protocol::ContactId const& identity) const;
 			QString getContactNickname(openmittsu::protocol::ContactId const& identity) const;
