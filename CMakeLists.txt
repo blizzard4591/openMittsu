@@ -440,9 +440,9 @@ endif(MSVC)
 target_link_libraries(openMittsuCore ${Libsodium_LIBRARIES})
 target_link_libraries(openMittsu ${LIBQRENCODE_LIBRARY})
 
-if (OPENMITTSU_ENABLE_TESTS)
+if (OPENMITTSU_ENABLE_TESTS AND NOT CMAKE_BUILD_TYPE MATCHES "^Gentoo")
 	add_dependencies(openMittsuTests gmock gtest)
-endif (OPENMITTSU_ENABLE_TESTS)
+endif()
 
 # Use the required modules from Qt 5.
 target_link_libraries(openMittsuCore Qt5::Core Qt5::Network Qt5::Multimedia Qt5::Sql)
