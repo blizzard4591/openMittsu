@@ -10,7 +10,7 @@
 #include "src/dataproviders/MessageSource.h"
 
 #include "src/utility/Location.h"
-#include "src/database/Database.h"
+#include "src/database/DatabaseWrapper.h"
 #include "src/dataproviders/messages/ContactMessageCursor.h"
 #include "src/dataproviders/MessageCenterWrapper.h"
 #include "src/protocol/ContactId.h"

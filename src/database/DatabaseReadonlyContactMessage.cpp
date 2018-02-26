@@ -1,4 +1,4 @@
-#include "src/database/internal/DatabaseContactMessage.h"
+#include "src/database/DatabaseReadonlyContactMessage.h"
 
 #include "src/backup/ContactMessageBackupObject.h"
 #include "src/database/internal/InternalDatabaseInterface.h"
@@ -11,52 +11,50 @@
 
 namespace openmittsu {
 	namespace database {
-		namespace internal {
 
-			using namespace openmittsu::dataproviders::messages;
+		using namespace openmittsu::dataproviders::messages;
 
-			DatabaseContactMessage::DatabaseContactMessage(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId) : DatabaseMessage(database, messageId), DatabaseUserMessage(database, messageId), ContactMessage(), m_contact(contact) {
-				if (!exists(database, contact, messageId)) {
-					throw openmittsu::exceptions::InternalErrorException() << "No message from contact \"" << contact.toString() << "\" and message ID \"" << messageId.toString() << "\" exists, can not manipulate.";
-				}
-			}
-
-			DatabaseContactMessage::~DatabaseContactMessage() {
-				//
-			}
-
-			openmittsu::protocol::ContactId const& DatabaseContactMessage::getContactId() const {
-				return m_contact;
-			}
-
-			ContactMessageType DatabaseContactMessage::getMessageType() const {
-				return ContactMessageTypeHelper::fromString(queryField(QStringLiteral("contact_message_type")).toString());
-			}
-
-			QString DatabaseContactMessage::getContentAsText() const {
-				ContactMessageType const messageType = getMessageType();
-				if (messageType != ContactMessageType::TEXT) {
-					throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as text because it has type " << ContactMessageTypeHelper::toString(messageType) << "!";
-				}
-				return queryField(QStringLiteral("body")).toString();
-			}
-
-			openmittsu::utility::Location DatabaseContactMessage::getContentAsLocation() const {
-				ContactMessageType const messageType = getMessageType();
-				if (messageType != ContactMessageType::LOCATION) {
-					throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as location because it has type " << ContactMessageTypeHelper::toString(messageType) << "!";
-				}
-				return openmittsu::utility::Location::fromDatabaseString(queryField(QStringLiteral("body")).toString());
-			}
-
-			MediaFileItem DatabaseContactMessage::getContentAsImage() const {
-				ContactMessageType const messageType = getMessageType();
-				if (messageType != ContactMessageType::IMAGE) {
-					throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as image because it has type " << ContactMessageTypeHelper::toString(messageType) << "!";
-				}
-				return getMediaItem(getUid());
-			}
-
+		DatabaseReadonlyContactMessage::DatabaseReadonlyContactMessage(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, bool isMessageFromUs, bool isOutbox, openmittsu::protocol::MessageTime const& createdAt, openmittsu::protocol::MessageTime const& sentAt, openmittsu::protocol::MessageTime const& modifiedAt, bool isQueued, bool isSent, QString const& uuid, bool isRead, bool isSaved, openmittsu::dataproviders::messages::UserMessageState const& messageState, openmittsu::protocol::MessageTime const& receivedAt, openmittsu::protocol::MessageTime const& seenAt, bool isStatusMessage, QString const& caption, openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::messages::ContactMessageType const& contactMessageType, QString const& body, MediaFileItem const& mediaItem)
+			: DatabaseReadonlyUserMessage(sender, messageId, isMessageFromUs, isOutbox, createdAt, sentAt, modifiedAt, isQueued, isSent, uuid, isRead, isSaved, messageState, receivedAt, seenAt, isStatusMessage, caption), DatabaseReadonlyMessage(sender, messageId, isMessageFromUs, isOutbox, createdAt, sentAt, modifiedAt, isQueued, isSent, uuid), ReadonlyContactMessage(), m_contact(contact), m_contactMessageType(contactMessageType), m_body(body), m_mediaItem(mediaItem)
+		{
+			//
 		}
+
+		DatabaseReadonlyContactMessage::~DatabaseReadonlyContactMessage() {
+			//
+		}
+
+		openmittsu::protocol::ContactId const& DatabaseReadonlyContactMessage::getContactId() const {
+			return m_contact;
+		}
+
+		ContactMessageType DatabaseReadonlyContactMessage::getMessageType() const {
+			return m_contactMessageType;
+		}
+
+		QString DatabaseReadonlyContactMessage::getContentAsText() const {
+			ContactMessageType const messageType = getMessageType();
+			if (messageType != ContactMessageType::TEXT) {
+				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as text because it has type " << ContactMessageTypeHelper::toString(messageType) << "!";
+			}
+			return m_body;
+		}
+
+		openmittsu::utility::Location DatabaseReadonlyContactMessage::getContentAsLocation() const {
+			ContactMessageType const messageType = getMessageType();
+			if (messageType != ContactMessageType::LOCATION) {
+				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as location because it has type " << ContactMessageTypeHelper::toString(messageType) << "!";
+			}
+			return openmittsu::utility::Location::fromDatabaseString(m_body);
+		}
+
+		MediaFileItem DatabaseReadonlyContactMessage::getContentAsImage() const {
+			ContactMessageType const messageType = getMessageType();
+			if (messageType != ContactMessageType::IMAGE) {
+				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as image because it has type " << ContactMessageTypeHelper::toString(messageType) << "!";
+			}
+			return m_mediaItem;
+		}
+
 	}
 }

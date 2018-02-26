@@ -6,9 +6,10 @@
 #include <QSet>
 #include <QString>
 
-#include "src/dataproviders/BackedContact.h"
-#include "src/dataproviders/BackedGroup.h"
 #include "src/dataproviders/SentMessageAcceptor.h"
+#include "src/dataproviders/messages/ReadonlyContactMessage.h"
+#include "src/crypto/PublicKey.h"
+#include "src/protocol/AccountStatus.h"
 #include "src/protocol/ContactId.h"
 #include "src/protocol/ContactStatus.h"
 #include "src/protocol/ContactIdVerificationStatus.h"
@@ -22,10 +23,14 @@
 
 namespace openmittsu {
 	namespace dataproviders {
-		class MessageCenter;
+		class MessageCenterWrapper;
+		class BackedContact;
+		class BackedGroup;
 	}
 
 	namespace database {
+		class DatabaseReadonlyContactMessage;
+
 		class Database : public QObject {
 			Q_OBJECT
 		public:
@@ -101,8 +106,8 @@ namespace openmittsu {
 
 			virtual void sendAllWaitingMessages(openmittsu::dataproviders::SentMessageAcceptor& messageAcceptor) = 0;
 
-			virtual std::unique_ptr<openmittsu::dataproviders::BackedContact> getBackedContact(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::MessageCenter& messageCenter) = 0;
-			virtual std::unique_ptr<openmittsu::dataproviders::BackedGroup> getBackedGroup(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::MessageCenter& messageCenter) = 0;
+			virtual std::unique_ptr<openmittsu::dataproviders::BackedContact> getBackedContact(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) = 0;
+			virtual std::unique_ptr<openmittsu::dataproviders::BackedGroup> getBackedGroup(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) = 0;
 			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const = 0;
 
 			// Contact Data
@@ -117,7 +122,7 @@ namespace openmittsu {
 			virtual int getContactMessageCount(openmittsu::protocol::ContactId const& contact) const = 0;
 
 			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::ContactId const& contact, std::size_t n) const = 0;
-			virtual openmittsu::dataproviders::ContactMessage getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const = 0;
+			virtual DatabaseReadonlyContactMessage getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const = 0;
 
 			virtual void setFirstName(openmittsu::protocol::ContactId const& contact, QString const& firstName) = 0;
 			virtual void setLastName(openmittsu::protocol::ContactId const& contact, QString const& lastName) = 0;
