@@ -6,6 +6,7 @@
 #include <QSet>
 #include <QString>
 
+#include "src/database/DatabaseSeekResult.h"
 #include "src/dataproviders/SentMessageAcceptor.h"
 #include "src/dataproviders/messages/ReadonlyContactMessage.h"
 #include "src/crypto/PublicKey.h"
@@ -34,6 +35,14 @@ namespace openmittsu {
 		class Database : public QObject {
 			Q_OBJECT
 		public:
+			enum class SortOrder {
+				ASCENDING,
+				DESCENDING
+			};
+			enum class SortByMode {
+				ColSpecialSortBy,
+			};
+
 			virtual ~Database() {}
 
 			// Misc
@@ -142,6 +151,11 @@ namespace openmittsu {
 			virtual int getGroupMessageCount(openmittsu::protocol::GroupId const& group) const = 0;
 
 			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::GroupId const& group, std::size_t n) const = 0;
+
+			virtual DatabaseSeekResult seekNextMessage(openmittsu::protocol::ContactId const& identity, QString const& uuid, SortOrder sortOrder, SortByMode sortByMode) const = 0;
+			virtual DatabaseSeekResult seekFirstOrLastMessage(openmittsu::protocol::ContactId const& identity, bool first, SortByMode sortByMode) const = 0;
+			virtual DatabaseSeekResult seekNextMessage(openmittsu::protocol::GroupId const& group, QString const& uuid, SortOrder sortOrder, SortByMode sortByMode) const = 0;
+			virtual DatabaseSeekResult seekFirstOrLastMessage(openmittsu::protocol::GroupId const& group, bool first, SortByMode sortByMode) const = 0;
 
 			virtual void setGroupTitle(openmittsu::protocol::GroupId const& group, QString const& newTitle) = 0;
 			virtual void setGroupImage(openmittsu::protocol::GroupId const& group, QByteArray const& newImage) = 0;
