@@ -1,11 +1,11 @@
-#ifndef OPENMITTSU_DATABASE_DATABASEREADONLYCONTACTMESSAGE_H_
-#define OPENMITTSU_DATABASE_DATABASEREADONLYCONTACTMESSAGE_H_
+#ifndef OPENMITTSU_DATABASE_DATABASEREADONLYGROUPMESSAGE_H_
+#define OPENMITTSU_DATABASE_DATABASEREADONLYGROUPMESSAGE_H_
 
 #include <QList>
 #include <QString>
 
-#include "src/dataproviders/messages/ReadonlyContactMessage.h"
-#include "src/dataproviders/messages/ContactMessageType.h"
+#include "src/dataproviders/messages/ReadonlyGroupMessage.h"
+#include "src/dataproviders/messages/GroupMessageType.h"
 
 namespace openmittsu {
 	namespace backup {
@@ -13,12 +13,12 @@ namespace openmittsu {
 	}
 
 	namespace database {
-		class DatabaseReadonlyContactMessage : public virtual openmittsu::dataproviders::messages::ReadonlyContactMessage {
+		class DatabaseReadonlyGroupMessage : public virtual openmittsu::dataproviders::messages::ReadonlyGroupMessage {
 		public:
-			DatabaseReadonlyContactMessage(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, bool isMessageFromUs, openmittsu::protocol::MessageTime const& createdAt, openmittsu::protocol::MessageTime const& sentAt, openmittsu::protocol::MessageTime const& modifiedAt, bool isQueued, bool isSent, QString const& uuid, bool isRead, bool isSaved, openmittsu::dataproviders::messages::UserMessageState const& messageState, openmittsu::protocol::MessageTime const& receivedAt, openmittsu::protocol::MessageTime const& seenAt, bool isStatusMessage, QString const& caption, openmittsu::dataproviders::messages::ContactMessageType const& contactMessageType, QString const& body, MediaFileItem const& mediaItem);
-			//explicit DatabaseReadonlyContactMessage(DatabaseWrapper const& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId);
-			virtual ~DatabaseReadonlyContactMessage();
+			DatabaseReadonlyGroupMessage(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, bool isMessageFromUs, openmittsu::protocol::MessageTime const& createdAt, openmittsu::protocol::MessageTime const& sentAt, openmittsu::protocol::MessageTime const& modifiedAt, bool isQueued, bool isSent, QString const& uuid, bool isRead, bool isSaved, openmittsu::dataproviders::messages::UserMessageState const& messageState, openmittsu::protocol::MessageTime const& receivedAt, openmittsu::protocol::MessageTime const& seenAt, bool isStatusMessage, QString const& caption, openmittsu::dataproviders::messages::GroupMessageType const& groupMessageType, QString const& body, MediaFileItem const& mediaItem);
+			virtual ~DatabaseReadonlyGroupMessage();
 
+			virtual openmittsu::protocol::GroupId const& getGroupId() const override;
 			virtual openmittsu::protocol::ContactId const& getSender() const override;
 			virtual openmittsu::protocol::MessageId const& getMessageId() const override;
 
@@ -47,15 +47,14 @@ namespace openmittsu {
 			virtual openmittsu::protocol::MessageTime const& getSeenAt() const override;
 			virtual bool isStatusMessage() const override;
 
+			virtual openmittsu::dataproviders::messages::GroupMessageType const& getMessageType() const = 0;
 			virtual QString const& getCaption() const override;
-
-			virtual openmittsu::protocol::ContactId const& getContactId() const override;
-			virtual openmittsu::dataproviders::messages::ContactMessageType const& getMessageType() const override;
 
 			virtual QString const& getContentAsText() const override;
 			virtual openmittsu::utility::Location getContentAsLocation() const override;
 			virtual MediaFileItem getContentAsImage() const override;
 		private:
+			openmittsu::protocol::GroupId m_group;
 			openmittsu::protocol::ContactId m_sender;
 			openmittsu::protocol::MessageId m_messageId;
 			bool m_isMessageFromUs;
@@ -72,7 +71,7 @@ namespace openmittsu {
 			openmittsu::protocol::MessageTime m_seenAt;
 			bool m_isStatusMessage;
 			QString m_caption;
-			openmittsu::dataproviders::messages::ContactMessageType m_contactMessageType;
+			openmittsu::dataproviders::messages::GroupMessageType m_groupMessageType;
 			QString m_body;
 			MediaFileItem m_mediaItem;
 		};
@@ -80,4 +79,4 @@ namespace openmittsu {
 	}
 }
 
-#endif // OPENMITTSU_DATABASE_DATABASEREADONLYCONTACTMESSAGE_H_
+#endif // OPENMITTSU_DATABASE_DATABASEREADONLYGROUPMESSAGE_H_

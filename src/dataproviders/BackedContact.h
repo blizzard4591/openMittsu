@@ -11,6 +11,7 @@
 
 #include "src/utility/Location.h"
 #include "src/database/DatabaseWrapper.h"
+#include "src/database/DatabaseReadonlyContactMessage.h"
 #include "src/dataproviders/messages/ContactMessageCursor.h"
 #include "src/dataproviders/MessageCenterWrapper.h"
 #include "src/protocol/ContactId.h"
@@ -48,6 +49,10 @@ namespace openmittsu {
 			void setNickname(QString const& newNickname);
 			void setFirstName(QString const& newFirstName);
 			void setLastName(QString const& newLastName);
+
+			friend class BackedContactMessage;
+		protected:
+			openmittsu::database::DatabaseReadonlyContactMessage fetchMessageByUuid(QString const& uuid) const;
 		public slots:
 			bool sendTextMessage(QString const& text);
 			bool sendImageMessage(QByteArray const& image, QString const& caption);

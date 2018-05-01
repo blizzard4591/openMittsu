@@ -24,7 +24,6 @@ namespace openmittsu {
 				virtual openmittsu::protocol::ContactId const& getContactId() const override;
 				virtual std::shared_ptr<openmittsu::dataproviders::messages::ContactMessage> getMessage() const override;
 				virtual DatabaseReadonlyContactMessage getReadonlyMessage() const;
-				virtual QList<DatabaseReadonlyContactMessage> getMessages(QSet<QString> const& uuids) const;
 			protected:
 				virtual QString getWhereString() const override;
 				virtual void bindWhereStringValues(QSqlQuery& query) const override;

@@ -45,7 +45,7 @@ namespace openmittsu {
 				return std::make_shared<DatabaseContactMessage>(getDatabase(), m_contact, getMessageId());
 			}
 
-			QList<DatabaseReadonlyContactMessage> DatabaseContactMessageCursor::getMessages(QSet<QString> const& uuids) const {
+			QList<DatabaseReadonlyContactMessage> DatabaseContactMessageCursor::getMessages(QList<QString> const& uuids) const {
 				QList<DatabaseReadonlyContactMessage> result;
 				result.reserve(uuids.size());
 
@@ -54,14 +54,67 @@ namespace openmittsu {
 				// openmittsu::protocol::MessageTime const& modifiedAt, bool isQueued, bool isSent, QString const& uuid, bool isRead, bool isSaved, openmittsu::dataproviders::messages::UserMessageState const& messageState, 
 				// openmittsu::protocol::MessageTime const& receivedAt, openmittsu::protocol::MessageTime const& seenAt, bool isStatusMessage, QString const& caption, openmittsu::protocol::ContactId const& contact, 
 				// openmittsu::dataproviders::messages::ContactMessageType const& contactMessageType, QString const& body, MediaFileItem const& mediaItem
-				query.prepare(QStringLiteral("SELECT `identity`, `apiid`, `uid`, `is_outbox`, `is_read`, `is_saved`, `messagestate`, `sort_by`, `created_at`, `sent_at`, `received_at`, `seen_at`, `modified_at`, `contact_message_type`, `body`, `is_statusmessage`, `is_queued`, `is_sent`, `caption` FROM `contact_messages` WHERE `identity` = :identity AND `uid` = :uid;"));
+				//  AND `uid` = :uid
+				query.prepare(QStringLiteral("SELECT `identity`, `apiid`, `uid`, `is_outbox`, `is_read`, `is_saved`, `messagestate`, `sort_by`, `created_at`, `sent_at`, `received_at`, `seen_at`, `modified_at`, `contact_message_type`, `body`, `is_statusmessage`, `is_queued`, `is_sent`, `caption` FROM `contact_messages` WHERE `identity` = :identity;"));
+				bindWhereStringValues(query);
+				query.bindValue(QStringLiteral(":uid"), QVariant(getMessageUuid()));
+				if (!query.exec() || !query.isSelect()) {
+					throw openmittsu::exceptions::InternalErrorException() << "Could not execute contact message query for table contact_messages. Query error: " << query.lastError().text().toStdString();
+				}
+
+				while (query.next()) {
+					openmittsu::protocol::ContactId const contact(query.value(QStringLiteral("identity")).toString());
+					openmittsu::protocol::MessageId const messageId(query.value(QStringLiteral("apiid")).toString());
+					bool const isMessageFromUs = query.value(QStringLiteral("is_outbox")).toBool();
+					openmittsu::protocol::MessageTime const createdAt(openmittsu::protocol::MessageTime::fromDatabase(query.value(QStringLiteral("created_at")).toLongLong()));
+					openmittsu::protocol::MessageTime const sentAt(openmittsu::protocol::MessageTime::fromDatabase(query.value(QStringLiteral("sent_at")).toLongLong()));
+					openmittsu::protocol::MessageTime const modifiedAt(openmittsu::protocol::MessageTime::fromDatabase(query.value(QStringLiteral("modified_at")).toLongLong()));
+					bool const isQueued = query.value(QStringLiteral("is_queued")).toBool();
+					bool const isSent = query.value(QStringLiteral("is_sent")).toBool();
+					QString const uuid(query.value(QStringLiteral("uid")).toString());
+					bool const isRead = query.value(QStringLiteral("is_read")).toBool();
+					bool const isSaved = query.value(QStringLiteral("is_saved")).toBool();
+					UserMessageState const messageState(UserMessageStateHelper::fromString(query.value(QStringLiteral("messagestate")).toString()));
+					openmittsu::protocol::MessageTime const receivedAt(openmittsu::protocol::MessageTime::fromDatabase(query.value(QStringLiteral("received_at")).toLongLong()));
+					openmittsu::protocol::MessageTime const seenAt(openmittsu::protocol::MessageTime::fromDatabase(query.value(QStringLiteral("seen_at")).toLongLong()));
+					bool const isStatusMessage = query.value(QStringLiteral("is_statusmessage")).toBool();
+					QString const caption(query.value(QStringLiteral("caption")).toString());
+					openmittsu::dataproviders::messages::ContactMessageType const contactMessageType(openmittsu::dataproviders::messages::ContactMessageTypeHelper::fromString(query.value(QStringLiteral("contact_message_type")).toString()));
+					QString const body(query.value(QStringLiteral("body")).toString());
+
+					openmittsu::database::MediaFileItem mediaItem;
+					if ((contactMessageType == openmittsu::dataproviders::messages::ContactMessageType::AUDIO) || (contactMessageType == openmittsu::dataproviders::messages::ContactMessageType::FILE) || (contactMessageType == openmittsu::dataproviders::messages::ContactMessageType::IMAGE) || (contactMessageType == openmittsu::dataproviders::messages::ContactMessageType::VIDEO)) {
+						 mediaItem = getDatabase()->getMediaItem(uuid);
+					} else {
+						mediaItem = MediaFileItem(MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE);
+					}
+
+					DatabaseReadonlyContactMessage drcm(contact, messageId, isMessageFromUs, createdAt, sentAt, modifiedAt, isQueued, isSent, uuid, isRead, isSaved, messageState, receivedAt, seenAt, isStatusMessage, caption, contactMessageType, body, mediaItem);
+					result.append(drcm);
+				}
+
+				return result;
+			}
+
+			DatabaseReadonlyContactMessage DatabaseContactMessageCursor::getReadonlyMessage() const {
+				if (!isValid()) {
+					throw openmittsu::exceptions::InternalErrorException() << "Can not create message wrapper for invalid message.";
+				}
+
+				QSqlQuery query(getDatabase()->getQueryObject());
+				// openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, bool isMessageFromUs, bool isOutbox, openmittsu::protocol::MessageTime const& createdAt, openmittsu::protocol::MessageTime const& sentAt, 
+				// openmittsu::protocol::MessageTime const& modifiedAt, bool isQueued, bool isSent, QString const& uuid, bool isRead, bool isSaved, openmittsu::dataproviders::messages::UserMessageState const& messageState, 
+				// openmittsu::protocol::MessageTime const& receivedAt, openmittsu::protocol::MessageTime const& seenAt, bool isStatusMessage, QString const& caption, openmittsu::protocol::ContactId const& contact, 
+				// openmittsu::dataproviders::messages::ContactMessageType const& contactMessageType, QString const& body, MediaFileItem const& mediaItem
+				//  AND `uid` = :uid
+				query.prepare(QStringLiteral("SELECT `identity`, `apiid`, `uid`, `is_outbox`, `is_read`, `is_saved`, `messagestate`, `sort_by`, `created_at`, `sent_at`, `received_at`, `seen_at`, `modified_at`, `contact_message_type`, `body`, `is_statusmessage`, `is_queued`, `is_sent`, `caption` FROM `contact_messages` WHERE `identity` = :identity;"));
 				bindWhereStringValues(query);
 				query.bindValue(QStringLiteral(":uid"), QVariant(getMessageUuid()));
 				if (!query.exec() || !query.isSelect() || !query.next()) {
 					throw openmittsu::exceptions::InternalErrorException() << "Could not execute contact message query for table contact_messages. Query error: " << query.lastError().text().toStdString();
 				}
 
-				openmittsu::protocol::ContactId const receiver(query.value(QStringLiteral("identity")).toString());
+				openmittsu::protocol::ContactId const contact(query.value(QStringLiteral("identity")).toString());
 				openmittsu::protocol::MessageId const messageId(query.value(QStringLiteral("apiid")).toString());
 				bool const isMessageFromUs = query.value(QStringLiteral("is_outbox")).toBool();
 				openmittsu::protocol::MessageTime const createdAt(openmittsu::protocol::MessageTime::fromDatabase(query.value(QStringLiteral("created_at")).toLongLong()));
@@ -77,19 +130,18 @@ namespace openmittsu {
 				openmittsu::protocol::MessageTime const seenAt(openmittsu::protocol::MessageTime::fromDatabase(query.value(QStringLiteral("seen_at")).toLongLong()));
 				bool const isStatusMessage = query.value(QStringLiteral("is_statusmessage")).toBool();
 				QString const caption(query.value(QStringLiteral("caption")).toString());
-				
-				DatabaseReadonlyContactMessage drcm(receiver, messageId, isMessageFromUs, createdAt, sentAt, modifiedAt, isQueued, isSent, uuid, isRead, isSaved, messageState, receivedAt, seenAt, isStatusMessage, caption, )
-				message.setIsQueued(false);
+				openmittsu::dataproviders::messages::ContactMessageType const contactMessageType(openmittsu::dataproviders::messages::ContactMessageTypeHelper::fromString(query.value(QStringLiteral("contact_message_type")).toString()));
+				QString const body(query.value(QStringLiteral("body")).toString());
 
-				return DatabaseReadonlyContactMessage()
-			}
-
-			DatabaseReadonlyContactMessage DatabaseContactMessageCursor::getReadonlyMessage() const {
-				if (!isValid()) {
-					throw openmittsu::exceptions::InternalErrorException() << "Can not create message wrapper for invalid message.";
+				openmittsu::database::MediaFileItem mediaItem;
+				if ((contactMessageType == openmittsu::dataproviders::messages::ContactMessageType::AUDIO) || (contactMessageType == openmittsu::dataproviders::messages::ContactMessageType::FILE) || (contactMessageType == openmittsu::dataproviders::messages::ContactMessageType::IMAGE) || (contactMessageType == openmittsu::dataproviders::messages::ContactMessageType::VIDEO)) {
+					mediaItem = getDatabase()->getMediaItem(uuid);
+				} else {
+					mediaItem = MediaFileItem(MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE);
 				}
 
-				
+				DatabaseReadonlyContactMessage drcm(contact, messageId, isMessageFromUs, createdAt, sentAt, modifiedAt, isQueued, isSent, uuid, isRead, isSaved, messageState, receivedAt, seenAt, isStatusMessage, caption, contactMessageType, body, mediaItem);
+				return drcm;
 			}
 
 			QString DatabaseContactMessageCursor::getWhereString() const {

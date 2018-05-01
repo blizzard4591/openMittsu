@@ -17,7 +17,7 @@ namespace openmittsu {
 				virtual ~ReadonlyContactMessage() {}
 
 				virtual openmittsu::protocol::ContactId const& getContactId() const = 0;
-				virtual ContactMessageType getMessageType() const = 0;
+				virtual ContactMessageType const& getMessageType() const = 0;
 			};
 
 		}

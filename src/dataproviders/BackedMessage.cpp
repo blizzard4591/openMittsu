@@ -9,13 +9,11 @@
 namespace openmittsu {
 	namespace dataproviders {
 
-		BackedMessage::BackedMessage(QString const& uuid, BackedContact const& sender, bool isMessageFromUs, openmittsu::protocol::MessageId const& messageId) : m_uuid(uuid), m_contact(sender), m_sender(sender.getId()), m_isMessageFromUs(isMessageFromUs), m_messageId(messageId), m_cacheLoaded(false) {
+		BackedMessage::BackedMessage(QString const& uuid, BackedContact const& sender, bool isMessageFromUs, openmittsu::protocol::MessageId const& messageId) : m_uuid(uuid), m_contact(sender), m_isMessageFromUs(isMessageFromUs) {
 			//
 		}
 
-		BackedMessage::BackedMessage(BackedMessage const& other) : m_uuid(other.m_uuid), m_contact(other.m_contact), m_sender(other.m_sender), m_isMessageFromUs(other.m_isMessageFromUs), m_messageId(other.m_messageId), m_cacheLoaded(other.m_cacheLoaded),
-			m_isRead(other.m_isRead), m_isSent(other.m_isSent), m_messageState(other.m_messageState), m_timeOrderBy(other.m_timeOrderBy), m_timeCreatedAt(other.m_timeCreatedAt), m_timeSent(other.m_timeSent), m_timeReceived(other.m_timeReceived), m_timeSeen(other.m_timeSeen), m_timeModified(other.m_timeModified), m_isStatusMessage(other.m_isStatusMessage)
-		{
+		BackedMessage::BackedMessage(BackedMessage const& other) : m_uuid(other.m_uuid), m_contact(other.m_contact), m_isMessageFromUs(other.m_isMessageFromUs) {
 			//
 		}
 
@@ -24,7 +22,7 @@ namespace openmittsu {
 		}
 
 		openmittsu::protocol::ContactId const& BackedMessage::getSender() const {
-			return m_sender;
+			return getMessage().getSender();
 		}
 
 		BackedContact const& BackedMessage::getContact() const {
@@ -36,61 +34,43 @@ namespace openmittsu {
 		}
 
 		openmittsu::protocol::MessageId const& BackedMessage::getMessageId() const {
-			return m_messageId;
+			return getMessage().getMessageId();
 		}
 
 		bool BackedMessage::isRead() const {
-			QMutexLocker mutexLock(&m_mutex);
-			if (!m_cacheLoaded) { throw openmittsu::exceptions::InternalErrorException() << "Cache is not prepared!"; }
-			return m_isRead;
+			return getMessage().isRead();
 		}
 
 		bool BackedMessage::isSent() const {
-			QMutexLocker mutexLock(&m_mutex);
-			if (!m_cacheLoaded) { throw openmittsu::exceptions::InternalErrorException() << "Cache is not prepared!"; }
-			return m_isSent;
+			return getMessage().isSent();
 		}
 
-		messages::UserMessageState BackedMessage::getMessageState() const {
-			QMutexLocker mutexLock(&m_mutex);
-			if (!m_cacheLoaded) { throw openmittsu::exceptions::InternalErrorException() << "Cache is not prepared!"; }
-			return m_messageState;
+		messages::UserMessageState const& BackedMessage::getMessageState() const {
+			return getMessage().getMessageState();
 		}
 
-		openmittsu::protocol::MessageTime BackedMessage::getCreatedAt() const {
-			QMutexLocker mutexLock(&m_mutex);
-			if (!m_cacheLoaded) { throw openmittsu::exceptions::InternalErrorException() << "Cache is not prepared!"; }
-			return m_timeCreatedAt;
+		openmittsu::protocol::MessageTime const& BackedMessage::getCreatedAt() const {
+			return getMessage().getCreatedAt();
 		}
 
-		openmittsu::protocol::MessageTime BackedMessage::getSentAt() const {
-			QMutexLocker mutexLock(&m_mutex);
-			if (!m_cacheLoaded) { throw openmittsu::exceptions::InternalErrorException() << "Cache is not prepared!"; }
-			return m_timeSent;
+		openmittsu::protocol::MessageTime const& BackedMessage::getSentAt() const {
+			return getMessage().getSentAt();
 		}
 
-		openmittsu::protocol::MessageTime BackedMessage::getReceivedAt() const {
-			QMutexLocker mutexLock(&m_mutex);
-			if (!m_cacheLoaded) { throw openmittsu::exceptions::InternalErrorException() << "Cache is not prepared!"; }
-			return m_timeReceived;
+		openmittsu::protocol::MessageTime const& BackedMessage::getReceivedAt() const {
+			return getMessage().getReceivedAt();
 		}
 
-		openmittsu::protocol::MessageTime BackedMessage::getSeenAt() const {
-			QMutexLocker mutexLock(&m_mutex);
-			if (!m_cacheLoaded) { throw openmittsu::exceptions::InternalErrorException() << "Cache is not prepared!"; }
-			return m_timeSeen;
+		openmittsu::protocol::MessageTime const& BackedMessage::getSeenAt() const {
+			return getMessage().getSeenAt();
 		}
 
-		openmittsu::protocol::MessageTime BackedMessage::getModifiedAt() const {
-			QMutexLocker mutexLock(&m_mutex);
-			if (!m_cacheLoaded) { throw openmittsu::exceptions::InternalErrorException() << "Cache is not prepared!"; }
-			return m_timeModified;
+		openmittsu::protocol::MessageTime const& BackedMessage::getModifiedAt() const {
+			return getMessage().getModifiedAt();
 		}
 
 		bool BackedMessage::isStatusMessage() const {
-			QMutexLocker mutexLock(&m_mutex);
-			if (!m_cacheLoaded) { throw openmittsu::exceptions::InternalErrorException() << "Cache is not prepared!"; }
-			return m_isStatusMessage;
+			return getMessage().isStatusMessage();
 		}
 
 		QString BackedMessage::getContentAsText() const {
@@ -105,17 +85,14 @@ namespace openmittsu {
 			return getMessage().getContentAsImage();
 		}
 
-		QString BackedMessage::getCaption() const {
+		QString const& BackedMessage::getCaption() const {
 			return getMessage().getCaption();
 		}
 
 		bool BackedMessage::operator <(BackedMessage const& other) const {
-			QMutexLocker mutexLock(&m_mutex);
-			if (!m_cacheLoaded) { throw openmittsu::exceptions::InternalErrorException() << "Cache is not prepared!"; }
-
-			if (m_timeCreatedAt.getMessageTime() < other.m_timeCreatedAt.getMessageTime()) {
+			if (getCreatedAt().getMessageTime() < other.getCreatedAt().getMessageTime()) {
 				return true;
-			} else if (m_timeCreatedAt.getMessageTime() == other.m_timeCreatedAt.getMessageTime()) {
+			} else if (getCreatedAt().getMessageTime() == other.getCreatedAt().getMessageTime()) {
 				return m_uuid < other.m_uuid;
 			} else {
 				return false;
@@ -123,43 +100,13 @@ namespace openmittsu {
 		}
 
 		bool BackedMessage::operator <=(BackedMessage const& other) const {
-			QMutexLocker mutexLock(&m_mutex);
-			if (!m_cacheLoaded) { throw openmittsu::exceptions::InternalErrorException() << "Cache is not prepared!"; }
-
-			if (m_timeCreatedAt.getMessageTime() <= other.m_timeCreatedAt.getMessageTime()) {
+			if (getCreatedAt().getMessageTime() <= other.getCreatedAt().getMessageTime()) {
 				return true;
-			} else if (m_timeCreatedAt.getMessageTime() == other.m_timeCreatedAt.getMessageTime()) {
+			} else if (getCreatedAt().getMessageTime() == other.getCreatedAt().getMessageTime()) {
 				return m_uuid <= other.m_uuid;
 			} else {
 				return false;
 			}
-		}
-
-		void BackedMessage::loadCache() {
-			QMutexLocker mutexLock(&m_mutex);
-
-			messages::UserMessage const& message = getMessage();
-			m_isRead = message.isRead();
-			m_isSent = message.isSent();
-			m_messageState = message.getMessageState();
-			m_timeSent = message.getSentAt();
-			m_timeReceived = message.getReceivedAt();
-
-			if (m_isMessageFromUs) {
-				if (!m_isSent) {
-					m_timeOrderBy = message.getCreatedAt();
-				} else {
-					m_timeOrderBy = m_timeSent;
-				}
-			} else {
-				m_timeOrderBy = m_timeReceived;
-			}
-
-			m_timeCreatedAt = message.getCreatedAt();
-			m_timeSeen = message.getSeenAt();
-			m_timeModified = message.getModifiedAt();
-			m_isStatusMessage = message.isStatusMessage();
-			m_cacheLoaded = true;
 		}
 
 		void BackedMessage::onMessageChanged(QString const& uuid) {
