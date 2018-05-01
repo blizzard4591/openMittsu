@@ -14,16 +14,13 @@ namespace openmittsu {
 		class DatabaseReadonlyMessage : public virtual openmittsu::dataproviders::messages::ReadonlyMessage {
 		public:
 			//explicit DatabaseReadonlyMessage(DatabaseWrapper const& database, QString const& uuid);
-			DatabaseReadonlyMessage(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, bool isMessageFromUs, bool isOutbox, openmittsu::protocol::MessageTime const& createdAt, openmittsu::protocol::MessageTime const& sentAt, openmittsu::protocol::MessageTime const& modifiedAt, bool isQueued, bool isSent, QString const& uuid);
+			DatabaseReadonlyMessage(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, bool isMessageFromUs, openmittsu::protocol::MessageTime const& createdAt, openmittsu::protocol::MessageTime const& sentAt, openmittsu::protocol::MessageTime const& modifiedAt, bool isQueued, bool isSent, QString const& uuid);
 			virtual ~DatabaseReadonlyMessage();
 
 			virtual openmittsu::protocol::ContactId getSender() const override;
 			virtual openmittsu::protocol::MessageId const& getMessageId() const override;
 
 			virtual bool isMessageFromUs() const override;
-
-			/** Encodes whether this is an outgoing or incoming message. */
-			virtual bool isOutbox() const override;
 
 			virtual openmittsu::protocol::MessageTime getCreatedAt() const override;
 			virtual openmittsu::protocol::MessageTime getSentAt() const override;
@@ -40,7 +37,6 @@ namespace openmittsu {
 			openmittsu::protocol::ContactId m_sender;
 			openmittsu::protocol::MessageId m_messageId;
 			bool m_isMessageFromUs;
-			bool m_isOutbox;
 			openmittsu::protocol::MessageTime m_createdAt;
 			openmittsu::protocol::MessageTime m_sentAt;
 			openmittsu::protocol::MessageTime m_modifiedAt;

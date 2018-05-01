@@ -12,7 +12,7 @@ namespace openmittsu {
 
 		using namespace openmittsu::dataproviders::messages;
 
-		ContactMessageCursor::ContactMessageCursor(DatabaseWrapper const& database, openmittsu::protocol::ContactId const& contact) : openmittsu::dataproviders::messages::ContactMessageCursor(), m_contact(contact), m_messageId(0), m_isMessageIdValid(false), m_sortByValue(0), m_uid() {
+		ContactMessageCursor::ContactMessageCursor(DatabaseWrapper const& database, openmittsu::protocol::ContactId const& contact) : openmittsu::dataproviders::messages::ContactMessageCursor(), m_database(database), m_contact(contact), m_messageId(0), m_isMessageIdValid(false), m_sortByValue(0), m_uid() {
 			//
 		}
 
@@ -20,7 +20,7 @@ namespace openmittsu {
 			//
 		}
 
-		ContactMessageCursor::ContactMessageCursor(DatabaseWrapper const& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId) : openmittsu::dataproviders::messages::ContactMessageCursor(), m_contact(contact), m_messageId(messageId), m_isMessageIdValid(false), m_sortByValue(0), m_uid() {
+		ContactMessageCursor::ContactMessageCursor(DatabaseWrapper const& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId) : openmittsu::dataproviders::messages::ContactMessageCursor(), m_database(database), m_contact(contact), m_messageId(messageId), m_isMessageIdValid(false), m_sortByValue(0), m_uid() {
 			if (!seek(messageId)) {
 				throw openmittsu::exceptions::InternalErrorException() << "No message from contact \"" << contact.toString() << "\" and message ID \"" << messageId.toString() << "\" exists, invalid entry point.";
 			}
@@ -34,13 +34,22 @@ namespace openmittsu {
 			if (!isValid()) {
 				throw openmittsu::exceptions::InternalErrorException() << "Can not create message wrapper for invalid message.";
 			}
-
-			return std::make_shared<DatabaseReadonlyContactMessage>(getDatabase(), m_contact, getMessageId());
+			return std::make_shared<DatabaseReadonlyContactMessage>(m_database.getContactMessage(m_contact, getMessageId()));
 		}
 
-		virtual bool isValid() const override;
-		virtual bool seekToFirst() override;
-		virtual bool seekToLast() override;
+		bool ContactMessageCursor::isValid() const {
+			return m_isMessageIdValid;
+		}
+
+		bool ContactMessageCursor::seekToFirst() {
+			m_database->g
+			return getFirstOrLastMessageId(true);
+		}
+
+		bool ContactMessageCursor::seekToLast() {
+			return getFirstOrLastMessageId(false);
+		}
+
 		virtual bool seek(openmittsu::protocol::MessageId const& messageId) override;
 		virtual bool seekByUuid(QString const& uuid) override;
 

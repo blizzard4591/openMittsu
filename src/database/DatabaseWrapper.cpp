@@ -391,12 +391,28 @@ namespace openmittsu {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(setGroupMembers, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(QSet<openmittsu::protocol::ContactId> const&, newMembers));
 		}
 
-		std::shared_ptr<openmittsu::dataproviders::messages::ContactMessageCursor> getContactMessageCursor(openmittsu::protocol::ContactId const& contact) {
+		std::shared_ptr<openmittsu::dataproviders::messages::ContactMessageCursor> DatabaseWrapper::getContactMessageCursor(openmittsu::protocol::ContactId const& contact) {
 			return std::make_shared<openmittsu::database::internal::DatabaseContactMessageCursor>(m_database, group);
 		}
 		
-		std::shared_ptr <openmittsu::dataproviders::messages::GroupMessageCursor> getGroupMessageCursor(openmittsu::protocol::GroupId const& group) {
+		std::shared_ptr <openmittsu::dataproviders::messages::GroupMessageCursor> DatabaseWrapper::getGroupMessageCursor(openmittsu::protocol::GroupId const& group) {
 			return std::make_shared<openmittsu::database::internal::DatabaseGroupMessageCursor>(m_database, group);
+		}
+
+		DatabaseSeekResult DatabaseWrapper::seekNextMessage(openmittsu::protocol::ContactId const& identity, QString const& uuid, SortOrder sortOrder, SortByMode sortByMode) const {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(seekNextMessage, DatabaseSeekResult, Q_ARG(openmittsu::protocol::ContactId const&, identity), Q_ARG(QString const&, uuid), Q_ARG(SortOrder, sortOrder), Q_ARG(SortByMode, sortByMode));
+		}
+
+		DatabaseSeekResult DatabaseWrapper::seekFirstOrLastMessage(openmittsu::protocol::ContactId const& identity, bool first, SortByMode sortByMode) const {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(seekFirstOrLastMessage, DatabaseSeekResult, Q_ARG(openmittsu::protocol::ContactId const&, identity), Q_ARG(bool, first), Q_ARG(SortByMode, sortByMode));
+		}
+
+		DatabaseSeekResult DatabaseWrapper::seekNextMessage(openmittsu::protocol::GroupId const& group, QString const& uuid, SortOrder sortOrder, SortByMode sortByMode) const {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(seekNextMessage, DatabaseSeekResult, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(QString const&, uuid), Q_ARG(SortOrder, sortOrder), Q_ARG(SortByMode, sortByMode));
+		}
+
+		DatabaseSeekResult DatabaseWrapper::seekFirstOrLastMessage(openmittsu::protocol::GroupId const& group, bool first, SortByMode sortByMode) const {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(seekFirstOrLastMessage, DatabaseSeekResult, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(bool, first), Q_ARG(SortByMode, sortByMode));
 		}
 	}
 }

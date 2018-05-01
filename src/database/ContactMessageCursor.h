@@ -32,6 +32,7 @@ namespace openmittsu {
 			virtual openmittsu::protocol::MessageId const& getMessageId() const override;
 			virtual QVector<QString> getLastMessages(std::size_t n) const override;
 		private:
+			DatabaseWrapper m_database;
 			openmittsu::protocol::ContactId m_contact;
 			openmittsu::protocol::MessageId m_messageId;
 			bool m_isMessageIdValid;

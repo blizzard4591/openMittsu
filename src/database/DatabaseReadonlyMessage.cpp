@@ -12,8 +12,8 @@ namespace openmittsu {
 
 		using namespace openmittsu::dataproviders::messages;
 
-		DatabaseReadonlyMessage::DatabaseReadonlyMessage(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, bool isMessageFromUs, bool isOutbox, openmittsu::protocol::MessageTime const& createdAt, openmittsu::protocol::MessageTime const& sentAt, openmittsu::protocol::MessageTime const& modifiedAt, bool isQueued, bool isSent, QString const& uuid) :
-		ReadonlyMessage(), m_sender(sender), m_messageId(messageId), m_isMessageFromUs(isMessageFromUs), m_isOutbox(isOutbox), m_createdAt(createdAt), m_sentAt(sentAt), m_modifiedAt(modifiedAt), m_isQueued(isQueued), m_isSent(isSent), m_uuid(uuid) {
+		DatabaseReadonlyMessage::DatabaseReadonlyMessage(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, bool isMessageFromUs, openmittsu::protocol::MessageTime const& createdAt, openmittsu::protocol::MessageTime const& sentAt, openmittsu::protocol::MessageTime const& modifiedAt, bool isQueued, bool isSent, QString const& uuid) :
+		ReadonlyMessage(), m_sender(sender), m_messageId(messageId), m_isMessageFromUs(isMessageFromUs), m_createdAt(createdAt), m_sentAt(sentAt), m_modifiedAt(modifiedAt), m_isQueued(isQueued), m_isSent(isSent), m_uuid(uuid) {
 			//
 		}
 			
@@ -23,10 +23,6 @@ namespace openmittsu {
 
 		openmittsu::protocol::MessageId const& DatabaseReadonlyMessage::getMessageId() const {
 			return m_messageId;
-		}
-
-		bool DatabaseReadonlyMessage::isOutbox() const {
-			return m_isOutbox;
 		}
 
 		openmittsu::protocol::MessageTime DatabaseReadonlyMessage::getCreatedAt() const {

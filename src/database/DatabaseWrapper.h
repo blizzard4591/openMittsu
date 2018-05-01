@@ -121,6 +121,12 @@ namespace openmittsu {
 			virtual void setGroupTitle(openmittsu::protocol::GroupId const& group, QString const& newTitle) override;
 			virtual void setGroupImage(openmittsu::protocol::GroupId const& group, QByteArray const& newImage) override;
 			virtual void setGroupMembers(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& newMembers) override;
+
+			// Seeking
+			virtual DatabaseSeekResult seekNextMessage(openmittsu::protocol::ContactId const& identity, QString const& uuid, SortOrder sortOrder, SortByMode sortByMode) const override;
+			virtual DatabaseSeekResult seekFirstOrLastMessage(openmittsu::protocol::ContactId const& identity, bool first, SortByMode sortByMode) const override;
+			virtual DatabaseSeekResult seekNextMessage(openmittsu::protocol::GroupId const& group, QString const& uuid, SortOrder sortOrder, SortByMode sortByMode) const override;
+			virtual DatabaseSeekResult seekFirstOrLastMessage(openmittsu::protocol::GroupId const& group, bool first, SortByMode sortByMode) const override;
 		};
 
 	}

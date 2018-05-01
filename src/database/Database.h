@@ -6,9 +6,12 @@
 #include <QSet>
 #include <QString>
 
+#include <memory>
+
 #include "src/database/DatabaseSeekResult.h"
 #include "src/dataproviders/SentMessageAcceptor.h"
 #include "src/dataproviders/messages/ReadonlyContactMessage.h"
+#include "src/dataproviders/messages/ReadonlyGroupMessage.h"
 #include "src/crypto/PublicKey.h"
 #include "src/protocol/AccountStatus.h"
 #include "src/protocol/ContactId.h"
@@ -117,7 +120,6 @@ namespace openmittsu {
 
 			virtual std::unique_ptr<openmittsu::dataproviders::BackedContact> getBackedContact(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) = 0;
 			virtual std::unique_ptr<openmittsu::dataproviders::BackedGroup> getBackedGroup(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) = 0;
-			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const = 0;
 
 			// Contact Data
 			virtual QString getFirstName(openmittsu::protocol::ContactId const& contact) const = 0;
@@ -149,9 +151,12 @@ namespace openmittsu {
 			virtual bool getGroupIsAwaitingSync(openmittsu::protocol::GroupId const& group) const = 0;
 			virtual int getGroupCount() const = 0;
 			virtual int getGroupMessageCount(openmittsu::protocol::GroupId const& group) const = 0;
+			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const = 0;
 
 			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::GroupId const& group, std::size_t n) const = 0;
+			//virtual DatabaseReadonlyGroupMessage getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) const = 0;
 
+			// Seeking, Searching
 			virtual DatabaseSeekResult seekNextMessage(openmittsu::protocol::ContactId const& identity, QString const& uuid, SortOrder sortOrder, SortByMode sortByMode) const = 0;
 			virtual DatabaseSeekResult seekFirstOrLastMessage(openmittsu::protocol::ContactId const& identity, bool first, SortByMode sortByMode) const = 0;
 			virtual DatabaseSeekResult seekNextMessage(openmittsu::protocol::GroupId const& group, QString const& uuid, SortOrder sortOrder, SortByMode sortByMode) const = 0;

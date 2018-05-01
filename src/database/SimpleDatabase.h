@@ -30,6 +30,7 @@
 #include "src/database/internal/DatabaseMessage.h"
 #include "src/database/internal/ExternalMediaFileStorage.h"
 #include "src/database/internal/InternalDatabaseInterface.h"
+#include "src/database/DatabaseReadonlyContactMessage.h"
 #include "src/dataproviders/messages/ContactMessageType.h"
 #include "src/dataproviders/messages/ControlMessageType.h"
 #include "src/dataproviders/messages/GroupMessageType.h"
@@ -83,15 +84,16 @@ namespace openmittsu {
 			void setOptionValue(QString const& optionName, bool const& optionValue);
 			void setOptionValue(QString const& optionName, QByteArray const& optionValue);
 
-			virtual openmittsu::dataproviders::BackedContact getBackedContact(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) override;
-			virtual openmittsu::dataproviders::BackedGroup getBackedGroup(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) override;
+			virtual std::unique_ptr<openmittsu::dataproviders::BackedContact> getBackedContact(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) override;
+			virtual std::unique_ptr<openmittsu::dataproviders::BackedGroup> getBackedGroup(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) override;
 
 			virtual openmittsu::protocol::GroupStatus getGroupStatus(openmittsu::protocol::GroupId const& group) const override;
 			virtual openmittsu::protocol::ContactStatus getContactStatus(openmittsu::protocol::ContactId const& contact) const override;
 			virtual openmittsu::protocol::ContactId getSelfContact() const override;
 
 			/** AHHH FUCK THIS **/
-			virtual openmittsu::dataproviders::BackedContactMessage getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const override;
+			virtual DatabaseReadonlyContactMessage getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const override;
+			//virtual DatabaseReadonlyGroupMessage getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) const override;
 
 
 			openmittsu::crypto::PublicKey getContactPublicKey(openmittsu::protocol::ContactId const& identity) const;
@@ -141,6 +143,12 @@ namespace openmittsu {
 			virtual QSqlQuery getQueryObject() override;
 			virtual bool transactionStart() override;
 			virtual bool transactionCommit() override;
+
+			// Seeking
+			virtual DatabaseSeekResult seekNextMessage(openmittsu::protocol::ContactId const& identity, QString const& uuid, SortOrder sortOrder, SortByMode sortByMode) const override;
+			virtual DatabaseSeekResult seekFirstOrLastMessage(openmittsu::protocol::ContactId const& identity, bool first, SortByMode sortByMode) const override;
+			virtual DatabaseSeekResult seekNextMessage(openmittsu::protocol::GroupId const& group, QString const& uuid, SortOrder sortOrder, SortByMode sortByMode) const override;
+			virtual DatabaseSeekResult seekFirstOrLastMessage(openmittsu::protocol::GroupId const& group, bool first, SortByMode sortByMode) const override;
 
 			// Media Files
 			virtual MediaFileItem getMediaItem(QString const& uuid) const override;

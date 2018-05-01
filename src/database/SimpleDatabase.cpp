@@ -13,6 +13,7 @@
 
 #include <iostream>
 #include "src/crypto/Crc32.h"
+#include "src/database/internal/DatabaseContactMessageCursor.h"
 #include "src/exceptions/InternalErrorException.h"
 #include "src/exceptions/InvalidPasswordOrDatabaseException.h"
 #include "src/exceptions/MissingQSqlCipherException.h"
@@ -945,7 +946,7 @@ namespace openmittsu {
 			m_identityBackup = std::make_unique<openmittsu::backup::IdentityBackup>(openmittsu::backup::IdentityBackup::fromBackupString(identityBackup, m_password));
 		}
 
-		openmittsu::protocol::ContactId const& SimpleDatabase::getSelfContact() const {
+		openmittsu::protocol::ContactId SimpleDatabase::getSelfContact() const {
 			return m_selfContact;
 		}
 
@@ -1316,6 +1317,12 @@ namespace openmittsu {
 		bool SimpleDatabase::transactionCommit() {
 			return database.commit();
 		}
+
+		DatabaseReadonlyContactMessage SimpleDatabase::getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const {
+			internal::DatabaseContactMessageCursor cursor(this, contact, uuid);
+		}
+
+		//virtual DatabaseReadonlyGroupMessage getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) const override;
 
 	}
 }

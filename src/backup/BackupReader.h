@@ -10,8 +10,9 @@
 
 #include <QDir>
 #include <QHash>
-#include <QString>
 #include <QObject>
+#include <QString>
+#include <QThread>
 #include <cstdint>
 
 namespace openmittsu {

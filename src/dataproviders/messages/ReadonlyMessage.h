@@ -19,10 +19,8 @@ namespace openmittsu {
 				virtual openmittsu::protocol::ContactId getSender() const = 0;
 				virtual openmittsu::protocol::MessageId const& getMessageId() const = 0;
 
-				virtual bool isMessageFromUs() const = 0;
-
 				/** Encodes whether this is an outgoing or incoming message. */
-				virtual bool isOutbox() const = 0;
+				virtual bool isMessageFromUs() const = 0;
 
 				virtual openmittsu::protocol::MessageTime getCreatedAt() const = 0;
 				virtual openmittsu::protocol::MessageTime getSentAt() const = 0;

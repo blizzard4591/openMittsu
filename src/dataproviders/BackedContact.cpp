@@ -115,14 +115,11 @@ namespace openmittsu {
 		}
 
 		QVector<QString> BackedContact::getLastMessageUuids(std::size_t n) {
-			return m_cursor->getLastMessages(n);
+			return m_database.getLastMessageUuids(m_contactId, n);
 		}
 
 		BackedContactMessage BackedContact::getMessageByUuid(QString const& uuid) {
-			if (!m_cursor->seekByUuid(uuid)) {
-				throw openmittsu::exceptions::InternalErrorException() << "Can not return message with UUID " << uuid.toStdString() << " as it does not exist.";
-			}
-			return BackedContactMessage(m_cursor->getMessage(), *this, m_messageCenter);
+			return BackedContactMessage(m_database.getContactMessage(m_contactId, uuid), *this, m_messageCenter);
 		}
 
 	}

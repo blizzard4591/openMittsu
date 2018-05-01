@@ -212,6 +212,10 @@ namespace openmittsu {
 				return m_messageId;
 			}
 
+			QString const& DatabaseMessageCursor::getMessageUuid() const {
+				return m_uid;
+			}
+
 		}
 	}
 }

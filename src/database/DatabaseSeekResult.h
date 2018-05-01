@@ -2,11 +2,8 @@
 #define OPENMITTSU_DATABASE_DATABASESEEKRESULT_H_
 
 #include <QString>
-#include <QSqlQuery>
-#include <QVariant>
 
-#include "src/database/DatabaseWrapper.h"
-#include "src/dataproviders/messages/ReadonlyMessage.h"
+#include "src/protocol/MessageId.h"
 
 namespace openmittsu {
 	namespace database {
@@ -16,6 +13,10 @@ namespace openmittsu {
 			openmittsu::protocol::MessageId m_messageId;
 			QString m_uid;
 			qint64 m_sortByValue;
+
+			DatabaseSeekResult() : operationResult(false), m_messageId(0), m_uid(), m_sortByValue(0) {
+				//
+			}
 		};
 
 	}
