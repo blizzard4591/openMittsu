@@ -11,6 +11,7 @@
 #include "src/protocol/ContactIdList.h"
 
 #include "src/utility/Logging.h"
+#include "src/utility/MakeUnique.h"
 #include "src/utility/QObjectConnectionMacro.h"
 
 namespace openmittsu {
@@ -82,11 +83,11 @@ namespace openmittsu {
 			}
 
 			int DatabaseContactAndGroupDataProvider::getGroupCount() const {
-				return openmittsu::database::DatabaseUtilities::countQuery(m_database, QStringLiteral("groups"));
+				return openmittsu::database::internal::DatabaseUtilities::countQuery(m_database, QStringLiteral("groups"));
 			}
 
 			int DatabaseContactAndGroupDataProvider::getGroupMessageCount(openmittsu::protocol::GroupId const& group) const {
-				return openmittsu::database::DatabaseGroupMessage::getGroupMessageCount(m_database, group);
+				return openmittsu::database::internal::DatabaseGroupMessage::getGroupMessageCount(m_database, group);
 			}
 
 			QString DatabaseContactAndGroupDataProvider::getGroupTitle(openmittsu::protocol::GroupId const& group) const {
@@ -223,8 +224,8 @@ namespace openmittsu {
 				m_database->announceGroupChanged(group);
 			}
 
-			openmittsu::dataproviders::BackedGroup DatabaseContactAndGroupDataProvider::getGroup(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::MessageCenter& messageCenter) {
-				return openmittsu::dataproviders::BackedGroup(group, *this, *this, messageCenter);
+			std::unique_ptr<openmittsu::dataproviders::BackedGroup> DatabaseContactAndGroupDataProvider::getGroup(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::MessageCenter& messageCenter) {
+				return std::make_unique<openmittsu::dataproviders::BackedGroup>(group, *this, *this, messageCenter);
 			}
 
 			QSet<openmittsu::protocol::GroupId> DatabaseContactAndGroupDataProvider::getKnownGroups() const {
@@ -332,7 +333,7 @@ namespace openmittsu {
 				if (fieldsAndValues.size() > 0) {
 					QSqlQuery query(m_database->getQueryObject());
 
-					openmittsu::database::DatabaseUtilities::prepareSetFieldsUpdateQuery(query, QStringLiteral("UPDATE `groups` SET %1 WHERE `id` = :groupId AND `creator` = :groupCreator;"), fieldsAndValues);
+					openmittsu::database::internal::DatabaseUtilities::prepareSetFieldsUpdateQuery(query, QStringLiteral("UPDATE `groups` SET %1 WHERE `id` = :groupId AND `creator` = :groupCreator;"), fieldsAndValues);
 					query.bindValue(QStringLiteral(":groupId"), QVariant(group.groupIdWithoutOwnerToQString()));
 					query.bindValue(QStringLiteral(":groupCreator"), QVariant(group.getOwner().toQString()));
 
@@ -352,7 +353,7 @@ namespace openmittsu {
 				if (fieldsAndValues.size() > 0) {
 					QSqlQuery query(m_database->getQueryObject());
 
-					openmittsu::database::DatabaseUtilities::prepareSetFieldsUpdateQuery(query, QStringLiteral("UPDATE `contacts` SET %1 WHERE `identity` = :identity;"), fieldsAndValues);
+					openmittsu::database::internal::DatabaseUtilities::prepareSetFieldsUpdateQuery(query, QStringLiteral("UPDATE `contacts` SET %1 WHERE `identity` = :identity;"), fieldsAndValues);
 					query.bindValue(QStringLiteral(":identity"), QVariant(contact.toQString()));
 
 					if (!query.exec()) {
@@ -556,8 +557,8 @@ namespace openmittsu {
 				m_database->announceContactChanged(m_database->getSelfContact());
 			}
 
-			openmittsu::dataproviders::BackedContact DatabaseContactAndGroupDataProvider::getContact(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::MessageCenter& messageCenter) {
-				return openmittsu::dataproviders::BackedContact(contact, getPublicKey(contact), *this, messageCenter);
+			std::unique_ptr<openmittsu::dataproviders::BackedContact> DatabaseContactAndGroupDataProvider::getContact(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::MessageCenterWrapper& messageCenter) {
+				return std::make_unique<openmittsu::dataproviders::BackedContact>(contact, getPublicKey(contact), *this, messageCenter);
 			}
 
 			QSet<openmittsu::protocol::ContactId> DatabaseContactAndGroupDataProvider::getKnownContacts() const {
@@ -674,14 +675,14 @@ namespace openmittsu {
 				return std::make_shared<openmittsu::database::internal::DatabaseContactMessageCursor>(m_database, contact);
 			}
 
-			openmittsu::dataproviders::BackedContactMessage DatabaseContactAndGroupDataProvider::getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid, openmittsu::dataproviders::MessageCenter& messageCenter) {
+			openmittsu::dataproviders::BackedContactMessage DatabaseContactAndGroupDataProvider::getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid, openmittsu::dataproviders::MessageCenterWrapper& messageCenter) {
 				openmittsu::database::internal::DatabaseContactMessageCursor cursor(m_database, contact);
 				if (!cursor.seekByUuid(uuid)) {
 					throw openmittsu::exceptions::InternalErrorException() << "Could not find message with UUID " << uuid.toStdString() << " for contact " << contact.toString() << ".";
 				}
 
-				auto message = cursor.getMessage();
-				return openmittsu::dataproviders::BackedContactMessage(message, this->getContact(message->getSender(), messageCenter), messageCenter);
+				auto message = cursor.getReadonlyMessage();
+				return openmittsu::dataproviders::BackedContactMessage(message, this->getContact(contact, messageCenter), messageCenter);
 			}
 		}
 	}

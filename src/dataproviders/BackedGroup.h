@@ -9,6 +9,7 @@
 
 #include "src/utility/Location.h"
 #include "src/database/DatabaseWrapper.h"
+#include "src/database/DatabaseReadonlyGroupMessage.h"
 #include "src/dataproviders/MessageSource.h"
 #include "src/dataproviders/MessageCenterWrapper.h"
 #include "src/protocol/ContactId.h"
@@ -50,6 +51,10 @@ namespace openmittsu {
 
 			virtual QVector<QString> getLastMessageUuids(std::size_t n) override;
 			BackedGroupMessage getMessageByUuid(QString const& uuid);
+
+			friend class BackedGroupMessage;
+		protected:
+			openmittsu::database::DatabaseReadonlyGroupMessage fetchMessageByUuid(QString const& uuid) const;
 		public slots:
 			bool sendTextMessage(QString const& text);
 			bool sendImageMessage(QByteArray const& image, QString const& caption);

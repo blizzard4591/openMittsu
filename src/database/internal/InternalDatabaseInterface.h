@@ -23,7 +23,7 @@ namespace openmittsu {
 				virtual QString generateUuid() const = 0;
 
 				// Queries
-				virtual QSqlQuery getQueryObject() = 0;
+				virtual QSqlQuery getQueryObject() const = 0;
 				virtual bool transactionStart() = 0;
 				virtual bool transactionCommit() = 0;
 

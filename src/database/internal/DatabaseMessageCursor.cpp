@@ -12,7 +12,7 @@ namespace openmittsu {
 
 			using namespace openmittsu::dataproviders::messages;
 
-			DatabaseMessageCursor::DatabaseMessageCursor(InternalDatabaseInterface* database) : m_database(database), m_messageId(0), m_isMessageIdValid(false) {
+			DatabaseMessageCursor::DatabaseMessageCursor(InternalDatabaseInterface const* database) : m_database(database), m_messageId(0), m_isMessageIdValid(false) {
 				//
 			}
 
@@ -204,7 +204,7 @@ namespace openmittsu {
 				return getFollowingMessageId(false);
 			}
 
-			InternalDatabaseInterface* DatabaseMessageCursor::getDatabase() const {
+			InternalDatabaseInterface const* DatabaseMessageCursor::getDatabase() const {
 				return m_database;
 			}
 

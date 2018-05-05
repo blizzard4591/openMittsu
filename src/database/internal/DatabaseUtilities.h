@@ -15,7 +15,7 @@ namespace openmittsu {
 
 			class DatabaseUtilities {
 			public:
-				static int countQuery(InternalDatabaseInterface* database, QString const& tableName, QVariantMap const& whereQueryPart = {});
+				static int countQuery(InternalDatabaseInterface const* database, QString const& tableName, QVariantMap const& whereQueryPart = {});
 				static void prepareSetFieldsUpdateQuery(QSqlQuery& query, QString const& queryString, QVariantMap const& fieldsAndValues);
 			};
 

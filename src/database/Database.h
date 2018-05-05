@@ -133,7 +133,7 @@ namespace openmittsu {
 			virtual int getContactMessageCount(openmittsu::protocol::ContactId const& contact) const = 0;
 
 			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::ContactId const& contact, std::size_t n) const = 0;
-			virtual DatabaseReadonlyContactMessage getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const = 0;
+			virtual std::unique_ptr<DatabaseReadonlyContactMessage> getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const = 0;
 
 			virtual void setFirstName(openmittsu::protocol::ContactId const& contact, QString const& firstName) = 0;
 			virtual void setLastName(openmittsu::protocol::ContactId const& contact, QString const& lastName) = 0;
@@ -154,7 +154,7 @@ namespace openmittsu {
 			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const = 0;
 
 			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::GroupId const& group, std::size_t n) const = 0;
-			//virtual DatabaseReadonlyGroupMessage getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) const = 0;
+			virtual std::unique_ptr<DatabaseReadonlyGroupMessage> getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) const = 0;
 
 			// Seeking, Searching
 			virtual DatabaseSeekResult seekNextMessage(openmittsu::protocol::ContactId const& identity, QString const& uuid, SortOrder sortOrder, SortByMode sortByMode) const = 0;

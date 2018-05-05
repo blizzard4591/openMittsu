@@ -18,8 +18,9 @@ namespace openmittsu {
 
 			class DatabaseGroupMessageCursor : public virtual DatabaseMessageCursor, public virtual openmittsu::dataproviders::messages::GroupMessageCursor {
 			public:
-				explicit DatabaseGroupMessageCursor(InternalDatabaseInterface* database, openmittsu::protocol::GroupId const& group);
-				explicit DatabaseGroupMessageCursor(InternalDatabaseInterface* database, openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId);
+				explicit DatabaseGroupMessageCursor(InternalDatabaseInterface const* database, openmittsu::protocol::GroupId const& group);
+				explicit DatabaseGroupMessageCursor(InternalDatabaseInterface const* database, openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId);
+				explicit DatabaseGroupMessageCursor(InternalDatabaseInterface const* database, openmittsu::protocol::GroupId const& group, QString const& uuid);
 				virtual ~DatabaseGroupMessageCursor();
 
 				virtual openmittsu::protocol::GroupId const& getGroupId() const override;

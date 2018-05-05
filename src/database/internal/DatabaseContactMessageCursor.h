@@ -16,9 +16,9 @@ namespace openmittsu {
 		namespace internal {
 			class DatabaseContactMessageCursor : public virtual DatabaseMessageCursor, public virtual openmittsu::dataproviders::messages::ContactMessageCursor {
 			public:
-				explicit DatabaseContactMessageCursor(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact);
-				explicit DatabaseContactMessageCursor(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId);
-				explicit DatabaseContactMessageCursor(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, QString const& uuid);
+				explicit DatabaseContactMessageCursor(InternalDatabaseInterface const* database, openmittsu::protocol::ContactId const& contact);
+				explicit DatabaseContactMessageCursor(InternalDatabaseInterface const* database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId);
+				explicit DatabaseContactMessageCursor(InternalDatabaseInterface const* database, openmittsu::protocol::ContactId const& contact, QString const& uuid);
 				virtual ~DatabaseContactMessageCursor();
 
 				virtual openmittsu::protocol::ContactId const& getContactId() const override;

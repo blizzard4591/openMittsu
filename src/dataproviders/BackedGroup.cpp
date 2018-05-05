@@ -103,12 +103,11 @@ namespace openmittsu {
 		}
 
 		BackedGroupMessage BackedGroup::getMessageByUuid(QString const& uuid) {
-			if (!m_cursor->seekByUuid(uuid)) {
-				throw openmittsu::exceptions::InternalErrorException() << "Can not return message with UUID " << uuid.toStdString() << " as it does not exist.";
-			}
-			auto message = m_cursor->getMessage();
+			return BackedGroupMessage(m_database.getGroupMessage(m_contactId, uuid), *this, m_messageCenter);
+		}
 
-			return BackedGroupMessage(message, m_database.getBackedContact(message->getSender(), m_messageCenter), m_messageCenter);
+		openmittsu::database::DatabaseReadonlyGroupMessage BackedGroup::fetchMessageByUuid(QString const& uuid) const {
+			return m_database.getGroupMessage(m_groupId, uuid);
 		}
 
 	}

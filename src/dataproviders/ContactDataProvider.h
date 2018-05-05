@@ -22,7 +22,7 @@ namespace openmittsu {
 
 		class BackedContact;
 		class BackedContactMessage;
-		class MessageCenter;
+		class MessageCenterWrapper;
 
 		class ContactDataProvider : public QObject {
 			Q_OBJECT
@@ -31,7 +31,7 @@ namespace openmittsu {
 
 			virtual bool hasContact(openmittsu::protocol::ContactId const& contact) const = 0;
 
-			virtual BackedContact getSelfContact(MessageCenter& messageCenter) = 0;
+			virtual BackedContact getSelfContact(MessageCenterWrapper& messageCenter) = 0;
 
 			virtual openmittsu::crypto::PublicKey getPublicKey(openmittsu::protocol::ContactId const& contact) const = 0;
 			virtual QString getFirstName(openmittsu::protocol::ContactId const& contact) const = 0;
@@ -60,8 +60,8 @@ namespace openmittsu {
 			virtual void setAccountStatusBatch(QHash<openmittsu::protocol::ContactId, openmittsu::protocol::AccountStatus> const& status) = 0;
 			virtual void setFeatureLevelBatch(QHash<openmittsu::protocol::ContactId, openmittsu::protocol::FeatureLevel> const& featureLevels) = 0;
 
-			virtual BackedContact getContact(openmittsu::protocol::ContactId const& contact, MessageCenter& messageCenter) = 0;
-			virtual BackedContactMessage getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid, MessageCenter& messageCenter) = 0;
+			virtual BackedContact getContact(openmittsu::protocol::ContactId const& contact, MessageCenterWrapper& messageCenter) = 0;
+			//virtual BackedContactMessage getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid, MessageCenterWrapper& messageCenter) = 0;
 
 			virtual QSet<openmittsu::protocol::ContactId> getKnownContacts() const = 0;
 			virtual QSet<openmittsu::protocol::ContactId> getContactsRequiringFeatureLevelCheck(int maximalAgeInSeconds) const = 0;

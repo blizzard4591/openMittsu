@@ -30,8 +30,8 @@ namespace openmittsu {
 				virtual openmittsu::utility::Location getContentAsLocation() const override;
 				virtual MediaFileItem getContentAsImage() const override;
 
-				static int getGroupMessageCount(InternalDatabaseInterface* database);
-				static int getGroupMessageCount(InternalDatabaseInterface* database, openmittsu::protocol::GroupId const& group);
+				static int getGroupMessageCount(InternalDatabaseInterface const* database);
+				static int getGroupMessageCount(InternalDatabaseInterface const* database, openmittsu::protocol::GroupId const& group);
 
 				static bool exists(InternalDatabaseInterface* database, openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId);
 				static openmittsu::protocol::MessageId insertGroupMessageFromUs(InternalDatabaseInterface* database, openmittsu::protocol::GroupId const& group, QString const& uuid, openmittsu::protocol::MessageTime const& createdAt, openmittsu::dataproviders::messages::GroupMessageType const& type, QString const& body, bool isQueued, bool isStatusMessage, QString const& caption);

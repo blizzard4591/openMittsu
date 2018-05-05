@@ -47,7 +47,7 @@ namespace openmittsu {
 			virtual openmittsu::protocol::MessageTime const& getSeenAt() const override;
 			virtual bool isStatusMessage() const override;
 
-			virtual openmittsu::dataproviders::messages::GroupMessageType const& getMessageType() const = 0;
+			virtual openmittsu::dataproviders::messages::GroupMessageType const& getMessageType() const override;
 			virtual QString const& getCaption() const override;
 
 			virtual QString const& getContentAsText() const override;

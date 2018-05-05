@@ -92,8 +92,8 @@ namespace openmittsu {
 			virtual openmittsu::protocol::ContactId getSelfContact() const override;
 
 			/** AHHH FUCK THIS **/
-			virtual DatabaseReadonlyContactMessage getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const override;
-			//virtual DatabaseReadonlyGroupMessage getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) const override;
+			virtual std::unique_ptr<DatabaseReadonlyContactMessage> getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const override;
+			virtual std::unique_ptr<DatabaseReadonlyGroupMessage> getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) const override;
 
 
 			openmittsu::crypto::PublicKey getContactPublicKey(openmittsu::protocol::ContactId const& identity) const;
@@ -140,7 +140,7 @@ namespace openmittsu {
 			openmittsu::protocol::MessageId getNextMessageId(openmittsu::protocol::GroupId const& group);
 
 			// Queries
-			virtual QSqlQuery getQueryObject() override;
+			virtual QSqlQuery getQueryObject() const override;
 			virtual bool transactionStart() override;
 			virtual bool transactionCommit() override;
 

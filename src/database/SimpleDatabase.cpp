@@ -797,11 +797,11 @@ namespace openmittsu {
 			return m_contactAndGroupDataProvider.getGroupStatus(group) == openmittsu::protocol::GroupStatus::DELETED;
 		}
 
-		openmittsu::dataproviders::BackedContact SimpleDatabase::getBackedContact(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::MessageCenter& messageCenter) {
+		std::unique_ptr<openmittsu::dataproviders::BackedContact> SimpleDatabase::getBackedContact(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::MessageCenter& messageCenter) {
 			return m_contactAndGroupDataProvider.getContact(contact, messageCenter);
 		}
 
-		openmittsu::dataproviders::BackedGroup SimpleDatabase::getBackedGroup(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::MessageCenter& messageCenter) {
+		std::unique_ptr<openmittsu::dataproviders::BackedGroup> SimpleDatabase::getBackedGroup(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::MessageCenter& messageCenter) {
 			return m_contactAndGroupDataProvider.getGroup(group, messageCenter);
 		}
 
@@ -1306,7 +1306,7 @@ namespace openmittsu {
 			}
 		}
 
-		QSqlQuery SimpleDatabase::getQueryObject() {
+		QSqlQuery SimpleDatabase::getQueryObject() const {
 			return QSqlQuery(database);
 		}
 
@@ -1320,9 +1320,13 @@ namespace openmittsu {
 
 		DatabaseReadonlyContactMessage SimpleDatabase::getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const {
 			internal::DatabaseContactMessageCursor cursor(this, contact, uuid);
+			return cursor.getReadonlyMessage();
 		}
 
-		//virtual DatabaseReadonlyGroupMessage getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) const override;
+		DatabaseReadonlyGroupMessage SimpleDatabase::getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) const {
+			internal::DatabaseGroupMessageCursor cursor(this, group, uuid);
+			return cursor.getReadonlyMessage();
+		}
 
 	}
 }
