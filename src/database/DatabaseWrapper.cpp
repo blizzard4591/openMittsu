@@ -6,8 +6,8 @@
 #include "src/utility/QObjectConnectionMacro.h"
 #include "src/utility/Wrapping.h"
 
-#include "src/database/internal/DatabaseContactMessageCursor.h"
-#include "src/database/internal/DatabaseGroupMessageCursor.h"
+#include "src/database/DatabaseReadonlyContactMessage.h"
+#include "src/database/DatabaseReadonlyGroupMessage.h"
 
 namespace openmittsu {
 	namespace database {
@@ -279,6 +279,14 @@ namespace openmittsu {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getBackedGroup, std::unique_ptr<openmittsu::dataproviders::BackedGroup>, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(openmittsu::dataproviders::MessageCenterWrapper const&, messageCenter));
 		}
 
+		std::unique_ptr<DatabaseReadonlyContactMessage> DatabaseWrapper::getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getContactMessage, std::unique_ptr<openmittsu::database::DatabaseReadonlyContactMessage>, Q_ARG(openmittsu::protocol::ContactId const&, contact), Q_ARG(QString const&, uuid));
+		}
+		
+		std::unique_ptr<DatabaseReadonlyGroupMessage> DatabaseWrapper::getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) const {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getGroupMessage, std::unique_ptr<openmittsu::database::DatabaseReadonlyGroupMessage>, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(QString const&, uuid));
+		}
+
 		QSet<openmittsu::protocol::ContactId> DatabaseWrapper::getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getGroupMembers, QSet<openmittsu::protocol::ContactId>, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(bool, excludeSelfContact));
 		}
@@ -391,12 +399,12 @@ namespace openmittsu {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(setGroupMembers, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(QSet<openmittsu::protocol::ContactId> const&, newMembers));
 		}
 
-		std::shared_ptr<openmittsu::dataproviders::messages::ContactMessageCursor> DatabaseWrapper::getContactMessageCursor(openmittsu::protocol::ContactId const& contact) {
-			return std::make_shared<openmittsu::database::internal::DatabaseContactMessageCursor>(m_database, group);
+		QVector<QString> DatabaseWrapper::getLastMessageUuids(openmittsu::protocol::ContactId const& contact, std::size_t n) const {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getLastMessageUuids, QVector<QString>, Q_ARG(openmittsu::protocol::ContactId const&, contact), Q_ARG(std::size_t, n));
 		}
-		
-		std::shared_ptr <openmittsu::dataproviders::messages::GroupMessageCursor> DatabaseWrapper::getGroupMessageCursor(openmittsu::protocol::GroupId const& group) {
-			return std::make_shared<openmittsu::database::internal::DatabaseGroupMessageCursor>(m_database, group);
+
+		QVector<QString> DatabaseWrapper::getLastMessageUuids(openmittsu::protocol::GroupId const& group, std::size_t n) const {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getLastMessageUuids, QVector<QString>, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(std::size_t, n));
 		}
 
 		DatabaseSeekResult DatabaseWrapper::seekNextMessage(openmittsu::protocol::ContactId const& identity, QString const& uuid, SortOrder sortOrder, SortByMode sortByMode) const {

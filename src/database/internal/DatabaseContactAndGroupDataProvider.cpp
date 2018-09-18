@@ -224,7 +224,7 @@ namespace openmittsu {
 				m_database->announceGroupChanged(group);
 			}
 
-			std::unique_ptr<openmittsu::dataproviders::BackedGroup> DatabaseContactAndGroupDataProvider::getGroup(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::MessageCenter& messageCenter) {
+			std::unique_ptr<openmittsu::dataproviders::BackedGroup> DatabaseContactAndGroupDataProvider::getGroup(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::MessageCenterWrapper& messageCenter) {
 				return std::make_unique<openmittsu::dataproviders::BackedGroup>(group, *this, *this, messageCenter);
 			}
 
@@ -387,14 +387,14 @@ namespace openmittsu {
 				return std::make_shared<openmittsu::database::internal::DatabaseGroupMessageCursor>(m_database, group);
 			}
 
-			openmittsu::dataproviders::BackedGroupMessage DatabaseContactAndGroupDataProvider::getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid, openmittsu::dataproviders::MessageCenter& messageCenter) {
+			std::unique_ptr<openmittsu::dataproviders::BackedGroupMessage> DatabaseContactAndGroupDataProvider::getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid, openmittsu::dataproviders::MessageCenterWrapper& messageCenter) {
 				openmittsu::database::internal::DatabaseGroupMessageCursor cursor(m_database, group);
 				if (!cursor.seekByUuid(uuid)) {
 					throw openmittsu::exceptions::InternalErrorException() << "Could not find message with UUID " << uuid.toStdString() << " for group " << group.toString() << ".";
 				}
 				auto message = cursor.getMessage();
 
-				return openmittsu::dataproviders::BackedGroupMessage(message, getContact(message->getSender(), messageCenter), messageCenter);
+				return std::make_unique<openmittsu::dataproviders::BackedGroupMessage>(message, getContact(message->getSender(), messageCenter), messageCenter);
 			}
 
 
@@ -412,7 +412,7 @@ namespace openmittsu {
 				return query.next();
 			}
 
-			openmittsu::dataproviders::BackedContact DatabaseContactAndGroupDataProvider::getSelfContact(openmittsu::dataproviders::MessageCenter& messageCenter) {
+			std::unique_ptr<openmittsu::dataproviders::BackedContact> DatabaseContactAndGroupDataProvider::getSelfContact(openmittsu::dataproviders::MessageCenterWrapper& messageCenter) {
 				return getContact(m_database->getSelfContact(), messageCenter);
 			}
 
@@ -675,14 +675,14 @@ namespace openmittsu {
 				return std::make_shared<openmittsu::database::internal::DatabaseContactMessageCursor>(m_database, contact);
 			}
 
-			openmittsu::dataproviders::BackedContactMessage DatabaseContactAndGroupDataProvider::getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid, openmittsu::dataproviders::MessageCenterWrapper& messageCenter) {
+			std::unique_ptr<openmittsu::dataproviders::BackedContactMessage> DatabaseContactAndGroupDataProvider::getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid, openmittsu::dataproviders::MessageCenterWrapper& messageCenter) {
 				openmittsu::database::internal::DatabaseContactMessageCursor cursor(m_database, contact);
 				if (!cursor.seekByUuid(uuid)) {
 					throw openmittsu::exceptions::InternalErrorException() << "Could not find message with UUID " << uuid.toStdString() << " for contact " << contact.toString() << ".";
 				}
 
 				auto message = cursor.getReadonlyMessage();
-				return openmittsu::dataproviders::BackedContactMessage(message, this->getContact(contact, messageCenter), messageCenter);
+				return std::make_unique<openmittsu::dataproviders::BackedContactMessage>(message, this->getContact(contact, messageCenter), messageCenter);
 			}
 		}
 	}

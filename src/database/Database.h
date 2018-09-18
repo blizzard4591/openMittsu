@@ -34,6 +34,7 @@ namespace openmittsu {
 
 	namespace database {
 		class DatabaseReadonlyContactMessage;
+		class DatabaseReadonlyGroupMessage;
 
 		class Database : public QObject {
 			Q_OBJECT

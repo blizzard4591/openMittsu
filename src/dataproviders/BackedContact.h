@@ -25,6 +25,7 @@ namespace openmittsu {
 
 	namespace dataproviders {
 		class BackedContactMessage;
+		class BackedGroupMessage;
 
 		class BackedContact : public QObject, public MessageSource {
 			Q_OBJECT
@@ -52,6 +53,7 @@ namespace openmittsu {
 			void setLastName(QString const& newLastName);
 
 			friend class BackedContactMessage;
+			friend class BackedGroupMessage;
 		protected:
 			openmittsu::database::DatabaseReadonlyContactMessage fetchMessageByUuid(QString const& uuid) const;
 		public slots:

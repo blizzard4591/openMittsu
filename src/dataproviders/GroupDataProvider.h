@@ -47,8 +47,8 @@ namespace openmittsu {
 			virtual void setGroupImage(openmittsu::protocol::GroupId const& group, QByteArray const& newImage) = 0;
 			virtual void setGroupMembers(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& newMembers) = 0;
 
-			virtual BackedGroup getGroup(openmittsu::protocol::GroupId const& group, MessageCenterWrapper& messageCenter) = 0;
-			//virtual BackedGroupMessage getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid, MessageCenterWrapper& messageCenter) = 0;
+			virtual std::unique_ptr<BackedGroup> getGroup(openmittsu::protocol::GroupId const& group, MessageCenterWrapper& messageCenter) = 0;
+			virtual std::unique_ptr<BackedGroupMessage> getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid, MessageCenterWrapper& messageCenter) = 0;
 
 			virtual QSet<openmittsu::protocol::GroupId> getKnownGroups() const = 0;
 			virtual QHash<openmittsu::protocol::GroupId, std::pair<QSet<openmittsu::protocol::ContactId>, QString>> getKnownGroupsWithMembersAndTitles() const = 0;

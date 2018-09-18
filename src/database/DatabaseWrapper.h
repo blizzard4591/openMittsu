@@ -85,6 +85,8 @@ namespace openmittsu {
 			virtual void sendAllWaitingMessages(openmittsu::dataproviders::SentMessageAcceptor & messageAcceptor) override;
 			virtual std::unique_ptr<openmittsu::dataproviders::BackedContact> getBackedContact(openmittsu::protocol::ContactId const & contact, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) override;
 			virtual std::unique_ptr<openmittsu::dataproviders::BackedGroup> getBackedGroup(openmittsu::protocol::GroupId const & group, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) override;
+			virtual std::unique_ptr<DatabaseReadonlyContactMessage> getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const override;
+			virtual std::unique_ptr<DatabaseReadonlyGroupMessage> getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) const override;
 			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const & group, bool excludeSelfContact) const override;
 			virtual void enableTimers() override;
 

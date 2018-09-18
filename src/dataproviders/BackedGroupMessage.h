@@ -6,8 +6,9 @@
 #include <memory>
 
 #include "src/dataproviders/BackedMessage.h"
-#include "src/dataproviders/messages/GroupMessage.h"
 #include "src/dataproviders/MessageCenter.h"
+
+#include "src/database/DatabaseReadonlyGroupMessage.h"
 
 namespace openmittsu {
 	namespace dataproviders {
@@ -15,7 +16,7 @@ namespace openmittsu {
 		class BackedGroupMessage : public BackedMessage {
 			Q_OBJECT
 		public:
-			BackedGroupMessage(std::shared_ptr<messages::GroupMessage> const& message, BackedContact const& sender, openmittsu::dataproviders::MessageCenter& messageCenter);
+			BackedGroupMessage(openmittsu::database::DatabaseReadonlyGroupMessage const& message, BackedContact const& sender, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter);
 			BackedGroupMessage(BackedGroupMessage const& other);
 			virtual ~BackedGroupMessage();
 
@@ -23,10 +24,11 @@ namespace openmittsu {
 
 			messages::GroupMessageType getMessageType() const;
 		protected:
-			virtual messages::UserMessage const& getMessage() const override;
+			virtual messages::ReadonlyUserMessage const& getMessage() const override;
+			virtual void loadCache() override;
 		private:
-			std::shared_ptr<messages::GroupMessage> const m_message;
-			openmittsu::dataproviders::MessageCenter& m_messageCenter;
+			openmittsu::database::DatabaseReadonlyGroupMessage m_message;
+			openmittsu::dataproviders::MessageCenterWrapper m_messageCenter;
 		};
 
 	}

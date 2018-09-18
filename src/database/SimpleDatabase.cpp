@@ -797,11 +797,11 @@ namespace openmittsu {
 			return m_contactAndGroupDataProvider.getGroupStatus(group) == openmittsu::protocol::GroupStatus::DELETED;
 		}
 
-		std::unique_ptr<openmittsu::dataproviders::BackedContact> SimpleDatabase::getBackedContact(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::MessageCenter& messageCenter) {
+		std::unique_ptr<openmittsu::dataproviders::BackedContact> SimpleDatabase::getBackedContact(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::MessageCenterWrapper& messageCenter) {
 			return m_contactAndGroupDataProvider.getContact(contact, messageCenter);
 		}
 
-		std::unique_ptr<openmittsu::dataproviders::BackedGroup> SimpleDatabase::getBackedGroup(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::MessageCenter& messageCenter) {
+		std::unique_ptr<openmittsu::dataproviders::BackedGroup> SimpleDatabase::getBackedGroup(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::MessageCenterWrapper& messageCenter) {
 			return m_contactAndGroupDataProvider.getGroup(group, messageCenter);
 		}
 
