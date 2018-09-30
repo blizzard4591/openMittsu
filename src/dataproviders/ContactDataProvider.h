@@ -15,14 +15,11 @@
 #include "src/protocol/FeatureLevel.h"
 #include "src/crypto/PublicKey.h"
 
+#include "src/database/ContactData.h"
 #include "src/dataproviders/messages/ContactMessageCursor.h"
 
 namespace openmittsu {
 	namespace dataproviders {
-
-		class BackedContact;
-		class BackedContactMessage;
-		class MessageCenterWrapper;
 
 		class ContactDataProvider : public QObject {
 			Q_OBJECT
@@ -32,17 +29,10 @@ namespace openmittsu {
 			virtual bool hasContact(openmittsu::protocol::ContactId const& contact) const = 0;
 
 			virtual openmittsu::crypto::PublicKey getPublicKey(openmittsu::protocol::ContactId const& contact) const = 0;
-			virtual QString getFirstName(openmittsu::protocol::ContactId const& contact) const = 0;
-			virtual QString getLastName(openmittsu::protocol::ContactId const& contact) const = 0;
-			virtual QString getNickName(openmittsu::protocol::ContactId const& contact) const = 0;
-			virtual openmittsu::protocol::AccountStatus getAccountStatus(openmittsu::protocol::ContactId const& contact) const = 0;
-			virtual openmittsu::protocol::ContactIdVerificationStatus getVerificationStatus(openmittsu::protocol::ContactId const& contact) const = 0;
-			virtual openmittsu::protocol::FeatureLevel getFeatureLevel(openmittsu::protocol::ContactId const& contact) const = 0;
-			virtual openmittsu::protocol::ContactStatus getContactStatus(openmittsu::protocol::ContactId const& contact) const = 0;
-			virtual int getColor(openmittsu::protocol::ContactId const& contact) const = 0;
+			
+			virtual openmittsu::database::ContactData getContactData(openmittsu::protocol::ContactId const& contact) const = 0;
 
 			virtual int getContactCount() const = 0;
-			virtual int getContactMessageCount(openmittsu::protocol::ContactId const& contact) const = 0;
 
 			virtual void addContact(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& publicKey) = 0;
 			virtual void addContact(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& publicKey, openmittsu::protocol::ContactIdVerificationStatus const& verificationStatus, QString const& firstName, QString const& lastName, QString const& nickName, int color) = 0;

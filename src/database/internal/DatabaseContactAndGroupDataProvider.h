@@ -24,14 +24,11 @@ namespace openmittsu {
 				virtual bool hasGroup(openmittsu::protocol::GroupId const& group) const override;
 				virtual openmittsu::protocol::GroupStatus getGroupStatus(openmittsu::protocol::GroupId const& group) const override;
 				virtual int getGroupCount() const override;
-				virtual int getGroupMessageCount(openmittsu::protocol::GroupId const& group) const override;
-
-				virtual QString getGroupTitle(openmittsu::protocol::GroupId const& group) const override;
-				virtual QString getGroupDescription(openmittsu::protocol::GroupId const& group) const override;
-				virtual bool getGroupHasImage(openmittsu::protocol::GroupId const& group) const override;
 				virtual openmittsu::database::MediaFileItem getGroupImage(openmittsu::protocol::GroupId const& group) const override;
 				virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const override;
 				virtual bool getGroupIsAwaitingSync(openmittsu::protocol::GroupId const& group) const override;
+
+				virtual openmittsu::database::GroupData getGroupData(openmittsu::protocol::GroupId const& group) const override;
 
 				virtual void addGroup(openmittsu::protocol::GroupId const& group, QString const& name, openmittsu::protocol::MessageTime const& createdAt, QSet<openmittsu::protocol::ContactId> const& members, bool isDeleted, bool isAwaitingSync) override;
 
@@ -49,16 +46,10 @@ namespace openmittsu {
 				virtual bool hasContact(openmittsu::protocol::ContactId const& contact) const override;
 
 				virtual openmittsu::crypto::PublicKey getPublicKey(openmittsu::protocol::ContactId const& contact) const override;
-				virtual QString getFirstName(openmittsu::protocol::ContactId const& contact) const override;
-				virtual QString getLastName(openmittsu::protocol::ContactId const& contact) const override;
-				virtual QString getNickName(openmittsu::protocol::ContactId const& contact) const override;
-				virtual openmittsu::protocol::AccountStatus getAccountStatus(openmittsu::protocol::ContactId const& contact) const override;
-				virtual openmittsu::protocol::ContactIdVerificationStatus getVerificationStatus(openmittsu::protocol::ContactId const& contact) const override;
-				virtual openmittsu::protocol::FeatureLevel getFeatureLevel(openmittsu::protocol::ContactId const& contact) const override;
-				virtual openmittsu::protocol::ContactStatus getContactStatus(openmittsu::protocol::ContactId const& contact) const override;
-				virtual int getColor(openmittsu::protocol::ContactId const& contact) const override;
+				openmittsu::protocol::ContactStatus getContactStatus(openmittsu::protocol::ContactId const& contact) const;
 				virtual int getContactCount() const override;
-				virtual int getContactMessageCount(openmittsu::protocol::ContactId const& contact) const override;
+				
+				virtual openmittsu::database::ContactData getContactData(openmittsu::protocol::ContactId const& contact) const override;
 
 				virtual void addContact(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& publicKey) override;
 				virtual void addContact(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& publicKey, openmittsu::protocol::ContactIdVerificationStatus const& verificationStatus, QString const& firstName, QString const& lastName, QString const& nickName, int color) override;
@@ -99,6 +90,10 @@ namespace openmittsu {
 				void setFields(openmittsu::protocol::ContactId const& contact, QVariantMap const& fieldsAndValues, bool doAnnounce = true);
 
 				QVariant queryField(openmittsu::protocol::ContactId const& contact, QString const& fieldName) const;
+
+				QString buildNickname(QString const& nickname, QString const& firstName, QString const& lastName, openmittsu::protocol::ContactId const& contact) const;
+				QString getGroupDescription(QString const& memberField) const;
+				QHash<openmittsu::protocol::ContactId, QString> getNicknames(QSet<openmittsu::protocol::ContactId> const& contacts) const;
 			};
 		}
 	}

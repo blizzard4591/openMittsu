@@ -123,16 +123,22 @@ namespace openmittsu {
 
 			// Contact Data
 			virtual ContactData getContactData(openmittsu::protocol::ContactId const& contact) const = 0;
-			virtual void setContactData(openmittsu::protocol::ContactId const& contact, ContactData const& contactData) = 0;
 			virtual int getContactCount() const = 0;
 
 			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::ContactId const& contact, std::size_t n) const = 0;
 			virtual std::unique_ptr<DatabaseReadonlyContactMessage> getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const = 0;
 
+			virtual void setContactFirstName(openmittsu::protocol::ContactId const& contact, QString const& firstName) = 0;
+			virtual void setContactLastName(openmittsu::protocol::ContactId const& contact, QString const& lastName) = 0;
+			virtual void setContactNickName(openmittsu::protocol::ContactId const& contact, QString const& nickname) = 0;
+			virtual void setContactAccountStatus(openmittsu::protocol::ContactId const& contact, openmittsu::protocol::AccountStatus const& status) = 0;
+			virtual void setContactVerificationStatus(openmittsu::protocol::ContactId const& contact, openmittsu::protocol::ContactIdVerificationStatus const& verificationStatus) = 0;
+			virtual void setContactFeatureLevel(openmittsu::protocol::ContactId const& contact, openmittsu::protocol::FeatureLevel const& featureLevel) = 0;
+			virtual void setContactColor(openmittsu::protocol::ContactId const& contact, int color) = 0;
+
 			// Group Data
 			virtual GroupData getGroupData(openmittsu::protocol::GroupId const& group) const = 0;
 			virtual int getGroupCount() const = 0;
-			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const = 0;
 
 			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::GroupId const& group, std::size_t n) const = 0;
 			virtual std::unique_ptr<DatabaseReadonlyGroupMessage> getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) const = 0;
@@ -142,10 +148,6 @@ namespace openmittsu {
 			virtual DatabaseSeekResult seekFirstOrLastMessage(openmittsu::protocol::ContactId const& identity, bool first, SortByMode sortByMode) const = 0;
 			virtual DatabaseSeekResult seekNextMessage(openmittsu::protocol::GroupId const& group, QString const& uuid, SortOrder sortOrder, SortByMode sortByMode) const = 0;
 			virtual DatabaseSeekResult seekFirstOrLastMessage(openmittsu::protocol::GroupId const& group, bool first, SortByMode sortByMode) const = 0;
-
-			virtual void setGroupTitle(openmittsu::protocol::GroupId const& group, QString const& newTitle) = 0;
-			virtual void setGroupImage(openmittsu::protocol::GroupId const& group, QByteArray const& newImage) = 0;
-			virtual void setGroupMembers(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& newMembers) = 0;
 		signals:
 			void contactChanged(openmittsu::protocol::ContactId const& identity);
 			void groupChanged(openmittsu::protocol::GroupId const& changedGroupId);

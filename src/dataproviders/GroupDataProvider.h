@@ -10,6 +10,7 @@
 #include <memory>
 #include <utility>
 
+#include "src/database/GroupData.h"
 #include "src/database/MediaFileItem.h"
 #include "src/dataproviders/ContactDataProvider.h"
 #include "src/dataproviders/messages/GroupMessageCursor.h"
@@ -20,10 +21,6 @@
 namespace openmittsu {
 	namespace dataproviders {
 
-		class BackedGroup;
-		class BackedGroupMessage;
-		class MessageCenterWrapper;
-
 		class GroupDataProvider : public ContactDataProvider {
 			Q_OBJECT
 		public:
@@ -32,14 +29,16 @@ namespace openmittsu {
 			virtual bool hasGroup(openmittsu::protocol::GroupId const& group) const = 0;
 			virtual openmittsu::protocol::GroupStatus getGroupStatus(openmittsu::protocol::GroupId const& group) const = 0;
 			virtual int getGroupCount() const = 0;
-			virtual int getGroupMessageCount(openmittsu::protocol::GroupId const& group) const = 0;
+			//virtual int getGroupMessageCount(openmittsu::protocol::GroupId const& group) const = 0;
 
-			virtual QString getGroupTitle(openmittsu::protocol::GroupId const& group) const = 0;
-			virtual QString getGroupDescription(openmittsu::protocol::GroupId const& group) const = 0;
-			virtual bool getGroupHasImage(openmittsu::protocol::GroupId const& group) const = 0;
+			//virtual QString getGroupTitle(openmittsu::protocol::GroupId const& group) const = 0;
+			//virtual QString getGroupDescription(openmittsu::protocol::GroupId const& group) const = 0;
+			//virtual bool getGroupHasImage(openmittsu::protocol::GroupId const& group) const = 0;
 			virtual openmittsu::database::MediaFileItem getGroupImage(openmittsu::protocol::GroupId const& group) const = 0;
 			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const = 0;
 			virtual bool getGroupIsAwaitingSync(openmittsu::protocol::GroupId const& group) const = 0;
+
+			virtual openmittsu::database::GroupData getGroupData(openmittsu::protocol::GroupId const& group) const = 0;
 
 			virtual void addGroup(openmittsu::protocol::GroupId const& group, QString const& name, openmittsu::protocol::MessageTime const& createdAt, QSet<openmittsu::protocol::ContactId> const& members, bool isDeleted, bool isAwaitingSync) = 0;
 

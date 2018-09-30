@@ -92,21 +92,22 @@ namespace openmittsu {
 			virtual ContactData getContactData(openmittsu::protocol::ContactId const& contact) const override;
 			virtual GroupData getGroupData(openmittsu::protocol::GroupId const& group) const override;
 
+			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::ContactId const& contact, std::size_t n) const override;
+			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::GroupId const& group, std::size_t n) const override;
 
 			openmittsu::crypto::PublicKey getContactPublicKey(openmittsu::protocol::ContactId const& identity) const;
-			QString getContactNickname(openmittsu::protocol::ContactId const& identity) const;
-			openmittsu::protocol::AccountStatus getContactAccountStatus(openmittsu::protocol::ContactId const& identity) const;
-			openmittsu::protocol::ContactIdVerificationStatus getContactVerficationStatus(openmittsu::protocol::ContactId const& identity) const;
-			openmittsu::protocol::FeatureLevel getContactFeatureLevel(openmittsu::protocol::ContactId const& identity) const;
 
 			QSet<openmittsu::protocol::ContactId> getKnownContacts() const;
 			QHash<openmittsu::protocol::ContactId, openmittsu::crypto::PublicKey> getKnownContactsWithPublicKeys() const;
 			QHash<openmittsu::protocol::ContactId, QString> getKnownContactsWithNicknames(bool withSelfContactId = true) const;
 
-			void setContactNickname(openmittsu::protocol::ContactId const& identity, QString const& nickname);
-			void setContactAccountStatus(openmittsu::protocol::ContactId const& identity, openmittsu::protocol::AccountStatus const& status);
-			void setContactVerficationStatus(openmittsu::protocol::ContactId const& identity, openmittsu::protocol::ContactIdVerificationStatus const& verificationStatus);
-			void setContactFeatureLevel(openmittsu::protocol::ContactId const& identity, openmittsu::protocol::FeatureLevel const& featureLevel);
+			virtual void setContactFirstName(openmittsu::protocol::ContactId const& contact, QString const& firstName) override;
+			virtual void setContactLastName(openmittsu::protocol::ContactId const& contact, QString const& lastName) override;
+			virtual void setContactNickName(openmittsu::protocol::ContactId const& contact, QString const& nickname) override;
+			virtual void setContactAccountStatus(openmittsu::protocol::ContactId const& contact, openmittsu::protocol::AccountStatus const& status) override;
+			virtual void setContactVerificationStatus(openmittsu::protocol::ContactId const& contact, openmittsu::protocol::ContactIdVerificationStatus const& verificationStatus) override;
+			virtual void setContactFeatureLevel(openmittsu::protocol::ContactId const& contact, openmittsu::protocol::FeatureLevel const& featureLevel) override;
+			virtual void setContactColor(openmittsu::protocol::ContactId const& contact, int color) override;
 
 			void setContactAccountStatusBatch(QHash<openmittsu::protocol::ContactId, openmittsu::protocol::AccountStatus> const& status);
 			void setContactFeatureLevelBatch(QHash<openmittsu::protocol::ContactId, openmittsu::protocol::FeatureLevel> const& featureLevels);
@@ -114,12 +115,6 @@ namespace openmittsu {
 			QSet<openmittsu::protocol::GroupId> getKnownGroups() const;
 			QSet<openmittsu::protocol::ContactId> getContactsRequiringFeatureLevelCheck(int maximalAgeInSeconds) const;
 			QSet<openmittsu::protocol::ContactId> getContactsRequiringAccountStatusCheck(int maximalAgeInSeconds) const;
-
-			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const override;
-			QString getGroupTitle(openmittsu::protocol::GroupId const& group) const;
-			QString getGroupDescription(openmittsu::protocol::GroupId const& group) const;
-			MediaFileItem getGroupImage(openmittsu::protocol::GroupId const& group) const;
-			bool getGroupIsAwaitingSync(openmittsu::protocol::GroupId const& group) const;
 
 			QHash<openmittsu::protocol::GroupId, std::pair<QSet<openmittsu::protocol::ContactId>, QString>> getKnownGroupsWithMembersAndTitles() const;
 			QSet<openmittsu::protocol::GroupId> getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const;
