@@ -97,10 +97,15 @@ private:
 
 	ConnectionState m_connectionState;
 	std::shared_ptr<openmittsu::widgets::TabController> m_tabController;
+	
 	openmittsu::utility::MessageCenterThreadContainer m_messageCenterThread;
+	std::unique_ptr<openmittsu::network::MessageCenterWrapper> m_messageCenterWrapper;
+
 	std::shared_ptr<openmittsu::network::ServerConfiguration> m_serverConfiguration;
 	std::shared_ptr<openmittsu::utility::OptionMaster> m_optionMaster;
+
 	openmittsu::utility::DatabaseThreadContainer m_databaseThread;
+	std::unique_ptr<openmittsu::database::DatabaseWrapper> m_databaseWrapper;
 
 	std::shared_ptr<openmittsu::utility::AudioNotification> m_audioNotifier;
 

@@ -39,9 +39,6 @@ namespace openmittsu {
 				virtual void setGroupImage(openmittsu::protocol::GroupId const& group, QByteArray const& newImage) override;
 				virtual void setGroupMembers(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& newMembers) override;
 
-				virtual std::unique_ptr<openmittsu::dataproviders::BackedGroup> getGroup(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::MessageCenterWrapper& messageCenter) override;
-				virtual std::unique_ptr<openmittsu::dataproviders::BackedGroupMessage> getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid, openmittsu::dataproviders::MessageCenterWrapper& messageCenter) override;
-
 				virtual QSet<openmittsu::protocol::GroupId> getKnownGroups() const override;
 				virtual QHash<openmittsu::protocol::GroupId, std::pair<QSet<openmittsu::protocol::ContactId>, QString>> getKnownGroupsWithMembersAndTitles() const override;
 				virtual QSet<openmittsu::protocol::GroupId> getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const override;
@@ -50,8 +47,6 @@ namespace openmittsu {
 
 				// Contacts
 				virtual bool hasContact(openmittsu::protocol::ContactId const& contact) const override;
-
-				virtual std::unique_ptr<openmittsu::dataproviders::BackedContact> getSelfContact(openmittsu::dataproviders::MessageCenterWrapper& messageCenter) override;
 
 				virtual openmittsu::crypto::PublicKey getPublicKey(openmittsu::protocol::ContactId const& contact) const override;
 				virtual QString getFirstName(openmittsu::protocol::ContactId const& contact) const override;
@@ -80,9 +75,6 @@ namespace openmittsu {
 				virtual void setFeatureLevelBatch(QHash<openmittsu::protocol::ContactId, openmittsu::protocol::FeatureLevel> const& featureLevels) override;
 
 				virtual std::shared_ptr<openmittsu::dataproviders::messages::ContactMessageCursor> getContactMessageCursor(openmittsu::protocol::ContactId const& contact) override;
-
-				virtual std::unique_ptr<openmittsu::dataproviders::BackedContact> getContact(openmittsu::protocol::ContactId const& contact, openmittsu::database::DatabaseWrapper, openmittsu::dataproviders::MessageCenterWrapper& messageCenter) override;
-				virtual std::unique_ptr<openmittsu::dataproviders::BackedContactMessage> getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid, openmittsu::dataproviders::MessageCenterWrapper& messageCenter) override;
 
 				virtual QSet<openmittsu::protocol::ContactId> getKnownContacts() const override;
 				virtual QSet<openmittsu::protocol::ContactId> getContactsRequiringFeatureLevelCheck(int maximalAgeInSeconds) const override;

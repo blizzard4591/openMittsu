@@ -40,9 +40,6 @@
 #include "src/database/Database.h"
 #include "src/dataproviders/ReceivedMessageAcceptor.h"
 
-#include "src/dataproviders/BackedContact.h"
-#include "src/dataproviders/BackedGroup.h"
-
 namespace openmittsu {
 	namespace backup {
 		class ContactMessageBackupObject;
@@ -84,9 +81,6 @@ namespace openmittsu {
 			void setOptionValue(QString const& optionName, bool const& optionValue);
 			void setOptionValue(QString const& optionName, QByteArray const& optionValue);
 
-			virtual std::unique_ptr<openmittsu::dataproviders::BackedContact> getBackedContact(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) override;
-			virtual std::unique_ptr<openmittsu::dataproviders::BackedGroup> getBackedGroup(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) override;
-
 			virtual openmittsu::protocol::GroupStatus getGroupStatus(openmittsu::protocol::GroupId const& group) const override;
 			virtual openmittsu::protocol::ContactStatus getContactStatus(openmittsu::protocol::ContactId const& contact) const override;
 			virtual openmittsu::protocol::ContactId getSelfContact() const override;
@@ -94,6 +88,9 @@ namespace openmittsu {
 			/** AHHH FUCK THIS **/
 			virtual std::unique_ptr<DatabaseReadonlyContactMessage> getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const override;
 			virtual std::unique_ptr<DatabaseReadonlyGroupMessage> getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) const override;
+
+			virtual ContactData getContactData(openmittsu::protocol::ContactId const& contact) const override;
+			virtual GroupData getGroupData(openmittsu::protocol::GroupId const& group) const override;
 
 
 			openmittsu::crypto::PublicKey getContactPublicKey(openmittsu::protocol::ContactId const& identity) const;

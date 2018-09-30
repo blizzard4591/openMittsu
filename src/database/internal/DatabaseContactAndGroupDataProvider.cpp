@@ -224,10 +224,6 @@ namespace openmittsu {
 				m_database->announceGroupChanged(group);
 			}
 
-			std::unique_ptr<openmittsu::dataproviders::BackedGroup> DatabaseContactAndGroupDataProvider::getGroup(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::MessageCenterWrapper& messageCenter) {
-				return std::make_unique<openmittsu::dataproviders::BackedGroup>(group, *this, *this, messageCenter);
-			}
-
 			QSet<openmittsu::protocol::GroupId> DatabaseContactAndGroupDataProvider::getKnownGroups() const {
 				QSqlQuery query(m_database->getQueryObject());
 				query.prepare(QStringLiteral("SELECT `id`, `creator` FROM `groups` WHERE `is_deleted` = 0"));
@@ -387,17 +383,6 @@ namespace openmittsu {
 				return std::make_shared<openmittsu::database::internal::DatabaseGroupMessageCursor>(m_database, group);
 			}
 
-			std::unique_ptr<openmittsu::dataproviders::BackedGroupMessage> DatabaseContactAndGroupDataProvider::getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid, openmittsu::dataproviders::MessageCenterWrapper& messageCenter) {
-				openmittsu::database::internal::DatabaseGroupMessageCursor cursor(m_database, group);
-				if (!cursor.seekByUuid(uuid)) {
-					throw openmittsu::exceptions::InternalErrorException() << "Could not find message with UUID " << uuid.toStdString() << " for group " << group.toString() << ".";
-				}
-				auto message = cursor.getMessage();
-
-				return std::make_unique<openmittsu::dataproviders::BackedGroupMessage>(message, getContact(message->getSender(), messageCenter), messageCenter);
-			}
-
-
 			// Contacts
 			bool DatabaseContactAndGroupDataProvider::hasContact(openmittsu::protocol::ContactId const& contact) const {
 				QSqlQuery query(m_database->getQueryObject());
@@ -412,8 +397,8 @@ namespace openmittsu {
 				return query.next();
 			}
 
-			std::unique_ptr<openmittsu::dataproviders::BackedContact> DatabaseContactAndGroupDataProvider::getSelfContact(openmittsu::dataproviders::MessageCenterWrapper& messageCenter) {
-				return getContact(m_database->getSelfContact(), messageCenter);
+			std::unique_ptr<openmittsu::dataproviders::BackedContact> DatabaseContactAndGroupDataProvider::getSelfContact(openmittsu::database::DatabaseWrapper& database, openmittsu::dataproviders::MessageCenterWrapper& messageCenter) {
+				return getContact(m_database->getSelfContact(), database, messageCenter);
 			}
 
 			openmittsu::crypto::PublicKey DatabaseContactAndGroupDataProvider::getPublicKey(openmittsu::protocol::ContactId const& contact) const {
@@ -557,10 +542,6 @@ namespace openmittsu {
 				m_database->announceContactChanged(m_database->getSelfContact());
 			}
 
-			std::unique_ptr<openmittsu::dataproviders::BackedContact> DatabaseContactAndGroupDataProvider::getContact(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::MessageCenterWrapper& messageCenter) {
-				return std::make_unique<openmittsu::dataproviders::BackedContact>(contact, getPublicKey(contact), *this, messageCenter);
-			}
-
 			QSet<openmittsu::protocol::ContactId> DatabaseContactAndGroupDataProvider::getKnownContacts() const {
 				QSet<openmittsu::protocol::ContactId> result;
 
@@ -675,15 +656,6 @@ namespace openmittsu {
 				return std::make_shared<openmittsu::database::internal::DatabaseContactMessageCursor>(m_database, contact);
 			}
 
-			std::unique_ptr<openmittsu::dataproviders::BackedContactMessage> DatabaseContactAndGroupDataProvider::getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid, openmittsu::dataproviders::MessageCenterWrapper& messageCenter) {
-				openmittsu::database::internal::DatabaseContactMessageCursor cursor(m_database, contact);
-				if (!cursor.seekByUuid(uuid)) {
-					throw openmittsu::exceptions::InternalErrorException() << "Could not find message with UUID " << uuid.toStdString() << " for contact " << contact.toString() << ".";
-				}
-
-				auto message = cursor.getReadonlyMessage();
-				return std::make_unique<openmittsu::dataproviders::BackedContactMessage>(message, this->getContact(contact, messageCenter), messageCenter);
-			}
 		}
 	}
 }

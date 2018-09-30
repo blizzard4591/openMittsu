@@ -25,7 +25,7 @@ namespace openmittsu {
 
 				virtual openmittsu::protocol::GroupId const& getGroupId() const override;
 				virtual std::shared_ptr<openmittsu::dataproviders::messages::GroupMessage> getMessage() const override;
-				virtual DatabaseReadonlyGroupMessage getReadonlyMessage() const;
+				virtual std::unique_ptr<DatabaseReadonlyGroupMessage> getReadonlyMessage() const;
 			protected:
 				virtual QString getWhereString() const override;
 				virtual void bindWhereStringValues(QSqlQuery& query) const override;

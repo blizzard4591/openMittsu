@@ -271,22 +271,6 @@ namespace openmittsu {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(sendAllWaitingMessages, Q_ARG(openmittsu::dataproviders::SentMessageAcceptor&, messageAcceptor));
 		}
 
-		std::unique_ptr<openmittsu::dataproviders::BackedContact> DatabaseWrapper::getBackedContact(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getBackedContact, std::unique_ptr<openmittsu::dataproviders::BackedContact>, Q_ARG(openmittsu::protocol::ContactId const&, contact), Q_ARG(openmittsu::dataproviders::MessageCenterWrapper const&, messageCenter));
-		}
-
-		std::unique_ptr<openmittsu::dataproviders::BackedGroup> DatabaseWrapper::getBackedGroup(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getBackedGroup, std::unique_ptr<openmittsu::dataproviders::BackedGroup>, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(openmittsu::dataproviders::MessageCenterWrapper const&, messageCenter));
-		}
-
-		std::unique_ptr<DatabaseReadonlyContactMessage> DatabaseWrapper::getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getContactMessage, std::unique_ptr<openmittsu::database::DatabaseReadonlyContactMessage>, Q_ARG(openmittsu::protocol::ContactId const&, contact), Q_ARG(QString const&, uuid));
-		}
-		
-		std::unique_ptr<DatabaseReadonlyGroupMessage> DatabaseWrapper::getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getGroupMessage, std::unique_ptr<openmittsu::database::DatabaseReadonlyGroupMessage>, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(QString const&, uuid));
-		}
-
 		QSet<openmittsu::protocol::ContactId> DatabaseWrapper::getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getGroupMembers, QSet<openmittsu::protocol::ContactId>, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(bool, excludeSelfContact));
 		}
@@ -295,96 +279,32 @@ namespace openmittsu {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(enableTimers);
 		}
 
-		QString DatabaseWrapper::getFirstName(openmittsu::protocol::ContactId const& contact) const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getFirstName, QString, Q_ARG(openmittsu::protocol::ContactId const&, contact));
+		ContactData DatabaseWrapper::getContactData(openmittsu::protocol::ContactId const& contact) const {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getContactData, ContactData, Q_ARG(openmittsu::protocol::ContactId const&, contact));
 		}
-		
-		QString DatabaseWrapper::getLastName(openmittsu::protocol::ContactId const& contact) const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getLastName, QString, Q_ARG(openmittsu::protocol::ContactId const&, contact));
-		}
-		
-		QString DatabaseWrapper::getNickName(openmittsu::protocol::ContactId const& contact) const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getNickName, QString, Q_ARG(openmittsu::protocol::ContactId const&, contact));
-		}
-		
-		openmittsu::protocol::AccountStatus DatabaseWrapper::getAccountStatus(openmittsu::protocol::ContactId const& contact) const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getAccountStatus, openmittsu::protocol::AccountStatus, Q_ARG(openmittsu::protocol::ContactId const&, contact));
-		}
-		
-		openmittsu::protocol::ContactIdVerificationStatus DatabaseWrapper::getVerificationStatus(openmittsu::protocol::ContactId const& contact) const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getVerificationStatus, openmittsu::protocol::ContactIdVerificationStatus, Q_ARG(openmittsu::protocol::ContactId const&, contact));
-		}
-		
-		openmittsu::protocol::FeatureLevel DatabaseWrapper::getFeatureLevel(openmittsu::protocol::ContactId const& contact) const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getFeatureLevel, openmittsu::protocol::FeatureLevel, Q_ARG(openmittsu::protocol::ContactId const&, contact));
-		}
-		
-		int DatabaseWrapper::getColor(openmittsu::protocol::ContactId const& contact) const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getColor, int, Q_ARG(openmittsu::protocol::ContactId const&, contact));
-		}
-		
+
 		int DatabaseWrapper::getContactCount() const {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getContactCount, int);
 		}
-		
-		int DatabaseWrapper::getContactMessageCount(openmittsu::protocol::ContactId const& contact) const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getContactMessageCount, int, Q_ARG(openmittsu::protocol::ContactId const&, contact));
+
+		std::unique_ptr<DatabaseReadonlyContactMessage> DatabaseWrapper::getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getContactMessage, std::unique_ptr<DatabaseReadonlyContactMessage>, Q_ARG(openmittsu::protocol::ContactId const&, contact), Q_ARG(QString const&, uuid));
 		}
 
-		void DatabaseWrapper::setFirstName(openmittsu::protocol::ContactId const& contact, QString const& firstName) {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(setFirstName, Q_ARG(openmittsu::protocol::ContactId const&, contact), Q_ARG(QString const&, firstName));
-		}
-		
-		void DatabaseWrapper::setLastName(openmittsu::protocol::ContactId const& contact, QString const& lastName) {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(setLastName, Q_ARG(openmittsu::protocol::ContactId const&, contact), Q_ARG(QString const&, lastName));
-		}
-		
-		void DatabaseWrapper::setNickName(openmittsu::protocol::ContactId const& contact, QString const& nickname) {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(setNickName, Q_ARG(openmittsu::protocol::ContactId const&, contact), Q_ARG(QString const&, nickname));
-		}
-		
-		void DatabaseWrapper::setAccountStatus(openmittsu::protocol::ContactId const& contact, openmittsu::protocol::AccountStatus const& status) {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(setAccountStatus, Q_ARG(openmittsu::protocol::ContactId const&, contact), Q_ARG(openmittsu::protocol::AccountStatus const&, status));
-		}
-		
-		void DatabaseWrapper::setVerificationStatus(openmittsu::protocol::ContactId const& contact, openmittsu::protocol::ContactIdVerificationStatus const& verificationStatus) {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(setVerificationStatus, Q_ARG(openmittsu::protocol::ContactId const&, contact), Q_ARG(openmittsu::protocol::ContactIdVerificationStatus const&, verificationStatus));
-		}
-		
-		void DatabaseWrapper::setFeatureLevel(openmittsu::protocol::ContactId const& contact, openmittsu::protocol::FeatureLevel const& featureLevel) {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(setFeatureLevel, Q_ARG(openmittsu::protocol::ContactId const&, contact), Q_ARG(openmittsu::protocol::FeatureLevel const&, featureLevel));
-		}
-		
-		void DatabaseWrapper::setColor(openmittsu::protocol::ContactId const& contact, int color) {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(setColor, Q_ARG(openmittsu::protocol::ContactId const&, contact), Q_ARG(int, color));
+		void DatabaseWrapper::setContactData(openmittsu::protocol::ContactId const& contact, ContactData const& contactData) {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(setContactData, Q_ARG(openmittsu::protocol::ContactId const&, contact), Q_ARG(ContactData const&, contactData));
 		}
 
-		QString DatabaseWrapper::getGroupTitle(openmittsu::protocol::GroupId const& group) const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getGroupTitle, QString, Q_ARG(openmittsu::protocol::GroupId const&, group));
+		GroupData DatabaseWrapper::getGroupData(openmittsu::protocol::GroupId const& group) const {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getGroupData, GroupData, Q_ARG(openmittsu::protocol::GroupId const&, group));
 		}
-		
-		QString DatabaseWrapper::getGroupDescription(openmittsu::protocol::GroupId const& group) const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getGroupDescription, QString, Q_ARG(openmittsu::protocol::GroupId const&, group));
-		}
-		
-		bool DatabaseWrapper::getGroupHasImage(openmittsu::protocol::GroupId const& group) const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getGroupHasImage, bool, Q_ARG(openmittsu::protocol::GroupId const&, group));
-		}
-		
-		openmittsu::database::MediaFileItem DatabaseWrapper::getGroupImage(openmittsu::protocol::GroupId const& group) const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getGroupImage, openmittsu::database::MediaFileItem, Q_ARG(openmittsu::protocol::GroupId const&, group));
-		}
-		
-		bool DatabaseWrapper::getGroupIsAwaitingSync(openmittsu::protocol::GroupId const& group) const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getGroupIsAwaitingSync, bool, Q_ARG(openmittsu::protocol::GroupId const&, group));
-		}
-		
+
 		int DatabaseWrapper::getGroupCount() const {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getGroupCount, int);
 		}
-		
-		int DatabaseWrapper::getGroupMessageCount(openmittsu::protocol::GroupId const& group) const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getGroupMessageCount, int, Q_ARG(openmittsu::protocol::GroupId const&, group));
+
+		std::unique_ptr<DatabaseReadonlyGroupMessage> DatabaseWrapper::getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) const {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getGroupMessage, std::unique_ptr<DatabaseReadonlyGroupMessage>, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(QString const&, uuid));
 		}
 
 		void DatabaseWrapper::setGroupTitle(openmittsu::protocol::GroupId const& group, QString const& newTitle) {

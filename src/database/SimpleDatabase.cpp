@@ -797,14 +797,6 @@ namespace openmittsu {
 			return m_contactAndGroupDataProvider.getGroupStatus(group) == openmittsu::protocol::GroupStatus::DELETED;
 		}
 
-		std::unique_ptr<openmittsu::dataproviders::BackedContact> SimpleDatabase::getBackedContact(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::MessageCenterWrapper& messageCenter) {
-			return m_contactAndGroupDataProvider.getContact(contact, messageCenter);
-		}
-
-		std::unique_ptr<openmittsu::dataproviders::BackedGroup> SimpleDatabase::getBackedGroup(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::MessageCenterWrapper& messageCenter) {
-			return m_contactAndGroupDataProvider.getGroup(group, messageCenter);
-		}
-
 		openmittsu::protocol::GroupStatus SimpleDatabase::getGroupStatus(openmittsu::protocol::GroupId const& group) const {
 			if (hasGroup(group)) {
 				if (m_contactAndGroupDataProvider.getGroupIsAwaitingSync(group)) {
@@ -1318,14 +1310,22 @@ namespace openmittsu {
 			return database.commit();
 		}
 
-		DatabaseReadonlyContactMessage SimpleDatabase::getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const {
+		std::unique_ptr<DatabaseReadonlyContactMessage> SimpleDatabase::getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const {
 			internal::DatabaseContactMessageCursor cursor(this, contact, uuid);
 			return cursor.getReadonlyMessage();
 		}
 
-		DatabaseReadonlyGroupMessage SimpleDatabase::getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) const {
+		std::unique_ptr<DatabaseReadonlyGroupMessage> SimpleDatabase::getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) const {
 			internal::DatabaseGroupMessageCursor cursor(this, group, uuid);
 			return cursor.getReadonlyMessage();
+		}
+
+		ContactData SimpleDatabase::getContactData(openmittsu::protocol::ContactId const& contact) const {
+
+		}
+		
+		GroupData SimpleDatabase::getGroupData(openmittsu::protocol::GroupId const& group) const {
+
 		}
 
 	}

@@ -549,7 +549,7 @@ void Client::listContactsOnDoubleClick(QListWidgetItem* item) {
 
 	if (clwi != nullptr) {
 		openmittsu::protocol::ContactId const contactId = clwi->getContactId();
-		m_tabController->openTab(contactId, m_database->getBackedContact(contactId, *m_messageCenter));
+		m_tabController->openTab(contactId, BackedContact(contactId, databaseWrapper, messageCenterWrapper));
 		m_tabController->focusTab(contactId);
 	} else if (glwi != nullptr) {
 		openmittsu::protocol::GroupId const groupId = glwi->getGroupId();

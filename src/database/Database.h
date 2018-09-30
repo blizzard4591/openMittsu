@@ -9,6 +9,8 @@
 #include <memory>
 
 #include "src/database/DatabaseSeekResult.h"
+#include "src/database/ContactData.h"
+#include "src/database/GroupData.h"
 #include "src/dataproviders/SentMessageAcceptor.h"
 #include "src/dataproviders/messages/ReadonlyContactMessage.h"
 #include "src/dataproviders/messages/ReadonlyGroupMessage.h"
@@ -119,39 +121,17 @@ namespace openmittsu {
 
 			virtual void sendAllWaitingMessages(openmittsu::dataproviders::SentMessageAcceptor& messageAcceptor) = 0;
 
-			virtual std::unique_ptr<openmittsu::dataproviders::BackedContact> getBackedContact(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) = 0;
-			virtual std::unique_ptr<openmittsu::dataproviders::BackedGroup> getBackedGroup(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) = 0;
-
 			// Contact Data
-			virtual QString getFirstName(openmittsu::protocol::ContactId const& contact) const = 0;
-			virtual QString getLastName(openmittsu::protocol::ContactId const& contact) const = 0;
-			virtual QString getNickName(openmittsu::protocol::ContactId const& contact) const = 0;
-			virtual openmittsu::protocol::AccountStatus getAccountStatus(openmittsu::protocol::ContactId const& contact) const = 0;
-			virtual openmittsu::protocol::ContactIdVerificationStatus getVerificationStatus(openmittsu::protocol::ContactId const& contact) const = 0;
-			virtual openmittsu::protocol::FeatureLevel getFeatureLevel(openmittsu::protocol::ContactId const& contact) const = 0;
-			virtual int getColor(openmittsu::protocol::ContactId const& contact) const = 0;
+			virtual ContactData getContactData(openmittsu::protocol::ContactId const& contact) const = 0;
+			virtual void setContactData(openmittsu::protocol::ContactId const& contact, ContactData const& contactData) = 0;
 			virtual int getContactCount() const = 0;
-			virtual int getContactMessageCount(openmittsu::protocol::ContactId const& contact) const = 0;
 
 			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::ContactId const& contact, std::size_t n) const = 0;
 			virtual std::unique_ptr<DatabaseReadonlyContactMessage> getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const = 0;
 
-			virtual void setFirstName(openmittsu::protocol::ContactId const& contact, QString const& firstName) = 0;
-			virtual void setLastName(openmittsu::protocol::ContactId const& contact, QString const& lastName) = 0;
-			virtual void setNickName(openmittsu::protocol::ContactId const& contact, QString const& nickname) = 0;
-			virtual void setAccountStatus(openmittsu::protocol::ContactId const& contact, openmittsu::protocol::AccountStatus const& status) = 0;
-			virtual void setVerificationStatus(openmittsu::protocol::ContactId const& contact, openmittsu::protocol::ContactIdVerificationStatus const& verificationStatus) = 0;
-			virtual void setFeatureLevel(openmittsu::protocol::ContactId const& contact, openmittsu::protocol::FeatureLevel const& featureLevel) = 0;
-			virtual void setColor(openmittsu::protocol::ContactId const& contact, int color) = 0;
-
 			// Group Data
-			virtual QString getGroupTitle(openmittsu::protocol::GroupId const& group) const = 0;
-			virtual QString getGroupDescription(openmittsu::protocol::GroupId const& group) const = 0;
-			virtual bool getGroupHasImage(openmittsu::protocol::GroupId const& group) const = 0;
-			virtual openmittsu::database::MediaFileItem getGroupImage(openmittsu::protocol::GroupId const& group) const = 0;
-			virtual bool getGroupIsAwaitingSync(openmittsu::protocol::GroupId const& group) const = 0;
+			virtual GroupData getGroupData(openmittsu::protocol::GroupId const& group) const = 0;
 			virtual int getGroupCount() const = 0;
-			virtual int getGroupMessageCount(openmittsu::protocol::GroupId const& group) const = 0;
 			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const = 0;
 
 			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::GroupId const& group, std::size_t n) const = 0;
