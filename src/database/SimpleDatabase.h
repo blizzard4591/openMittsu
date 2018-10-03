@@ -70,7 +70,7 @@ namespace openmittsu {
 			virtual bool hasGroup(openmittsu::protocol::GroupId const& group) const override;
 			virtual bool isDeleteted(openmittsu::protocol::GroupId const& group) const override;
 
-			openmittsu::backup::IdentityBackup getBackup();
+			virtual std::unique_ptr<openmittsu::backup::IdentityBackup> getBackup() const override;
 
 			bool hasOption(QString const& optionName);
 			QString getOptionValueAsString(QString const& optionName);
@@ -89,17 +89,21 @@ namespace openmittsu {
 			virtual std::unique_ptr<DatabaseReadonlyContactMessage> getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const override;
 			virtual std::unique_ptr<DatabaseReadonlyGroupMessage> getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) const override;
 
-			virtual ContactData getContactData(openmittsu::protocol::ContactId const& contact) const override;
-			virtual GroupData getGroupData(openmittsu::protocol::GroupId const& group) const override;
+			virtual ContactData getContactData(openmittsu::protocol::ContactId const& contact, bool fetchMessageCount) const override;
+			virtual QHash<openmittsu::protocol::ContactId, ContactData> getContactDataAll(bool fetchMessageCount) const override;
+			virtual GroupData getGroupData(openmittsu::protocol::GroupId const& group, bool withMembers) const override;
+			virtual QHash<openmittsu::protocol::GroupId, GroupData> getGroupDataAll(bool withMembers) const override;
 
 			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::ContactId const& contact, std::size_t n) const override;
 			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::GroupId const& group, std::size_t n) const override;
 
-			openmittsu::crypto::PublicKey getContactPublicKey(openmittsu::protocol::ContactId const& identity) const;
+			virtual openmittsu::crypto::PublicKey getContactPublicKey(openmittsu::protocol::ContactId const& identity) const override;
 
 			QSet<openmittsu::protocol::ContactId> getKnownContacts() const;
 			QHash<openmittsu::protocol::ContactId, openmittsu::crypto::PublicKey> getKnownContactsWithPublicKeys() const;
-			QHash<openmittsu::protocol::ContactId, QString> getKnownContactsWithNicknames(bool withSelfContactId = true) const;
+			//virtual QHash<openmittsu::protocol::ContactId, QString> getKnownContactsWithNicknames(bool withSelfContactId = true) const override;
+
+			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const override;
 
 			virtual void setContactFirstName(openmittsu::protocol::ContactId const& contact, QString const& firstName) override;
 			virtual void setContactLastName(openmittsu::protocol::ContactId const& contact, QString const& lastName) override;
@@ -109,15 +113,15 @@ namespace openmittsu {
 			virtual void setContactFeatureLevel(openmittsu::protocol::ContactId const& contact, openmittsu::protocol::FeatureLevel const& featureLevel) override;
 			virtual void setContactColor(openmittsu::protocol::ContactId const& contact, int color) override;
 
-			void setContactAccountStatusBatch(QHash<openmittsu::protocol::ContactId, openmittsu::protocol::AccountStatus> const& status);
-			void setContactFeatureLevelBatch(QHash<openmittsu::protocol::ContactId, openmittsu::protocol::FeatureLevel> const& featureLevels);
+			virtual void setContactAccountStatusBatch(QHash<openmittsu::protocol::ContactId, openmittsu::protocol::AccountStatus> const& status) override;
+			virtual void setContactFeatureLevelBatch(QHash<openmittsu::protocol::ContactId, openmittsu::protocol::FeatureLevel> const& featureLevels) override;
 
 			QSet<openmittsu::protocol::GroupId> getKnownGroups() const;
-			QSet<openmittsu::protocol::ContactId> getContactsRequiringFeatureLevelCheck(int maximalAgeInSeconds) const;
-			QSet<openmittsu::protocol::ContactId> getContactsRequiringAccountStatusCheck(int maximalAgeInSeconds) const;
+			virtual QSet<openmittsu::protocol::ContactId> getContactsRequiringFeatureLevelCheck(int maximalAgeInSeconds) const override;
+			virtual QSet<openmittsu::protocol::ContactId> getContactsRequiringAccountStatusCheck(int maximalAgeInSeconds) const override;
 
 			QHash<openmittsu::protocol::GroupId, std::pair<QSet<openmittsu::protocol::ContactId>, QString>> getKnownGroupsWithMembersAndTitles() const;
-			QSet<openmittsu::protocol::GroupId> getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const;
+			virtual QHash<openmittsu::protocol::GroupId, QString> getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const override;
 
 			int getContactCount() const;
 			int getGroupCount() const;
@@ -212,10 +216,12 @@ namespace openmittsu {
 
 			// New Contact, new Group, group changes...
 			virtual void storeNewContact(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& publicKey) override;
-			virtual void storeNewContact(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& publicKey, openmittsu::protocol::ContactIdVerificationStatus const& verificationStatus, QString const& firstName, QString const& lastName, QString const& nickName, int color);
+			virtual void storeNewContact(QVector<NewContactData> const& newContactData) override;
+			//virtual void storeNewContact(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& publicKey, openmittsu::protocol::ContactIdVerificationStatus const& verificationStatus, QString const& firstName, QString const& lastName, QString const& nickName, int color);
 
 			virtual void storeNewGroup(openmittsu::protocol::GroupId const& groupId, QSet<openmittsu::protocol::ContactId> const& members, bool isAwaitingSync) override;
-			virtual void storeNewGroup(openmittsu::protocol::GroupId const& groupId, QString const& name, openmittsu::protocol::MessageTime const& createdAt, QSet<openmittsu::protocol::ContactId> const& members, bool isDeleted, bool isAwaitingSync);
+			//virtual void storeNewGroup(openmittsu::protocol::GroupId const& groupId, QString const& name, openmittsu::protocol::MessageTime const& createdAt, QSet<openmittsu::protocol::ContactId> const& members, bool isDeleted, bool isAwaitingSync);
+			virtual void storeNewGroup(QVector<NewGroupData> const& newGroupData) override;
 
 			void announceMessageChanged(QString const& uuid);
 			void announceContactChanged(openmittsu::protocol::ContactId const& contact);

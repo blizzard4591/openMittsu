@@ -632,7 +632,10 @@ namespace openmittsu {
 
 			internal::DatabaseGroupMessage::insertGroupMessageFromThem(this, group, sender, messageId, generateUuid(), timeSent, timeReceived, GroupMessageType::GROUP_CREATION, result, true, QStringLiteral(""));
 	
-			m_contactAndGroupDataProvider.addGroup(group, "", timeSent, members, false, false);
+			QVector<NewGroupData> vector;
+			NewGroupData data(group, "", timeSent, members, false, false);
+			vector.append(data);
+			m_contactAndGroupDataProvider.addGroup(vector);
 		}
 
 		void SimpleDatabase::storeMessageSendFailed(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId) {
@@ -681,26 +684,38 @@ namespace openmittsu {
 			m_mediaFileStorage.insertMediaItemsFromBackup(items);
 		}
 
-		void SimpleDatabase::storeNewContact(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& publicKey, openmittsu::protocol::ContactIdVerificationStatus const& verificationStatus, QString const& firstName, QString const& lastName, QString const& nickName, int color) {
-			m_contactAndGroupDataProvider.addContact(contact, publicKey, verificationStatus, firstName, lastName, nickName, color);
+		void SimpleDatabase::storeNewContact(QVector<NewContactData> const& newContactData) {
+			m_contactAndGroupDataProvider.addContact(newContactData);
 		}
 
 		void SimpleDatabase::storeNewContact(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& publicKey) {
-			storeNewContact(contact, publicKey, openmittsu::protocol::ContactIdVerificationStatus::VERIFICATION_STATUS_UNVERIFIED, QStringLiteral(""), QStringLiteral(""), QStringLiteral(""), 0);
+			QVector<NewContactData> vector;
+			NewContactData data(contact, publicKey);
+			vector.append(data);
+			storeNewContact(vector);
 		}
 
-		void SimpleDatabase::storeNewGroup(openmittsu::protocol::GroupId const& groupId, QString const& name, openmittsu::protocol::MessageTime const& createdAt, QSet<openmittsu::protocol::ContactId> const& members, bool isDeleted, bool isAwaitingSync) {
-			for (openmittsu::protocol::ContactId const& c : members) {
-				if (!hasContact(c)) {
-					throw openmittsu::exceptions::InternalErrorException() << "The given group "<< groupId.toString() << " contains member " << c.toString() << " that is unknown.";
+		void SimpleDatabase::storeNewGroup(QVector<NewGroupData> const& newGroupData) {
+			QSet<openmittsu::protocol::ContactId> knownContacts;
+			for (NewGroupData const& newGroup : newGroupData) {
+				for (openmittsu::protocol::ContactId const& c : newGroup.members) {
+					if (knownContacts.contains(c)) {
+						continue;
+					} else if (!hasContact(c)) {
+						throw openmittsu::exceptions::InternalErrorException() << "The given group " << newGroup.id.toString() << " contains member " << c.toString() << " that is unknown.";
+					}
+					knownContacts.insert(c);
 				}
 			}
 
-			m_contactAndGroupDataProvider.addGroup(groupId, name, createdAt, members, isDeleted, isAwaitingSync);
+			m_contactAndGroupDataProvider.addGroup(newGroupData);
 		}
 
 		void SimpleDatabase::storeNewGroup(openmittsu::protocol::GroupId const& groupId, QSet<openmittsu::protocol::ContactId> const& members, bool isAwaitingSync) {
-			storeNewGroup(groupId, "", openmittsu::protocol::MessageTime::now(), members, false, isAwaitingSync);
+			QVector<NewGroupData> vector;
+			NewGroupData data(groupId, members, isAwaitingSync);
+			vector.append(data);
+			storeNewGroup(vector);
 		}
 
 		openmittsu::protocol::MessageId SimpleDatabase::storeSentGroupCreation(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, QSet<openmittsu::protocol::ContactId> const& members, bool apply) {
@@ -722,7 +737,10 @@ namespace openmittsu {
 			}
 
 			if (apply) {
-				m_contactAndGroupDataProvider.addGroup(group, "", timeCreated, members, false, false);
+				QVector<NewGroupData> vector;
+				NewGroupData data(group, "", timeCreated, members, false, false);
+				vector.append(data);
+				m_contactAndGroupDataProvider.addGroup(vector);
 			}
 
 			return internal::DatabaseGroupMessage::insertGroupMessageFromUs(this, group, generateUuid(), timeCreated, GroupMessageType::GROUP_CREATION, memberString, isQueued, true, QStringLiteral(""));
@@ -929,8 +947,8 @@ namespace openmittsu {
 			m_mediaFileStorage.removeMediaItem(uuid);
 		}
 
-		openmittsu::backup::IdentityBackup SimpleDatabase::getBackup() {
-			return *m_identityBackup;
+		std::unique_ptr<openmittsu::backup::IdentityBackup> SimpleDatabase::getBackup() const {
+			return std::make_unique<openmittsu::backup::IdentityBackup>(*m_identityBackup);
 		}
 
 		void SimpleDatabase::updateCachedIdentityBackup() {
@@ -1067,15 +1085,6 @@ namespace openmittsu {
 			return m_contactAndGroupDataProvider.getKnownGroups();
 		}
 
-		QHash<openmittsu::protocol::ContactId, openmittsu::crypto::PublicKey> SimpleDatabase::getKnownContactsWithPublicKeys() const {
-			return m_contactAndGroupDataProvider.getKnownContactsWithPublicKeys();
-		}
-
-		QHash<openmittsu::protocol::ContactId, QString> SimpleDatabase::getKnownContactsWithNicknames(bool withSelfContactId) const {
-			return m_contactAndGroupDataProvider.getKnownContactsWithNicknames(withSelfContactId);
-		}
-
-		/*
 		QSet<openmittsu::protocol::ContactId> SimpleDatabase::getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const {
 			openmittsu::protocol::GroupStatus const status = m_contactAndGroupDataProvider.getGroupStatus(group);
 			if ((status != openmittsu::protocol::GroupStatus::KNOWN) && (status != openmittsu::protocol::GroupStatus::TEMPORARY)) {
@@ -1085,40 +1094,15 @@ namespace openmittsu {
 			return m_contactAndGroupDataProvider.getGroupMembers(group, excludeSelfContact);
 		}
 
-		QString SimpleDatabase::getGroupTitle(openmittsu::protocol::GroupId const& group) const {
-			if (!hasGroup(group)) {
-				throw openmittsu::exceptions::InternalErrorException() << "Could not get group title, the given group " << group.toString() << " is unknown!";
-			}
-
-			return m_contactAndGroupDataProvider.getGroupTitle(group);
+		QHash<openmittsu::protocol::ContactId, openmittsu::crypto::PublicKey> SimpleDatabase::getKnownContactsWithPublicKeys() const {
+			return m_contactAndGroupDataProvider.getKnownContactsWithPublicKeys();
 		}
-
-		QString SimpleDatabase::getGroupDescription(openmittsu::protocol::GroupId const& group) const {
-			if (!hasGroup(group)) {
-				throw openmittsu::exceptions::InternalErrorException() << "Could not get group title, the given group " << group.toString() << " is unknown!";
-			}
-
-			return m_contactAndGroupDataProvider.getGroupDescription(group);
-		}
-
-		MediaFileItem SimpleDatabase::getGroupImage(openmittsu::protocol::GroupId const& group) const {
-			if (!hasGroup(group)) {
-				throw openmittsu::exceptions::InternalErrorException() << "Could not get group image, the given group " << group.toString() << " is unknown!";
-			}
-
-			return m_contactAndGroupDataProvider.getGroupImage(group);
-		}
-
-		bool SimpleDatabase::getGroupIsAwaitingSync(openmittsu::protocol::GroupId const& group) const {
-			openmittsu::protocol::GroupStatus const status = m_contactAndGroupDataProvider.getGroupStatus(group);
-			return (status == openmittsu::protocol::GroupStatus::TEMPORARY);
-		}*/
 
 		QHash<openmittsu::protocol::GroupId, std::pair<QSet<openmittsu::protocol::ContactId>, QString>> SimpleDatabase::getKnownGroupsWithMembersAndTitles() const {
 			return m_contactAndGroupDataProvider.getKnownGroupsWithMembersAndTitles();
 		}
 
-		QSet<openmittsu::protocol::GroupId> SimpleDatabase::getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const {
+		QHash<openmittsu::protocol::GroupId, QString> SimpleDatabase::getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const {
 			if (!hasContact(identity)) {
 				throw openmittsu::exceptions::InternalErrorException() << "Could not get groups containing contact because the given contact " << identity.toString() << " is unknown!";
 			}
@@ -1351,12 +1335,20 @@ namespace openmittsu {
 			return cursor.getReadonlyMessage();
 		}
 
-		ContactData SimpleDatabase::getContactData(openmittsu::protocol::ContactId const& contact) const {
-			return m_contactAndGroupDataProvider.getContactData(contact);
+		ContactData SimpleDatabase::getContactData(openmittsu::protocol::ContactId const& contact, bool fetchMessageCount) const {
+			return m_contactAndGroupDataProvider.getContactData(contact, fetchMessageCount);
+		}
+
+		QHash<openmittsu::protocol::ContactId, ContactData> SimpleDatabase::getContactDataAll(bool fetchMessageCount) const {
+			return m_contactAndGroupDataProvider.getContactDataAll(fetchMessageCount);
 		}
 		
-		GroupData SimpleDatabase::getGroupData(openmittsu::protocol::GroupId const& group) const {
-			return m_contactAndGroupDataProvider.getGroupData(group);
+		GroupData SimpleDatabase::getGroupData(openmittsu::protocol::GroupId const& group, bool withMembers) const {
+			return m_contactAndGroupDataProvider.getGroupData(group, withMembers);
+		}
+		
+		QHash<openmittsu::protocol::GroupId, GroupData> SimpleDatabase::getGroupDataAll(bool withMembers) const {
+			return m_contactAndGroupDataProvider.getGroupDataAll(withMembers);
 		}
 
 		QVector<QString> SimpleDatabase::getLastMessageUuids(openmittsu::protocol::ContactId const& contact, std::size_t n) const {

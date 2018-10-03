@@ -30,7 +30,7 @@ namespace openmittsu {
 
 				virtual openmittsu::database::GroupData getGroupData(openmittsu::protocol::GroupId const& group) const override;
 
-				virtual void addGroup(openmittsu::protocol::GroupId const& group, QString const& name, openmittsu::protocol::MessageTime const& createdAt, QSet<openmittsu::protocol::ContactId> const& members, bool isDeleted, bool isAwaitingSync) override;
+				virtual void addGroup(QVector<NewGroupData> const& newGroupData) override;
 
 				virtual void setGroupTitle(openmittsu::protocol::GroupId const& group, QString const& newTitle) override;
 				virtual void setGroupImage(openmittsu::protocol::GroupId const& group, QByteArray const& newImage) override;
@@ -38,7 +38,7 @@ namespace openmittsu {
 
 				virtual QSet<openmittsu::protocol::GroupId> getKnownGroups() const override;
 				virtual QHash<openmittsu::protocol::GroupId, std::pair<QSet<openmittsu::protocol::ContactId>, QString>> getKnownGroupsWithMembersAndTitles() const override;
-				virtual QSet<openmittsu::protocol::GroupId> getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const override;
+				virtual QHash<openmittsu::protocol::GroupId, QString> getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const override;
 
 				virtual std::shared_ptr<openmittsu::dataproviders::messages::GroupMessageCursor> getGroupMessageCursor(openmittsu::protocol::GroupId const& group) override;
 
@@ -49,10 +49,10 @@ namespace openmittsu {
 				openmittsu::protocol::ContactStatus getContactStatus(openmittsu::protocol::ContactId const& contact) const;
 				virtual int getContactCount() const override;
 				
-				virtual openmittsu::database::ContactData getContactData(openmittsu::protocol::ContactId const& contact) const override;
+				virtual openmittsu::database::ContactData getContactData(openmittsu::protocol::ContactId const& contact, bool fetchMessageCount) const override;
+				virtual QHash<openmittsu::protocol::ContactId, openmittsu::database::ContactData> getContactDataAll(bool fetchMessageCount) const override;
 
-				virtual void addContact(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& publicKey) override;
-				virtual void addContact(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& publicKey, openmittsu::protocol::ContactIdVerificationStatus const& verificationStatus, QString const& firstName, QString const& lastName, QString const& nickName, int color) override;
+				virtual void addContact(QVector<NewContactData> const& newContactData) override;
 
 				virtual void setFirstName(openmittsu::protocol::ContactId const& contact, QString const& firstName) override;
 				virtual void setLastName(openmittsu::protocol::ContactId const& contact, QString const& lastName) override;

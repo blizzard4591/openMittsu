@@ -11,6 +11,7 @@
 #include <utility>
 
 #include "src/database/GroupData.h"
+#include "src/database/NewGroupData.h"
 #include "src/database/MediaFileItem.h"
 #include "src/dataproviders/ContactDataProvider.h"
 #include "src/dataproviders/messages/GroupMessageCursor.h"
@@ -29,18 +30,14 @@ namespace openmittsu {
 			virtual bool hasGroup(openmittsu::protocol::GroupId const& group) const = 0;
 			virtual openmittsu::protocol::GroupStatus getGroupStatus(openmittsu::protocol::GroupId const& group) const = 0;
 			virtual int getGroupCount() const = 0;
-			//virtual int getGroupMessageCount(openmittsu::protocol::GroupId const& group) const = 0;
-
-			//virtual QString getGroupTitle(openmittsu::protocol::GroupId const& group) const = 0;
-			//virtual QString getGroupDescription(openmittsu::protocol::GroupId const& group) const = 0;
-			//virtual bool getGroupHasImage(openmittsu::protocol::GroupId const& group) const = 0;
+			
 			virtual openmittsu::database::MediaFileItem getGroupImage(openmittsu::protocol::GroupId const& group) const = 0;
 			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const = 0;
 			virtual bool getGroupIsAwaitingSync(openmittsu::protocol::GroupId const& group) const = 0;
 
 			virtual openmittsu::database::GroupData getGroupData(openmittsu::protocol::GroupId const& group) const = 0;
 
-			virtual void addGroup(openmittsu::protocol::GroupId const& group, QString const& name, openmittsu::protocol::MessageTime const& createdAt, QSet<openmittsu::protocol::ContactId> const& members, bool isDeleted, bool isAwaitingSync) = 0;
+			virtual void addGroup(QVector<openmittsu::database::NewGroupData> const& newGroupData) = 0;
 
 			virtual void setGroupTitle(openmittsu::protocol::GroupId const& group, QString const& newTitle) = 0;
 			virtual void setGroupImage(openmittsu::protocol::GroupId const& group, QByteArray const& newImage) = 0;
@@ -48,7 +45,7 @@ namespace openmittsu {
 
 			virtual QSet<openmittsu::protocol::GroupId> getKnownGroups() const = 0;
 			virtual QHash<openmittsu::protocol::GroupId, std::pair<QSet<openmittsu::protocol::ContactId>, QString>> getKnownGroupsWithMembersAndTitles() const = 0;
-			virtual QSet<openmittsu::protocol::GroupId> getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const = 0;
+			virtual QHash<openmittsu::protocol::GroupId, QString> getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const = 0;
 
 			virtual std::shared_ptr<messages::GroupMessageCursor> getGroupMessageCursor(openmittsu::protocol::GroupId const& group) = 0;
 		signals:

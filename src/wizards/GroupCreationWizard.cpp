@@ -6,7 +6,7 @@
 
 namespace openmittsu {
 	namespace wizards {
-		GroupCreationWizard::GroupCreationWizard(QHash<openmittsu::protocol::ContactId, QString> const& knownIdentitiesWithNicknamesExcludingSelfContactId, std::unique_ptr<openmittsu::dataproviders::GroupCreationProcessor> groupCreationProcessor, QWidget* parent) : QWizard(parent), ui(new Ui::GroupCreationWizard) {
+		GroupCreationWizard::GroupCreationWizard(QHash<openmittsu::protocol::ContactId, openmittsu::database::ContactData> const& knownIdentitiesWithNicknamesExcludingSelfContactId, std::unique_ptr<openmittsu::dataproviders::GroupCreationProcessor> groupCreationProcessor, QWidget* parent) : QWizard(parent), ui(new Ui::GroupCreationWizard) {
 			ui->setupUi(this);
 			setOption(QWizard::NoBackButtonOnLastPage, true);
 

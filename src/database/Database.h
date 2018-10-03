@@ -8,9 +8,12 @@
 
 #include <memory>
 
+#include "src/backup/IdentityBackup.h"
 #include "src/database/DatabaseSeekResult.h"
 #include "src/database/ContactData.h"
 #include "src/database/GroupData.h"
+#include "src/database/NewContactData.h"
+#include "src/database/NewGroupData.h"
 #include "src/dataproviders/SentMessageAcceptor.h"
 #include "src/dataproviders/messages/ReadonlyContactMessage.h"
 #include "src/dataproviders/messages/ReadonlyGroupMessage.h"
@@ -117,12 +120,16 @@ namespace openmittsu {
 			virtual void storeMessageSendDone(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId) = 0;
 
 			virtual void storeNewContact(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& publicKey) = 0;
+			virtual void storeNewContact(QVector<NewContactData> const& newContactData) = 0;
 			virtual void storeNewGroup(openmittsu::protocol::GroupId const& groupId, QSet<openmittsu::protocol::ContactId> const& members, bool isAwaitingSync) = 0;
+			virtual void storeNewGroup(QVector<NewGroupData> const& newGroupData) = 0;
 
 			virtual void sendAllWaitingMessages(openmittsu::dataproviders::SentMessageAcceptor& messageAcceptor) = 0;
 
 			// Contact Data
-			virtual ContactData getContactData(openmittsu::protocol::ContactId const& contact) const = 0;
+			virtual ContactData getContactData(openmittsu::protocol::ContactId const& contact, bool fetchMessageCount) const = 0;
+			virtual QHash<openmittsu::protocol::ContactId, ContactData> getContactDataAll(bool fetchMessageCount) const = 0;
+			virtual openmittsu::crypto::PublicKey getContactPublicKey(openmittsu::protocol::ContactId const& identity) const = 0;
 			virtual int getContactCount() const = 0;
 
 			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::ContactId const& contact, std::size_t n) const = 0;
@@ -137,11 +144,21 @@ namespace openmittsu {
 			virtual void setContactColor(openmittsu::protocol::ContactId const& contact, int color) = 0;
 
 			// Group Data
-			virtual GroupData getGroupData(openmittsu::protocol::GroupId const& group) const = 0;
+			virtual GroupData getGroupData(openmittsu::protocol::GroupId const& group, bool withMembers) const = 0;
+			virtual QHash<openmittsu::protocol::GroupId, GroupData> getGroupDataAll(bool withMembers) const = 0;
 			virtual int getGroupCount() const = 0;
+			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const = 0;
 
 			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::GroupId const& group, std::size_t n) const = 0;
 			virtual std::unique_ptr<DatabaseReadonlyGroupMessage> getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) const = 0;
+
+			// Mass Data, checks
+			virtual std::unique_ptr<openmittsu::backup::IdentityBackup> getBackup() const = 0;
+			virtual QSet<openmittsu::protocol::ContactId> getContactsRequiringFeatureLevelCheck(int maximalAgeInSeconds) const = 0;
+			virtual QSet<openmittsu::protocol::ContactId> getContactsRequiringAccountStatusCheck(int maximalAgeInSeconds) const = 0;
+			virtual void setContactAccountStatusBatch(QHash<openmittsu::protocol::ContactId, openmittsu::protocol::AccountStatus> const& status) = 0;
+			virtual void setContactFeatureLevelBatch(QHash<openmittsu::protocol::ContactId, openmittsu::protocol::FeatureLevel> const& featureLevels) = 0;
+			virtual QHash<openmittsu::protocol::GroupId, QString> getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const = 0;
 
 			// Seeking, Searching
 			virtual DatabaseSeekResult seekNextMessage(openmittsu::protocol::ContactId const& identity, QString const& uuid, SortOrder sortOrder, SortByMode sortByMode) const = 0;

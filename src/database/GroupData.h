@@ -4,6 +4,7 @@
 #include "src/database/MediaFileItem.h"
 #include "src/protocol/ContactId.h"
 
+#include <QMetaType>
 #include <QSet>
 #include <QString>
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#define SINGLE_ARG(...) __VA_ARGS__
 #define STRINGIFY2(x) #x
 #define STRINGIFY(x) STRINGIFY2(x)
 #define OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(funcName, ...) do { \

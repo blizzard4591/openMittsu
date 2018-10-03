@@ -15,6 +15,10 @@ namespace openmittsu {
 			//
 		}
 
+		bool MessageCenterWrapper::hasMessageCenter() const {
+			return (m_messageCenter) ? true : false;
+		}
+
 		void MessageCenterWrapper::addNewContact(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& publicKey) {
 			if (!QMetaObject::invokeMethod(m_messageCenter.get(), "onFoundNewContact", Qt::QueuedConnection, Q_ARG(openmittsu::protocol::ContactId, contact), Q_ARG(openmittsu::crypto::PublicKey, publicKey))) {
 				throw openmittsu::exceptions::InternalErrorException() << "Could not invoke method onFoundNewContact in " << __FILE__ << "  at line " << __LINE__ << ".";

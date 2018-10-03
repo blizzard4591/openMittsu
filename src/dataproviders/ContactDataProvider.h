@@ -5,6 +5,7 @@
 #include <QString>
 #include <QSet>
 #include <QHash>
+#include <QVector>
 
 #include <memory>
 
@@ -16,6 +17,7 @@
 #include "src/crypto/PublicKey.h"
 
 #include "src/database/ContactData.h"
+#include "src/database/NewContactData.h"
 #include "src/dataproviders/messages/ContactMessageCursor.h"
 
 namespace openmittsu {
@@ -30,12 +32,12 @@ namespace openmittsu {
 
 			virtual openmittsu::crypto::PublicKey getPublicKey(openmittsu::protocol::ContactId const& contact) const = 0;
 			
-			virtual openmittsu::database::ContactData getContactData(openmittsu::protocol::ContactId const& contact) const = 0;
+			virtual openmittsu::database::ContactData getContactData(openmittsu::protocol::ContactId const& contact, bool fetchMessageCount) const = 0;
+			virtual QHash<openmittsu::protocol::ContactId, openmittsu::database::ContactData> getContactDataAll(bool fetchMessageCount) const = 0;
 
 			virtual int getContactCount() const = 0;
 
-			virtual void addContact(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& publicKey) = 0;
-			virtual void addContact(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& publicKey, openmittsu::protocol::ContactIdVerificationStatus const& verificationStatus, QString const& firstName, QString const& lastName, QString const& nickName, int color) = 0;
+			virtual void addContact(QVector<openmittsu::database::NewContactData> const& newContactData) = 0;
 
 			virtual void setFirstName(openmittsu::protocol::ContactId const& contact, QString const& firstName) = 0;
 			virtual void setLastName(openmittsu::protocol::ContactId const& contact, QString const& lastName) = 0;

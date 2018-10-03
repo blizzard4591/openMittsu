@@ -12,6 +12,10 @@
 #include "src/protocol/ContactId.h"
 
 namespace openmittsu {
+	namespace widgets {
+		class TabController;
+	}
+
 	namespace dataproviders {
 
 		class MessageCenterThreadWorker : public QObject {

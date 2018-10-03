@@ -23,6 +23,8 @@ namespace openmittsu {
 			MessageCenterWrapper(std::shared_ptr<openmittsu::dataproviders::MessageCenter> const& messageCenter);
 			virtual ~MessageCenterWrapper();
 
+			bool hasMessageCenter() const;
+
 			virtual void addNewContact(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& publicKey);
 
 			virtual void processMessageSendFailed(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId);

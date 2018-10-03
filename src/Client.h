@@ -19,6 +19,8 @@
 #include "src/updater/Updater.h"
 
 #include "src/database/Database.h"
+#include "src/database/DatabasePointerAuthority.h"
+#include "src/database/DatabaseWrapper.h"
 #include "src/utility/ThreadContainer.h"
 
 #include "src/dataproviders/KeyRegistry.h"
@@ -63,8 +65,11 @@ private slots:
 	void updaterFoundNewVersion(int versionMajor, int versionMinor, int versionPatch, int commitsSinceTag, QString gitHash, QString channel, QString link);
 public slots:
 	void contactRegistryOnIdentitiesChanged();
-	void messageCenterOnHasUnreadMessages(openmittsu::widgets::ChatTab*);
 	void connectionTimerOnTimer();
+
+	void databaseOnReceivedNewContactMessage(openmittsu::protocol::ContactId const& identity);
+	void databaseOnReceivedNewGroupMessage(openmittsu::protocol::GroupId const& group);
+	void onHasUnreadMessage(openmittsu::widgets::ChatTab* tab);
 
 	// All messages from the ProtocolClient
 	void protocolClientOnReadyConnect();
@@ -105,7 +110,8 @@ private:
 	std::shared_ptr<openmittsu::utility::OptionMaster> m_optionMaster;
 
 	openmittsu::utility::DatabaseThreadContainer m_databaseThread;
-	std::unique_ptr<openmittsu::database::DatabaseWrapper> m_databaseWrapper;
+	openmittsu::database::DatabasePointerAuthority m_databasePointerAuthority;
+	openmittsu::database::DatabaseWrapper m_databaseWrapper;
 
 	std::shared_ptr<openmittsu::utility::AudioNotification> m_audioNotifier;
 

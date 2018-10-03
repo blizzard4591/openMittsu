@@ -14,6 +14,7 @@
 #include "src/widgets/TabController.h"
 
 #include "src/database/DatabaseWrapper.h"
+#include "src/database/DatabaseWrapperFactory.h"
 #include "src/dataproviders/MessageCenter.h"
 #include "src/dataproviders/ReceivedMessageAcceptor.h"
 #include "src/dataproviders/NetworkSentMessageAcceptor.h"
@@ -30,7 +31,7 @@ namespace openmittsu {
 		class SimpleMessageCenter : public MessageCenter {
 			Q_OBJECT
 		public:
-			SimpleMessageCenter(openmittsu::database::DatabaseWrapper const& databaseWrapper, std::shared_ptr<openmittsu::widgets::TabController> const& tabController, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster);
+			SimpleMessageCenter(openmittsu::database::DatabaseWrapperFactory const& databaseWrapperFactory, std::shared_ptr<openmittsu::widgets::TabController> const& tabController, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster);
 			virtual ~SimpleMessageCenter();
 		public slots:
 			virtual bool sendText(openmittsu::protocol::ContactId const& receiver, QString const& text) override;
@@ -52,7 +53,6 @@ namespace openmittsu {
 			virtual bool sendGroupImage(openmittsu::protocol::GroupId const& group, QByteArray const& image);
 
 			void setNetworkSentMessageAcceptor(std::shared_ptr<NetworkSentMessageAcceptor> const& newNetworkSentMessageAcceptor);
-			void setStorage(std::shared_ptr<openmittsu::database::Database> const& newStorage);
 
 			virtual void processReceivedContactMessageText(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& message) override;
 			virtual void processReceivedContactMessageImage(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& image) override;
@@ -91,8 +91,6 @@ namespace openmittsu {
 			void resendGroupSetup(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& recipients);
 
 			void databaseOnMessageChanged(QString const& uuid);
-			void databaseOnReceivedNewContactMessage(openmittsu::protocol::ContactId const& identity);
-			void databaseOnReceivedNewGroupMessage(openmittsu::protocol::GroupId const& group);
 			void tryResendingMessagesToNetwork();
 		private:
 			std::shared_ptr<openmittsu::widgets::TabController> const m_tabController;
