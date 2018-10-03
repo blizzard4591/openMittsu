@@ -9,6 +9,7 @@
 #include "src/database/internal/DatabaseContactMessage.h"
 #include "src/database/internal/DatabaseMessageCursor.h"
 #include "src/dataproviders/messages/ContactMessageCursor.h"
+#include "src/database/DatabaseWrapper.h"
 
 namespace openmittsu {
 	namespace database {

@@ -97,7 +97,13 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 	m_ui.listContacts->setContextMenuPolicy(Qt::CustomContextMenu);
 	m_connectionTimer.start(500);
 	OPENMITTSU_CONNECT(&m_connectionTimer, timeout(), this, connectionTimerOnTimer());
-	OPENMITTSU_CONNECT(m_messageCenterThread.getQObjectPtr(), newUnreadMessageAvailable(openmittsu::widgets::ChatTab*), this, messageCenterOnHasUnreadMessages(openmittsu::widgets::ChatTab*));
+	OPENMITTSU_CONNECT(&m_messageCenterWrapper, newUnreadMessageAvailableContact(openmittsu::protocol::ContactId const&), this, onMessageCenterHasUnreadMessageContact(openmittsu::protocol::ContactId const&));
+	OPENMITTSU_CONNECT(&m_messageCenterWrapper, newUnreadMessageAvailableGroup(openmittsu::protocol::GroupId const&), this, onMessageCenterHasUnreadMessageGroup(openmittsu::protocol::GroupId const&));
+
+	OPENMITTSU_CONNECT(&m_databaseWrapper, contactChanged(openmittsu::protocol::ContactId const&), this, onDatabaseContactChanged(openmittsu::protocol::ContactId const&));
+	OPENMITTSU_CONNECT(&m_databaseWrapper, groupChanged(openmittsu::protocol::GroupId const&), this, onDatabaseGroupChanged(openmittsu::protocol::GroupId const&));
+	OPENMITTSU_CONNECT(&m_databaseWrapper, receivedNewContactMessage(openmittsu::protocol::ContactId const&), this, onDatabaseReceivedNewContactMessage(openmittsu::protocol::ContactId const&));
+	OPENMITTSU_CONNECT(&m_databaseWrapper, receivedNewGroupMessage(openmittsu::protocol::GroupId const&), this, onDatabaseReceivedNewGroupMessage(openmittsu::protocol::GroupId const&));
 
 	// Check whether QSqlCipher is available
 	if (!QSqlDatabase::isDriverAvailable(QStringLiteral("QSQLCIPHER"))) {
@@ -500,7 +506,15 @@ void Client::onHasUnreadMessage(openmittsu::widgets::ChatTab* tab) {
 	}
 }
 
-void Client::databaseOnReceivedNewContactMessage(openmittsu::protocol::ContactId const& identity) {
+void Client::onMessageCenterHasUnreadMessageContact(openmittsu::protocol::ContactId const& contact) {
+	// TODO Implement and check with regard to below DB functions
+}
+
+void Client::onMessageCenterHasUnreadMessageGroup(openmittsu::protocol::GroupId const& group) {
+	// TODO Implement and check with regard to below DB functions
+}
+
+void Client::onDatabaseReceivedNewContactMessage(openmittsu::protocol::ContactId const& identity) {
 	if (m_tabController && m_databaseWrapper.hasDatabase()) {
 		openmittsu::widgets::ChatTab* chatTab = nullptr;
 		if (m_tabController->hasTab(identity)) {
@@ -515,7 +529,7 @@ void Client::databaseOnReceivedNewContactMessage(openmittsu::protocol::ContactId
 	}
 }
 
-void Client::databaseOnReceivedNewGroupMessage(openmittsu::protocol::GroupId const& group) {
+void Client::onDatabaseReceivedNewGroupMessage(openmittsu::protocol::GroupId const& group) {
 	if (m_tabController && m_databaseWrapper.hasDatabase()) {
 		openmittsu::widgets::ChatTab* chatTab = nullptr;
 		if (m_tabController->hasTab(group)) {
@@ -527,6 +541,16 @@ void Client::databaseOnReceivedNewGroupMessage(openmittsu::protocol::GroupId con
 		}
 		onHasUnreadMessage(chatTab);
 	}
+}
+
+void Client::onDatabaseContactChanged(openmittsu::protocol::ContactId const& contact) {
+	// TODO: Better
+	contactRegistryOnIdentitiesChanged();
+}
+
+void Client::onDatabaseGroupChanged(openmittsu::protocol::GroupId const& group) {
+	// TODO: Better
+	contactRegistryOnIdentitiesChanged();
 }
 
 void Client::protocolClientOnReadyConnect() {

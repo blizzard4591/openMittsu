@@ -34,7 +34,7 @@ namespace openmittsu {
 			if (!isValid()) {
 				throw openmittsu::exceptions::InternalErrorException() << "Can not create message wrapper for invalid message.";
 			}
-			return std::make_shared<DatabaseReadonlyContactMessage>(m_database.getContactMessage(m_contact, getMessageId()));
+			return std::make_shared<DatabaseReadonlyContactMessage>(m_database.getContactMessage(m_contact, m_uid));
 		}
 
 		bool ContactMessageCursor::isValid() const {
@@ -42,7 +42,6 @@ namespace openmittsu {
 		}
 
 		bool ContactMessageCursor::seekToFirst() {
-			m_database->g
 			return getFirstOrLastMessageId(true);
 		}
 

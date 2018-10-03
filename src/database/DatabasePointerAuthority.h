@@ -4,12 +4,12 @@
 #include <memory>
 
 #include "src/database/Database.h"
+#include "src/database/DatabaseWrapperFactory.h"
 
 #include <QMutex>
 
 namespace openmittsu {
 	namespace database {
-		class DatabaseWrapperFactory;
 
 		class DatabasePointerAuthority : public QObject {
 			Q_OBJECT

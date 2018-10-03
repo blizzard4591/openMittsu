@@ -17,9 +17,9 @@
 namespace openmittsu {
 	namespace dataproviders {
 
-		SimpleMessageCenter::SimpleMessageCenter(openmittsu::database::DatabaseWrapperFactory const& databaseWrapperFactory, std::shared_ptr<openmittsu::widgets::TabController> const& tabController, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster) : MessageCenter(), m_tabController(tabController), m_optionMaster(optionMaster), m_networkSentMessageAcceptor(nullptr), m_storage(databaseWrapperFactory.getDatabaseWrapper()) {
-			if ((tabController == nullptr) || (optionMaster == nullptr)) {
-				throw openmittsu::exceptions::IllegalArgumentException() << "MessageCenter created with a TabController or OptionMaster that is null!";
+		SimpleMessageCenter::SimpleMessageCenter(openmittsu::database::DatabaseWrapperFactory const& databaseWrapperFactory, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster) : MessageCenter(), m_optionMaster(optionMaster), m_networkSentMessageAcceptor(nullptr), m_storage(databaseWrapperFactory.getDatabaseWrapper()) {
+			if (optionMaster == nullptr) {
+				throw openmittsu::exceptions::IllegalArgumentException() << "MessageCenter created with an OptionMaster that is null!";
 			}
 
 			OPENMITTSU_CONNECT(&m_storage, messageChanged(QString const&), this, databaseOnMessageChanged(QString const&));
@@ -889,7 +889,7 @@ namespace openmittsu {
 				return;
 			}
 
-			openmittsu::database::GroupData const groupData = m_storage.getGroupData(group);
+			openmittsu::database::GroupData const groupData = m_storage.getGroupData(group, true);
 
 			sendGroupCreation(group, groupData.members, recipients, false);
 			sendGroupTitle(group, groupData.title, recipients, false);
@@ -935,6 +935,14 @@ namespace openmittsu {
 				header.saveToJpeg(&buffer);
 				buffer.close();
 			}
+		}
+
+		void SimpleMessageCenter::openTabForIncomingMessage(openmittsu::protocol::ContactId const& contact) {
+			emit newUnreadMessageAvailableContact(contact);
+		}
+
+		void SimpleMessageCenter::openTabForIncomingMessage(openmittsu::protocol::GroupId const& group) {
+			emit newUnreadMessageAvailableGroup(group);
 		}
 
 		void SimpleMessageCenter::requestSyncForGroupIfApplicable(openmittsu::protocol::GroupId const& group) {

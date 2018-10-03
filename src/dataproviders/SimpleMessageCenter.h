@@ -32,7 +32,7 @@ namespace openmittsu {
 		class SimpleMessageCenter : public MessageCenter {
 			Q_OBJECT
 		public:
-			SimpleMessageCenter(openmittsu::database::DatabaseWrapperFactory const& databaseWrapperFactory, std::shared_ptr<openmittsu::widgets::TabController> const& tabController, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster);
+			SimpleMessageCenter(openmittsu::database::DatabaseWrapperFactory const& databaseWrapperFactory, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster);
 			virtual ~SimpleMessageCenter();
 		public slots:
 			virtual bool sendText(openmittsu::protocol::ContactId const& receiver, QString const& text) override;
@@ -86,22 +86,18 @@ namespace openmittsu {
 			void onFoundNewContact(openmittsu::protocol::ContactId const& newContact, openmittsu::crypto::PublicKey const& publicKey);
 			void onFoundNewGroup(openmittsu::protocol::GroupId const& groupId, QSet<openmittsu::protocol::ContactId> const& members);
 
-			bool createNewGroupAndInformMembers(QSet<openmittsu::protocol::ContactId> const& members, bool addSelfContact, QVariant const& groupTitle, QVariant const& groupImage);
+			virtual bool createNewGroupAndInformMembers(QSet<openmittsu::protocol::ContactId> const& members, bool addSelfContact, QVariant const& groupTitle, QVariant const& groupImage) override;
 
-			void resendGroupSetup(openmittsu::protocol::GroupId const& group);
+			virtual void resendGroupSetup(openmittsu::protocol::GroupId const& group) override;
 			void resendGroupSetup(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& recipients);
 
 			void databaseOnMessageChanged(QString const& uuid);
 			void tryResendingMessagesToNetwork();
 		private:
-			std::shared_ptr<openmittsu::widgets::TabController> const m_tabController;
 			std::shared_ptr<openmittsu::utility::OptionMaster> const m_optionMaster;
 			std::shared_ptr<NetworkSentMessageAcceptor> m_networkSentMessageAcceptor;
 			openmittsu::database::DatabaseWrapper m_storage;
 			MessageQueue m_messageQueue;
-
-			void openTabForIncomingMessage(openmittsu::protocol::ContactId const& sender);
-			void openTabForIncomingMessage(openmittsu::protocol::GroupId const& group);
 
 			bool sendGroupCreation(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& members, QSet<openmittsu::protocol::ContactId> const& recipients, bool applyOperationInDatabase);
 			bool sendGroupTitle(openmittsu::protocol::GroupId const& group, QString const& title, QSet<openmittsu::protocol::ContactId> const& recipients, bool applyOperationInDatabase);
@@ -112,6 +108,9 @@ namespace openmittsu {
 
 			QString parseCaptionFromImage(QByteArray const& image) const;
 			void embedCaptionIntoImage(QByteArray& image, QString const& caption) const;
+
+			void openTabForIncomingMessage(openmittsu::protocol::ContactId const& contact);
+			void openTabForIncomingMessage(openmittsu::protocol::GroupId const& group);
 		};
 	}
 }

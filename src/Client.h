@@ -71,9 +71,13 @@ public slots:
 	void contactRegistryOnIdentitiesChanged();
 	void connectionTimerOnTimer();
 
-	void databaseOnReceivedNewContactMessage(openmittsu::protocol::ContactId const& identity);
-	void databaseOnReceivedNewGroupMessage(openmittsu::protocol::GroupId const& group);
-	void onHasUnreadMessage(openmittsu::widgets::ChatTab* tab);
+	void onDatabaseContactChanged(openmittsu::protocol::ContactId const& contact);
+	void onDatabaseGroupChanged(openmittsu::protocol::GroupId const& group);
+	void onDatabaseReceivedNewContactMessage(openmittsu::protocol::ContactId const& contact);
+	void onDatabaseReceivedNewGroupMessage(openmittsu::protocol::GroupId const& group);
+	
+	void onMessageCenterHasUnreadMessageContact(openmittsu::protocol::ContactId const& contact);
+	void onMessageCenterHasUnreadMessageGroup(openmittsu::protocol::GroupId const& group);
 
 	// All messages from the ProtocolClient
 	void protocolClientOnReadyConnect();
@@ -128,6 +132,7 @@ private:
 	void setupProtocolClient();
 
 	QString formatDuration(quint64 duration) const;
+	void onHasUnreadMessage(openmittsu::widgets::ChatTab* tab);
 };
 
 #endif

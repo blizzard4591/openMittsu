@@ -119,11 +119,11 @@ namespace openmittsu {
 		}
 
 		BackedContactMessage BackedContact::getMessageByUuid(QString const& uuid) {
-			return BackedContactMessage(m_database.getContactMessage(m_contactId, uuid), *this, m_messageCenter);
+			return BackedContactMessage(*m_database.getContactMessage(m_contactId, uuid), *this, m_messageCenter);
 		}
 
 		openmittsu::database::DatabaseReadonlyContactMessage BackedContact::fetchMessageByUuid(QString const& uuid) const {
-			return m_database.getContactMessage(m_contactId, uuid);
+			return *m_database.getContactMessage(m_contactId, uuid);
 		}
 
 	}

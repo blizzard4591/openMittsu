@@ -17,6 +17,9 @@ namespace openmittsu {
 			NewContactData(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& pubKey) : id(contact), publicKey(pubKey), verificationStatus(openmittsu::protocol::ContactIdVerificationStatus::VERIFICATION_STATUS_UNVERIFIED), firstName(""), lastName(""), nickName(""), color(0) {
 				//
 			}
+			NewContactData(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& pubKey, openmittsu::protocol::ContactIdVerificationStatus const& verificationStatus, QString const& firstName, QString const& lastName, QString const& nickName, int color) : id(contact), publicKey(pubKey), verificationStatus(verificationStatus), firstName(firstName), lastName(lastName), nickName(nickName), color(color) {
+				//
+			}
 
 			openmittsu::protocol::ContactId id;
 			openmittsu::crypto::PublicKey publicKey;
