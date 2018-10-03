@@ -48,7 +48,6 @@ namespace openmittsu {
 			virtual bool sendGroupImage(openmittsu::protocol::GroupId const& group, QByteArray const& image) = 0;
 
 			virtual void setNetworkSentMessageAcceptor(std::shared_ptr<NetworkSentMessageAcceptor> const& newNetworkSentMessageAcceptor) = 0;
-			virtual void setStorage(std::shared_ptr<openmittsu::database::Database> const& newStorage) = 0;
 
 			virtual void processReceivedContactMessageText(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& message) = 0;
 			virtual void processReceivedContactMessageImage(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& image) = 0;

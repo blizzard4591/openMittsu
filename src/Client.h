@@ -21,6 +21,10 @@
 #include "src/database/Database.h"
 #include "src/database/DatabasePointerAuthority.h"
 #include "src/database/DatabaseWrapper.h"
+
+#include "src/dataproviders/MessageCenterPointerAuthority.h"
+#include "src/dataproviders/MessageCenterWrapper.h"
+
 #include "src/utility/ThreadContainer.h"
 
 #include "src/dataproviders/KeyRegistry.h"
@@ -104,7 +108,8 @@ private:
 	std::shared_ptr<openmittsu::widgets::TabController> m_tabController;
 	
 	openmittsu::utility::MessageCenterThreadContainer m_messageCenterThread;
-	std::unique_ptr<openmittsu::network::MessageCenterWrapper> m_messageCenterWrapper;
+	openmittsu::dataproviders::MessageCenterPointerAuthority m_messageCenterPointerAuthority;
+	openmittsu::dataproviders::MessageCenterWrapper m_messageCenterWrapper;
 
 	std::shared_ptr<openmittsu::network::ServerConfiguration> m_serverConfiguration;
 	std::shared_ptr<openmittsu::utility::OptionMaster> m_optionMaster;

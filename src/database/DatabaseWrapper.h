@@ -11,7 +11,7 @@ namespace openmittsu {
 
 		class DatabaseWrapper : public Database {
 		public:
-			DatabaseWrapper(DatabasePointerAuthority const& databasePointerAuthority);
+			DatabaseWrapper(DatabasePointerAuthority const* databasePointerAuthority);
 			DatabaseWrapper(DatabaseWrapper const& other);
 			virtual ~DatabaseWrapper();
 
@@ -30,7 +30,7 @@ namespace openmittsu {
 			void onDatabaseContactStartedTyping(openmittsu::protocol::ContactId const& identity);
 			void onDatabaseContactStoppedTyping(openmittsu::protocol::ContactId const& identity);
 		private:
-			DatabasePointerAuthority const& m_databasePointerAuthority;
+			DatabasePointerAuthority const* m_databasePointerAuthority;
 			std::weak_ptr<Database> m_database;
 
 		public:

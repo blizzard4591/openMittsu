@@ -18,7 +18,8 @@
 #include "src/crypto/KeyPair.h"
 #include "src/crypto/PublicKey.h"
 #include "src/network/ServerConfiguration.h"
-#include "src/network/MessageCenterWrapper.h"
+#include "src/dataproviders/MessageCenterWrapperFactory.h"
+#include "src/dataproviders/MessageCenterWrapper.h"
 #include "src/utility/OptionMaster.h"
 #include "src/network/MissingIdentityProcessor.h"
 
@@ -58,7 +59,7 @@ namespace openmittsu {
 			Q_OBJECT
 
 		public:
-			ProtocolClient(std::shared_ptr<openmittsu::crypto::FullCryptoBox> cryptoBox, openmittsu::protocol::ContactId const& ourContactId, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster, std::shared_ptr<openmittsu::network::MessageCenterWrapper> const& messageCenterWrapper, openmittsu::protocol::PushFromId const& pushFromId);
+			ProtocolClient(std::shared_ptr<openmittsu::crypto::FullCryptoBox> cryptoBox, openmittsu::protocol::ContactId const& ourContactId, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster, openmittsu::dataproviders::MessageCenterWrapperFactory const& messageCenterWrapperFactory, openmittsu::protocol::PushFromId const& pushFromId);
 			virtual ~ProtocolClient();
 			bool getIsConnected() const;
 
@@ -101,7 +102,8 @@ namespace openmittsu {
 			void callbackTaskFinished(openmittsu::tasks::CallbackTask* callbackTask);
 		private:
 			std::shared_ptr<openmittsu::crypto::FullCryptoBox> m_cryptoBox;
-			std::shared_ptr<openmittsu::network::MessageCenterWrapper> const m_messageCenterWrapper;
+			openmittsu::dataproviders::MessageCenterWrapperFactory const m_messageCenterWrapperFactory;
+			std::shared_ptr<openmittsu::dataproviders::MessageCenterWrapper> m_messageCenterWrapper;
 			std::unique_ptr<openmittsu::protocol::PushFromId> m_pushFromIdPtr;
 
 			bool m_isSetupDone;

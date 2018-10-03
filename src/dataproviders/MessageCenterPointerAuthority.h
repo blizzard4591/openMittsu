@@ -3,6 +3,8 @@
 
 #include <memory>
 
+#include <QMutex>
+
 #include "src/dataproviders/MessageCenter.h"
 
 namespace openmittsu {
@@ -26,6 +28,7 @@ namespace openmittsu {
 			void newMessageCenterAvailable();
 		private:
 			std::shared_ptr<MessageCenter> m_messageCenter;
+			mutable QMutex m_mutex;
 		};
 
 	}

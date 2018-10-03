@@ -10,13 +10,13 @@
 namespace openmittsu {
 	namespace dataproviders {
 
-		MessageCenterWrapper::MessageCenterWrapper(MessageCenterPointerAuthority const& messageCenterPointerAuthority) : MessageCenter(), m_messageCenterPointerAuthority(messageCenterPointerAuthority), m_messageCenter() {
-			OPENMITTSU_CONNECT_QUEUED(&m_messageCenterPointerAuthority, newMessageCenterAvailable(), this, onMessageCenterPointerAuthorityHasNewMessageCenter());
+		MessageCenterWrapper::MessageCenterWrapper(MessageCenterPointerAuthority const* messageCenterPointerAuthority) : MessageCenter(), m_messageCenterPointerAuthority(messageCenterPointerAuthority), m_messageCenter() {
+			OPENMITTSU_CONNECT_QUEUED(m_messageCenterPointerAuthority, newMessageCenterAvailable(), this, onMessageCenterPointerAuthorityHasNewMessageCenter());
 			onMessageCenterPointerAuthorityHasNewMessageCenter();
 		}
 
 		MessageCenterWrapper::MessageCenterWrapper(MessageCenterWrapper const& other) : MessageCenter(), m_messageCenterPointerAuthority(other.m_messageCenterPointerAuthority), m_messageCenter() {
-			OPENMITTSU_CONNECT_QUEUED(&m_messageCenterPointerAuthority, newMessageCenterAvailable(), this, onMessageCenterPointerAuthorityHasNewMessageCenter());
+			OPENMITTSU_CONNECT_QUEUED(m_messageCenterPointerAuthority, newMessageCenterAvailable(), this, onMessageCenterPointerAuthorityHasNewMessageCenter());
 			onMessageCenterPointerAuthorityHasNewMessageCenter();
 		}
 
@@ -24,8 +24,13 @@ namespace openmittsu {
 			//
 		}
 
+		bool MessageCenterWrapper::hasMessageCenter() const {
+			auto ptr = m_messageCenter.lock();
+			return (ptr) ? true : false;
+		}
+
 		void MessageCenterWrapper::onMessageCenterPointerAuthorityHasNewMessageCenter() {
-			m_messageCenter = m_messageCenterPointerAuthority.getMessageCenterWeak();
+			m_messageCenter = m_messageCenterPointerAuthority->getMessageCenterWeak();
 
 			auto ptr = m_messageCenter.lock();
 			if (ptr) {

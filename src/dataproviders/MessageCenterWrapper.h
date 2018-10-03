@@ -9,9 +9,11 @@ namespace openmittsu {
 		class MessageCenterWrapper : public MessageCenter {
 			Q_OBJECT
 		public:
-			MessageCenterWrapper(MessageCenterPointerAuthority const& messageCenterPointerAuthority);
+			MessageCenterWrapper(MessageCenterPointerAuthority const* messageCenterPointerAuthority);
 			MessageCenterWrapper(MessageCenterWrapper const& other);
-			virtual ~MessageCenterWrapper() {}
+			virtual ~MessageCenterWrapper();
+
+			bool hasMessageCenter() const;
 		public:
 			virtual bool sendText(openmittsu::protocol::ContactId const& receiver, QString const& text) override;
 			virtual bool sendImage(openmittsu::protocol::ContactId const& receiver, QByteArray const& image, QString const& caption) override;
@@ -54,13 +56,12 @@ namespace openmittsu {
 			virtual void processReceivedGroupLeave(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived) override;
 
 			virtual void setNetworkSentMessageAcceptor(std::shared_ptr<NetworkSentMessageAcceptor> const& newNetworkSentMessageAcceptor) override;
-			virtual void setStorage(std::shared_ptr<openmittsu::database::Database> const& newStorage) override;
 		private slots:
 			void onMessageCenterPointerAuthorityHasNewMessageCenter();
 			void onNewUnreadMessageAvailable(openmittsu::widgets::ChatTab* source);
 			void onMessageChanged(QString const& uuid);
 		private:
-			MessageCenterPointerAuthority const& m_messageCenterPointerAuthority;
+			MessageCenterPointerAuthority const* m_messageCenterPointerAuthority;
 			std::weak_ptr<MessageCenter> m_messageCenter;
 		};
 	}

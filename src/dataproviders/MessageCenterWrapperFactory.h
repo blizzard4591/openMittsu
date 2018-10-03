@@ -12,12 +12,13 @@ namespace openmittsu {
 
 		class MessageCenterWrapperFactory {
 		public:
-			MessageCenterWrapperFactory(MessageCenterPointerAuthority const& messageCenterPointerAuthority);
+			MessageCenterWrapperFactory();
+			MessageCenterWrapperFactory(MessageCenterPointerAuthority const* messageCenterPointerAuthority);
 			virtual ~MessageCenterWrapperFactory();
 
 			MessageCenterWrapper getMessageCenterWrapper() const;
 		private:
-			MessageCenterPointerAuthority const& m_messageCenterPointerAuthority;
+			MessageCenterPointerAuthority const* m_messageCenterPointerAuthority;
 		};
 
 	}

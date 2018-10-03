@@ -16,6 +16,7 @@
 #include "src/database/DatabaseWrapper.h"
 #include "src/database/DatabaseWrapperFactory.h"
 #include "src/dataproviders/MessageCenter.h"
+#include "src/dataproviders/MessageQueue.h"
 #include "src/dataproviders/ReceivedMessageAcceptor.h"
 #include "src/dataproviders/NetworkSentMessageAcceptor.h"
 

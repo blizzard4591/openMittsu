@@ -5,6 +5,8 @@
 
 #include "src/database/Database.h"
 
+#include <QMutex>
+
 namespace openmittsu {
 	namespace database {
 		class DatabaseWrapperFactory;
@@ -26,6 +28,7 @@ namespace openmittsu {
 			void newDatabaseAvailable();
 		private:
 			std::shared_ptr<Database> m_database;
+			mutable QMutex m_mutex;
 		};
 
 	}

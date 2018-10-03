@@ -44,8 +44,8 @@
 namespace openmittsu {
 	namespace network {
 
-		ProtocolClient::ProtocolClient(std::shared_ptr<openmittsu::crypto::FullCryptoBox> cryptoBox, openmittsu::protocol::ContactId const& ourContactId, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster, std::shared_ptr<openmittsu::network::MessageCenterWrapper> const& messageCenterWrapper, openmittsu::protocol::PushFromId const& pushFromId)
-			: QObject(nullptr), m_cryptoBox(std::move(cryptoBox)), m_messageCenterWrapper(messageCenterWrapper), m_pushFromIdPtr(std::make_unique<openmittsu::protocol::PushFromId>(pushFromId)),
+		ProtocolClient::ProtocolClient(std::shared_ptr<openmittsu::crypto::FullCryptoBox> cryptoBox, openmittsu::protocol::ContactId const& ourContactId, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster, openmittsu::dataproviders::MessageCenterWrapperFactory const& messageCenterWrapperFactory, openmittsu::protocol::PushFromId const& pushFromId)
+			: QObject(nullptr), m_cryptoBox(std::move(cryptoBox)), m_messageCenterWrapperFactory(messageCenterWrapperFactory), m_messageCenterWrapper(nullptr), m_pushFromIdPtr(std::make_unique<openmittsu::protocol::PushFromId>(pushFromId)),
 			m_isSetupDone(false), m_isNetworkSessionReady(false), m_isConnected(false), m_isAllowedToSend(false), m_isDisconnecting(false), m_socket(nullptr), m_networkSession(nullptr), m_ourContactId(ourContactId), m_serverConfiguration(serverConfiguration), m_optionMaster(optionMaster), outgoingMessagesTimer(nullptr), acknowledgmentWaitingTimer(nullptr), keepAliveTimer(nullptr), keepAliveCounter(0), failedReconnectAttempts(0) {
 			// Intentionally left empty.
 		}
@@ -132,6 +132,10 @@ namespace openmittsu {
 					if (m_socket == nullptr) {
 						return;
 					}
+				}
+
+				if (m_messageCenterWrapper == nullptr) {
+					m_messageCenterWrapper = std::make_shared<openmittsu::dataproviders::MessageCenterWrapper>(m_messageCenterWrapperFactory.getMessageCenterWrapper());
 				}
 
 				OPENMITTSU_CONNECT(m_socket.get(), readyRead(), this, socketOnReadyRead());

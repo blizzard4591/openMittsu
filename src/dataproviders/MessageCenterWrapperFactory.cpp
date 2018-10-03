@@ -7,7 +7,11 @@
 namespace openmittsu {
 	namespace dataproviders {
 
-		MessageCenterWrapperFactory::MessageCenterWrapperFactory(MessageCenterPointerAuthority const& messageCenterPointerAuthority) : m_messageCenterPointerAuthority(messageCenterPointerAuthority) {
+		MessageCenterWrapperFactory::MessageCenterWrapperFactory() : m_messageCenterPointerAuthority(nullptr) {
+			//
+		}
+
+		MessageCenterWrapperFactory::MessageCenterWrapperFactory(MessageCenterPointerAuthority const* messageCenterPointerAuthority) : m_messageCenterPointerAuthority(messageCenterPointerAuthority) {
 			//
 		}
 

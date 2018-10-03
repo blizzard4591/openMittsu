@@ -75,12 +75,13 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 	m_connectionState(ConnectionState::STATE_DISCONNECTED),
 	m_tabController(nullptr),
 	m_messageCenterThread(),
-	m_messageCenterWrapper(nullptr),
+	m_messageCenterPointerAuthority(),
+	m_messageCenterWrapper(&m_messageCenterPointerAuthority),
 	m_serverConfiguration(std::make_shared<openmittsu::network::ServerConfiguration>()),
 	m_optionMaster(std::make_shared<openmittsu::utility::OptionMaster>()),
 	m_databaseThread(),
 	m_databasePointerAuthority(),
-	m_databaseWrapper(m_databasePointerAuthority),
+	m_databaseWrapper(&m_databasePointerAuthority),
 	m_audioNotifier(std::make_shared<openmittsu::utility::AudioNotification>()) 
 
 {
@@ -89,7 +90,7 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 	m_tabController = std::make_shared<openmittsu::widgets::SimpleTabController>(m_ui.tabWidget);
 
 	bool messageCenterCreationSuccess = false;
-	if ((!QMetaObject::invokeMethod(m_messageCenterThread.getQObjectPtr(), "createMessageCenter", Q_RETURN_ARG(bool, messageCenterCreationSuccess), Q_ARG(std::shared_ptr<openmittsu::widgets::TabController> const&, m_tabController), Q_ARG(std::shared_ptr<openmittsu::utility::OptionMaster> const&, m_optionMaster))) || (!messageCenterCreationSuccess)) {
+	if ((!QMetaObject::invokeMethod(m_messageCenterThread.getQObjectPtr(), "createMessageCenter", Q_RETURN_ARG(bool, messageCenterCreationSuccess), Q_ARG(openmittsu::database::DatabaseWrapperFactory const&, m_databasePointerAuthority.getDatabaseWrapperFactory()), Q_ARG(std::shared_ptr<openmittsu::widgets::TabController> const&, m_tabController), Q_ARG(std::shared_ptr<openmittsu::utility::OptionMaster> const&, m_optionMaster))) || (!messageCenterCreationSuccess)) {
 		throw openmittsu::exceptions::InternalErrorException() << "Could not create MessageCenter, terminating.";
 	}
 
@@ -270,9 +271,9 @@ void Client::setupProtocolClient() {
 	std::shared_ptr<openmittsu::crypto::FullCryptoBox> cryptoBox = std::make_shared<openmittsu::crypto::FullCryptoBox>(openmittsu::dataproviders::KeyRegistry(m_serverConfiguration->getServerLongTermPublicKey(), m_databaseThread.getWorker().getDatabase()));
 	if (nickname.compare(QStringLiteral("You"), Qt::CaseInsensitive) == 0) {
 		LOGGER()->info("Using only ID as PushFromID token (for iOS Push Receivers).");
-		m_protocolClient = std::make_unique<openmittsu::network::ProtocolClient>(cryptoBox, selfContactId, m_serverConfiguration, m_optionMaster, std::make_shared<openmittsu::network::MessageCenterWrapper>(m_messageCenterThread.getWorker().getMessageCenter()), openmittsu::protocol::PushFromId(selfContactId));
+		m_protocolClient = std::make_unique<openmittsu::network::ProtocolClient>(cryptoBox, selfContactId, m_serverConfiguration, m_optionMaster, m_messageCenterPointerAuthority.getMessageCenterWrapperFactory(), openmittsu::protocol::PushFromId(selfContactId));
 	} else {
-		m_protocolClient = std::make_unique<openmittsu::network::ProtocolClient>(cryptoBox, selfContactId, m_serverConfiguration, m_optionMaster, std::make_shared<openmittsu::network::MessageCenterWrapper>(m_messageCenterThread.getWorker().getMessageCenter()), openmittsu::protocol::PushFromId(nickname));
+		m_protocolClient = std::make_unique<openmittsu::network::ProtocolClient>(cryptoBox, selfContactId, m_serverConfiguration, m_optionMaster, m_messageCenterPointerAuthority.getMessageCenterWrapperFactory(), openmittsu::protocol::PushFromId(nickname));
 		LOGGER()->info("Using nickname \"{}\" as PushFromID token (for iOS Push Receivers).", nickname.toStdString());
 	}
 
@@ -506,8 +507,7 @@ void Client::databaseOnReceivedNewContactMessage(openmittsu::protocol::ContactId
 			chatTab = m_tabController->getTab(identity);
 		} else {
 			openmittsu::crypto::PublicKey const publicKey = m_databaseWrapper.getContactPublicKey(identity);
-			openmittsu::dataproviders::MessageCenterWrapper const& messageCenter = *m_messageCenterWrapper;
-			openmittsu::dataproviders::BackedContact backedContact(identity, publicKey, m_databaseWrapper, *m_messageCenterWrapper);
+			openmittsu::dataproviders::BackedContact backedContact(identity, publicKey, m_databaseWrapper, m_messageCenterWrapper);
 			m_tabController->openTab(identity, backedContact);
 			chatTab = m_tabController->getTab(identity);
 		}
@@ -521,7 +521,7 @@ void Client::databaseOnReceivedNewGroupMessage(openmittsu::protocol::GroupId con
 		if (m_tabController->hasTab(group)) {
 			chatTab = m_tabController->getTab(group);
 		} else {
-			openmittsu::dataproviders::BackedGroup backedGroup(group, m_databaseWrapper, *m_messageCenterWrapper);
+			openmittsu::dataproviders::BackedGroup backedGroup(group, m_databaseWrapper, m_messageCenterWrapper);
 			m_tabController->openTab(group, backedGroup);
 			chatTab = m_tabController->getTab(group);
 		}
@@ -599,12 +599,12 @@ void Client::listContactsOnDoubleClick(QListWidgetItem* item) {
 	if (clwi != nullptr) {
 		openmittsu::protocol::ContactId const contactId = clwi->getContactId();
 		openmittsu::crypto::PublicKey const publicKey = m_databaseWrapper.getContactPublicKey(contactId);
-		openmittsu::dataproviders::BackedContact const backedContact(contactId, publicKey, m_databaseWrapper, *m_messageCenterWrapper);
+		openmittsu::dataproviders::BackedContact const backedContact(contactId, publicKey, m_databaseWrapper, m_messageCenterWrapper);
 		m_tabController->openTab(contactId, backedContact);
 		m_tabController->focusTab(contactId);
 	} else if (glwi != nullptr) {
 		openmittsu::protocol::GroupId const groupId = glwi->getGroupId();
-		openmittsu::dataproviders::BackedGroup const backedGroup(groupId, m_databaseWrapper, *m_messageCenterWrapper);
+		openmittsu::dataproviders::BackedGroup const backedGroup(groupId, m_databaseWrapper, m_messageCenterWrapper);
 		m_tabController->openTab(groupId, backedGroup);
 		m_tabController->focusTab(groupId);
 	} else {
@@ -621,7 +621,7 @@ void Client::listContactsOnContextMenu(QPoint const& pos) {
 	ContactListWidgetItem* clwi = dynamic_cast<ContactListWidgetItem*>(listItem);
 	GroupListWidgetItem* glwi = dynamic_cast<GroupListWidgetItem*>(listItem);
 
-	if ((!m_databaseWrapper.hasDatabase()) || (m_messageCenterWrapper == nullptr) || (m_tabController == nullptr)) {
+	if ((!m_databaseWrapper.hasDatabase()) || (m_messageCenterWrapper.hasMessageCenter()) || (m_tabController == nullptr)) {
 		return;
 	}
 
@@ -769,24 +769,24 @@ void Client::listContactsOnContextMenu(QPoint const& pos) {
 				} else {
 					if (isIdentityContact) {
 						openmittsu::crypto::PublicKey const publicKey = m_databaseWrapper.getContactPublicKey(clwi->getContactId());
-						openmittsu::dataproviders::BackedContact const backedContact(clwi->getContactId(), publicKey, m_databaseWrapper, *m_messageCenterWrapper);
+						openmittsu::dataproviders::BackedContact const backedContact(clwi->getContactId(), publicKey, m_databaseWrapper, m_messageCenterWrapper);
 						m_tabController->openTab(clwi->getContactId(), backedContact);
 						m_tabController->focusTab(clwi->getContactId());
 					} else {
-						openmittsu::dataproviders::BackedGroup const backedGroup(glwi->getGroupId(), m_databaseWrapper, *m_messageCenterWrapper);
+						openmittsu::dataproviders::BackedGroup const backedGroup(glwi->getGroupId(), m_databaseWrapper, m_messageCenterWrapper);
 						m_tabController->openTab(glwi->getGroupId(), backedGroup);
 						m_tabController->focusTab(glwi->getGroupId());
 					}
 				}
 			} else if (!isIdentityContact && (selectedItem == actionRequestSync) && (actionRequestSync != nullptr)) {
-				if (m_protocolClient == nullptr || !m_protocolClient->getIsConnected() || (m_messageCenterWrapper == nullptr)) {
+				if (m_protocolClient == nullptr || !m_protocolClient->getIsConnected() || (m_messageCenterWrapper.hasMessageCenter())) {
 					return;
 				}
 
 				if (isGroupSelfOwned) {
-					m_messageCenterWrapper->resendGroupSetup(glwi->getGroupId());
+					m_messageCenterWrapper.resendGroupSetup(glwi->getGroupId());
 				} else {
-					m_messageCenterWrapper->sendSyncRequest(glwi->getGroupId());
+					m_messageCenterWrapper.sendSyncRequest(glwi->getGroupId());
 				}
 			}
 		}
@@ -837,7 +837,7 @@ void Client::menuAboutAboutQtOnClick() {
 }
 
 void Client::menuGroupAddOnClick() {
-	if ((!m_databaseWrapper.hasDatabase()) || (m_messageCenterWrapper == nullptr)) {
+	if ((!m_databaseWrapper.hasDatabase()) || (m_messageCenterWrapper.hasMessageCenter())) {
 		QMessageBox::warning(this, "No database loaded", "Before you can use this feature you need to load a database from file (see main screen) or create one using a backup of your existing ID (see Identity -> Load Backup).");
 	} else if (m_protocolClient == nullptr || !m_protocolClient->getIsConnected()) {
 		QMessageBox::warning(this, "Not connected to a server", "Before you can use this feature you need to connect to a server.");

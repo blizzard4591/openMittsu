@@ -12,13 +12,13 @@
 namespace openmittsu {
 	namespace database {
 
-		DatabaseWrapper::DatabaseWrapper(DatabasePointerAuthority const& databasePointerAuthority) : Database(), m_databasePointerAuthority(databasePointerAuthority), m_database() {
-			OPENMITTSU_CONNECT_QUEUED(&m_databasePointerAuthority, newDatabaseAvailable(), this, onDatabasePointerAuthorityHasNewDatabase());
+		DatabaseWrapper::DatabaseWrapper(DatabasePointerAuthority const* databasePointerAuthority) : Database(), m_databasePointerAuthority(databasePointerAuthority), m_database() {
+			OPENMITTSU_CONNECT_QUEUED(m_databasePointerAuthority, newDatabaseAvailable(), this, onDatabasePointerAuthorityHasNewDatabase());
 			onDatabasePointerAuthorityHasNewDatabase();
 		}
 
 		DatabaseWrapper::DatabaseWrapper(DatabaseWrapper const& other) : Database(), m_databasePointerAuthority(other.m_databasePointerAuthority), m_database() {
-			OPENMITTSU_CONNECT_QUEUED(&m_databasePointerAuthority, newDatabaseAvailable(), this, onDatabasePointerAuthorityHasNewDatabase());
+			OPENMITTSU_CONNECT_QUEUED(m_databasePointerAuthority, newDatabaseAvailable(), this, onDatabasePointerAuthorityHasNewDatabase());
 			onDatabasePointerAuthorityHasNewDatabase();
 		}
 
@@ -27,7 +27,7 @@ namespace openmittsu {
 		}
 
 		void DatabaseWrapper::onDatabasePointerAuthorityHasNewDatabase() {
-			m_database = m_databasePointerAuthority.getDatabaseWeak();
+			m_database = m_databasePointerAuthority->getDatabaseWeak();
 
 			auto ptr = m_database.lock();
 			if (ptr) {
