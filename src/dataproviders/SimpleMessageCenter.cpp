@@ -787,7 +787,7 @@ namespace openmittsu {
 			}
 		}
 
-		void SimpleMessageCenter::onMessageSendFailed(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId) {
+		void SimpleMessageCenter::processMessageSendFailed(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId) {
 			if (this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We were notfied that sending a message to user {} with message ID #{} failed, but that could not be saved as the storage system is not ready.", receiver.toString(), messageId.toString());
 				return;
@@ -795,7 +795,7 @@ namespace openmittsu {
 			this->m_storage.storeMessageSendFailed(receiver, messageId);
 		}
 
-		void SimpleMessageCenter::onMessageSendDone(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId) {
+		void SimpleMessageCenter::processMessageSendDone(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId) {
 			if (this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We were notfied that sending a message to user {} with message ID #{} was successful, but that could not be saved as the storage system is not ready.", receiver.toString(), messageId.toString());
 				return;
@@ -803,7 +803,7 @@ namespace openmittsu {
 			this->m_storage.storeMessageSendDone(receiver, messageId);
 		}
 
-		void SimpleMessageCenter::onMessageSendFailed(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId) {
+		void SimpleMessageCenter::processMessageSendFailed(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId) {
 			if (this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We were notfied that sending a message to group {} with message ID #{} failed, but that could not be saved as the storage system is not ready.", group.toString(), messageId.toString());
 				return;
@@ -811,7 +811,7 @@ namespace openmittsu {
 			this->m_storage.storeMessageSendFailed(group, messageId);
 		}
 
-		void SimpleMessageCenter::onMessageSendDone(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId) {
+		void SimpleMessageCenter::processMessageSendDone(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId) {
 			if (this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We were notfied that sending a message to group {} with message ID #{} was successful, but that could not be saved as the storage system is not ready.", group.toString(), messageId.toString());
 				return;
@@ -819,7 +819,7 @@ namespace openmittsu {
 			this->m_storage.storeMessageSendDone(group, messageId);
 		}
 
-		void SimpleMessageCenter::onFoundNewContact(openmittsu::protocol::ContactId const& newContact, openmittsu::crypto::PublicKey const& publicKey) {
+		void SimpleMessageCenter::addNewContact(openmittsu::protocol::ContactId const& newContact, openmittsu::crypto::PublicKey const& publicKey) {
 			if (this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We were notfied of a new contact with ID {}, but that could not be saved as the storage system is not ready.", newContact.toString());
 				return;

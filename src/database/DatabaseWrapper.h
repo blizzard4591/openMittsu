@@ -98,8 +98,8 @@ namespace openmittsu {
 			virtual QHash<openmittsu::protocol::ContactId, ContactData> getContactDataAll(bool fetchMessageCount) const override;
 			virtual openmittsu::crypto::PublicKey getContactPublicKey(openmittsu::protocol::ContactId const& identity) const override;
 			virtual int getContactCount() const override;
-			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::ContactId const& contact, std::size_t n) const override;
-			virtual std::unique_ptr<DatabaseReadonlyContactMessage> getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const override;
+			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::ContactId const& contact, std::size_t n) override;
+			virtual std::unique_ptr<DatabaseReadonlyContactMessage> getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) override;
 			virtual void setContactFirstName(openmittsu::protocol::ContactId const& contact, QString const& firstName) override;
 			virtual void setContactLastName(openmittsu::protocol::ContactId const& contact, QString const& lastName) override;
 			virtual void setContactNickName(openmittsu::protocol::ContactId const& contact, QString const& nickname) override;
@@ -112,8 +112,8 @@ namespace openmittsu {
 			virtual QHash<openmittsu::protocol::GroupId, GroupData> getGroupDataAll(bool withMembers) const override;
 			virtual int getGroupCount() const override;
 			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const override;
-			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::GroupId const& group, std::size_t n) const override;
-			virtual std::unique_ptr<DatabaseReadonlyGroupMessage> getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) const override;
+			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::GroupId const& group, std::size_t n) override;
+			virtual std::unique_ptr<DatabaseReadonlyGroupMessage> getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) override;
 			// Mass Data, checks
 			virtual std::unique_ptr<openmittsu::backup::IdentityBackup> getBackup() const override;
 			virtual QSet<openmittsu::protocol::ContactId> getContactsRequiringFeatureLevelCheck(int maximalAgeInSeconds) const override;

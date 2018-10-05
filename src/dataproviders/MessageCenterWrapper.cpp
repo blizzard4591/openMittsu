@@ -112,6 +112,22 @@ namespace openmittsu {
 			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(setNetworkSentMessageAcceptor, Q_ARG(std::shared_ptr<NetworkSentMessageAcceptor> const&, newNetworkSentMessageAcceptor));
 		}
 
+		void MessageCenterWrapper::processMessageSendFailed(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processMessageSendFailed, Q_ARG(openmittsu::protocol::ContactId const&, receiver), Q_ARG(openmittsu::protocol::MessageId const&, messageId));
+		}
+
+		void MessageCenterWrapper::processMessageSendDone(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processMessageSendDone, Q_ARG(openmittsu::protocol::ContactId const&, receiver), Q_ARG(openmittsu::protocol::MessageId const&, messageId));
+		}
+
+		void MessageCenterWrapper::processMessageSendFailed(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processMessageSendFailed, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(openmittsu::protocol::MessageId const&, messageId));
+		}
+
+		void MessageCenterWrapper::processMessageSendDone(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processMessageSendDone, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(openmittsu::protocol::MessageId const&, messageId));
+		}
+
 		void MessageCenterWrapper::processReceivedContactMessageText(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& message) {
 			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedContactMessageText, Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived), Q_ARG(QString const&, message));
 		}
@@ -178,6 +194,10 @@ namespace openmittsu {
 
 		void MessageCenterWrapper::processReceivedGroupLeave(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived) {
 			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedGroupLeave, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived));
+		}
+
+		void MessageCenterWrapper::addNewContact(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& publicKey) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(addNewContact, Q_ARG(openmittsu::protocol::ContactId const&, contact), Q_ARG(openmittsu::crypto::PublicKey const&, publicKey));
 		}
 
 		void MessageCenterWrapper::resendGroupSetup(openmittsu::protocol::GroupId const& group) {

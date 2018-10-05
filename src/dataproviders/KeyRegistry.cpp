@@ -75,7 +75,7 @@ namespace openmittsu {
 			} else if (!m_cachedPublicKeys.contains(identity)) {
 				throw openmittsu::exceptions::IllegalArgumentException() << "KeyRegistry::getPublicKeyForIdentity(identity = " << identity.toString() << ") called with identity that does not exist.";
 			} else {
-				return m_cachedPublicKeys.value(identity);
+				return m_cachedPublicKeys.value(identity).publicKey;
 			}
 		}
 
@@ -101,11 +101,11 @@ namespace openmittsu {
 			if (!db) {
 				throw openmittsu::exceptions::InternalErrorException() << "KeyRegistry::updateCache() called while the database is unavailable.";
 			} else {
-				openmittsu::backup::IdentityBackup const backupData = db->getBackup();
+				std::unique_ptr<openmittsu::backup::IdentityBackup> const backupData = db->getBackup();
 
-				m_cachedSelfContactId = backupData.getClientContactId();
-				m_cachedClientLongTermKeyPair = backupData.getClientLongTermKeyPair();
-				m_cachedPublicKeys = db->getKnownContactsWithPublicKeys();
+				m_cachedSelfContactId = backupData->getClientContactId();
+				m_cachedClientLongTermKeyPair = backupData->getClientLongTermKeyPair();
+				m_cachedPublicKeys = db->getContactDataAll(false);
 
 				this->m_isCacheValid = true;
 				LOGGER_DEBUG("Updated cache in KeyRegistry.");

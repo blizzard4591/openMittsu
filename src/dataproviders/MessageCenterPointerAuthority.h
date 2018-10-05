@@ -6,6 +6,7 @@
 #include <QMutex>
 
 #include "src/dataproviders/MessageCenter.h"
+#include "src/dataproviders/MessageCenterWrapperFactory.h"
 
 namespace openmittsu {
 	namespace dataproviders {

@@ -13,7 +13,7 @@ namespace openmittsu {
 
 			using namespace openmittsu::dataproviders::messages;
 
-			DatabaseContactMessageCursor::DatabaseContactMessageCursor(InternalDatabaseInterface const* database, openmittsu::protocol::ContactId const& contact) : DatabaseMessageCursor(database), ContactMessageCursor(), m_contact(contact) {
+			DatabaseContactMessageCursor::DatabaseContactMessageCursor(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact) : DatabaseMessageCursor(database), ContactMessageCursor(), m_contact(contact) {
 				//
 			}
 
@@ -21,13 +21,13 @@ namespace openmittsu {
 				//
 			}
 
-			DatabaseContactMessageCursor::DatabaseContactMessageCursor(InternalDatabaseInterface const* database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId) : DatabaseMessageCursor(database), ContactMessageCursor(), m_contact(contact) {
+			DatabaseContactMessageCursor::DatabaseContactMessageCursor(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId) : DatabaseMessageCursor(database), ContactMessageCursor(), m_contact(contact) {
 				if (!seek(messageId)) {
 					throw openmittsu::exceptions::InternalErrorException() << "No message from contact \"" << contact.toString() << "\" and message ID \"" << messageId.toString() << "\" exists, invalid entry point.";
 				}
 			}
 
-			DatabaseContactMessageCursor::DatabaseContactMessageCursor(InternalDatabaseInterface const* database, openmittsu::protocol::ContactId const& contact, QString const& uuid) : DatabaseMessageCursor(database), ContactMessageCursor(), m_contact(contact) {
+			DatabaseContactMessageCursor::DatabaseContactMessageCursor(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, QString const& uuid) : DatabaseMessageCursor(database), ContactMessageCursor(), m_contact(contact) {
 				if (!seekByUuid(uuid)) {
 					throw openmittsu::exceptions::InternalErrorException() << "No message from contact \"" << contact.toString() << "\" and UUID \"" << uuid.toStdString() << "\" exists, invalid entry point.";
 				}

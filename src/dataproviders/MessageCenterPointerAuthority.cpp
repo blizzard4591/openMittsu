@@ -44,7 +44,7 @@ namespace openmittsu {
 
 		MessageCenterWrapperFactory MessageCenterPointerAuthority::getMessageCenterWrapperFactory() const {
 			QMutexLocker lock(&m_mutex);
-			return MessageCenterWrapperFactory(*this);
+			return MessageCenterWrapperFactory(this);
 		}
 
 	}

@@ -14,10 +14,6 @@
 #include "src/protocol/ContactId.h"
 
 namespace openmittsu {
-	namespace widgets {
-		class TabController;
-	}
-
 	namespace dataproviders {
 
 		class MessageCenterThreadWorker : public QObject {
@@ -25,7 +21,7 @@ namespace openmittsu {
 		public:
 			virtual ~MessageCenterThreadWorker();
 		public slots:
-			bool createMessageCenter(openmittsu::database::DatabaseWrapperFactory const& databaseWrapperFactory, std::shared_ptr<openmittsu::widgets::TabController> const& tabController, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster);
+			bool createMessageCenter(openmittsu::database::DatabaseWrapperFactory const& databaseWrapperFactory, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster);
 
 			bool hasMessageCenter() const;
 			std::shared_ptr<openmittsu::dataproviders::MessageCenter> getMessageCenter();

@@ -132,8 +132,8 @@ namespace openmittsu {
 			virtual openmittsu::crypto::PublicKey getContactPublicKey(openmittsu::protocol::ContactId const& identity) const = 0;
 			virtual int getContactCount() const = 0;
 
-			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::ContactId const& contact, std::size_t n) const = 0;
-			virtual std::unique_ptr<DatabaseReadonlyContactMessage> getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const = 0;
+			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::ContactId const& contact, std::size_t n) = 0;
+			virtual std::unique_ptr<DatabaseReadonlyContactMessage> getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) = 0;
 
 			virtual void setContactFirstName(openmittsu::protocol::ContactId const& contact, QString const& firstName) = 0;
 			virtual void setContactLastName(openmittsu::protocol::ContactId const& contact, QString const& lastName) = 0;
@@ -144,13 +144,13 @@ namespace openmittsu {
 			virtual void setContactColor(openmittsu::protocol::ContactId const& contact, int color) = 0;
 
 			// Group Data
-			virtual GroupData getGroupData(openmittsu::protocol::GroupId const& group, bool withMembers) const = 0;
-			virtual QHash<openmittsu::protocol::GroupId, GroupData> getGroupDataAll(bool withMembers) const = 0;
+			virtual GroupData getGroupData(openmittsu::protocol::GroupId const& group, bool withDescription) const = 0;
+			virtual QHash<openmittsu::protocol::GroupId, GroupData> getGroupDataAll(bool withDescription) const = 0;
 			virtual int getGroupCount() const = 0;
 			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const = 0;
 
-			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::GroupId const& group, std::size_t n) const = 0;
-			virtual std::unique_ptr<DatabaseReadonlyGroupMessage> getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) const = 0;
+			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::GroupId const& group, std::size_t n) = 0;
+			virtual std::unique_ptr<DatabaseReadonlyGroupMessage> getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) = 0;
 
 			// Mass Data, checks
 			virtual std::unique_ptr<openmittsu::backup::IdentityBackup> getBackup() const = 0;

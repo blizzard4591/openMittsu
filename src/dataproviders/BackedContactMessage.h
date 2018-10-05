@@ -13,7 +13,7 @@ namespace openmittsu {
 		class BackedContactMessage : public BackedMessage {
 			Q_OBJECT
 		public:
-			BackedContactMessage(openmittsu::database::DatabaseReadonlyContactMessage const& message, BackedContact const& sender, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter);
+			BackedContactMessage(openmittsu::database::DatabaseReadonlyContactMessage const& message, std::shared_ptr<BackedContact> const& sender, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter);
 			BackedContactMessage(BackedContactMessage const& other);
 			virtual ~BackedContactMessage();
 

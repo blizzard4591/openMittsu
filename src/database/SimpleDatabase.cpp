@@ -1254,7 +1254,7 @@ namespace openmittsu {
 						}
 						case GroupMessageType::SET_TITLE:
 						{
-							GroupData groupData = m_contactAndGroupDataProvider.getGroupData(group);
+							GroupData groupData = m_contactAndGroupDataProvider.getGroupData(group, false);
 							messageAcceptor.processSentGroupSetTitle(group, groupData.members, messageId, message.getCreatedAt(), groupData.title);
 							message.setIsQueued(true);
 							break;
@@ -1325,12 +1325,12 @@ namespace openmittsu {
 			return database.commit();
 		}
 
-		std::unique_ptr<DatabaseReadonlyContactMessage> SimpleDatabase::getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const {
+		std::unique_ptr<DatabaseReadonlyContactMessage> SimpleDatabase::getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) {
 			internal::DatabaseContactMessageCursor cursor(this, contact, uuid);
 			return cursor.getReadonlyMessage();
 		}
 
-		std::unique_ptr<DatabaseReadonlyGroupMessage> SimpleDatabase::getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) const {
+		std::unique_ptr<DatabaseReadonlyGroupMessage> SimpleDatabase::getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) {
 			internal::DatabaseGroupMessageCursor cursor(this, group, uuid);
 			return cursor.getReadonlyMessage();
 		}
@@ -1343,20 +1343,20 @@ namespace openmittsu {
 			return m_contactAndGroupDataProvider.getContactDataAll(fetchMessageCount);
 		}
 		
-		GroupData SimpleDatabase::getGroupData(openmittsu::protocol::GroupId const& group, bool withMembers) const {
-			return m_contactAndGroupDataProvider.getGroupData(group, withMembers);
+		GroupData SimpleDatabase::getGroupData(openmittsu::protocol::GroupId const& group, bool withDescription) const {
+			return m_contactAndGroupDataProvider.getGroupData(group, withDescription);
 		}
 		
-		QHash<openmittsu::protocol::GroupId, GroupData> SimpleDatabase::getGroupDataAll(bool withMembers) const {
-			return m_contactAndGroupDataProvider.getGroupDataAll(withMembers);
+		QHash<openmittsu::protocol::GroupId, GroupData> SimpleDatabase::getGroupDataAll(bool withDescription) const {
+			return m_contactAndGroupDataProvider.getGroupDataAll(withDescription);
 		}
 
-		QVector<QString> SimpleDatabase::getLastMessageUuids(openmittsu::protocol::ContactId const& contact, std::size_t n) const {
+		QVector<QString> SimpleDatabase::getLastMessageUuids(openmittsu::protocol::ContactId const& contact, std::size_t n) {
 			internal::DatabaseContactMessageCursor cursor(this, contact);
 			return cursor.getLastMessages(n);
 		}
 
-		QVector<QString> SimpleDatabase::getLastMessageUuids(openmittsu::protocol::GroupId const& group, std::size_t n) const {
+		QVector<QString> SimpleDatabase::getLastMessageUuids(openmittsu::protocol::GroupId const& group, std::size_t n) {
 			internal::DatabaseGroupMessageCursor cursor(this, group);
 			return cursor.getLastMessages(n);
 		}

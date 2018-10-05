@@ -45,7 +45,7 @@ namespace openmittsu {
 
 		DatabaseWrapperFactory DatabasePointerAuthority::getDatabaseWrapperFactory() const {
 			QMutexLocker lock(&m_mutex);
-			return DatabaseWrapperFactory(*this);
+			return DatabaseWrapperFactory(this);
 		}
 
 	}

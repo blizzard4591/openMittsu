@@ -19,7 +19,7 @@ namespace openmittsu {
 		class BackedMessage : public QObject {
 			Q_OBJECT
 		public:
-			BackedMessage(QString const& uuid, BackedContact const& sender, bool isMessageFromUs, openmittsu::protocol::MessageId const& messageId);
+			BackedMessage(QString const& uuid, std::shared_ptr<BackedContact> const& sender, bool isMessageFromUs, openmittsu::protocol::MessageId const& messageId);
 			BackedMessage(BackedMessage const& other);
 			virtual ~BackedMessage();
 
@@ -38,7 +38,7 @@ namespace openmittsu {
 			bool isStatusMessage() const;
 
 			openmittsu::protocol::ContactId const& getSender() const;
-			BackedContact const& getContact() const;
+			std::shared_ptr<BackedContact> const& getContact() const;
 
 			bool isMessageFromUs() const;
 
@@ -61,7 +61,7 @@ namespace openmittsu {
 			virtual messages::ReadonlyUserMessage const& getMessage() const = 0;
 			
 			QString const m_uuid;
-			BackedContact const m_contact;
+			std::shared_ptr<BackedContact> const m_contact;
 			bool const m_isMessageFromUs;
 		};
 

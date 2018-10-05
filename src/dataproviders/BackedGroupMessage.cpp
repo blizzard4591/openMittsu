@@ -8,7 +8,7 @@
 namespace openmittsu {
 	namespace dataproviders {
 
-		BackedGroupMessage::BackedGroupMessage(openmittsu::database::DatabaseReadonlyGroupMessage const& message, BackedContact const& sender, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) : BackedMessage(message.getUid(), sender, message.isMessageFromUs(), message.getMessageId()), m_message(message), m_messageCenter(messageCenter) {
+		BackedGroupMessage::BackedGroupMessage(openmittsu::database::DatabaseReadonlyGroupMessage const& message, std::shared_ptr<BackedContact> const& sender, std::shared_ptr<BackedGroup> const& group, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) : BackedMessage(message.getUid(), sender, message.isMessageFromUs(), message.getMessageId()), m_group(group), m_message(message), m_messageCenter(messageCenter) {
 			OPENMITTSU_CONNECT(&m_messageCenter, messageChanged(QString const&), this, onMessageChanged(QString const&));
 		}
 
@@ -29,7 +29,7 @@ namespace openmittsu {
 		}
 
 		void BackedGroupMessage::loadCache() {
-			m_message = m_contact.fetchMessageByUuid(m_uuid);
+			m_message = m_group->fetchMessageByUuid(m_uuid);
 		}
 
 		messages::GroupMessageType BackedGroupMessage::getMessageType() const {

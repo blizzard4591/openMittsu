@@ -37,8 +37,8 @@ namespace openmittsu {
 				virtual void announceReceivedNewMessage(openmittsu::protocol::GroupId const& group) = 0;
 
 				// Message ID
-				//virtual openmittsu::protocol::MessageId getNextMessageId(openmittsu::protocol::ContactId const& contact) = 0;
-				//virtual openmittsu::protocol::MessageId getNextMessageId(openmittsu::protocol::GroupId const& group) = 0;
+				virtual openmittsu::protocol::MessageId getNextMessageId(openmittsu::protocol::ContactId const& contact) = 0;
+				virtual openmittsu::protocol::MessageId getNextMessageId(openmittsu::protocol::GroupId const& group) = 0;
 
 				// Media Items
 				virtual MediaFileItem getMediaItem(QString const& uuid) const = 0;

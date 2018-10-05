@@ -9,7 +9,7 @@
 namespace openmittsu {
 	namespace dataproviders {
 
-		BackedMessage::BackedMessage(QString const& uuid, BackedContact const& sender, bool isMessageFromUs, openmittsu::protocol::MessageId const& messageId) : m_uuid(uuid), m_contact(sender), m_isMessageFromUs(isMessageFromUs) {
+		BackedMessage::BackedMessage(QString const& uuid, std::shared_ptr<BackedContact> const& sender, bool isMessageFromUs, openmittsu::protocol::MessageId const& messageId) : m_uuid(uuid), m_contact(sender), m_isMessageFromUs(isMessageFromUs) {
 			//
 		}
 
@@ -25,7 +25,7 @@ namespace openmittsu {
 			return getMessage().getSender();
 		}
 
-		BackedContact const& BackedMessage::getContact() const {
+		std::shared_ptr<BackedContact> const& BackedMessage::getContact() const {
 			return m_contact;
 		}
 

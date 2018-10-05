@@ -28,7 +28,8 @@ namespace openmittsu {
 				virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const override;
 				virtual bool getGroupIsAwaitingSync(openmittsu::protocol::GroupId const& group) const override;
 
-				virtual openmittsu::database::GroupData getGroupData(openmittsu::protocol::GroupId const& group) const override;
+				virtual openmittsu::database::GroupData getGroupData(openmittsu::protocol::GroupId const& group, bool withDescription) const override;
+				virtual QHash<openmittsu::protocol::GroupId, openmittsu::database::GroupData> getGroupDataAll(bool withDescription) const override;
 
 				virtual void addGroup(QVector<NewGroupData> const& newGroupData) override;
 

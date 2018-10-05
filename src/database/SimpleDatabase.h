@@ -86,16 +86,16 @@ namespace openmittsu {
 			virtual openmittsu::protocol::ContactId getSelfContact() const override;
 
 			/** AHHH FUCK THIS **/
-			virtual std::unique_ptr<DatabaseReadonlyContactMessage> getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const override;
-			virtual std::unique_ptr<DatabaseReadonlyGroupMessage> getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) const override;
+			virtual std::unique_ptr<DatabaseReadonlyContactMessage> getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) override;
+			virtual std::unique_ptr<DatabaseReadonlyGroupMessage> getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) override;
 
 			virtual ContactData getContactData(openmittsu::protocol::ContactId const& contact, bool fetchMessageCount) const override;
 			virtual QHash<openmittsu::protocol::ContactId, ContactData> getContactDataAll(bool fetchMessageCount) const override;
-			virtual GroupData getGroupData(openmittsu::protocol::GroupId const& group, bool withMembers) const override;
-			virtual QHash<openmittsu::protocol::GroupId, GroupData> getGroupDataAll(bool withMembers) const override;
+			virtual GroupData getGroupData(openmittsu::protocol::GroupId const& group, bool withDescription) const override;
+			virtual QHash<openmittsu::protocol::GroupId, GroupData> getGroupDataAll(bool withDescription) const override;
 
-			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::ContactId const& contact, std::size_t n) const override;
-			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::GroupId const& group, std::size_t n) const override;
+			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::ContactId const& contact, std::size_t n) override;
+			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::GroupId const& group, std::size_t n) override;
 
 			virtual openmittsu::crypto::PublicKey getContactPublicKey(openmittsu::protocol::ContactId const& identity) const override;
 
@@ -131,9 +131,6 @@ namespace openmittsu {
 
 			internal::DatabaseContactMessageCursor getMessageCursor(openmittsu::protocol::ContactId const& contact);
 			internal::DatabaseGroupMessageCursor getMessageCursor(openmittsu::protocol::GroupId const& group);
-
-			openmittsu::protocol::MessageId getNextMessageId(openmittsu::protocol::ContactId const& contact);
-			openmittsu::protocol::MessageId getNextMessageId(openmittsu::protocol::GroupId const& group);
 
 			// Queries
 			virtual QSqlQuery getQueryObject() const override;
@@ -230,6 +227,10 @@ namespace openmittsu {
 			void announceNewMessage(openmittsu::protocol::GroupId const& group, QString const& messageUuid);
 			void announceReceivedNewMessage(openmittsu::protocol::ContactId const& contact);
 			void announceReceivedNewMessage(openmittsu::protocol::GroupId const& group);
+
+			// Internal Interface
+			virtual openmittsu::protocol::MessageId getNextMessageId(openmittsu::protocol::ContactId const& contact) override;
+			virtual openmittsu::protocol::MessageId getNextMessageId(openmittsu::protocol::GroupId const& group) override;
 		private:
 			QSqlDatabase database;
 			QString const m_driverNameCrypto;

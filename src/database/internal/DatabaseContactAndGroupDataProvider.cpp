@@ -710,7 +710,7 @@ namespace openmittsu {
 				return result;
 			}
 
-			openmittsu::database::GroupData DatabaseContactAndGroupDataProvider::getGroupData(openmittsu::protocol::GroupId const& group) const {
+			openmittsu::database::GroupData DatabaseContactAndGroupDataProvider::getGroupData(openmittsu::protocol::GroupId const& group, bool withDescription) const {
 				QSqlQuery query(m_database->getQueryObject());
 
 				query.prepare(QStringLiteral("SELECT `groupname`, `members`, `avatar_uuid`, `is_awaiting_sync` FROM `groups` WHERE `id` = :groupId AND `creator` = :groupCreator;"));
@@ -727,7 +727,12 @@ namespace openmittsu {
 				result.title = query.value(QStringLiteral("groupname")).toString();
 
 				QString const memberField = query.value(QStringLiteral("members")).toString();
-				result.description = getGroupDescription(memberField);
+				if (withDescription) {
+					result.description = getGroupDescription(memberField);
+				} else {
+					result.description = QStringLiteral("");
+				}
+
 				result.members = openmittsu::protocol::ContactIdList::fromString(memberField).getContactIds();
 
 				QVariant const avatar = queryField(group, QStringLiteral("avatar_uuid"));
@@ -741,6 +746,49 @@ namespace openmittsu {
 
 				result.isAwaitingSync = query.value(QStringLiteral("is_awaiting_sync")).toBool();
 				result.messageCount = openmittsu::database::internal::DatabaseGroupMessage::getGroupMessageCount(m_database, group);
+
+				return result;
+			}
+
+			QHash<openmittsu::protocol::GroupId, openmittsu::database::GroupData> DatabaseContactAndGroupDataProvider::getGroupDataAll(bool withDescription) const {
+				QSqlQuery query(m_database->getQueryObject());
+
+				query.prepare(QStringLiteral("SELECT `id`, `creator`, `groupname`, `members`, `avatar_uuid`, `is_awaiting_sync` FROM `groups`;"));
+
+				if (!query.exec() || !query.isSelect()) {
+					throw openmittsu::exceptions::InternalErrorException() << "Could not execute group data enumeration query for table groups. Query error: " << query.lastError().text().toStdString();
+				}
+
+				QHash<openmittsu::protocol::GroupId, openmittsu::database::GroupData> result;
+				while (query.next()) {
+					GroupData groupData;
+					openmittsu::protocol::ContactId const creator(query.value(QStringLiteral("creator")).toString());
+					openmittsu::protocol::GroupId const group(creator, query.value(QStringLiteral("id")).toString());
+
+					groupData.title = query.value(QStringLiteral("groupname")).toString();
+
+					QString const memberField = query.value(QStringLiteral("members")).toString();
+					if (withDescription) {
+						groupData.description = getGroupDescription(memberField);
+					} else {
+						groupData.description = QStringLiteral("");
+					}
+					groupData.members = openmittsu::protocol::ContactIdList::fromString(memberField).getContactIds();
+
+					QVariant const avatar = queryField(group, QStringLiteral("avatar_uuid"));
+					groupData.hasImage = !(avatar.isNull() || avatar.toString().isEmpty());
+
+					if (groupData.hasImage) {
+						groupData.image = openmittsu::database::MediaFileItem(openmittsu::database::MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE);
+					} else {
+						groupData.image = m_database->getMediaItem(avatar.toString());
+					}
+
+					groupData.isAwaitingSync = query.value(QStringLiteral("is_awaiting_sync")).toBool();
+					groupData.messageCount = openmittsu::database::internal::DatabaseGroupMessage::getGroupMessageCount(m_database, group);
+
+					result.insert(group, groupData);
+				}
 
 				return result;
 			}

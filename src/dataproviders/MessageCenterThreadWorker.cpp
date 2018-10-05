@@ -13,8 +13,8 @@ namespace openmittsu {
 			//
 		}
 
-		bool MessageCenterThreadWorker::createMessageCenter(openmittsu::database::DatabaseWrapperFactory const& databaseWrapperFactory, std::shared_ptr<openmittsu::widgets::TabController> const& tabController, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster) {
-			std::shared_ptr<openmittsu::dataproviders::MessageCenter> newMessageCenter = std::make_shared<openmittsu::dataproviders::SimpleMessageCenter>(databaseWrapperFactory, tabController, optionMaster);
+		bool MessageCenterThreadWorker::createMessageCenter(openmittsu::database::DatabaseWrapperFactory const& databaseWrapperFactory, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster) {
+			std::shared_ptr<openmittsu::dataproviders::MessageCenter> newMessageCenter = std::make_shared<openmittsu::dataproviders::SimpleMessageCenter>(databaseWrapperFactory, optionMaster);
 			if (newMessageCenter) {
 				m_messageCenter = newMessageCenter;
 

@@ -35,7 +35,8 @@ namespace openmittsu {
 			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const = 0;
 			virtual bool getGroupIsAwaitingSync(openmittsu::protocol::GroupId const& group) const = 0;
 
-			virtual openmittsu::database::GroupData getGroupData(openmittsu::protocol::GroupId const& group) const = 0;
+			virtual openmittsu::database::GroupData getGroupData(openmittsu::protocol::GroupId const& group, bool withDescription) const = 0;
+			virtual QHash<openmittsu::protocol::GroupId, openmittsu::database::GroupData> getGroupDataAll(bool withDescription) const = 0;
 
 			virtual void addGroup(QVector<openmittsu::database::NewGroupData> const& newGroupData) = 0;
 

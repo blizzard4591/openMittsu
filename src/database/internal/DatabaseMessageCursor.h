@@ -19,7 +19,7 @@ namespace openmittsu {
 
 			class DatabaseMessageCursor : public virtual openmittsu::dataproviders::messages::MessageCursor {
 			public:
-				explicit DatabaseMessageCursor(InternalDatabaseInterface const* database);
+				explicit DatabaseMessageCursor(InternalDatabaseInterface* database);
 				virtual ~DatabaseMessageCursor();
 
 				virtual bool isValid() const override;
@@ -35,13 +35,13 @@ namespace openmittsu {
 				virtual QString const& getMessageUuid() const override;
 				virtual QVector<QString> getLastMessages(std::size_t n) const override;
 			protected:
-				InternalDatabaseInterface const* getDatabase() const;
+				InternalDatabaseInterface* getDatabase() const;
 
 				virtual QString getWhereString() const = 0;
 				virtual void bindWhereStringValues(QSqlQuery& query) const = 0;
 				virtual QString getTableName() const = 0;
 			private:
-				InternalDatabaseInterface const* const m_database;
+				InternalDatabaseInterface* const m_database;
 				openmittsu::protocol::MessageId m_messageId;
 				bool m_isMessageIdValid;
 				qint64 m_sortByValue;

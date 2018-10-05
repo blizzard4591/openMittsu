@@ -7,7 +7,7 @@
 namespace openmittsu {
 	namespace dataproviders {
 
-		BackedContactMessage::BackedContactMessage(openmittsu::database::DatabaseReadonlyContactMessage const& message, BackedContact const& sender, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) : BackedMessage(message.getUid(), sender, message.isMessageFromUs(), message.getMessageId()), m_message(message), m_messageCenter(messageCenter) {
+		BackedContactMessage::BackedContactMessage(openmittsu::database::DatabaseReadonlyContactMessage const& message, std::shared_ptr<BackedContact> const& sender, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) : BackedMessage(message.getUid(), sender, message.isMessageFromUs(), message.getMessageId()), m_message(message), m_messageCenter(messageCenter) {
 			OPENMITTSU_CONNECT(&m_messageCenter, messageChanged(QString const&), this, onMessageChanged(QString const&));
 		}
 
@@ -36,7 +36,7 @@ namespace openmittsu {
 		}
 
 		void BackedContactMessage::loadCache() {
-			m_message = m_contact.fetchMessageByUuid(m_uuid);
+			m_message = m_contact->fetchMessageByUuid(m_uuid);
 		}
 
 		messages::ContactMessageType BackedContactMessage::getMessageType() const {
