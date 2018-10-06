@@ -10,6 +10,7 @@ namespace openmittsu {
 	namespace database {
 
 		class DatabaseWrapper : public Database {
+			Q_OBJECT
 		public:
 			DatabaseWrapper(DatabasePointerAuthority const* databasePointerAuthority);
 			DatabaseWrapper(DatabaseWrapper const& other);
@@ -122,11 +123,6 @@ namespace openmittsu {
 			virtual void setContactAccountStatusBatch(QHash<openmittsu::protocol::ContactId, openmittsu::protocol::AccountStatus> const& status) override;
 			virtual void setContactFeatureLevelBatch(QHash<openmittsu::protocol::ContactId, openmittsu::protocol::FeatureLevel> const& featureLevels) override;
 			virtual QHash<openmittsu::protocol::GroupId, QString> getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const override;
-			// Seeking, Searching
-			virtual DatabaseSeekResult seekNextMessage(openmittsu::protocol::ContactId const& identity, QString const& uuid, SortOrder sortOrder, SortByMode sortByMode) const override;
-			virtual DatabaseSeekResult seekFirstOrLastMessage(openmittsu::protocol::ContactId const& identity, bool first, SortByMode sortByMode) const override;
-			virtual DatabaseSeekResult seekNextMessage(openmittsu::protocol::GroupId const& group, QString const& uuid, SortOrder sortOrder, SortByMode sortByMode) const override;
-			virtual DatabaseSeekResult seekFirstOrLastMessage(openmittsu::protocol::GroupId const& group, bool first, SortByMode sortByMode) const override;
 			// Options
 			virtual QHash<QString, QString> getOptions() override;
 			virtual void setOptions(QHash<QString, QString> const& options) override;

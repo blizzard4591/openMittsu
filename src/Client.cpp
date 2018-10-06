@@ -91,7 +91,7 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 	m_tabController = std::make_shared<openmittsu::widgets::SimpleTabController>(m_ui.tabWidget);
 
 	bool messageCenterCreationSuccess = false;
-	if ((!QMetaObject::invokeMethod(m_messageCenterThread.getQObjectPtr(), "createMessageCenter", Q_RETURN_ARG(bool, messageCenterCreationSuccess), Q_ARG(openmittsu::database::DatabaseWrapperFactory const&, m_databasePointerAuthority.getDatabaseWrapperFactory()))) || (!messageCenterCreationSuccess)) {
+	if ((!QMetaObject::invokeMethod(m_messageCenterThread.getQObjectPtr(), "createMessageCenter", Qt::BlockingQueuedConnection, Q_RETURN_ARG(bool, messageCenterCreationSuccess), Q_ARG(openmittsu::database::DatabaseWrapperFactory const&, m_databasePointerAuthority.getDatabaseWrapperFactory()))) || (!messageCenterCreationSuccess)) {
 		throw openmittsu::exceptions::InternalErrorException() << "Could not create MessageCenter, terminating.";
 	}
 
@@ -250,7 +250,7 @@ void Client::setupProtocolClient() {
 		OPENMITTSU_DISCONNECT(m_protocolClient.get(), lostConnection(), this, protocolClientOnLostConnection());
 		OPENMITTSU_DISCONNECT(m_protocolClient.get(), duplicateIdUsageDetected(), this, protocolClientOnDuplicateIdUsageDetected());
 
-		if (!QMetaObject::invokeMethod(m_messageCenterThread.getWorker().getMessageCenter().get(), "setNetworkSentMessageAcceptor", Q_ARG(std::shared_ptr<openmittsu::dataproviders::NetworkSentMessageAcceptor> const&, nullptr))) {
+		if (!QMetaObject::invokeMethod(m_messageCenterThread.getWorker().getMessageCenter().get(), Qt::BlockingQueuedConnection, "setNetworkSentMessageAcceptor", Q_ARG(std::shared_ptr<openmittsu::dataproviders::NetworkSentMessageAcceptor> const&, nullptr))) {
 			throw openmittsu::exceptions::InternalErrorException() << "Could not unset NetworkSentMessageAcceptor!";
 		}
 
@@ -260,7 +260,7 @@ void Client::setupProtocolClient() {
 
 		QEventLoop eventLoop;
 		OPENMITTSU_CONNECT(m_protocolClient.get(), teardownComplete(), &eventLoop, quit());
-		if (!QMetaObject::invokeMethod(m_protocolClient.get(), "teardown", Qt::QueuedConnection)) {
+		if (!QMetaObject::invokeMethod(m_protocolClient.get(), "teardown", Qt::BlockingQueuedConnection)) {
 			throw openmittsu::exceptions::InternalErrorException() << "Could not invoke method teardown in " << __FILE__ << "  at line " << __LINE__ << ".";
 		}
 
@@ -402,7 +402,7 @@ void Client::openDatabaseFile(QString const& fileName) {
 			openmittsu::database::DatabaseOpenResult databaseOpenSuccess;
 			databaseOpenSuccess.success = false;
 
-			if (!QMetaObject::invokeMethod(m_databaseThread.getQObjectPtr(), "openDatabase", Q_RETURN_ARG(openmittsu::database::DatabaseOpenResult, databaseOpenSuccess), Q_ARG(QString const&, fileName), Q_ARG(QString const&, password), Q_ARG(QDir const&, location))) {
+			if (!QMetaObject::invokeMethod(m_databaseThread.getQObjectPtr(), "openDatabase", Qt::BlockingQueuedConnection, Q_RETURN_ARG(openmittsu::database::DatabaseOpenResult, databaseOpenSuccess), Q_ARG(QString const&, fileName), Q_ARG(QString const&, password), Q_ARG(QDir const&, location))) {
 				throw openmittsu::exceptions::InternalErrorException() << "Could not create MessageCenter, terminating.";
 			} else if (!databaseOpenSuccess.success) {
 				if (databaseOpenSuccess.failureReason == openmittsu::database::DatabaseOpenFailureReason::FREASON_INVALID_PASSWORD) {

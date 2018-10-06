@@ -24,7 +24,7 @@ if (!ptr) { \
 	throw openmittsu::exceptions::InternalErrorException() << "Tried aquiring database pointer in wrapper for " << STRINGIFY(funcName) << " and failed!"; \
 } \
  \
-if (!QMetaObject::invokeMethod(ptr.get(), STRINGIFY(funcName), Q_RETURN_ARG(returnType, returnVal), __VA_ARGS__)) { \
+if (!QMetaObject::invokeMethod(ptr.get(), STRINGIFY(funcName), Qt::BlockingQueuedConnection, Q_RETURN_ARG(returnType, returnVal), __VA_ARGS__)) { \
 	throw openmittsu::exceptions::InternalErrorException() << "Could not invoke " << STRINGIFY(funcName) << " from Database Wrapper"; \
 } \
  \
@@ -55,7 +55,7 @@ if (!ptr) { \
 	throw openmittsu::exceptions::InternalErrorException() << "Tried aquiring MessageCenter pointer in wrapper for " << STRINGIFY(funcName) << " and failed!"; \
 } \
  \
-if (!QMetaObject::invokeMethod(ptr.get(), STRINGIFY(funcName), Q_RETURN_ARG(returnType, returnVal), __VA_ARGS__)) { \
+if (!QMetaObject::invokeMethod(ptr.get(), STRINGIFY(funcName), Qt::BlockingQueuedConnection, Q_RETURN_ARG(returnType, returnVal), __VA_ARGS__)) { \
 	throw openmittsu::exceptions::InternalErrorException() << "Could not invoke " << STRINGIFY(funcName) << " from MessageCenter Wrapper"; \
 } \
  \

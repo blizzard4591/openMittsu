@@ -86,6 +86,44 @@ namespace openmittsu {
 				return openmittsu::database::internal::DatabaseUtilities::countQuery(m_database, QStringLiteral("groups"));
 			}
 
+			openmittsu::database::MediaFileItem DatabaseContactAndGroupDataProvider::getGroupImage(openmittsu::protocol::GroupId const& group) const {
+				QVariant const result = queryField(group, QStringLiteral("avatar_uuid"));
+				if (result.isNull() || result.toString().isEmpty()) {
+					return openmittsu::database::MediaFileItem(openmittsu::database::MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE);
+				}
+
+				return m_database->getMediaItem(result.toString());
+			}
+
+			QSet<openmittsu::protocol::ContactId> DatabaseContactAndGroupDataProvider::getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const {
+				QSqlQuery query(m_database->getQueryObject());
+				openmittsu::protocol::ContactId const selfContact = m_database->getSelfContact();
+
+				query.prepare(QStringLiteral("SELECT `members` FROM `groups` WHERE `id` = :id AND `creator` = :creator;"));
+				query.bindValue(QStringLiteral(":id"), QVariant(group.groupIdWithoutOwnerToQString()));
+				query.bindValue(QStringLiteral(":creator"), QVariant(group.getOwner().toQString()));
+
+				if (query.exec() && query.isSelect()) {
+					if (!query.next()) {
+						throw openmittsu::exceptions::InternalErrorException() << "Could not execute group member enumeration query for group " << group.toString() << " on table groups. Group does not exist!";
+					}
+
+					QString const memberString(query.value(QStringLiteral("members")).toString());
+					QSet<openmittsu::protocol::ContactId> result = openmittsu::protocol::ContactIdList::fromString(memberString).getContactIds();
+
+					if (excludeSelfContact) {
+						result.remove(selfContact);
+					}
+					return result;
+				} else {
+					throw openmittsu::exceptions::InternalErrorException() << "Could not execute group member enumeration query for group " << group.toString() << " on table groups. Query error: " << query.lastError().text().toStdString();
+				}
+			}
+
+			bool DatabaseContactAndGroupDataProvider::getGroupIsAwaitingSync(openmittsu::protocol::GroupId const& group) const {
+				return queryField(group, QStringLiteral("is_awaiting_sync")).toBool();
+			}
+
 			void DatabaseContactAndGroupDataProvider::addGroup(QVector<openmittsu::database::NewGroupData> const& newGroupData) {
 				auto it = newGroupData.constBegin();
 				auto const end = newGroupData.constEnd();

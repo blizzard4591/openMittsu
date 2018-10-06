@@ -140,12 +140,6 @@ namespace openmittsu {
 			virtual bool transactionStart() override;
 			virtual bool transactionCommit() override;
 
-			// Seeking
-			virtual DatabaseSeekResult seekNextMessage(openmittsu::protocol::ContactId const& identity, QString const& uuid, SortOrder sortOrder, SortByMode sortByMode) const override;
-			virtual DatabaseSeekResult seekFirstOrLastMessage(openmittsu::protocol::ContactId const& identity, bool first, SortByMode sortByMode) const override;
-			virtual DatabaseSeekResult seekNextMessage(openmittsu::protocol::GroupId const& group, QString const& uuid, SortOrder sortOrder, SortByMode sortByMode) const override;
-			virtual DatabaseSeekResult seekFirstOrLastMessage(openmittsu::protocol::GroupId const& group, bool first, SortByMode sortByMode) const override;
-
 			// Media Files
 			virtual MediaFileItem getMediaItem(QString const& uuid) const override;
 			virtual QString insertMediaItem(QByteArray const& data) override;

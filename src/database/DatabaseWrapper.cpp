@@ -394,22 +394,6 @@ namespace openmittsu {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getKnownGroupsContainingMember, SINGLE_ARG(QHash<openmittsu::protocol::GroupId, QString>), Q_ARG(openmittsu::protocol::ContactId const&, identity));
 		}
 
-		DatabaseSeekResult DatabaseWrapper::seekNextMessage(openmittsu::protocol::ContactId const& identity, QString const& uuid, SortOrder sortOrder, SortByMode sortByMode) const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(seekNextMessage, DatabaseSeekResult, Q_ARG(openmittsu::protocol::ContactId const&, identity), Q_ARG(QString const&, uuid), Q_ARG(SortOrder, sortOrder), Q_ARG(SortByMode, sortByMode));
-		}
-
-		DatabaseSeekResult DatabaseWrapper::seekFirstOrLastMessage(openmittsu::protocol::ContactId const& identity, bool first, SortByMode sortByMode) const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(seekFirstOrLastMessage, DatabaseSeekResult, Q_ARG(openmittsu::protocol::ContactId const&, identity), Q_ARG(bool, first), Q_ARG(SortByMode, sortByMode));
-		}
-
-		DatabaseSeekResult DatabaseWrapper::seekNextMessage(openmittsu::protocol::GroupId const& group, QString const& uuid, SortOrder sortOrder, SortByMode sortByMode) const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(seekNextMessage, DatabaseSeekResult, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(QString const&, uuid), Q_ARG(SortOrder, sortOrder), Q_ARG(SortByMode, sortByMode));
-		}
-
-		DatabaseSeekResult DatabaseWrapper::seekFirstOrLastMessage(openmittsu::protocol::GroupId const& group, bool first, SortByMode sortByMode) const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(seekFirstOrLastMessage, DatabaseSeekResult, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(bool, first), Q_ARG(SortByMode, sortByMode));
-		}
-
 		QHash<QString, QString> DatabaseWrapper::getOptions() {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getOptions, SINGLE_ARG(QHash<QString, QString>));
 		}
