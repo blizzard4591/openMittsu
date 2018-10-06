@@ -893,6 +893,32 @@ namespace openmittsu {
 			return hasOptionInternal(optionName, false);
 		}
 
+		QHash<QString, QString> SimpleDatabase::getOptions() {
+			QHash<QString, QString> result;
+			QSqlQuery query(database);
+			query.prepare(QStringLiteral("SELECT `name`, `value` FROM `settings` WHERE `is_internal` = 0;"));
+
+			if (!query.exec() || !query.isSelect()) {
+				throw openmittsu::exceptions::InternalErrorException() << "Could not enumerate options from settings. Query error: " << query.lastError().text().toStdString();
+			}
+			
+			while (query.next()) {
+				result.insert(query.value(QStringLiteral("name")).toString(), query.value(QStringLiteral("value")).toString());
+			}
+
+			return result;
+		}
+
+		void SimpleDatabase::setOptions(QHash<QString, QString> const& options) {
+			auto it = options.constBegin();
+			auto const end = options.constEnd();
+			while (it != end) {
+				setOptionInternal(it.key(), it.value(), false);
+			}
+
+			emit optionsChanged();
+		}
+
 		QString SimpleDatabase::getOptionValueAsString(QString const& optionName) {
 			return getOptionValueInternal(optionName, false);
 		}

@@ -41,6 +41,7 @@ namespace openmittsu {
 				OPENMITTSU_CONNECT_QUEUED(ptr.get(), haveQueuedMessages(), this, onDatabaseHaveQueuedMessages());
 				OPENMITTSU_CONNECT_QUEUED(ptr.get(), contactStartedTyping(openmittsu::protocol::ContactId const&), this, onDatabaseContactStartedTyping(openmittsu::protocol::ContactId const&));
 				OPENMITTSU_CONNECT_QUEUED(ptr.get(), contactStoppedTyping(openmittsu::protocol::ContactId const&), this, onDatabaseContactStoppedTyping(openmittsu::protocol::ContactId const&));
+				OPENMITTSU_CONNECT_QUEUED(ptr.get(), optionsChanged(), this, onDatabaseOptionsChanged());
 			}
 		}
 
@@ -87,6 +88,10 @@ namespace openmittsu {
 
 		void DatabaseWrapper::onDatabaseContactStoppedTyping(openmittsu::protocol::ContactId const& identity) {
 			emit contactStoppedTyping(identity);
+		}
+
+		void DatabaseWrapper::onDatabaseOptionsChanged() {
+			emit optionsChanged();
 		}
 
 		void DatabaseWrapper::enableTimers() {
@@ -404,6 +409,15 @@ namespace openmittsu {
 		DatabaseSeekResult DatabaseWrapper::seekFirstOrLastMessage(openmittsu::protocol::GroupId const& group, bool first, SortByMode sortByMode) const {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(seekFirstOrLastMessage, DatabaseSeekResult, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(bool, first), Q_ARG(SortByMode, sortByMode));
 		}
+
+		QHash<QString, QString> DatabaseWrapper::getOptions() {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getOptions, SINGLE_ARG(QHash<QString, QString>));
+		}
+
+		void DatabaseWrapper::setOptions(QHash<QString, QString> const& options) {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(setOptions, Q_ARG(SINGLE_ARG(QHash<QString, QString> const&), options));
+		}
+
 
 	}
 }

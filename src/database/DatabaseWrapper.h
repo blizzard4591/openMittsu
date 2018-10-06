@@ -29,6 +29,7 @@ namespace openmittsu {
 			void onDatabaseHaveQueuedMessages();
 			void onDatabaseContactStartedTyping(openmittsu::protocol::ContactId const& identity);
 			void onDatabaseContactStoppedTyping(openmittsu::protocol::ContactId const& identity);
+			void onDatabaseOptionsChanged();
 		private:
 			DatabasePointerAuthority const* m_databasePointerAuthority;
 			std::weak_ptr<Database> m_database;
@@ -126,6 +127,9 @@ namespace openmittsu {
 			virtual DatabaseSeekResult seekFirstOrLastMessage(openmittsu::protocol::ContactId const& identity, bool first, SortByMode sortByMode) const override;
 			virtual DatabaseSeekResult seekNextMessage(openmittsu::protocol::GroupId const& group, QString const& uuid, SortOrder sortOrder, SortByMode sortByMode) const override;
 			virtual DatabaseSeekResult seekFirstOrLastMessage(openmittsu::protocol::GroupId const& group, bool first, SortByMode sortByMode) const override;
+			// Options
+			virtual QHash<QString, QString> getOptions() override;
+			virtual void setOptions(QHash<QString, QString> const& options) override;
 		};
 
 	}

@@ -1,0 +1,77 @@
+#ifndef OPENMITTSU_OPTIONS_OPTIONMASTER_H_
+#define OPENMITTSU_OPTIONS_OPTIONMASTER_H_
+
+#include <QObject>
+#include <QSettings>
+#include <QVariant>
+#include <QMetaType>
+#include <QString>
+#include <QByteArray>
+#include <QHash>
+#include <QMultiHash>
+
+#include <memory>
+
+#include "src/options/OptionContainer.h"
+#include "src/options/OptionGroups.h"
+#include "src/options/OptionRegister.h"
+#include "src/options/Options.h"
+#include "src/options/OptionStorage.h"
+#include "src/options/OptionTypes.h"
+
+#include "src/database/DatabaseWrapper.h"
+
+namespace openmittsu {
+	namespace dialogs {
+		class OptionsDialog;
+	}
+}
+
+namespace openmittsu {
+	namespace options {
+
+		class OptionMaster : public QObject, public OptionRegister {
+			Q_OBJECT
+		public:
+			friend class openmittsu::dialogs::OptionsDialog;
+
+			OptionMaster(openmittsu::database::DatabaseWrapper const& database);
+			virtual ~OptionMaster();
+
+			virtual bool getOptionAsBool(Options const& option) const;
+			virtual QString getOptionAsQString(Options const& option) const;
+			virtual QByteArray getOptionAsQByteArray(Options const& option) const;
+
+			virtual void setOption(Options const& option, QVariant const& value);
+
+			void registerOptions();
+			static void registerOptions(OptionRegister* target, QHash<OptionGroups, QString>& groupsToName);
+		protected:
+			virtual bool registerOption(OptionGroups const& optionGroup, Options const& option, QString const& optionName, QString const& optionDescription, QVariant const& defaultValue, OptionTypes const& optionType, OptionStorage const& optionStorage) override;
+			static QSettings* getSettings();
+			static QString toStringRepresentation(QVariant const& value, OptionTypes const& optionType);
+			static bool toBoolRepresentation(QString const& value);
+			static QString toQStringRepresentation(QString const& value);
+			static QByteArray toQByteArrayRepresentation(QString const& value);
+		private slots:
+			void onDatabaseOptionsChanged();
+		private:
+			void ensureOptionsExist();
+			QString getOptionKeyForOption(Options const& option) const;
+			OptionTypes getOptionTypeForOption(Options const& option) const;
+
+			QMetaType::Type optionTypeToMetaType(OptionTypes const& type) const;
+
+			openmittsu::database::DatabaseWrapper m_database;
+			QHash<QString, QString> m_databaseCache;
+
+			QHash<QString, Options> m_nameToOptionMap;
+			QHash<Options, OptionContainer> m_optionToOptionContainerMap;
+			QMultiHash<OptionGroups, Options> m_groupToOptionsMap;
+			QHash<OptionGroups, QString> m_groupToNameMap;
+		};
+
+	}
+}
+
+#endif // OPENMITTSU_OPTIONS_OPTIONMASTER_H_

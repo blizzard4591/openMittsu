@@ -81,6 +81,9 @@ namespace openmittsu {
 			void setOptionValue(QString const& optionName, bool const& optionValue);
 			void setOptionValue(QString const& optionName, QByteArray const& optionValue);
 
+			virtual QHash<QString, QString> getOptions() override;
+			virtual void setOptions(QHash<QString, QString> const& options) override;
+
 			virtual openmittsu::protocol::GroupStatus getGroupStatus(openmittsu::protocol::GroupId const& group) const override;
 			virtual openmittsu::protocol::ContactStatus getContactStatus(openmittsu::protocol::ContactId const& contact) const override;
 			virtual openmittsu::protocol::ContactId getSelfContact() const override;

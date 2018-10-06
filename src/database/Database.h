@@ -165,6 +165,10 @@ namespace openmittsu {
 			virtual DatabaseSeekResult seekFirstOrLastMessage(openmittsu::protocol::ContactId const& identity, bool first, SortByMode sortByMode) const = 0;
 			virtual DatabaseSeekResult seekNextMessage(openmittsu::protocol::GroupId const& group, QString const& uuid, SortOrder sortOrder, SortByMode sortByMode) const = 0;
 			virtual DatabaseSeekResult seekFirstOrLastMessage(openmittsu::protocol::GroupId const& group, bool first, SortByMode sortByMode) const = 0;
+
+			// Options
+			virtual QHash<QString, QString> getOptions() = 0;
+			virtual void setOptions(QHash<QString, QString> const& options) = 0;
 		signals:
 			void contactChanged(openmittsu::protocol::ContactId const& identity);
 			void groupChanged(openmittsu::protocol::GroupId const& changedGroupId);
@@ -176,6 +180,7 @@ namespace openmittsu {
 			void haveQueuedMessages();
 			void contactStartedTyping(openmittsu::protocol::ContactId const& identity);
 			void contactStoppedTyping(openmittsu::protocol::ContactId const& identity);
+			void optionsChanged();
 		};
 	}
 }
