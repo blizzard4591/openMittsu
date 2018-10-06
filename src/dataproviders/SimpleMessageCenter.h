@@ -11,15 +11,13 @@
 #include <cstdint>
 #include <memory>
 
-#include "src/widgets/TabController.h"
-
 #include "src/database/DatabaseWrapper.h"
 #include "src/database/DatabaseWrapperFactory.h"
 #include "src/dataproviders/MessageCenter.h"
 #include "src/dataproviders/MessageQueue.h"
 #include "src/dataproviders/ReceivedMessageAcceptor.h"
 #include "src/dataproviders/NetworkSentMessageAcceptor.h"
-
+#include "src/options/OptionReader.h"
 
 namespace openmittsu {
 	namespace utility {
@@ -32,7 +30,7 @@ namespace openmittsu {
 		class SimpleMessageCenter : public MessageCenter {
 			Q_OBJECT
 		public:
-			SimpleMessageCenter(openmittsu::database::DatabaseWrapperFactory const& databaseWrapperFactory, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster);
+			SimpleMessageCenter(openmittsu::database::DatabaseWrapperFactory const& databaseWrapperFactory);
 			virtual ~SimpleMessageCenter();
 		public slots:
 			virtual bool sendText(openmittsu::protocol::ContactId const& receiver, QString const& text) override;
@@ -94,7 +92,7 @@ namespace openmittsu {
 			void databaseOnMessageChanged(QString const& uuid);
 			void tryResendingMessagesToNetwork();
 		private:
-			std::shared_ptr<openmittsu::utility::OptionMaster> const m_optionMaster;
+			openmittsu::options::OptionReader m_optionReader;
 			std::shared_ptr<NetworkSentMessageAcceptor> m_networkSentMessageAcceptor;
 			openmittsu::database::DatabaseWrapper m_storage;
 			MessageQueue m_messageQueue;

@@ -5,7 +5,6 @@
 #include <QObject>
 
 #include "src/utility/Location.h"
-#include "src/utility/OptionMaster.h"
 #include "src/protocol/ContactId.h"
 #include "src/protocol/GroupId.h"
 #include "src/protocol/MessageId.h"

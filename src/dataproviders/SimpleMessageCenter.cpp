@@ -17,11 +17,7 @@
 namespace openmittsu {
 	namespace dataproviders {
 
-		SimpleMessageCenter::SimpleMessageCenter(openmittsu::database::DatabaseWrapperFactory const& databaseWrapperFactory, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster) : MessageCenter(), m_optionMaster(optionMaster), m_networkSentMessageAcceptor(nullptr), m_storage(databaseWrapperFactory.getDatabaseWrapper()) {
-			if (optionMaster == nullptr) {
-				throw openmittsu::exceptions::IllegalArgumentException() << "MessageCenter created with an OptionMaster that is null!";
-			}
-
+		SimpleMessageCenter::SimpleMessageCenter(openmittsu::database::DatabaseWrapperFactory const& databaseWrapperFactory) : MessageCenter(), m_optionReader(databaseWrapperFactory.getDatabaseWrapper()), m_networkSentMessageAcceptor(nullptr), m_storage(databaseWrapperFactory.getDatabaseWrapper()) {
 			OPENMITTSU_CONNECT(&m_storage, messageChanged(QString const&), this, databaseOnMessageChanged(QString const&));
 			OPENMITTSU_CONNECT(&m_storage, haveQueuedMessages(), this, tryResendingMessagesToNetwork());
 		}
@@ -107,12 +103,7 @@ namespace openmittsu {
 		}
 
 		void SimpleMessageCenter::sendUserTypingStatus(openmittsu::protocol::ContactId const& receiver, bool isTyping) {
-			if (m_optionMaster == nullptr) {
-				LOGGER()->warn("MessageCenter has a null OptionMaster!");
-				return;
-			}
-
-			if (!m_optionMaster->getOptionAsBool(openmittsu::utility::OptionMaster::Options::BOOLEAN_SEND_TYPING_NOTIFICATION)) {
+			if (!m_optionReader.getOptionAsBool(openmittsu::options::Options::BOOLEAN_SEND_TYPING_NOTIFICATION)) {
 				return;
 			}
 
@@ -985,7 +976,7 @@ namespace openmittsu {
 						requestSyncForGroupIfApplicable(group);
 					}
 
-					if (this->m_optionMaster->getOptionAsBool(openmittsu::utility::OptionMaster::Options::BOOLEAN_TRUST_OTHERS)) {
+					if (m_optionReader.getOptionAsBool(openmittsu::options::Options::BOOLEAN_TRUST_OTHERS)) {
 						QSet<openmittsu::protocol::ContactId> groupMembers;
 						if (this->m_storage.isDeleteted(group)) {
 							groupMembers = this->m_storage.getGroupMembers(group, false); // need not exclude, as the group is deleted we are not in there anyway
@@ -1006,7 +997,7 @@ namespace openmittsu {
 							return false;
 						} else {
 							requestSyncForGroupIfApplicable(group);
-							if (this->m_optionMaster->getOptionAsBool(openmittsu::utility::OptionMaster::Options::BOOLEAN_TRUST_OTHERS)) {
+							if (m_optionReader.getOptionAsBool(openmittsu::options::Options::BOOLEAN_TRUST_OTHERS)) {
 								QSet<openmittsu::protocol::ContactId> groupMembers = this->m_storage.getGroupMembers(group, false);
 								groupMembers.insert(this->m_storage.getSelfContact());
 								groupMembers.insert(sender);

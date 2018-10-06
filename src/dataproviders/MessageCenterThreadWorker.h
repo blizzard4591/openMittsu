@@ -21,7 +21,7 @@ namespace openmittsu {
 		public:
 			virtual ~MessageCenterThreadWorker();
 		public slots:
-			bool createMessageCenter(openmittsu::database::DatabaseWrapperFactory const& databaseWrapperFactory, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster);
+			bool createMessageCenter(openmittsu::database::DatabaseWrapperFactory const& databaseWrapperFactory);
 
 			bool hasMessageCenter() const;
 			std::shared_ptr<openmittsu::dataproviders::MessageCenter> getMessageCenter();

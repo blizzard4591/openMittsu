@@ -20,7 +20,7 @@
 #include "src/network/ServerConfiguration.h"
 #include "src/dataproviders/MessageCenterWrapperFactory.h"
 #include "src/dataproviders/MessageCenterWrapper.h"
-#include "src/utility/OptionMaster.h"
+#include "src/options/OptionReaderFactory.h"
 #include "src/network/MissingIdentityProcessor.h"
 
 #include "src/acknowledgments/AcknowledgmentProcessor.h"
@@ -59,7 +59,7 @@ namespace openmittsu {
 			Q_OBJECT
 
 		public:
-			ProtocolClient(std::shared_ptr<openmittsu::crypto::FullCryptoBox> cryptoBox, openmittsu::protocol::ContactId const& ourContactId, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster, openmittsu::dataproviders::MessageCenterWrapperFactory const& messageCenterWrapperFactory, openmittsu::protocol::PushFromId const& pushFromId);
+			ProtocolClient(std::shared_ptr<openmittsu::crypto::FullCryptoBox> cryptoBox, openmittsu::protocol::ContactId const& ourContactId, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, openmittsu::options::OptionReaderFactory const& optionReaderFactory, openmittsu::dataproviders::MessageCenterWrapperFactory const& messageCenterWrapperFactory, openmittsu::protocol::PushFromId const& pushFromId);
 			virtual ~ProtocolClient();
 			bool getIsConnected() const;
 
@@ -116,7 +116,8 @@ namespace openmittsu {
 			std::unique_ptr<QNetworkSession> m_networkSession;
 			openmittsu::protocol::ContactId const m_ourContactId;
 			std::shared_ptr<openmittsu::network::ServerConfiguration> m_serverConfiguration;
-			std::shared_ptr<openmittsu::utility::OptionMaster> m_optionMaster;
+			openmittsu::options::OptionReaderFactory m_optionReaderFactory;
+			std::unique_ptr<openmittsu::options::OptionReader> m_optionReader;
 
 			// Outgoing Message List
 			QList<QByteArray> outgoingMessages;

@@ -16,7 +16,6 @@
 #include "src/utility/ByteArrayToHexString.h"
 #include "src/utility/Logging.h"
 #include "src/utility/MakeUnique.h"
-#include "src/utility/OptionMaster.h"
 #include "src/utility/QObjectConnectionMacro.h"
 #include "src/utility/ThreadDeleter.h"
 
@@ -44,9 +43,9 @@
 namespace openmittsu {
 	namespace network {
 
-		ProtocolClient::ProtocolClient(std::shared_ptr<openmittsu::crypto::FullCryptoBox> cryptoBox, openmittsu::protocol::ContactId const& ourContactId, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster, openmittsu::dataproviders::MessageCenterWrapperFactory const& messageCenterWrapperFactory, openmittsu::protocol::PushFromId const& pushFromId)
+		ProtocolClient::ProtocolClient(std::shared_ptr<openmittsu::crypto::FullCryptoBox> cryptoBox, openmittsu::protocol::ContactId const& ourContactId, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, openmittsu::options::OptionReaderFactory const& optionReaderFactory, openmittsu::dataproviders::MessageCenterWrapperFactory const& messageCenterWrapperFactory, openmittsu::protocol::PushFromId const& pushFromId)
 			: QObject(nullptr), m_cryptoBox(std::move(cryptoBox)), m_messageCenterWrapperFactory(messageCenterWrapperFactory), m_messageCenterWrapper(nullptr), m_pushFromIdPtr(std::make_unique<openmittsu::protocol::PushFromId>(pushFromId)),
-			m_isSetupDone(false), m_isNetworkSessionReady(false), m_isConnected(false), m_isAllowedToSend(false), m_isDisconnecting(false), m_socket(nullptr), m_networkSession(nullptr), m_ourContactId(ourContactId), m_serverConfiguration(serverConfiguration), m_optionMaster(optionMaster), outgoingMessagesTimer(nullptr), acknowledgmentWaitingTimer(nullptr), keepAliveTimer(nullptr), keepAliveCounter(0), failedReconnectAttempts(0) {
+			m_isSetupDone(false), m_isNetworkSessionReady(false), m_isConnected(false), m_isAllowedToSend(false), m_isDisconnecting(false), m_socket(nullptr), m_networkSession(nullptr), m_ourContactId(ourContactId), m_serverConfiguration(serverConfiguration), m_optionReaderFactory(optionReaderFactory), m_optionReader(nullptr), outgoingMessagesTimer(nullptr), acknowledgmentWaitingTimer(nullptr), keepAliveTimer(nullptr), keepAliveCounter(0), failedReconnectAttempts(0) {
 			// Intentionally left empty.
 		}
 
@@ -100,7 +99,7 @@ namespace openmittsu {
 			keepAliveTimer->stop();
 			outgoingMessagesTimer->stop();
 
-			if (!m_isDisconnecting && (failedReconnectAttempts < 3) && m_optionMaster->getOptionAsBool(openmittsu::utility::OptionMaster::Options::BOOLEAN_RECONNECT_ON_CONNECTION_LOSS)) {
+			if (!m_isDisconnecting && (failedReconnectAttempts < 3) && m_optionReader->getOptionAsBool(openmittsu::options::Options::BOOLEAN_RECONNECT_ON_CONNECTION_LOSS)) {
 				LOGGER()->info("Trying to reconnect...");
 				connectToServer();
 				return;
@@ -136,6 +135,10 @@ namespace openmittsu {
 
 				if (m_messageCenterWrapper == nullptr) {
 					m_messageCenterWrapper = std::make_shared<openmittsu::dataproviders::MessageCenterWrapper>(m_messageCenterWrapperFactory.getMessageCenterWrapper());
+				}
+
+				if (m_optionReader == nullptr) {
+					m_optionReader = m_optionReaderFactory.getOptionReader();
 				}
 
 				OPENMITTSU_CONNECT(m_socket.get(), readyRead(), this, socketOnReadyRead());
