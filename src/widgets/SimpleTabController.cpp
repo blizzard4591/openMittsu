@@ -39,7 +39,7 @@ namespace openmittsu {
 			return m_groupTabs.value(group);
 		}
 
-		void SimpleTabController::openTab(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::BackedContact const& backedContact) {
+		void SimpleTabController::openTab(openmittsu::protocol::ContactId const& contact, std::shared_ptr<openmittsu::dataproviders::BackedContact> const& backedContact) {
 			if (!hasTab(contact)) {
 				ChatTab* chatWindow = new SimpleContactChatTab(backedContact, m_chatTabWidget);
 				m_chatTabWidget->addChatTab(chatWindow);
@@ -50,7 +50,7 @@ namespace openmittsu {
 			}
 		}
 
-		void SimpleTabController::openTab(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::BackedGroup const& backedGroup) {
+		void SimpleTabController::openTab(openmittsu::protocol::GroupId const& group, std::shared_ptr<openmittsu::dataproviders::BackedGroup> const& backedGroup) {
 			if (!hasTab(group)) {
 				ChatTab* chatWindow = new SimpleGroupChatTab(backedGroup, m_chatTabWidget);
 				m_chatTabWidget->addChatTab(chatWindow);

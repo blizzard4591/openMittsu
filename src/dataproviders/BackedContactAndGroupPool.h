@@ -20,7 +20,7 @@ namespace openmittsu {
 			std::shared_ptr<BackedContact> getBackedContact(openmittsu::protocol::ContactId const& contact, openmittsu::database::DatabaseWrapper const& database, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter);
 			std::shared_ptr<BackedGroup> getBackedGroup(openmittsu::protocol::GroupId const& group, openmittsu::database::DatabaseWrapper const& database, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter);
 
-			BackedContactAndGroupPool& getInstance();
+			static BackedContactAndGroupPool& getInstance();
 
 			// delete copy and move constructors and assign operators
 			BackedContactAndGroupPool(BackedContactAndGroupPool const&) = delete;             // Copy construct

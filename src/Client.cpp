@@ -66,6 +66,7 @@
 
 #include "src/dataproviders/MessageCenter.h"
 #include "src/dataproviders/SimpleGroupCreationProcessor.h"
+#include "src/dataproviders/BackedContactAndGroupPool.h"
 #include "Config.h"
 
 Client::Client(QWidget* parent) : QMainWindow(parent), 
@@ -78,7 +79,7 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 	m_messageCenterPointerAuthority(),
 	m_messageCenterWrapper(&m_messageCenterPointerAuthority),
 	m_serverConfiguration(std::make_shared<openmittsu::network::ServerConfiguration>()),
-	m_optionMaster(std::make_shared<openmittsu::utility::OptionMaster>()),
+	m_optionMaster(nullptr),
 	m_databaseThread(),
 	m_databasePointerAuthority(),
 	m_databaseWrapper(&m_databasePointerAuthority),
@@ -90,7 +91,7 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 	m_tabController = std::make_shared<openmittsu::widgets::SimpleTabController>(m_ui.tabWidget);
 
 	bool messageCenterCreationSuccess = false;
-	if ((!QMetaObject::invokeMethod(m_messageCenterThread.getQObjectPtr(), "createMessageCenter", Q_RETURN_ARG(bool, messageCenterCreationSuccess), Q_ARG(openmittsu::database::DatabaseWrapperFactory const&, m_databasePointerAuthority.getDatabaseWrapperFactory()), Q_ARG(std::shared_ptr<openmittsu::widgets::TabController> const&, m_tabController), Q_ARG(std::shared_ptr<openmittsu::utility::OptionMaster> const&, m_optionMaster))) || (!messageCenterCreationSuccess)) {
+	if ((!QMetaObject::invokeMethod(m_messageCenterThread.getQObjectPtr(), "createMessageCenter", Q_RETURN_ARG(bool, messageCenterCreationSuccess), Q_ARG(openmittsu::database::DatabaseWrapperFactory const&, m_databasePointerAuthority.getDatabaseWrapperFactory()))) || (!messageCenterCreationSuccess)) {
 		throw openmittsu::exceptions::InternalErrorException() << "Could not create MessageCenter, terminating.";
 	}
 
@@ -127,16 +128,16 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 	}
 
 	// Load stored settings
-	this->m_optionMaster = std::make_shared<openmittsu::utility::OptionMaster>();
-	QString const databaseFile = m_optionMaster->getOptionAsQString(openmittsu::utility::OptionMaster::Options::FILEPATH_DATABASE);
-	QString const legacyClientConfiguration = m_optionMaster->getOptionAsQString(openmittsu::utility::OptionMaster::Options::FILEPATH_LEGACY_CLIENT_CONFIGURATION);
+	this->m_optionMaster = std::make_shared<openmittsu::options::OptionMaster>(m_databaseWrapper);
+	QString const databaseFile = m_optionMaster->getOptionAsQString(openmittsu::options::Options::FILEPATH_DATABASE);
+	QString const legacyClientConfiguration = m_optionMaster->getOptionAsQString(openmittsu::options::Options::FILEPATH_LEGACY_CLIENT_CONFIGURATION);
 	bool showFirstUseWizard = false;
 	bool showFromBackupWizard = false;
 
 	if (!databaseFile.isEmpty()) {
 		if (!QFile::exists(databaseFile)) {
 			LOGGER_DEBUG("Removing key \"FILEPATH_DATABASE\" from stored settings as the file is not valid.");
-			m_optionMaster->setOption(openmittsu::utility::OptionMaster::Options::FILEPATH_DATABASE, "");
+			m_optionMaster->setOption(openmittsu::options::Options::FILEPATH_DATABASE, "");
 		} else {
 			openDatabaseFile(databaseFile);
 		}
@@ -186,8 +187,8 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 	contactRegistryOnIdentitiesChanged();
 
 	// Restore Window location and size
-	restoreGeometry(m_optionMaster->getOptionAsQByteArray(openmittsu::utility::OptionMaster::Options::BINARY_MAINWINDOW_GEOMETRY));
-	restoreState(m_optionMaster->getOptionAsQByteArray(openmittsu::utility::OptionMaster::Options::BINARY_MAINWINDOW_STATE));
+	restoreGeometry(m_optionMaster->getOptionAsQByteArray(openmittsu::options::Options::BINARY_MAINWINDOW_GEOMETRY));
+	restoreState(m_optionMaster->getOptionAsQByteArray(openmittsu::options::Options::BINARY_MAINWINDOW_STATE));
 
 	if (showFirstUseWizard) {
 		menuFileShowFirstUseWizardOnClick();
@@ -195,17 +196,17 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 		auto const resultButton = QMessageBox::question(this, tr("Legacy client configuration found"), tr("Welcome.\nIt seems that you used an older version of openMittsu before that used a plaintext client configuration file to store your ID.\nThis has been replaced by an encrypted database storing both your ID, contacts, groups and messages.\nIf you want, your legacy ID file can be converted into a modern openMittsu database. Click yes to import the old file."));
 		if (resultButton == QMessageBox::StandardButton::Yes) {
 			menuIdentityLoadBackupOnClick(legacyClientConfiguration);
-			m_optionMaster->setOption(openmittsu::utility::OptionMaster::Options::FILEPATH_LEGACY_CLIENT_CONFIGURATION, "");
+			m_optionMaster->setOption(openmittsu::options::Options::FILEPATH_LEGACY_CLIENT_CONFIGURATION, "");
 		}
 	}
 
 	if (m_databaseThread.getWorker().hasDatabase()) {
-		QString const legacyContactsFile = m_optionMaster->getOptionAsQString(openmittsu::utility::OptionMaster::Options::FILEPATH_LEGACY_CONTACTS_DATABASE);
+		QString const legacyContactsFile = m_optionMaster->getOptionAsQString(openmittsu::options::Options::FILEPATH_LEGACY_CONTACTS_DATABASE);
 		if (!legacyContactsFile.isEmpty() && QFile::exists(legacyContactsFile)) {
 			auto const resultButton = QMessageBox::question(this, tr("Legacy contacts file found"), tr("Welcome.\nIt seems that you used an older version of openMittsu before that used a plaintext contacts file to store your contacts and groups.\nThis has been replaced by an encrypted database storing both your ID, contacts, groups and messages.\nIf you want, your legacy contacts file can be imported into your openMittsu database.\nClick \"Yes\" to import the old file (located at %1), or \"No\" to leave it for now.\nYou can always come back later and import it via Database -> Import openMittsu....").arg(legacyContactsFile));
 			if (resultButton == QMessageBox::StandardButton::Yes) {
 				menuDatabaseImportLegacyContactsAndGroupsOnClick(legacyContactsFile);
-				m_optionMaster->setOption(openmittsu::utility::OptionMaster::Options::FILEPATH_LEGACY_CONTACTS_DATABASE, "");
+				m_optionMaster->setOption(openmittsu::options::Options::FILEPATH_LEGACY_CONTACTS_DATABASE, "");
 			}
 		}
 	}
@@ -226,8 +227,8 @@ Client::~Client() {
 
 void Client::closeEvent(QCloseEvent* event) {
 	// Save location and size of window
-	m_optionMaster->setOption(openmittsu::utility::OptionMaster::Options::BINARY_MAINWINDOW_GEOMETRY, saveGeometry());
-	m_optionMaster->setOption(openmittsu::utility::OptionMaster::Options::BINARY_MAINWINDOW_STATE, saveState());
+	m_optionMaster->setOption(openmittsu::options::Options::BINARY_MAINWINDOW_GEOMETRY, saveGeometry());
+	m_optionMaster->setOption(openmittsu::options::Options::BINARY_MAINWINDOW_STATE, saveState());
 	
 	// Close server connection and tear down threads
 	if (m_protocolClient != nullptr) {
@@ -277,9 +278,9 @@ void Client::setupProtocolClient() {
 	std::shared_ptr<openmittsu::crypto::FullCryptoBox> cryptoBox = std::make_shared<openmittsu::crypto::FullCryptoBox>(openmittsu::dataproviders::KeyRegistry(m_serverConfiguration->getServerLongTermPublicKey(), m_databaseThread.getWorker().getDatabase()));
 	if (nickname.compare(QStringLiteral("You"), Qt::CaseInsensitive) == 0) {
 		LOGGER()->info("Using only ID as PushFromID token (for iOS Push Receivers).");
-		m_protocolClient = std::make_unique<openmittsu::network::ProtocolClient>(cryptoBox, selfContactId, m_serverConfiguration, m_optionMaster, m_messageCenterPointerAuthority.getMessageCenterWrapperFactory(), openmittsu::protocol::PushFromId(selfContactId));
+		m_protocolClient = std::make_unique<openmittsu::network::ProtocolClient>(cryptoBox, selfContactId, m_serverConfiguration, openmittsu::options::OptionReaderFactory(m_databasePointerAuthority.getDatabaseWrapperFactory()), m_messageCenterPointerAuthority.getMessageCenterWrapperFactory(), openmittsu::protocol::PushFromId(selfContactId));
 	} else {
-		m_protocolClient = std::make_unique<openmittsu::network::ProtocolClient>(cryptoBox, selfContactId, m_serverConfiguration, m_optionMaster, m_messageCenterPointerAuthority.getMessageCenterWrapperFactory(), openmittsu::protocol::PushFromId(nickname));
+		m_protocolClient = std::make_unique<openmittsu::network::ProtocolClient>(cryptoBox, selfContactId, m_serverConfiguration, openmittsu::options::OptionReaderFactory(m_databasePointerAuthority.getDatabaseWrapperFactory()), m_messageCenterPointerAuthority.getMessageCenterWrapperFactory(), openmittsu::protocol::PushFromId(nickname));
 		LOGGER()->info("Using nickname \"{}\" as PushFromID token (for iOS Push Receivers).", nickname.toStdString());
 	}
 
@@ -325,14 +326,11 @@ void Client::updaterFoundNewVersion(int versionMajor, int versionMinor, int vers
 void Client::updateDatabaseInfo(QString const& currentFileName) {
 	m_ui.lblDatabase->setText(currentFileName);
 	if (m_databaseThread.getWorker().hasDatabase()) {
-		if (!QMetaObject::invokeMethod(m_messageCenterThread.getWorker().getMessageCenter().get(), "setStorage", Q_ARG(std::shared_ptr<openmittsu::database::Database> const&, m_databaseThread.getWorker().getDatabase()))) {
-			throw openmittsu::exceptions::InternalErrorException() << "Could not set Database on MessageCenter!";
+		if (!m_databaseWrapper.hasDatabase()) {
+			LOGGER_DEBUG("Database was set, but wrapper does not announce so.");
+			return;
 		}
-		m_optionMaster->setDatabase(m_databaseThread.getWorker().getDatabase());
-
-		if (!QMetaObject::invokeMethod(m_databaseThread.getWorker().getDatabase().get(), "enableTimers")) {
-			throw openmittsu::exceptions::InternalErrorException() << "Could not enable timers on Database!";
-		}
+		m_databaseWrapper.enableTimers();
 	}
 }
 
@@ -411,18 +409,18 @@ void Client::openDatabaseFile(QString const& fileName) {
 					QMessageBox::information(this, tr("Invalid password"), tr("The entered database password was invalid."));
 				} else {
 					LOGGER_DEBUG("Removing key \"FILEPATH_DATABASE\" from stored settings as the file is not valid.");
-					m_optionMaster->setOption(openmittsu::utility::OptionMaster::Options::FILEPATH_DATABASE, "");
+					m_optionMaster->setOption(openmittsu::options::Options::FILEPATH_DATABASE, "");
 					break;
 				}
 			} else {
-				this->m_optionMaster->setOption(openmittsu::utility::OptionMaster::Options::FILEPATH_DATABASE, fileName);
+				this->m_optionMaster->setOption(openmittsu::options::Options::FILEPATH_DATABASE, fileName);
 				updateDatabaseInfo(fileName);
 
 				contactRegistryOnIdentitiesChanged();
 				break;
 			}
 		} else {
-			m_optionMaster->setOption(openmittsu::utility::OptionMaster::Options::FILEPATH_DATABASE, "");
+			m_optionMaster->setOption(openmittsu::options::Options::FILEPATH_DATABASE, "");
 			break;
 		}
 	}
@@ -495,11 +493,11 @@ void Client::contactRegistryOnIdentitiesChanged() {
 
 void Client::onHasUnreadMessage(openmittsu::widgets::ChatTab* tab) {
 	LOGGER_DEBUG("Activating window for unread messages...");
-	if (m_optionMaster->getOptionAsBool(openmittsu::utility::OptionMaster::Options::BOOLEAN_FORCE_FOREGROUND_ON_MESSAGE_RECEIVED)) {
+	if (m_optionMaster->getOptionAsBool(openmittsu::options::Options::BOOLEAN_FORCE_FOREGROUND_ON_MESSAGE_RECEIVED)) {
 		this->activateWindow();
 	}
 
-	if (m_optionMaster->getOptionAsBool(openmittsu::utility::OptionMaster::Options::BOOLEAN_PLAY_SOUND_ON_MESSAGE_RECEIVED)) {
+	if (m_optionMaster->getOptionAsBool(openmittsu::options::Options::BOOLEAN_PLAY_SOUND_ON_MESSAGE_RECEIVED)) {
 		if (m_audioNotifier) {
 			m_audioNotifier->playNotification();
 		}
@@ -520,9 +518,8 @@ void Client::onDatabaseReceivedNewContactMessage(openmittsu::protocol::ContactId
 		if (m_tabController->hasTab(identity)) {
 			chatTab = m_tabController->getTab(identity);
 		} else {
-			openmittsu::crypto::PublicKey const publicKey = m_databaseWrapper.getContactPublicKey(identity);
-			openmittsu::dataproviders::BackedContact backedContact(identity, publicKey, m_databaseWrapper, m_messageCenterWrapper);
-			m_tabController->openTab(identity, backedContact);
+			openmittsu::dataproviders::BackedContactAndGroupPool& pool = openmittsu::dataproviders::BackedContactAndGroupPool::getInstance();
+			m_tabController->openTab(identity, pool.getBackedContact(identity, m_databaseWrapper, m_messageCenterWrapper));
 			chatTab = m_tabController->getTab(identity);
 		}
 		onHasUnreadMessage(chatTab);
@@ -535,8 +532,8 @@ void Client::onDatabaseReceivedNewGroupMessage(openmittsu::protocol::GroupId con
 		if (m_tabController->hasTab(group)) {
 			chatTab = m_tabController->getTab(group);
 		} else {
-			openmittsu::dataproviders::BackedGroup backedGroup(group, m_databaseWrapper, m_messageCenterWrapper);
-			m_tabController->openTab(group, backedGroup);
+			openmittsu::dataproviders::BackedContactAndGroupPool& pool = openmittsu::dataproviders::BackedContactAndGroupPool::getInstance();
+			m_tabController->openTab(group, pool.getBackedGroup(group, m_databaseWrapper, m_messageCenterWrapper));
 			chatTab = m_tabController->getTab(group);
 		}
 		onHasUnreadMessage(chatTab);
@@ -622,14 +619,13 @@ void Client::listContactsOnDoubleClick(QListWidgetItem* item) {
 
 	if (clwi != nullptr) {
 		openmittsu::protocol::ContactId const contactId = clwi->getContactId();
-		openmittsu::crypto::PublicKey const publicKey = m_databaseWrapper.getContactPublicKey(contactId);
-		openmittsu::dataproviders::BackedContact const backedContact(contactId, publicKey, m_databaseWrapper, m_messageCenterWrapper);
-		m_tabController->openTab(contactId, backedContact);
+		openmittsu::dataproviders::BackedContactAndGroupPool& pool = openmittsu::dataproviders::BackedContactAndGroupPool::getInstance();
+		m_tabController->openTab(contactId, pool.getBackedContact(contactId, m_databaseWrapper, m_messageCenterWrapper));
 		m_tabController->focusTab(contactId);
 	} else if (glwi != nullptr) {
 		openmittsu::protocol::GroupId const groupId = glwi->getGroupId();
-		openmittsu::dataproviders::BackedGroup const backedGroup(groupId, m_databaseWrapper, m_messageCenterWrapper);
-		m_tabController->openTab(groupId, backedGroup);
+		openmittsu::dataproviders::BackedContactAndGroupPool& pool = openmittsu::dataproviders::BackedContactAndGroupPool::getInstance();
+		m_tabController->openTab(groupId, pool.getBackedGroup(groupId, m_databaseWrapper, m_messageCenterWrapper));
 		m_tabController->focusTab(groupId);
 	} else {
 		LOGGER()->warn("Could not determine the type of element the user double clicked on in the contacts list.");
@@ -792,13 +788,12 @@ void Client::listContactsOnContextMenu(QPoint const& pos) {
 					}
 				} else {
 					if (isIdentityContact) {
-						openmittsu::crypto::PublicKey const publicKey = m_databaseWrapper.getContactPublicKey(clwi->getContactId());
-						openmittsu::dataproviders::BackedContact const backedContact(clwi->getContactId(), publicKey, m_databaseWrapper, m_messageCenterWrapper);
-						m_tabController->openTab(clwi->getContactId(), backedContact);
+						openmittsu::dataproviders::BackedContactAndGroupPool& pool = openmittsu::dataproviders::BackedContactAndGroupPool::getInstance();
+						m_tabController->openTab(clwi->getContactId(), pool.getBackedContact(clwi->getContactId(), m_databaseWrapper, m_messageCenterWrapper));
 						m_tabController->focusTab(clwi->getContactId());
 					} else {
-						openmittsu::dataproviders::BackedGroup const backedGroup(glwi->getGroupId(), m_databaseWrapper, m_messageCenterWrapper);
-						m_tabController->openTab(glwi->getGroupId(), backedGroup);
+						openmittsu::dataproviders::BackedContactAndGroupPool& pool = openmittsu::dataproviders::BackedContactAndGroupPool::getInstance();
+						m_tabController->openTab(glwi->getGroupId(), pool.getBackedGroup(glwi->getGroupId(), m_databaseWrapper, m_messageCenterWrapper));
 						m_tabController->focusTab(glwi->getGroupId());
 					}
 				}

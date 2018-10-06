@@ -57,12 +57,14 @@ namespace openmittsu {
 
 		void BackedGroup::slotGroupChanged(openmittsu::protocol::GroupId const& changedGroupId) {
 			if (changedGroupId == m_groupId) {
+				m_groupData = m_database.getGroupData(m_groupId, true);
 				emit groupDataChanged();
 			}
 		}
 
 		void BackedGroup::slotIdentityChanged(openmittsu::protocol::ContactId const& changedContactId) {
 			if (m_groupId.getOwner() == changedContactId || hasMember(changedContactId)) {
+				m_groupData = m_database.getGroupData(m_groupId, true);
 				emit groupDataChanged();
 			}
 		}

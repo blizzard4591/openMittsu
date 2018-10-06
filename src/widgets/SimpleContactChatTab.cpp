@@ -4,7 +4,6 @@
 #include "src/dataproviders/BackedContactMessage.h"
 #include "src/protocol/ContactId.h"
 
-#include "src/utility/OptionMaster.h"
 #include "src/utility/Logging.h"
 #include "src/utility/QObjectConnectionMacro.h"
 
@@ -16,11 +15,11 @@
 namespace openmittsu {
 	namespace widgets {
 
-		SimpleContactChatTab::SimpleContactChatTab(openmittsu::dataproviders::BackedContact const& contact, QWidget* parent) : SimpleChatTab(parent), m_contact(contact) {
-			OPENMITTSU_CONNECT(&m_contact, contactDataChanged(), this, onContactDataChanged());
-			OPENMITTSU_CONNECT(&m_contact, newMessageAvailable(QString const&), this, onNewMessage(QString const&));
-			OPENMITTSU_CONNECT(&m_contact, contactStartedTyping(), this, onContactStartedTyping());
-			OPENMITTSU_CONNECT(&m_contact, contactStoppedTyping(), this, onContactStoppedTyping());
+		SimpleContactChatTab::SimpleContactChatTab(std::shared_ptr<openmittsu::dataproviders::BackedContact> const& contact, QWidget* parent) : SimpleChatTab(parent), m_contact(contact) {
+			OPENMITTSU_CONNECT(m_contact.get(), contactDataChanged(), this, onContactDataChanged());
+			OPENMITTSU_CONNECT(m_contact.get(), newMessageAvailable(QString const&), this, onNewMessage(QString const&));
+			OPENMITTSU_CONNECT(m_contact.get(), contactStartedTyping(), this, onContactStartedTyping());
+			OPENMITTSU_CONNECT(m_contact.get(), contactStoppedTyping(), this, onContactStoppedTyping());
 		}
 
 		SimpleContactChatTab::~SimpleContactChatTab() {
@@ -28,23 +27,23 @@ namespace openmittsu {
 		}
 
 		bool SimpleContactChatTab::sendText(QString const& text) {
-			return m_contact.sendTextMessage(text);
+			return m_contact->sendTextMessage(text);
 		}
 
 		bool SimpleContactChatTab::sendImage(QByteArray const& image, QString const& caption) {
-			return m_contact.sendImageMessage(image, caption);
+			return m_contact->sendImageMessage(image, caption);
 		}
 
 		bool SimpleContactChatTab::sendLocation(openmittsu::utility::Location const& location) {
-			return m_contact.sendLocationMessage(location);
+			return m_contact->sendLocationMessage(location);
 		}
 
 		void SimpleContactChatTab::sendUserTypingStatus(bool isTyping) {
-			m_contact.sendTypingNotification(!isTyping);
+			m_contact->sendTypingNotification(!isTyping);
 		}
 
 		openmittsu::dataproviders::MessageSource& SimpleContactChatTab::getMessageSource() {
-			return m_contact;
+			return *m_contact;
 		}
 
 		bool SimpleContactChatTab::canUserAgree() const {
@@ -59,25 +58,25 @@ namespace openmittsu {
 				}
 				m_knownUuids.insert(uuid);
 			}
-			setMessageCount(m_contact.getMessageCount());
+			setMessageCount(m_contact->getMessageCount());
 
-			openmittsu::dataproviders::BackedContactMessage message = m_contact.getMessageByUuid(uuid);
+			openmittsu::dataproviders::BackedContactMessage message = m_contact->getMessageByUuid(uuid);
 			openmittsu::dataproviders::messages::ContactMessageType messageType = message.getMessageType();
 			switch (messageType) {
 				case openmittsu::dataproviders::messages::ContactMessageType::AUDIO:
 					LOGGER()->warn("Can not create audio message item in GUI, not supported yet.");
 					break;
 				case openmittsu::dataproviders::messages::ContactMessageType::IMAGE:
-					this->addChatWidgetItem(new ContactImageChatWidgetItem(m_contact.getMessageByUuid(uuid)));
+					this->addChatWidgetItem(new ContactImageChatWidgetItem(m_contact->getMessageByUuid(uuid)));
 					break;
 				case openmittsu::dataproviders::messages::ContactMessageType::LOCATION:
-					this->addChatWidgetItem(new ContactLocationChatWidgetItem(m_contact.getMessageByUuid(uuid)));
+					this->addChatWidgetItem(new ContactLocationChatWidgetItem(m_contact->getMessageByUuid(uuid)));
 					break;
 				case openmittsu::dataproviders::messages::ContactMessageType::POLL:
 					LOGGER()->warn("Can not create poll message item in GUI, not supported yet.");
 					break;
 				case openmittsu::dataproviders::messages::ContactMessageType::TEXT:
-					this->addChatWidgetItem(new ContactTextChatWidgetItem(m_contact.getMessageByUuid(uuid)));
+					this->addChatWidgetItem(new ContactTextChatWidgetItem(m_contact->getMessageByUuid(uuid)));
 					break;
 				case openmittsu::dataproviders::messages::ContactMessageType::VIDEO:
 					LOGGER()->warn("Can not create video message item in GUI, not supported yet.");
@@ -100,7 +99,7 @@ namespace openmittsu {
 		}
 
 		QString SimpleContactChatTab::getTabName() {
-			return m_contact.getNickname();
+			return m_contact->getNickname();
 		}
 
 	}

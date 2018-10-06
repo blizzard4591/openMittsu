@@ -33,6 +33,8 @@
 #include "src/utility/AudioNotification.h"
 #include "src/tasks/CallbackTask.h"
 
+#include "src/options/OptionMaster.h"
+
 class Client : public QMainWindow {
 	Q_OBJECT
 public:
@@ -116,7 +118,7 @@ private:
 	openmittsu::dataproviders::MessageCenterWrapper m_messageCenterWrapper;
 
 	std::shared_ptr<openmittsu::network::ServerConfiguration> m_serverConfiguration;
-	std::shared_ptr<openmittsu::utility::OptionMaster> m_optionMaster;
+	std::shared_ptr<openmittsu::options::OptionMaster> m_optionMaster;
 
 	openmittsu::utility::DatabaseThreadContainer m_databaseThread;
 	openmittsu::database::DatabasePointerAuthority m_databasePointerAuthority;

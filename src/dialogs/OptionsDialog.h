@@ -10,7 +10,7 @@
 
 #include <memory>
 
-#include "src/utility/OptionMaster.h"
+#include "src/options/OptionMaster.h"
 
 namespace Ui {
 class OptionsDialog;
@@ -23,23 +23,23 @@ namespace openmittsu {
 			Q_OBJECT
 
 		public:
-			explicit OptionsDialog(std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster, QWidget* parent = nullptr);
+			explicit OptionsDialog(std::shared_ptr<openmittsu::options::OptionMaster> const& optionMaster, QWidget* parent = nullptr);
 			virtual ~OptionsDialog();
 		public slots:
 			virtual void accept() override;
 		private:
 			Ui::OptionsDialog* m_ui;
-			std::shared_ptr<openmittsu::utility::OptionMaster> const m_optionMaster;
+			std::shared_ptr<openmittsu::options::OptionMaster> const m_optionMaster;
 
 			struct OptionWidget {
-				openmittsu::utility::OptionMaster::OptionTypes type;
+				openmittsu::options::OptionTypes type;
 				union {
 					QCheckBox* cboxPtr;
 					QLineEdit* edtPtr;
 				};
 			};
 
-			QHash<openmittsu::utility::OptionMaster::Options, OptionWidget> optionToWidgetMap;
+			QHash<openmittsu::options::Options, OptionWidget> optionToWidgetMap;
 			void saveOptions();
 		};
 

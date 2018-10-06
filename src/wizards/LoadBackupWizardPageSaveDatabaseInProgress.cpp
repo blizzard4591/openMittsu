@@ -2,6 +2,7 @@
 #include "ui_LoadBackupWizardPageSaveDatabaseInProgress.h"
 
 #include "src/backup/BackupReader.h"
+#include "src/database/SimpleDatabase.h"
 #include "src/exceptions/IllegalArgumentException.h"
 #include "src/exceptions/InternalErrorException.h"
 #include "src/utility/MakeUnique.h"
@@ -42,7 +43,7 @@ namespace openmittsu {
 				OPENMITTSU_DISCONNECT_NOTHROW(m_backupReader.get(), finished(bool, QString const&), this, onFinished(bool, QString const&));
 			}
 
-			m_databaseFileName = databaseLocation.absoluteFilePath(openmittsu::database::Database::getDefaultDatabaseFileName());
+			m_databaseFileName = databaseLocation.absoluteFilePath(openmittsu::database::SimpleDatabase::getDefaultDatabaseFileName());
 			m_backupReader = std::make_unique<openmittsu::backup::BackupReader>(backupLocation, backupPassword, m_databaseFileName, databaseLocation, databasePassword);
 			OPENMITTSU_CONNECT_QUEUED(m_backupReader.get(), progressUpdated(int), this, onProgressUpdated(int));
 			OPENMITTSU_CONNECT_QUEUED(m_backupReader.get(), finished(bool, QString const&), this, onFinished(bool, QString const&));

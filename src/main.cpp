@@ -2,7 +2,6 @@
 #include "Client.h"
 
 #include "src/ExceptionHandlingApplication.h"
-#include "src/utility/OptionMaster.h"
 #include "src/utility/Version.h"
 
 int main(int argc, char *argv[]) {

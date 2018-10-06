@@ -2,6 +2,7 @@
 #define OPENMITTSU_WIDGETS_CHAT_CHATWIDGET_H_
 
 #include <QScrollArea>
+#include <QTimer>
 #include <QVBoxLayout>
 #include <QVector>
 
@@ -40,7 +41,7 @@ namespace openmittsu {
 
 			void informAllOfSize();
 			void markMessagesAsRead();
-			private slots:
+		private slots:
 			void onUnreadMessagesTimerExpired();
 		};
 
