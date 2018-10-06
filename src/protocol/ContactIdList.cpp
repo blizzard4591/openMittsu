@@ -14,6 +14,10 @@ namespace openmittsu {
 			//
 		}
 
+		ContactIdList::ContactIdList() : m_contactIds() {
+			//
+		}
+
 		ContactIdList::~ContactIdList() {
 			//
 		}

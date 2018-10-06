@@ -250,7 +250,7 @@ void Client::setupProtocolClient() {
 		OPENMITTSU_DISCONNECT(m_protocolClient.get(), lostConnection(), this, protocolClientOnLostConnection());
 		OPENMITTSU_DISCONNECT(m_protocolClient.get(), duplicateIdUsageDetected(), this, protocolClientOnDuplicateIdUsageDetected());
 
-		if (!QMetaObject::invokeMethod(m_messageCenterThread.getWorker().getMessageCenter().get(), Qt::BlockingQueuedConnection, "setNetworkSentMessageAcceptor", Q_ARG(std::shared_ptr<openmittsu::dataproviders::NetworkSentMessageAcceptor> const&, nullptr))) {
+		if (!QMetaObject::invokeMethod(m_messageCenterThread.getWorker().getMessageCenter().get(), "setNetworkSentMessageAcceptor", Qt::BlockingQueuedConnection, Q_ARG(std::shared_ptr<openmittsu::dataproviders::NetworkSentMessageAcceptor> const&, nullptr))) {
 			throw openmittsu::exceptions::InternalErrorException() << "Could not unset NetworkSentMessageAcceptor!";
 		}
 
@@ -403,7 +403,7 @@ void Client::openDatabaseFile(QString const& fileName) {
 			databaseOpenSuccess.success = false;
 
 			if (!QMetaObject::invokeMethod(m_databaseThread.getQObjectPtr(), "openDatabase", Qt::BlockingQueuedConnection, Q_RETURN_ARG(openmittsu::database::DatabaseOpenResult, databaseOpenSuccess), Q_ARG(QString const&, fileName), Q_ARG(QString const&, password), Q_ARG(QDir const&, location))) {
-				throw openmittsu::exceptions::InternalErrorException() << "Could not create MessageCenter, terminating.";
+				throw openmittsu::exceptions::InternalErrorException() << "Could not create Database, terminating.";
 			} else if (!databaseOpenSuccess.success) {
 				if (databaseOpenSuccess.failureReason == openmittsu::database::DatabaseOpenFailureReason::FREASON_INVALID_PASSWORD) {
 					QMessageBox::information(this, tr("Invalid password"), tr("The entered database password was invalid."));

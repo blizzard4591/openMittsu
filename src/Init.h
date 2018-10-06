@@ -21,30 +21,66 @@
 #include "src/utility/Logging.h"
 #include "Config.h"
 
+#include <QSet>
+#include <QSharedPointer>
+
 // For Type registration
 #include "src/crypto/PublicKey.h"
+#include "src/database/ContactData.h"
+#include "src/database/DatabaseSeekResult.h"
+#include "src/database/DatabaseThreadWorker.h"
+#include "src/database/DatabaseWrapperFactory.h"
+#include "src/database/GroupData.h"
+#include "src/database/NewContactData.h"
+#include "src/database/NewGroupData.h"
+#include "src/messages/FullMessageHeader.h"
+#include "src/messages/contact/PreliminaryContactMessage.h"
+#include "src/messages/contact/ReceiptMessageContent.h"
+#include "src/messages/group/PreliminaryGroupMessage.h"
+#include "src/options/OptionData.h"
+#include "src/options/OptionGroups.h"
+#include "src/options/OptionReaderFactory.h"
+#include "src/options/OptionStorage.h"
+#include "src/options/OptionTypes.h"
+#include "src/options/Options.h"
 #include "src/protocol/ContactId.h"
-#include <QSet>
+#include "src/protocol/ContactIdList.h"
+#include "src/protocol/ContactIdWithMessageId.h"
 #include "src/protocol/GroupId.h"
 #include "src/protocol/MessageId.h"
 #include "src/protocol/MessageTime.h"
-#include "src/messages/FullMessageHeader.h"
-#include <QSharedPointer>
-#include "src/messages/contact/PreliminaryContactMessage.h"
-#include "src/messages/group/PreliminaryGroupMessage.h"
-#include "src/tasks/CallbackTask.h"
+#include "src/utility/Location.h"
+#include "src/utility/QExifImageHeader.h"
 
 #define OPENMITTSU_REGISTER_TYPES() do { \
 	qRegisterMetaType<openmittsu::crypto::PublicKey>(); \
-	qRegisterMetaType<openmittsu::protocol::ContactId>(); \
-	qRegisterMetaType<QSet<openmittsu::protocol::ContactId>>(); \
-	qRegisterMetaType<openmittsu::protocol::GroupId>(); \
-	qRegisterMetaType<openmittsu::protocol::MessageId>(); \
-	qRegisterMetaType<openmittsu::protocol::MessageTime>(); \
+	qRegisterMetaType<openmittsu::database::ContactData>(); \
+	qRegisterMetaType<openmittsu::database::DatabaseSeekResult>(); \
+	qRegisterMetaType<openmittsu::database::DatabaseOpenResult>(); \
+	qRegisterMetaType<openmittsu::database::DatabaseWrapperFactory>(); \
+	qRegisterMetaType<openmittsu::database::GroupData>(); \
+	qRegisterMetaType<openmittsu::database::NewContactData>(); \
+	qRegisterMetaType<openmittsu::database::NewGroupData>(); \
 	qRegisterMetaType<openmittsu::messages::FullMessageHeader>(); \
 	qRegisterMetaType<QSharedPointer<openmittsu::messages::FullMessageHeader const>>(); \
 	qRegisterMetaType<openmittsu::messages::contact::PreliminaryContactMessage>(); \
+	qRegisterMetaType<openmittsu::messages::contact::ReceiptMessageContent::ReceiptType>(); \
 	qRegisterMetaType<openmittsu::messages::group::PreliminaryGroupMessage>(); \
+	qRegisterMetaType<openmittsu::options::OptionData>(); \
+	qRegisterMetaType<openmittsu::options::OptionGroups>(); \
+	qRegisterMetaType<openmittsu::options::OptionReaderFactory>(); \
+	qRegisterMetaType<openmittsu::options::OptionStorage>(); \
+	qRegisterMetaType<openmittsu::options::OptionTypes>(); \
+	qRegisterMetaType<openmittsu::options::Options>(); \
+	qRegisterMetaType<openmittsu::protocol::ContactId>(); \
+	qRegisterMetaType<openmittsu::protocol::ContactIdList>(); \
+	qRegisterMetaType<openmittsu::protocol::ContactIdWithMessageId>(); \
+	qRegisterMetaType<openmittsu::protocol::GroupId>(); \
+	qRegisterMetaType<openmittsu::protocol::MessageId>(); \
+	qRegisterMetaType<openmittsu::protocol::MessageTime>(); \
+	qRegisterMetaType<openmittsu::utility::Location>(); \
+	qRegisterMetaType<QExifURational>(); \
+	qRegisterMetaType<QExifSRational>(); \
 } while (false)
 
 bool initializeLogging(std::size_t maxLogfileSize, std::size_t maxFileCount) {
