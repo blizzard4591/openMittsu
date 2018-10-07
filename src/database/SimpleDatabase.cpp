@@ -973,8 +973,8 @@ namespace openmittsu {
 			m_mediaFileStorage.removeMediaItem(uuid);
 		}
 
-		std::unique_ptr<openmittsu::backup::IdentityBackup> SimpleDatabase::getBackup() const {
-			return std::make_unique<openmittsu::backup::IdentityBackup>(*m_identityBackup);
+		std::shared_ptr<openmittsu::backup::IdentityBackup> SimpleDatabase::getBackup() const {
+			return std::make_shared<openmittsu::backup::IdentityBackup>(*m_identityBackup);
 		}
 
 		void SimpleDatabase::updateCachedIdentityBackup() {
@@ -1351,12 +1351,12 @@ namespace openmittsu {
 			return database.commit();
 		}
 
-		std::unique_ptr<DatabaseReadonlyContactMessage> SimpleDatabase::getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) {
+		std::shared_ptr<DatabaseReadonlyContactMessage> SimpleDatabase::getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) {
 			internal::DatabaseContactMessageCursor cursor(this, contact, uuid);
 			return cursor.getReadonlyMessage();
 		}
 
-		std::unique_ptr<DatabaseReadonlyGroupMessage> SimpleDatabase::getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) {
+		std::shared_ptr<DatabaseReadonlyGroupMessage> SimpleDatabase::getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) {
 			internal::DatabaseGroupMessageCursor cursor(this, group, uuid);
 			return cursor.getReadonlyMessage();
 		}

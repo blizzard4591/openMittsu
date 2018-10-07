@@ -45,7 +45,7 @@ namespace openmittsu {
 				return std::make_shared<DatabaseContactMessage>(getDatabase(), m_contact, getMessageId());
 			}
 
-			std::unique_ptr<DatabaseReadonlyContactMessage> DatabaseContactMessageCursor::getReadonlyMessage() const {
+			std::shared_ptr<DatabaseReadonlyContactMessage> DatabaseContactMessageCursor::getReadonlyMessage() const {
 				if (!isValid()) {
 					throw openmittsu::exceptions::InternalErrorException() << "Can not create message wrapper for invalid message.";
 				}
@@ -88,7 +88,7 @@ namespace openmittsu {
 					mediaItem = MediaFileItem(MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE);
 				}
 
-				return std::make_unique<DatabaseReadonlyContactMessage>(contact, messageId, isMessageFromUs, createdAt, sentAt, modifiedAt, isQueued, isSent, uuid, isRead, isSaved, messageState, receivedAt, seenAt, isStatusMessage, caption, contactMessageType, body, mediaItem);
+				return std::make_shared<DatabaseReadonlyContactMessage>(contact, messageId, isMessageFromUs, createdAt, sentAt, modifiedAt, isQueued, isSent, uuid, isRead, isSaved, messageState, receivedAt, seenAt, isStatusMessage, caption, contactMessageType, body, mediaItem);
 			}
 
 			QString DatabaseContactMessageCursor::getWhereString() const {

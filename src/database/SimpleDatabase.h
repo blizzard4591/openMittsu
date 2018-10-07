@@ -115,8 +115,8 @@ namespace openmittsu {
 			virtual openmittsu::protocol::ContactStatus getContactStatus(openmittsu::protocol::ContactId const& contact) const override;
 			virtual openmittsu::protocol::ContactId getSelfContact() const override;
 
-			virtual std::unique_ptr<DatabaseReadonlyContactMessage> getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) override;
-			virtual std::unique_ptr<DatabaseReadonlyGroupMessage> getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) override;
+			virtual std::shared_ptr<DatabaseReadonlyContactMessage> getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) override;
+			virtual std::shared_ptr<DatabaseReadonlyGroupMessage> getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) override;
 
 			virtual ContactData getContactData(openmittsu::protocol::ContactId const& contact, bool fetchMessageCount) const override;
 			virtual ContactToContactDataMap getContactDataAll(bool fetchMessageCount) const override;
@@ -145,7 +145,7 @@ namespace openmittsu {
 			virtual QSet<openmittsu::protocol::ContactId> getContactsRequiringAccountStatusCheck(int maximalAgeInSeconds) const override;
 			virtual GroupToTitleMap getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const override;
 
-			virtual std::unique_ptr<openmittsu::backup::IdentityBackup> getBackup() const override;
+			virtual std::shared_ptr<openmittsu::backup::IdentityBackup> getBackup() const override;
 
 			virtual void enableTimers() override;
 			virtual void sendAllWaitingMessages(openmittsu::dataproviders::SentMessageAcceptor& messageAcceptor) override;

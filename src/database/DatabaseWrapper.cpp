@@ -316,8 +316,8 @@ namespace openmittsu {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getLastMessageUuids, QVector<QString>, Q_ARG(openmittsu::protocol::ContactId const&, contact), Q_ARG(std::size_t, n));
 		}
 
-		std::unique_ptr<DatabaseReadonlyContactMessage> DatabaseWrapper::getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getContactMessage, std::unique_ptr<DatabaseReadonlyContactMessage>, Q_ARG(openmittsu::protocol::ContactId const&, contact), Q_ARG(QString const&, uuid));
+		std::shared_ptr<DatabaseReadonlyContactMessage> DatabaseWrapper::getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getContactMessage, std::shared_ptr<DatabaseReadonlyContactMessage>, Q_ARG(openmittsu::protocol::ContactId const&, contact), Q_ARG(QString const&, uuid));
 		}
 
 		void DatabaseWrapper::setContactFirstName(openmittsu::protocol::ContactId const& contact, QString const& firstName) {
@@ -368,12 +368,12 @@ namespace openmittsu {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getLastMessageUuids, QVector<QString>, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(std::size_t, n));
 		}
 
-		std::unique_ptr<DatabaseReadonlyGroupMessage> DatabaseWrapper::getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getGroupMessage, std::unique_ptr<DatabaseReadonlyGroupMessage>, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(QString const&, uuid));
+		std::shared_ptr<DatabaseReadonlyGroupMessage> DatabaseWrapper::getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getGroupMessage, std::shared_ptr<DatabaseReadonlyGroupMessage>, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(QString const&, uuid));
 		}
 
-		std::unique_ptr<openmittsu::backup::IdentityBackup> DatabaseWrapper::getBackup() const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN_NOARGS(getBackup, std::unique_ptr<openmittsu::backup::IdentityBackup>);
+		std::shared_ptr<openmittsu::backup::IdentityBackup> DatabaseWrapper::getBackup() const {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN_NOARGS(getBackup, std::shared_ptr<openmittsu::backup::IdentityBackup>);
 		}
 
 		QSet<openmittsu::protocol::ContactId> DatabaseWrapper::getContactsRequiringFeatureLevelCheck(int maximalAgeInSeconds) const {

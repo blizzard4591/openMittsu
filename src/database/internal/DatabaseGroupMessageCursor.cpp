@@ -44,7 +44,7 @@ namespace openmittsu {
 				return std::make_shared<DatabaseGroupMessage>(getDatabase(), m_group, getMessageId());
 			}
 
-			std::unique_ptr<DatabaseReadonlyGroupMessage> DatabaseGroupMessageCursor::getReadonlyMessage() const {
+			std::shared_ptr<DatabaseReadonlyGroupMessage> DatabaseGroupMessageCursor::getReadonlyMessage() const {
 				if (!isValid()) {
 					throw openmittsu::exceptions::InternalErrorException() << "Can not create message wrapper for invalid message.";
 				}
@@ -83,7 +83,7 @@ namespace openmittsu {
 					mediaItem = MediaFileItem(MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE);
 				}
 
-				return std::make_unique<DatabaseReadonlyGroupMessage>(m_group, contact, messageId, isMessageFromUs, createdAt, sentAt, modifiedAt, isQueued, isSent, uuid, isRead, isSaved, messageState, receivedAt, seenAt, isStatusMessage, caption, groupMessageType, body, mediaItem);
+				return std::make_shared<DatabaseReadonlyGroupMessage>(m_group, contact, messageId, isMessageFromUs, createdAt, sentAt, modifiedAt, isQueued, isSent, uuid, isRead, isSaved, messageState, receivedAt, seenAt, isStatusMessage, caption, groupMessageType, body, mediaItem);
 			}
 
 			QString DatabaseGroupMessageCursor::getWhereString() const {

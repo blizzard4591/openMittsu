@@ -140,7 +140,7 @@ namespace openmittsu {
 			virtual int getContactCount() const = 0;
 
 			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::ContactId const& contact, std::size_t n) = 0;
-			virtual std::unique_ptr<DatabaseReadonlyContactMessage> getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) = 0;
+			virtual std::shared_ptr<DatabaseReadonlyContactMessage> getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) = 0;
 
 			virtual void setContactFirstName(openmittsu::protocol::ContactId const& contact, QString const& firstName) = 0;
 			virtual void setContactLastName(openmittsu::protocol::ContactId const& contact, QString const& lastName) = 0;
@@ -157,10 +157,10 @@ namespace openmittsu {
 			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const = 0;
 
 			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::GroupId const& group, std::size_t n) = 0;
-			virtual std::unique_ptr<DatabaseReadonlyGroupMessage> getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) = 0;
+			virtual std::shared_ptr<DatabaseReadonlyGroupMessage> getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) = 0;
 
 			// Mass Data, checks
-			virtual std::unique_ptr<openmittsu::backup::IdentityBackup> getBackup() const = 0;
+			virtual std::shared_ptr<openmittsu::backup::IdentityBackup> getBackup() const = 0;
 			virtual QSet<openmittsu::protocol::ContactId> getContactsRequiringFeatureLevelCheck(int maximalAgeInSeconds) const = 0;
 			virtual QSet<openmittsu::protocol::ContactId> getContactsRequiringAccountStatusCheck(int maximalAgeInSeconds) const = 0;
 			virtual void setContactAccountStatusBatch(ContactToAccountStatusMap const& status) = 0;
