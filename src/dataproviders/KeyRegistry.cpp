@@ -94,7 +94,7 @@ namespace openmittsu {
 			if (!m_database.hasDatabase()) {
 				throw openmittsu::exceptions::InternalErrorException() << "KeyRegistry::updateCache() called while the database is unavailable.";
 			} else {
-				std::unique_ptr<openmittsu::backup::IdentityBackup> const backupData = m_database.getBackup();
+				std::shared_ptr<openmittsu::backup::IdentityBackup> const backupData = m_database.getBackup();
 
 				m_cachedSelfContactId = backupData->getClientContactId();
 				m_cachedClientLongTermKeyPair = backupData->getClientLongTermKeyPair();

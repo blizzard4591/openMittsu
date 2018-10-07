@@ -955,7 +955,7 @@ void Client::menuIdentityShowFingerprintOnClick() {
 	if (!m_databaseWrapper.hasDatabase()) {
 		QMessageBox::warning(this, "No database loaded", "Before you can use this feature you need to load a database from file (see main screen) or create one using a backup of your existing ID (see Identity -> Load Backup).");
 	} else {
-		std::unique_ptr<openmittsu::backup::IdentityBackup> const backupData = m_databaseWrapper.getBackup();
+		std::shared_ptr<openmittsu::backup::IdentityBackup> const backupData = m_databaseWrapper.getBackup();
 		openmittsu::dialogs::FingerprintDialog fingerprintDialog(backupData->getClientContactId(), backupData->getClientLongTermKeyPair(), this);
 		fingerprintDialog.exec();
 	}
@@ -965,7 +965,7 @@ void Client::menuIdentityShowPublicKeyOnClick() {
 	if (!m_databaseWrapper.hasDatabase()) {
 		QMessageBox::warning(this, "No database loaded", "Before you can use this feature you need to load a database from file (see main screen) or create one using a backup of your existing ID (see Identity -> Load Backup).");
 	} else {
-		std::unique_ptr<openmittsu::backup::IdentityBackup> const backupData = m_databaseWrapper.getBackup();
+		std::shared_ptr<openmittsu::backup::IdentityBackup> const backupData = m_databaseWrapper.getBackup();
 		openmittsu::dialogs::ShowIdentityAndPublicKeyDialog showIdentityAndPublicKeyDialog(backupData->getClientContactId(), backupData->getClientLongTermKeyPair(), this);
 		showIdentityAndPublicKeyDialog.exec();
 	}
@@ -1115,7 +1115,7 @@ void Client::callbackTaskFinished(openmittsu::tasks::CallbackTask* callbackTask)
 						return;
 					}
 
-					std::unique_ptr<openmittsu::backup::IdentityBackup> const backupData = m_databaseWrapper.getBackup();
+					std::shared_ptr<openmittsu::backup::IdentityBackup> const backupData = m_databaseWrapper.getBackup();
 					openmittsu::crypto::BasicCryptoBox basicCryptoBox(backupData->getClientLongTermKeyPair(), m_serverConfiguration->getServerLongTermPublicKey());
 					openmittsu::tasks::SetFeatureLevelCallbackTask* setFeatureLevelTask = new openmittsu::tasks::SetFeatureLevelCallbackTask(m_serverConfiguration, basicCryptoBox, backupData->getClientContactId(), openMittsuFeatureLevel);
 					OPENMITTSU_CONNECT(setFeatureLevelTask, finished(openmittsu::tasks::CallbackTask*), this, callbackTaskFinished(openmittsu::tasks::CallbackTask*));
