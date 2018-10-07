@@ -43,10 +43,11 @@
 namespace openmittsu {
 	namespace network {
 
-		ProtocolClient::ProtocolClient(std::shared_ptr<openmittsu::crypto::FullCryptoBox> cryptoBox, openmittsu::protocol::ContactId const& ourContactId, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, openmittsu::options::OptionReaderFactory const& optionReaderFactory, openmittsu::dataproviders::MessageCenterWrapperFactory const& messageCenterWrapperFactory, openmittsu::protocol::PushFromId const& pushFromId)
-			: QObject(nullptr), m_cryptoBox(std::move(cryptoBox)), m_messageCenterWrapperFactory(messageCenterWrapperFactory), m_messageCenterWrapper(nullptr), m_pushFromIdPtr(std::make_unique<openmittsu::protocol::PushFromId>(pushFromId)),
+		ProtocolClient::ProtocolClient(openmittsu::database::DatabaseWrapperFactory const& databaseFactory, openmittsu::protocol::ContactId const& ourContactId, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, openmittsu::options::OptionReaderFactory const& optionReaderFactory, openmittsu::dataproviders::MessageCenterWrapperFactory const& messageCenterWrapperFactory, openmittsu::protocol::PushFromId const& pushFromId)
+			: QObject(nullptr), m_databaseWrapperFactory(databaseFactory), m_cryptoBox(nullptr), m_messageCenterWrapperFactory(messageCenterWrapperFactory), m_messageCenterWrapper(nullptr), m_pushFromIdPtr(std::make_unique<openmittsu::protocol::PushFromId>(pushFromId)),
 			m_isSetupDone(false), m_isNetworkSessionReady(false), m_isConnected(false), m_isAllowedToSend(false), m_isDisconnecting(false), m_socket(nullptr), m_networkSession(nullptr), m_ourContactId(ourContactId), m_serverConfiguration(serverConfiguration), m_optionReaderFactory(optionReaderFactory), m_optionReader(nullptr), outgoingMessagesTimer(nullptr), acknowledgmentWaitingTimer(nullptr), keepAliveTimer(nullptr), keepAliveCounter(0), failedReconnectAttempts(0) {
 			// Intentionally left empty.
+			LOGGER_DEBUG("Thread ID in ProtocolClient ctor = {}", QThread::currentThreadId());
 		}
 
 		ProtocolClient::~ProtocolClient() {
@@ -126,6 +127,10 @@ namespace openmittsu {
 
 		void ProtocolClient::setup() {
 			if (!m_isSetupDone) {
+				if (m_cryptoBox == nullptr) {
+					m_cryptoBox = std::make_shared<openmittsu::crypto::FullCryptoBox>(openmittsu::dataproviders::KeyRegistry(m_serverConfiguration->getServerLongTermPublicKey(), m_databaseWrapperFactory.getDatabaseWrapper()));
+				}
+
 				if (m_socket == nullptr) {
 					m_socket = std::make_unique<QTcpSocket>();
 					if (m_socket == nullptr) {

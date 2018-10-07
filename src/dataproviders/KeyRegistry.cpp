@@ -11,30 +11,24 @@
 namespace openmittsu {
 	namespace dataproviders {
 
-		KeyRegistry::KeyRegistry() : QObject(), m_mutex(), m_isCacheValid(false), m_cachedSelfContactId(0), m_serverLongTermPublicKey(), m_database() {
-			throw;
-		}
-
 		KeyRegistry::KeyRegistry(KeyRegistry const& other) : m_mutex(), m_isCacheValid(false), m_cachedSelfContactId(0), m_serverLongTermPublicKey(other.m_serverLongTermPublicKey), m_database(other.m_database) {
 			{
-				auto db = m_database.lock();
-				if (!db) {
+				if (!m_database.hasDatabase()) {
 					throw openmittsu::exceptions::InternalErrorException() << "KeyRegistry::KeyRegistry() called while the database is unavailable.";
 				} else {
-					OPENMITTSU_CONNECT(db.get(), contactChanged(openmittsu::protocol::ContactId const&), this, onContactChanged());
+					OPENMITTSU_CONNECT(&m_database, contactChanged(openmittsu::protocol::ContactId const&), this, onContactChanged());
 				}
 			}
 			onContactChanged();
 		}
 
-		KeyRegistry::KeyRegistry(openmittsu::crypto::PublicKey const& serverLongTermPublicKey, std::weak_ptr<openmittsu::database::Database> const& database)
+		KeyRegistry::KeyRegistry(openmittsu::crypto::PublicKey const& serverLongTermPublicKey, openmittsu::database::DatabaseWrapper const& database)
 			: m_mutex(), m_isCacheValid(false), m_cachedSelfContactId(0), m_serverLongTermPublicKey(serverLongTermPublicKey), m_database(database) {
 			{
-				auto db = m_database.lock();
-				if (!db) {
+				if (!m_database.hasDatabase()) {
 					throw openmittsu::exceptions::InternalErrorException() << "KeyRegistry::KeyRegistry() called while the database is unavailable.";
 				} else {
-					OPENMITTSU_CONNECT(db.get(), contactChanged(openmittsu::protocol::ContactId const&), this, onContactChanged());
+					OPENMITTSU_CONNECT(&m_database, contactChanged(openmittsu::protocol::ContactId const&), this, onContactChanged());
 				}
 			}
 			onContactChanged();
@@ -97,15 +91,14 @@ namespace openmittsu {
 		}
 		
 		void KeyRegistry::updateCache() {
-			auto db = m_database.lock();
-			if (!db) {
+			if (!m_database.hasDatabase()) {
 				throw openmittsu::exceptions::InternalErrorException() << "KeyRegistry::updateCache() called while the database is unavailable.";
 			} else {
-				std::unique_ptr<openmittsu::backup::IdentityBackup> const backupData = db->getBackup();
+				std::unique_ptr<openmittsu::backup::IdentityBackup> const backupData = m_database.getBackup();
 
 				m_cachedSelfContactId = backupData->getClientContactId();
 				m_cachedClientLongTermKeyPair = backupData->getClientLongTermKeyPair();
-				m_cachedPublicKeys = db->getContactDataAll(false);
+				m_cachedPublicKeys = m_database.getContactDataAll(false);
 
 				this->m_isCacheValid = true;
 				LOGGER_DEBUG("Updated cache in KeyRegistry.");

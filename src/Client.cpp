@@ -94,6 +94,7 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 	if ((!QMetaObject::invokeMethod(m_messageCenterThread.getQObjectPtr(), "createMessageCenter", Qt::BlockingQueuedConnection, Q_RETURN_ARG(bool, messageCenterCreationSuccess), Q_ARG(openmittsu::database::DatabaseWrapperFactory const&, m_databasePointerAuthority.getDatabaseWrapperFactory()))) || (!messageCenterCreationSuccess)) {
 		throw openmittsu::exceptions::InternalErrorException() << "Could not create MessageCenter, terminating.";
 	}
+	m_messageCenterPointerAuthority.setMessageCenter(m_messageCenterThread.getWorker().getMessageCenter());
 
 	m_ui.listContacts->setContextMenuPolicy(Qt::CustomContextMenu);
 	m_connectionTimer.start(500);
@@ -200,7 +201,7 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 		}
 	}
 
-	if (m_databaseThread.getWorker().hasDatabase()) {
+	if (m_databaseWrapper.hasDatabase()) {
 		QString const legacyContactsFile = m_optionMaster->getOptionAsQString(openmittsu::options::Options::FILEPATH_LEGACY_CONTACTS_DATABASE);
 		if (!legacyContactsFile.isEmpty() && QFile::exists(legacyContactsFile)) {
 			auto const resultButton = QMessageBox::question(this, tr("Legacy contacts file found"), tr("Welcome.\nIt seems that you used an older version of openMittsu before that used a plaintext contacts file to store your contacts and groups.\nThis has been replaced by an encrypted database storing both your ID, contacts, groups and messages.\nIf you want, your legacy contacts file can be imported into your openMittsu database.\nClick \"Yes\" to import the old file (located at %1), or \"No\" to leave it for now.\nYou can always come back later and import it via Database -> Import openMittsu....").arg(legacyContactsFile));
@@ -268,6 +269,7 @@ void Client::setupProtocolClient() {
 	}
 
 	if (!m_databaseWrapper.hasDatabase()) {
+		LOGGER()->critical("Can not set up ProtocolClient as no database is available, terminating setup early.");
 		return;
 	}
 
@@ -275,12 +277,11 @@ void Client::setupProtocolClient() {
 	openmittsu::database::ContactData const selfContactData = m_databaseWrapper.getContactData(selfContactId, false);
 
 	QString const nickname = selfContactData.nickName;
-	std::shared_ptr<openmittsu::crypto::FullCryptoBox> cryptoBox = std::make_shared<openmittsu::crypto::FullCryptoBox>(openmittsu::dataproviders::KeyRegistry(m_serverConfiguration->getServerLongTermPublicKey(), m_databaseThread.getWorker().getDatabase()));
 	if (nickname.compare(QStringLiteral("You"), Qt::CaseInsensitive) == 0) {
 		LOGGER()->info("Using only ID as PushFromID token (for iOS Push Receivers).");
-		m_protocolClient = std::make_unique<openmittsu::network::ProtocolClient>(cryptoBox, selfContactId, m_serverConfiguration, openmittsu::options::OptionReaderFactory(m_databasePointerAuthority.getDatabaseWrapperFactory()), m_messageCenterPointerAuthority.getMessageCenterWrapperFactory(), openmittsu::protocol::PushFromId(selfContactId));
+		m_protocolClient = std::make_unique<openmittsu::network::ProtocolClient>(m_databasePointerAuthority.getDatabaseWrapperFactory(), selfContactId, m_serverConfiguration, openmittsu::options::OptionReaderFactory(m_databasePointerAuthority.getDatabaseWrapperFactory()), m_messageCenterPointerAuthority.getMessageCenterWrapperFactory(), openmittsu::protocol::PushFromId(selfContactId));
 	} else {
-		m_protocolClient = std::make_unique<openmittsu::network::ProtocolClient>(cryptoBox, selfContactId, m_serverConfiguration, openmittsu::options::OptionReaderFactory(m_databasePointerAuthority.getDatabaseWrapperFactory()), m_messageCenterPointerAuthority.getMessageCenterWrapperFactory(), openmittsu::protocol::PushFromId(nickname));
+		m_protocolClient = std::make_unique<openmittsu::network::ProtocolClient>(m_databasePointerAuthority.getDatabaseWrapperFactory(), selfContactId, m_serverConfiguration, openmittsu::options::OptionReaderFactory(m_databasePointerAuthority.getDatabaseWrapperFactory()), m_messageCenterPointerAuthority.getMessageCenterWrapperFactory(), openmittsu::protocol::PushFromId(nickname));
 		LOGGER()->info("Using nickname \"{}\" as PushFromID token (for iOS Push Receivers).", nickname.toStdString());
 	}
 
@@ -336,7 +337,7 @@ void Client::updateDatabaseInfo(QString const& currentFileName) {
 
 void Client::btnConnectOnClick() {
 	if (m_connectionState == ConnectionState::STATE_DISCONNECTED) {
-		if ((m_serverConfiguration == nullptr) || (!m_databaseThread.getWorker().hasDatabase())) {
+		if ((m_serverConfiguration == nullptr) || (!m_databaseWrapper.hasDatabase())) {
 			QMessageBox::warning(this, "Can not connect", "Please choose a valid database file first.");
 			return;
 		}
@@ -413,6 +414,7 @@ void Client::openDatabaseFile(QString const& fileName) {
 				}
 			} else {
 				this->m_optionMaster->setOption(openmittsu::options::Options::FILEPATH_DATABASE, fileName);
+				m_databasePointerAuthority.setDatabase(m_databaseThread.getWorker().getDatabase());
 				updateDatabaseInfo(fileName);
 
 				contactRegistryOnIdentitiesChanged();
@@ -612,7 +614,7 @@ void Client::listContactsOnDoubleClick(QListWidgetItem* item) {
 	ContactListWidgetItem* clwi = dynamic_cast<ContactListWidgetItem*>(item);
 	GroupListWidgetItem* glwi = dynamic_cast<GroupListWidgetItem*>(item);
 
-	if ((!m_databaseWrapper.hasDatabase()) || (!m_messageCenterThread.getWorker().hasMessageCenter()) || (m_tabController == nullptr)) {
+	if ((!m_databaseWrapper.hasDatabase()) || (!m_messageCenterWrapper.hasMessageCenter()) || (m_tabController == nullptr)) {
 		return;
 	}
 

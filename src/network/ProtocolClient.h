@@ -17,6 +17,7 @@
 
 #include "src/crypto/KeyPair.h"
 #include "src/crypto/PublicKey.h"
+#include "src/database/DatabaseWrapperFactory.h"
 #include "src/network/ServerConfiguration.h"
 #include "src/dataproviders/MessageCenterWrapperFactory.h"
 #include "src/dataproviders/MessageCenterWrapper.h"
@@ -59,7 +60,7 @@ namespace openmittsu {
 			Q_OBJECT
 
 		public:
-			ProtocolClient(std::shared_ptr<openmittsu::crypto::FullCryptoBox> cryptoBox, openmittsu::protocol::ContactId const& ourContactId, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, openmittsu::options::OptionReaderFactory const& optionReaderFactory, openmittsu::dataproviders::MessageCenterWrapperFactory const& messageCenterWrapperFactory, openmittsu::protocol::PushFromId const& pushFromId);
+			ProtocolClient(openmittsu::database::DatabaseWrapperFactory const& databaseFactory, openmittsu::protocol::ContactId const& ourContactId, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, openmittsu::options::OptionReaderFactory const& optionReaderFactory, openmittsu::dataproviders::MessageCenterWrapperFactory const& messageCenterWrapperFactory, openmittsu::protocol::PushFromId const& pushFromId);
 			virtual ~ProtocolClient();
 			bool getIsConnected() const;
 
@@ -101,6 +102,7 @@ namespace openmittsu {
 			void keepAliveTimerOnTimer();
 			void callbackTaskFinished(openmittsu::tasks::CallbackTask* callbackTask);
 		private:
+			openmittsu::database::DatabaseWrapperFactory m_databaseWrapperFactory;
 			std::shared_ptr<openmittsu::crypto::FullCryptoBox> m_cryptoBox;
 			openmittsu::dataproviders::MessageCenterWrapperFactory const m_messageCenterWrapperFactory;
 			std::shared_ptr<openmittsu::dataproviders::MessageCenterWrapper> m_messageCenterWrapper;
