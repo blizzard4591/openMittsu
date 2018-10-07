@@ -15,8 +15,6 @@ namespace openmittsu {
 		}
 
 		int DatabaseThreadWorker::openDatabase(QString const& filename, QString const& password, QDir const& mediaStorageLocation) {
-			int result;
-
 			try {
 				std::shared_ptr<openmittsu::database::Database> newDatabase = std::make_shared<openmittsu::database::SimpleDatabase>(filename, password, mediaStorageLocation);
 				if (newDatabase) {

@@ -41,6 +41,13 @@ namespace openmittsu {
 		class DatabaseReadonlyContactMessage;
 		class DatabaseReadonlyGroupMessage;
 
+		typedef QHash<openmittsu::protocol::ContactId, ContactData> ContactToContactDataMap;
+		typedef QHash<openmittsu::protocol::GroupId, GroupData> GroupToGroupDataMap;
+		typedef QHash<QString, QString> OptionNameToValueMap;
+		typedef QHash<openmittsu::protocol::GroupId, QString> GroupToTitleMap;
+		typedef QHash<openmittsu::protocol::ContactId, openmittsu::protocol::AccountStatus> ContactToAccountStatusMap;
+		typedef QHash<openmittsu::protocol::ContactId, openmittsu::protocol::FeatureLevel> ContactToFeatureLevelMap;
+
 		class Database : public QObject {
 			Q_OBJECT
 		public:
@@ -128,7 +135,7 @@ namespace openmittsu {
 
 			// Contact Data
 			virtual ContactData getContactData(openmittsu::protocol::ContactId const& contact, bool fetchMessageCount) const = 0;
-			virtual QHash<openmittsu::protocol::ContactId, ContactData> getContactDataAll(bool fetchMessageCount) const = 0;
+			virtual ContactToContactDataMap getContactDataAll(bool fetchMessageCount) const = 0;
 			virtual openmittsu::crypto::PublicKey getContactPublicKey(openmittsu::protocol::ContactId const& identity) const = 0;
 			virtual int getContactCount() const = 0;
 
@@ -145,7 +152,7 @@ namespace openmittsu {
 
 			// Group Data
 			virtual GroupData getGroupData(openmittsu::protocol::GroupId const& group, bool withDescription) const = 0;
-			virtual QHash<openmittsu::protocol::GroupId, GroupData> getGroupDataAll(bool withDescription) const = 0;
+			virtual GroupToGroupDataMap getGroupDataAll(bool withDescription) const = 0;
 			virtual int getGroupCount() const = 0;
 			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const = 0;
 
@@ -156,13 +163,13 @@ namespace openmittsu {
 			virtual std::unique_ptr<openmittsu::backup::IdentityBackup> getBackup() const = 0;
 			virtual QSet<openmittsu::protocol::ContactId> getContactsRequiringFeatureLevelCheck(int maximalAgeInSeconds) const = 0;
 			virtual QSet<openmittsu::protocol::ContactId> getContactsRequiringAccountStatusCheck(int maximalAgeInSeconds) const = 0;
-			virtual void setContactAccountStatusBatch(QHash<openmittsu::protocol::ContactId, openmittsu::protocol::AccountStatus> const& status) = 0;
-			virtual void setContactFeatureLevelBatch(QHash<openmittsu::protocol::ContactId, openmittsu::protocol::FeatureLevel> const& featureLevels) = 0;
-			virtual QHash<openmittsu::protocol::GroupId, QString> getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const = 0;
+			virtual void setContactAccountStatusBatch(ContactToAccountStatusMap const& status) = 0;
+			virtual void setContactFeatureLevelBatch(ContactToFeatureLevelMap const& featureLevels) = 0;
+			virtual GroupToTitleMap getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const = 0;
 
 			// Options
-			virtual QHash<QString, QString> getOptions() = 0;
-			virtual void setOptions(QHash<QString, QString> const& options) = 0;
+			virtual OptionNameToValueMap getOptions() = 0;
+			virtual void setOptions(OptionNameToValueMap const& options) = 0;
 		signals:
 			void contactChanged(openmittsu::protocol::ContactId const& identity);
 			void groupChanged(openmittsu::protocol::GroupId const& changedGroupId);

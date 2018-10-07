@@ -415,6 +415,12 @@ void Client::openDatabaseFile(QString const& fileName) {
 			} else {
 				this->m_optionMaster->setOption(openmittsu::options::Options::FILEPATH_DATABASE, fileName);
 				m_databasePointerAuthority.setDatabase(m_databaseThread.getWorker().getDatabase());
+				
+				while (!m_databaseWrapper.hasDatabase()) {
+					QCoreApplication::processEvents();
+					QThread::msleep(25);
+				}
+
 				updateDatabaseInfo(fileName);
 
 				contactRegistryOnIdentitiesChanged();

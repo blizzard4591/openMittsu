@@ -816,7 +816,7 @@ namespace openmittsu {
 					QVariant const avatar = queryField(group, QStringLiteral("avatar_uuid"));
 					groupData.hasImage = !(avatar.isNull() || avatar.toString().isEmpty());
 
-					if (groupData.hasImage) {
+					if (!groupData.hasImage) {
 						groupData.image = openmittsu::database::MediaFileItem(openmittsu::database::MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE);
 					} else {
 						groupData.image = m_database->getMediaItem(avatar.toString());

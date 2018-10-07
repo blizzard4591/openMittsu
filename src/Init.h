@@ -79,8 +79,6 @@
 	qRegisterMetaType<openmittsu::protocol::MessageId>(); \
 	qRegisterMetaType<openmittsu::protocol::MessageTime>(); \
 	qRegisterMetaType<openmittsu::utility::Location>(); \
-	qRegisterMetaType<QExifURational>(); \
-	qRegisterMetaType<QExifSRational>(); \
 } while (false)
 
 bool initializeLogging(std::size_t maxLogfileSize, std::size_t maxFileCount) {

@@ -893,8 +893,8 @@ namespace openmittsu {
 			return hasOptionInternal(optionName, false);
 		}
 
-		QHash<QString, QString> SimpleDatabase::getOptions() {
-			QHash<QString, QString> result;
+		OptionNameToValueMap SimpleDatabase::getOptions() {
+			OptionNameToValueMap result;
 			QSqlQuery query(database);
 			query.prepare(QStringLiteral("SELECT `name`, `value` FROM `settings` WHERE `is_internal` = 0;"));
 
@@ -909,7 +909,7 @@ namespace openmittsu {
 			return result;
 		}
 
-		void SimpleDatabase::setOptions(QHash<QString, QString> const& options) {
+		void SimpleDatabase::setOptions(OptionNameToValueMap const& options) {
 			auto it = options.constBegin();
 			auto const end = options.constEnd();
 			while (it != end) {
@@ -1087,11 +1087,11 @@ namespace openmittsu {
 			}
 		}
 
-		void SimpleDatabase::setContactAccountStatusBatch(QHash<openmittsu::protocol::ContactId, openmittsu::protocol::AccountStatus> const& status) {
+		void SimpleDatabase::setContactAccountStatusBatch(ContactToAccountStatusMap const& status) {
 			m_contactAndGroupDataProvider.setAccountStatusBatch(status);
 		}
 
-		void SimpleDatabase::setContactFeatureLevelBatch(QHash<openmittsu::protocol::ContactId, openmittsu::protocol::FeatureLevel> const& featureLevels) {
+		void SimpleDatabase::setContactFeatureLevelBatch(ContactToFeatureLevelMap const& featureLevels) {
 			m_contactAndGroupDataProvider.setFeatureLevelBatch(featureLevels);
 		}
 
@@ -1365,7 +1365,7 @@ namespace openmittsu {
 			return m_contactAndGroupDataProvider.getContactData(contact, fetchMessageCount);
 		}
 
-		QHash<openmittsu::protocol::ContactId, ContactData> SimpleDatabase::getContactDataAll(bool fetchMessageCount) const {
+		ContactToContactDataMap SimpleDatabase::getContactDataAll(bool fetchMessageCount) const {
 			return m_contactAndGroupDataProvider.getContactDataAll(fetchMessageCount);
 		}
 		
@@ -1373,7 +1373,7 @@ namespace openmittsu {
 			return m_contactAndGroupDataProvider.getGroupData(group, withDescription);
 		}
 		
-		QHash<openmittsu::protocol::GroupId, GroupData> SimpleDatabase::getGroupDataAll(bool withDescription) const {
+		GroupToGroupDataMap SimpleDatabase::getGroupDataAll(bool withDescription) const {
 			return m_contactAndGroupDataProvider.getGroupDataAll(withDescription);
 		}
 

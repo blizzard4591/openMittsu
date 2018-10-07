@@ -20,9 +20,10 @@ namespace openmittsu {
 		}
 
 		void DatabasePointerAuthority::setDatabase(std::shared_ptr<Database> newDatabase) {
-			QMutexLocker lock(&m_mutex);
-			
-			m_database = newDatabase;
+			{
+				QMutexLocker lock(&m_mutex);
+				m_database = newDatabase;
+			}
 
 			emit newDatabaseAvailable();
 		}
@@ -44,7 +45,6 @@ namespace openmittsu {
 		}
 
 		DatabaseWrapperFactory DatabasePointerAuthority::getDatabaseWrapperFactory() const {
-			QMutexLocker lock(&m_mutex);
 			return DatabaseWrapperFactory(this);
 		}
 
