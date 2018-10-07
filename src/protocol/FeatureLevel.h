@@ -1,6 +1,8 @@
 #ifndef OPENMITTSU_PROTOCOL_FEATURELEVEL_H_
 #define OPENMITTSU_PROTOCOL_FEATURELEVEL_H_
 
+#include <QMetaType>
+
 namespace openmittsu {
 	namespace protocol {
 
@@ -24,5 +26,7 @@ namespace openmittsu {
 
 	}
 }
+
+Q_DECLARE_METATYPE(openmittsu::protocol::FeatureLevel)
 
 #endif // OPENMITTSU_PROTOCOL_FEATURELEVEL_H_

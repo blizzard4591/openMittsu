@@ -72,13 +72,21 @@
 	qRegisterMetaType<openmittsu::options::OptionStorage>(); \
 	qRegisterMetaType<openmittsu::options::OptionTypes>(); \
 	qRegisterMetaType<openmittsu::options::Options>(); \
+	qRegisterMetaType<openmittsu::protocol::AccountStatus>(); \
 	qRegisterMetaType<openmittsu::protocol::ContactId>(); \
 	qRegisterMetaType<openmittsu::protocol::ContactIdList>(); \
 	qRegisterMetaType<openmittsu::protocol::ContactIdWithMessageId>(); \
+	qRegisterMetaType<openmittsu::protocol::FeatureLevel>(); \
 	qRegisterMetaType<openmittsu::protocol::GroupId>(); \
 	qRegisterMetaType<openmittsu::protocol::MessageId>(); \
 	qRegisterMetaType<openmittsu::protocol::MessageTime>(); \
 	qRegisterMetaType<openmittsu::utility::Location>(); \
+	qRegisterMetaType<openmittsu::database::ContactToContactDataMap>(); \
+	qRegisterMetaType<openmittsu::database::GroupToGroupDataMap>(); \
+	qRegisterMetaType<openmittsu::database::OptionNameToValueMap>(); \
+	qRegisterMetaType<openmittsu::database::GroupToTitleMap>(); \
+	qRegisterMetaType<openmittsu::database::ContactToAccountStatusMap>(); \
+	qRegisterMetaType<openmittsu::database::ContactToFeatureLevelMap>(); \
 } while (false)
 
 bool initializeLogging(std::size_t maxLogfileSize, std::size_t maxFileCount) {

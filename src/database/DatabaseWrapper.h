@@ -123,8 +123,8 @@ namespace openmittsu {
 			virtual void setContactFeatureLevelBatch(ContactToFeatureLevelMap const& featureLevels) override;
 			virtual GroupToTitleMap getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const override;
 			// Options
-			virtual OptionNameToValueMap getOptions() override;
-			virtual void setOptions(OptionNameToValueMap const& options) override;
+			virtual openmittsu::database::OptionNameToValueMap getOptions() override;
+			virtual void setOptions(openmittsu::database::OptionNameToValueMap const& options) override;
 		};
 
 	}

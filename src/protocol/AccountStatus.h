@@ -1,6 +1,8 @@
 #ifndef OPENMITTSU_PROTOCOL_ACCOUNTSTATUS_H_
 #define OPENMITTSU_PROTOCOL_ACCOUNTSTATUS_H_
 
+#include <QMetaType>
+
 namespace openmittsu {
 	namespace protocol {
 
@@ -19,5 +21,7 @@ namespace openmittsu {
 
 	}
 }
+
+Q_DECLARE_METATYPE(openmittsu::protocol::AccountStatus)
 
 #endif // OPENMITTSU_PROTOCOL_ACCOUNTSTATUS_H_

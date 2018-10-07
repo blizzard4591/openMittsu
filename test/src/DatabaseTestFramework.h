@@ -3,13 +3,14 @@
 
 #include "gtest/gtest.h"
 
-#include <QString>
+#include <QDir>
 #include <QFile>
 #include <QSet>
+#include <QString>
 
 #include <memory>
 
-#include "database/Database.h"
+#include "database/SimpleDatabase.h"
 #include "protocol/ContactId.h"
 #include "protocol/MessageId.h"
 #include "crypto/KeyPair.h"
@@ -20,7 +21,7 @@ protected:
 	static openmittsu::protocol::ContactId selfContactId;
 	static openmittsu::crypto::KeyPair selfKeyPair;
 
-	std::shared_ptr<openmittsu::database::Database> db;
+	std::shared_ptr<openmittsu::database::SimpleDatabase> db;
 	QSet<openmittsu::protocol::MessageId> usedMessageIds;
 	QDir tempMediaStorageLocation;
 

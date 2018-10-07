@@ -396,12 +396,12 @@ namespace openmittsu {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getKnownGroupsContainingMember, GroupToTitleMap, Q_ARG(openmittsu::protocol::ContactId const&, identity));
 		}
 
-		OptionNameToValueMap DatabaseWrapper::getOptions() {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN_NOARGS(getOptions, OptionNameToValueMap);
+		openmittsu::database::OptionNameToValueMap DatabaseWrapper::getOptions() {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN_NOARGS(getOptions, openmittsu::database::OptionNameToValueMap);
 		}
 
-		void DatabaseWrapper::setOptions(OptionNameToValueMap const& options) {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(setOptions, Q_ARG(OptionNameToValueMap const&, options));
+		void DatabaseWrapper::setOptions(openmittsu::database::OptionNameToValueMap const& options) {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(setOptions, Q_ARG(openmittsu::database::OptionNameToValueMap const&, options));
 		}
 
 	}

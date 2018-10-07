@@ -14,9 +14,9 @@ TEST_F(DatabaseTestFramework, createNew) {
 	ASSERT_EQ(0, db->getGroupCount());
 	ASSERT_EQ(1, db->getContactCount());
 
-	openmittsu::backup::IdentityBackup const backupData = db->getBackup();
-	ASSERT_EQ(selfContactId, backupData.getClientContactId());
-	ASSERT_EQ(selfKeyPair, backupData.getClientLongTermKeyPair());
+	std::shared_ptr<openmittsu::backup::IdentityBackup> const backupData = db->getBackup();
+	ASSERT_EQ(selfContactId, backupData->getClientContactId());
+	ASSERT_EQ(selfKeyPair, backupData->getClientLongTermKeyPair());
 
 	openmittsu::protocol::GroupId nonExistantGroupId(selfContactId, 0);
 	ASSERT_FALSE(db->hasGroup(nonExistantGroupId));
@@ -67,11 +67,12 @@ TEST_F(DatabaseTestFramework, contacts) {
 	openmittsu::crypto::PublicKey const publicKeyIdCFromDatabase = db->getContactPublicKey(contactIdC);
 
 	ASSERT_EQ(contactIdCPublicKey, publicKeyIdCFromDatabase);
-	ASSERT_EQ(QString(""), db->getContactNickname(contactIdC));
+	openmittsu::database::ContactData cData = db->getContactData(contactIdC, true);
+	ASSERT_EQ(QString(""), cData.nickName);
 	ASSERT_EQ(openmittsu::protocol::ContactStatus::KNOWN, db->getContactStatus(contactIdC));
-	ASSERT_EQ(openmittsu::protocol::AccountStatus::STATUS_UNKNOWN, db->getContactAccountStatus(contactIdC));
-	ASSERT_EQ(openmittsu::protocol::ContactIdVerificationStatus::VERIFICATION_STATUS_UNVERIFIED, db->getContactVerficationStatus(contactIdC));
-	ASSERT_EQ(openmittsu::protocol::FeatureLevel::LEVEL_UNKNOW , db->getContactFeatureLevel(contactIdC));
+	ASSERT_EQ(openmittsu::protocol::AccountStatus::STATUS_UNKNOWN, cData.accountStatus);
+	ASSERT_EQ(openmittsu::protocol::ContactIdVerificationStatus::VERIFICATION_STATUS_UNVERIFIED, cData.verificationStatus);
+	ASSERT_EQ(openmittsu::protocol::FeatureLevel::LEVEL_UNKNOW, cData.featureLevel);
 
 	QSet<openmittsu::protocol::ContactId> const knownContacts = db->getKnownContacts();
 	ASSERT_EQ(2, knownContacts.size());
@@ -90,33 +91,38 @@ TEST_F(DatabaseTestFramework, contacts) {
 	ASSERT_EQ(3, db->getContactCount());
 
 	QString const newNickname(QStringLiteral("testNickName"));
-	ASSERT_THROW(db->setContactNickname(nonExistantContactId, newNickname), openmittsu::exceptions::InternalErrorException);
-	ASSERT_NO_THROW(db->setContactNickname(contactIdC, newNickname));
-	ASSERT_EQ(newNickname, db->getContactNickname(contactIdC));
+	ASSERT_THROW(db->setContactNickName(nonExistantContactId, newNickname), openmittsu::exceptions::InternalErrorException);
+	ASSERT_NO_THROW(db->setContactNickName(contactIdC, newNickname));
+	cData = db->getContactData(contactIdC, true);
+	ASSERT_EQ(newNickname, cData.nickName);
 
 	openmittsu::protocol::AccountStatus const newContactIdStatus = openmittsu::protocol::AccountStatus::STATUS_ACTIVE;
 	ASSERT_THROW(db->setContactAccountStatus(nonExistantContactId, newContactIdStatus), openmittsu::exceptions::InternalErrorException);
 	ASSERT_NO_THROW(db->setContactAccountStatus(contactIdC, newContactIdStatus));
-	ASSERT_EQ(newContactIdStatus, db->getContactAccountStatus(contactIdC));
+	cData = db->getContactData(contactIdC, true);
+	ASSERT_EQ(newContactIdStatus, cData.accountStatus);
 
 	openmittsu::protocol::ContactIdVerificationStatus const newContactIdVerificationStatus = openmittsu::protocol::ContactIdVerificationStatus::VERIFICATION_STATUS_FULLY_VERIFIED;
-	ASSERT_THROW(db->setContactVerficationStatus(nonExistantContactId, newContactIdVerificationStatus), openmittsu::exceptions::InternalErrorException);
-	ASSERT_NO_THROW(db->setContactVerficationStatus(contactIdC, newContactIdVerificationStatus));
-	ASSERT_EQ(newContactIdVerificationStatus, db->getContactVerficationStatus(contactIdC));
+	ASSERT_THROW(db->setContactVerificationStatus(nonExistantContactId, newContactIdVerificationStatus), openmittsu::exceptions::InternalErrorException);
+	ASSERT_NO_THROW(db->setContactVerificationStatus(contactIdC, newContactIdVerificationStatus));
+	cData = db->getContactData(contactIdC, true);
+	ASSERT_EQ(newContactIdVerificationStatus, cData.verificationStatus);
 
 	openmittsu::protocol::FeatureLevel const newContactFeatureLevel = openmittsu::protocol::FeatureLevel::LEVEL_3;
 	ASSERT_THROW(db->setContactFeatureLevel(nonExistantContactId, newContactFeatureLevel), openmittsu::exceptions::InternalErrorException);
 	ASSERT_NO_THROW(db->setContactFeatureLevel(contactIdC, newContactFeatureLevel));
-	ASSERT_EQ(newContactFeatureLevel, db->getContactFeatureLevel(contactIdC));
+	cData = db->getContactData(contactIdC, true);
+	ASSERT_EQ(newContactFeatureLevel, cData.featureLevel);
 
 	openmittsu::crypto::PublicKey const contactIdDPublicKey = contactIdDKeyPair;
 	openmittsu::crypto::PublicKey const publicKeyIdDFromDatabase = db->getContactPublicKey(contactIdD);
 	ASSERT_EQ(contactIdDPublicKey, publicKeyIdDFromDatabase);
-	ASSERT_EQ(QString(""), db->getContactNickname(contactIdD));
+	openmittsu::database::ContactData dData = db->getContactData(contactIdD, true);
+	ASSERT_EQ(QString(""), dData.nickName);
 	ASSERT_EQ(openmittsu::protocol::ContactStatus::KNOWN, db->getContactStatus(contactIdD));
-	ASSERT_EQ(openmittsu::protocol::AccountStatus::STATUS_UNKNOWN, db->getContactAccountStatus(contactIdD));
-	ASSERT_EQ(openmittsu::protocol::ContactIdVerificationStatus::VERIFICATION_STATUS_UNVERIFIED, db->getContactVerficationStatus(contactIdD));
-	ASSERT_EQ(openmittsu::protocol::FeatureLevel::LEVEL_UNKNOW, db->getContactFeatureLevel(contactIdD));
+	ASSERT_EQ(openmittsu::protocol::AccountStatus::STATUS_UNKNOWN, dData.accountStatus);
+	ASSERT_EQ(openmittsu::protocol::ContactIdVerificationStatus::VERIFICATION_STATUS_UNVERIFIED, dData.verificationStatus);
+	ASSERT_EQ(openmittsu::protocol::FeatureLevel::LEVEL_UNKNOW, dData.featureLevel);
 }
 
 TEST_F(DatabaseTestFramework, contactMessages) {
