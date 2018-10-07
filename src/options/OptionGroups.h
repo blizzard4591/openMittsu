@@ -12,10 +12,10 @@ namespace openmittsu {
 			GROUP_GENERAL,
 			GROUP_INTERNAL
 		};
+
+		uint qHash(openmittsu::options::OptionGroups const& key, uint seed);
 	}
 }
-
-uint qHash(openmittsu::options::OptionGroups const& key, uint seed);
 
 Q_DECLARE_METATYPE(openmittsu::options::OptionGroups)
 

@@ -41,17 +41,17 @@ namespace openmittsu {
 			virtual void sendUserTypingStatus(openmittsu::protocol::ContactId const& receiver, bool isTyping) override;
 
 			virtual bool sendText(openmittsu::protocol::GroupId const& group, QString const& text) override;
-			virtual bool sendImage(openmittsu::protocol::GroupId const& group, QByteArray const& image, QString const& caption);
-			virtual bool sendLocation(openmittsu::protocol::GroupId const& group, openmittsu::utility::Location const& location);
-			virtual bool sendReceipt(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& receiptedMessageId, openmittsu::messages::contact::ReceiptMessageContent::ReceiptType const& receiptType);
-			virtual bool sendLeave(openmittsu::protocol::GroupId const& group);
-			virtual bool sendSyncRequest(openmittsu::protocol::GroupId const& group);
+			virtual bool sendImage(openmittsu::protocol::GroupId const& group, QByteArray const& image, QString const& caption) override;
+			virtual bool sendLocation(openmittsu::protocol::GroupId const& group, openmittsu::utility::Location const& location) override;
+			virtual bool sendReceipt(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& receiptedMessageId, openmittsu::messages::contact::ReceiptMessageContent::ReceiptType const& receiptType) override;
+			virtual bool sendLeave(openmittsu::protocol::GroupId const& group) override;
+			virtual bool sendSyncRequest(openmittsu::protocol::GroupId const& group) override;
 
-			virtual bool sendGroupCreation(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& members);
-			virtual bool sendGroupTitle(openmittsu::protocol::GroupId const& group, QString const& title);
-			virtual bool sendGroupImage(openmittsu::protocol::GroupId const& group, QByteArray const& image);
+			virtual bool sendGroupCreation(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& members) override;
+			virtual bool sendGroupTitle(openmittsu::protocol::GroupId const& group, QString const& title) override;
+			virtual bool sendGroupImage(openmittsu::protocol::GroupId const& group, QByteArray const& image) override;
 
-			void setNetworkSentMessageAcceptor(std::shared_ptr<NetworkSentMessageAcceptor> const& newNetworkSentMessageAcceptor);
+			void setNetworkSentMessageAcceptor(std::shared_ptr<NetworkSentMessageAcceptor> const& newNetworkSentMessageAcceptor) override;
 
 			virtual void processReceivedContactMessageText(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& message) override;
 			virtual void processReceivedContactMessageImage(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& image) override;

@@ -20,10 +20,10 @@ namespace openmittsu {
 			BINARY_MAINWINDOW_GEOMETRY,
 			BINARY_MAINWINDOW_STATE
 		};
+
+		uint qHash(openmittsu::options::Options const& key, uint seed);
 	}
 }
-
-uint qHash(openmittsu::options::Options const& key, uint seed);
 
 Q_DECLARE_METATYPE(openmittsu::options::Options)
 
