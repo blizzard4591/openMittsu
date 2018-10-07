@@ -126,8 +126,8 @@ namespace openmittsu {
 			QHash<openmittsu::protocol::GroupId, std::pair<QSet<openmittsu::protocol::ContactId>, QString>> getKnownGroupsWithMembersAndTitles() const;
 			virtual QHash<openmittsu::protocol::GroupId, QString> getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const override;
 
-			int getContactCount() const;
-			int getGroupCount() const;
+			virtual int getContactCount() const override;
+			virtual int getGroupCount() const override;
 			int getContactMessageCount() const;
 			int getGroupMessageCount() const;
 			int getMediaItemCount() const;
@@ -217,13 +217,13 @@ namespace openmittsu {
 			//virtual void storeNewGroup(openmittsu::protocol::GroupId const& groupId, QString const& name, openmittsu::protocol::MessageTime const& createdAt, QSet<openmittsu::protocol::ContactId> const& members, bool isDeleted, bool isAwaitingSync);
 			virtual void storeNewGroup(QVector<NewGroupData> const& newGroupData) override;
 
-			void announceMessageChanged(QString const& uuid);
-			void announceContactChanged(openmittsu::protocol::ContactId const& contact);
-			void announceGroupChanged(openmittsu::protocol::GroupId const& group);
-			void announceNewMessage(openmittsu::protocol::ContactId const& contact, QString const& messageUuid);
-			void announceNewMessage(openmittsu::protocol::GroupId const& group, QString const& messageUuid);
-			void announceReceivedNewMessage(openmittsu::protocol::ContactId const& contact);
-			void announceReceivedNewMessage(openmittsu::protocol::GroupId const& group);
+			virtual void announceMessageChanged(QString const& uuid) override;
+			virtual void announceContactChanged(openmittsu::protocol::ContactId const& contact) override;
+			virtual void announceGroupChanged(openmittsu::protocol::GroupId const& group) override;
+			virtual void announceNewMessage(openmittsu::protocol::ContactId const& contact, QString const& messageUuid) override;
+			virtual void announceNewMessage(openmittsu::protocol::GroupId const& group, QString const& messageUuid) override;
+			virtual void announceReceivedNewMessage(openmittsu::protocol::ContactId const& contact) override;
+			virtual void announceReceivedNewMessage(openmittsu::protocol::GroupId const& group) override;
 
 			// Internal Interface
 			virtual openmittsu::protocol::MessageId getNextMessageId(openmittsu::protocol::ContactId const& contact) override;
@@ -262,7 +262,7 @@ namespace openmittsu {
 			bool doesTableExist(Tables const& table);
 			int getTableVersion(Tables const& table);
 			QString getTableName(Tables const& table);
-			QString generateUuid() const;
+			virtual QString generateUuid() const override;
 			QString getCreateStatementForTable(Tables const& table);
 			int createTableIfMissingAndGetVersion(Tables const& table, int createStatementVersion);
 			void setTableVersion(Tables const& table, int tableVersion);

@@ -95,7 +95,7 @@ namespace openmittsu {
 		}
 
 		void DatabaseWrapper::enableTimers() {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(enableTimers);
+			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID_NOARGS(enableTimers);
 		}
 
 		openmittsu::protocol::GroupStatus DatabaseWrapper::getGroupStatus(openmittsu::protocol::GroupId const& group) const {
@@ -107,7 +107,7 @@ namespace openmittsu {
 		}
 
 		openmittsu::protocol::ContactId DatabaseWrapper::getSelfContact() const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getSelfContact, openmittsu::protocol::ContactId);
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN_NOARGS(getSelfContact, openmittsu::protocol::ContactId);
 		}
 
 		bool DatabaseWrapper::hasContact(openmittsu::protocol::ContactId const& identity) const {
@@ -307,7 +307,7 @@ namespace openmittsu {
 		}
 
 		int DatabaseWrapper::getContactCount() const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getContactCount, int);
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN_NOARGS(getContactCount, int);
 		}
 
 		QVector<QString> DatabaseWrapper::getLastMessageUuids(openmittsu::protocol::ContactId const& contact, std::size_t n) {
@@ -346,16 +346,16 @@ namespace openmittsu {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(setContactColor, Q_ARG(openmittsu::protocol::ContactId const&, contact), Q_ARG(int, color));
 		}
 
-		GroupData DatabaseWrapper::getGroupData(openmittsu::protocol::GroupId const& group, bool withMembers) const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getGroupData, GroupData, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(bool, withMembers));
+		GroupData DatabaseWrapper::getGroupData(openmittsu::protocol::GroupId const& group, bool withDescription) const {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getGroupData, GroupData, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(bool, withDescription));
 		}
 
-		QHash<openmittsu::protocol::GroupId, GroupData> DatabaseWrapper::getGroupDataAll(bool withMembers) const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getGroupDataAll, SINGLE_ARG(QHash<openmittsu::protocol::GroupId, GroupData>), Q_ARG(bool, withMembers));
+		QHash<openmittsu::protocol::GroupId, GroupData> DatabaseWrapper::getGroupDataAll(bool withDescription) const {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getGroupDataAll, SINGLE_ARG(QHash<openmittsu::protocol::GroupId, GroupData>), Q_ARG(bool, withDescription));
 		}
 
 		int DatabaseWrapper::getGroupCount() const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getGroupCount, int);
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN_NOARGS(getGroupCount, int);
 		}
 
 		QSet<openmittsu::protocol::ContactId> DatabaseWrapper::getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const {
@@ -371,7 +371,7 @@ namespace openmittsu {
 		}
 
 		std::unique_ptr<openmittsu::backup::IdentityBackup> DatabaseWrapper::getBackup() const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getBackup, std::unique_ptr<openmittsu::backup::IdentityBackup>);
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN_NOARGS(getBackup, std::unique_ptr<openmittsu::backup::IdentityBackup>);
 		}
 
 		QSet<openmittsu::protocol::ContactId> DatabaseWrapper::getContactsRequiringFeatureLevelCheck(int maximalAgeInSeconds) const {
@@ -395,13 +395,12 @@ namespace openmittsu {
 		}
 
 		QHash<QString, QString> DatabaseWrapper::getOptions() {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getOptions, SINGLE_ARG(QHash<QString, QString>));
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN_NOARGS(getOptions, SINGLE_ARG(QHash<QString, QString>));
 		}
 
 		void DatabaseWrapper::setOptions(QHash<QString, QString> const& options) {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(setOptions, Q_ARG(SINGLE_ARG(QHash<QString, QString> const&), options));
 		}
-
 
 	}
 }

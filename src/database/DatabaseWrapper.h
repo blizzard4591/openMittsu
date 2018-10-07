@@ -39,7 +39,8 @@ namespace openmittsu {
 			void setupConnection();
 
 			// Inherited via Database
-						// Misc
+			
+			// Misc
 			virtual void enableTimers() override;
 			// Information
 			virtual openmittsu::protocol::GroupStatus getGroupStatus(openmittsu::protocol::GroupId const& group) const override;
@@ -110,8 +111,8 @@ namespace openmittsu {
 			virtual void setContactFeatureLevel(openmittsu::protocol::ContactId const& contact, openmittsu::protocol::FeatureLevel const& featureLevel) override;
 			virtual void setContactColor(openmittsu::protocol::ContactId const& contact, int color) override;
 			// Group Data
-			virtual GroupData getGroupData(openmittsu::protocol::GroupId const& group, bool withMembers) const override;
-			virtual QHash<openmittsu::protocol::GroupId, GroupData> getGroupDataAll(bool withMembers) const override;
+			virtual GroupData getGroupData(openmittsu::protocol::GroupId const& group, bool withDescription) const override;
+			virtual QHash<openmittsu::protocol::GroupId, GroupData> getGroupDataAll(bool withDescription) const override;
 			virtual int getGroupCount() const override;
 			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const override;
 			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::GroupId const& group, std::size_t n) override;
