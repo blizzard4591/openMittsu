@@ -14,34 +14,34 @@ namespace openmittsu {
 			//
 		}
 
-		DatabaseOpenResult DatabaseThreadWorker::openDatabase(QString const& filename, QString const& password, QDir const& mediaStorageLocation) {
-			DatabaseOpenResult result;
+		int DatabaseThreadWorker::openDatabase(QString const& filename, QString const& password, QDir const& mediaStorageLocation) {
+			int result;
 
 			try {
 				std::shared_ptr<openmittsu::database::Database> newDatabase = std::make_shared<openmittsu::database::SimpleDatabase>(filename, password, mediaStorageLocation);
 				if (newDatabase) {
 					m_database = newDatabase;
 					
-					result.failureReason = DatabaseOpenFailureReason::FREASON_NO_ERROR;
-					result.success = true;
+					//result.failureReason = DatabaseOpenFailureReason::FREASON_NO_ERROR;
+					//result.success = true;
 
-					return result;
+					return 0;
 				} else {
-					result.failureReason = DatabaseOpenFailureReason::FREASON_UNKNOWN;
-					result.success = false;
+					//result.failureReason = DatabaseOpenFailureReason::FREASON_UNKNOWN;
+					//result.success = false;
 
-					return result;
+					return 2;
 				}
 			} catch (openmittsu::exceptions::InvalidPasswordOrDatabaseException&) {
-				result.failureReason = DatabaseOpenFailureReason::FREASON_INVALID_PASSWORD;
-				result.success = false;
+				//result.failureReason = DatabaseOpenFailureReason::FREASON_INVALID_PASSWORD;
+				//result.success = false;
 
-				return result;
+				return 1;
 			} catch (openmittsu::exceptions::InternalErrorException&) {
-				result.failureReason = DatabaseOpenFailureReason::FREASON_OTHER;
-				result.success = false;
+				//result.failureReason = DatabaseOpenFailureReason::FREASON_OTHER;
+				//result.success = false;
 
-				return result;
+				return 3;
 			}
 		}
 

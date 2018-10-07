@@ -2,6 +2,7 @@
 #define OPENMITTSU_DATABASE_DATABASETHREADWORKER_H_
 
 #include <QDir>
+#include <QObject>
 #include <QString>
 #include <QThread>
 
@@ -31,7 +32,7 @@ namespace openmittsu {
 		public:
 			virtual ~DatabaseThreadWorker();
 		public slots:
-			DatabaseOpenResult openDatabase(QString const& filename, QString const& password, QDir const& mediaStorageLocation);
+			int openDatabase(QString const& filename, QString const& password, QDir const& mediaStorageLocation);
 			bool createDatabase(QString const& filename, openmittsu::protocol::ContactId const& selfContact, openmittsu::crypto::KeyPair const& selfLongTermKeyPair, QString const& password, QDir const& mediaStorageLocation);
 
 			bool hasDatabase() const;

@@ -399,13 +399,12 @@ void Client::openDatabaseFile(QString const& fileName) {
 			QDir location(fileName);
 			location.cdUp();
 
-			openmittsu::database::DatabaseOpenResult databaseOpenSuccess;
-			databaseOpenSuccess.success = false;
+			int databaseOpenSuccess = -1;
 
-			if (!QMetaObject::invokeMethod(m_databaseThread.getQObjectPtr(), "openDatabase", Qt::BlockingQueuedConnection, Q_RETURN_ARG(openmittsu::database::DatabaseOpenResult, databaseOpenSuccess), Q_ARG(QString const&, fileName), Q_ARG(QString const&, password), Q_ARG(QDir const&, location))) {
+			if (!QMetaObject::invokeMethod(m_databaseThread.getQObjectPtr(), "openDatabase", Qt::BlockingQueuedConnection, Q_RETURN_ARG(int, databaseOpenSuccess), Q_ARG(QString const&, fileName), Q_ARG(QString const&, password), Q_ARG(QDir const&, location))) {
 				throw openmittsu::exceptions::InternalErrorException() << "Could not create Database, terminating.";
-			} else if (!databaseOpenSuccess.success) {
-				if (databaseOpenSuccess.failureReason == openmittsu::database::DatabaseOpenFailureReason::FREASON_INVALID_PASSWORD) {
+			} else if (databaseOpenSuccess != 0) {
+				if (databaseOpenSuccess == 1) {
 					QMessageBox::information(this, tr("Invalid password"), tr("The entered database password was invalid."));
 				} else {
 					LOGGER_DEBUG("Removing key \"FILEPATH_DATABASE\" from stored settings as the file is not valid.");
