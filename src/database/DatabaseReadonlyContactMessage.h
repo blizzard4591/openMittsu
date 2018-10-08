@@ -16,7 +16,6 @@ namespace openmittsu {
 		class DatabaseReadonlyContactMessage : public virtual openmittsu::dataproviders::messages::ReadonlyContactMessage {
 		public:
 			DatabaseReadonlyContactMessage(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, bool isMessageFromUs, openmittsu::protocol::MessageTime const& createdAt, openmittsu::protocol::MessageTime const& sentAt, openmittsu::protocol::MessageTime const& modifiedAt, bool isQueued, bool isSent, QString const& uuid, bool isRead, bool isSaved, openmittsu::dataproviders::messages::UserMessageState const& messageState, openmittsu::protocol::MessageTime const& receivedAt, openmittsu::protocol::MessageTime const& seenAt, bool isStatusMessage, QString const& caption, openmittsu::dataproviders::messages::ContactMessageType const& contactMessageType, QString const& body, MediaFileItem const& mediaItem);
-			//explicit DatabaseReadonlyContactMessage(DatabaseWrapper const& database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId);
 			virtual ~DatabaseReadonlyContactMessage();
 
 			virtual openmittsu::protocol::ContactId const& getSender() const override;

@@ -45,6 +45,7 @@ namespace openmittsu {
 			static QByteArray toQByteArrayRepresentation(QString const& value);
 		private slots:
 			void onDatabaseOptionsChanged();
+			void onDatabaseUpdated();
 		protected:
 			void ensureOptionsExist();
 			QString getOptionKeyForOption(Options const& option) const;

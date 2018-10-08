@@ -18,6 +18,7 @@ namespace openmittsu {
 			QCoreApplication::setApplicationName("OpenMittsu");
 
 			OPENMITTSU_CONNECT_QUEUED(&m_database, optionsChanged(), this, onDatabaseOptionsChanged());
+			OPENMITTSU_CONNECT_QUEUED(&m_database, gotDatabase(), this, onDatabaseUpdated());
 
 			registerOptions();
 
@@ -29,6 +30,13 @@ namespace openmittsu {
 		}
 
 		void OptionReader::onDatabaseOptionsChanged() {
+			m_databaseCache.clear();
+			if (m_database.hasDatabase()) {
+				m_databaseCache = m_database.getOptions();
+			}
+		}
+
+		void OptionReader::onDatabaseUpdated() {
 			m_databaseCache.clear();
 			if (m_database.hasDatabase()) {
 				m_databaseCache = m_database.getOptions();

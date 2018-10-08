@@ -88,7 +88,11 @@ namespace openmittsu {
 					mediaItem = MediaFileItem(MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE);
 				}
 
-				return std::make_shared<DatabaseReadonlyContactMessage>(contact, messageId, isMessageFromUs, createdAt, sentAt, modifiedAt, isQueued, isSent, uuid, isRead, isSaved, messageState, receivedAt, seenAt, isStatusMessage, caption, contactMessageType, body, mediaItem);
+				auto drcm = std::make_shared<DatabaseReadonlyContactMessage>(contact, messageId, isMessageFromUs, createdAt, sentAt, modifiedAt, isQueued, isSent, uuid, isRead, isSaved, messageState, receivedAt, seenAt, isStatusMessage, caption, contactMessageType, body, mediaItem);
+				if (!drcm) {
+					throw openmittsu::exceptions::InternalErrorException() << "Fetching a group message to readonly failed for group " << contact.toString() << " and UUID " << getMessageUuid().toStdString() << "!";
+				}
+				return drcm;
 			}
 
 			QString DatabaseContactMessageCursor::getWhereString() const {

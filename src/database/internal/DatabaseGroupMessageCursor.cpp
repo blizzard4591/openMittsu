@@ -50,7 +50,7 @@ namespace openmittsu {
 				}
 
 				QSqlQuery query(getDatabase()->getQueryObject());
-				query.prepare(QStringLiteral("SELECT `group_id`, `group_creator`, `apiid`, `uid`, `identity`, `is_outbox`, `is_read`, `is_saved`, `messagestate`, `sort_by`, `created_at`, `sent_at`, `received_at`, `seen_at`, `modified_at`, `group_message_type`,`, `body`, `is_statusmessage`, `is_queued`, `is_sent`, `caption` FROM `group_messages` WHERE `group_id` = :groupId AND `group_creator` = :groupCreator AND `uid` = :uid;"));
+				query.prepare(QStringLiteral("SELECT `group_id`, `group_creator`, `apiid`, `uid`, `identity`, `is_outbox`, `is_read`, `is_saved`, `messagestate`, `sort_by`, `created_at`, `sent_at`, `received_at`, `seen_at`, `modified_at`, `group_message_type`, `body`, `is_statusmessage`, `is_queued`, `is_sent`, `caption` FROM `group_messages` WHERE `group_id` = :groupId AND `group_creator` = :groupCreator AND `uid` = :uid;"));
 				bindWhereStringValues(query);
 				query.bindValue(QStringLiteral(":uid"), QVariant(getMessageUuid()));
 				if (!query.exec() || !query.isSelect() || !query.next()) {
@@ -83,7 +83,11 @@ namespace openmittsu {
 					mediaItem = MediaFileItem(MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE);
 				}
 
-				return std::make_shared<DatabaseReadonlyGroupMessage>(m_group, contact, messageId, isMessageFromUs, createdAt, sentAt, modifiedAt, isQueued, isSent, uuid, isRead, isSaved, messageState, receivedAt, seenAt, isStatusMessage, caption, groupMessageType, body, mediaItem);
+				auto drgm = std::make_shared<DatabaseReadonlyGroupMessage>(m_group, contact, messageId, isMessageFromUs, createdAt, sentAt, modifiedAt, isQueued, isSent, uuid, isRead, isSaved, messageState, receivedAt, seenAt, isStatusMessage, caption, groupMessageType, body, mediaItem);
+				if (!drgm) {
+					throw openmittsu::exceptions::InternalErrorException() << "Fetching a group message to readonly failed for group " << m_group.toString() << " and UUID " << getMessageUuid().toStdString() << "!";
+				}
+				return drgm;
 			}
 
 			QString DatabaseGroupMessageCursor::getWhereString() const {

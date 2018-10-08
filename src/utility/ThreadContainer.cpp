@@ -5,6 +5,8 @@
 #include "src/utility/MakeUnique.h"
 #include "src/utility/QObjectConnectionMacro.h"
 
+#include <QEventLoop>
+
 namespace openmittsu {
 	namespace utility {
 
@@ -17,7 +19,15 @@ namespace openmittsu {
 
 		template <typename T>
 		ThreadContainer<T>::~ThreadContainer() {
-			//
+			try {
+				QEventLoop eventLoop;
+				OPENMITTSU_CONNECT(&m_workerThread, finished(), &eventLoop, quit());
+
+				m_workerThread.quit();
+				eventLoop.exec();
+			} catch (...) {
+				LOGGER()->critical("Caught an exception in the ThreadContainer destructor...");
+			}
 		}
 
 		template <typename T>

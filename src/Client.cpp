@@ -102,6 +102,7 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 	OPENMITTSU_CONNECT(&m_messageCenterWrapper, newUnreadMessageAvailableContact(openmittsu::protocol::ContactId const&), this, onMessageCenterHasUnreadMessageContact(openmittsu::protocol::ContactId const&));
 	OPENMITTSU_CONNECT(&m_messageCenterWrapper, newUnreadMessageAvailableGroup(openmittsu::protocol::GroupId const&), this, onMessageCenterHasUnreadMessageGroup(openmittsu::protocol::GroupId const&));
 
+	OPENMITTSU_CONNECT(&m_databaseWrapper, gotDatabase(), this, onDatabaseUpdated());
 	OPENMITTSU_CONNECT(&m_databaseWrapper, contactChanged(openmittsu::protocol::ContactId const&), this, onDatabaseContactChanged(openmittsu::protocol::ContactId const&));
 	OPENMITTSU_CONNECT(&m_databaseWrapper, groupChanged(openmittsu::protocol::GroupId const&), this, onDatabaseGroupChanged(openmittsu::protocol::GroupId const&));
 	OPENMITTSU_CONNECT(&m_databaseWrapper, receivedNewContactMessage(openmittsu::protocol::ContactId const&), this, onDatabaseReceivedNewContactMessage(openmittsu::protocol::ContactId const&));
@@ -546,6 +547,10 @@ void Client::onDatabaseReceivedNewGroupMessage(openmittsu::protocol::GroupId con
 		}
 		onHasUnreadMessage(chatTab);
 	}
+}
+
+void Client::onDatabaseUpdated() {
+	contactRegistryOnIdentitiesChanged();
 }
 
 void Client::onDatabaseContactChanged(openmittsu::protocol::ContactId const& contact) {
