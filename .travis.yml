@@ -40,7 +40,7 @@ matrix:
     # Ubuntu 14.04 + Clang + Qt from PPA (https://launchpad.net/~beineri) + AppImage deployment
     - os: linux
       compiler: clang
-      env: DEPLOY_APPIMAGE=true QT_BASE="qt59" QT_PPA="ppa:beineri/opt-qt593-trusty"
+      env: DEPLOY_APPIMAGE=true QT_BASE="qt510" QT_PPA="ppa:beineri/opt-qt5.10.1-trusty"
 
 after_failure:
   - find build -iname '*err*.log' -type f -print -exec cat {} \;
