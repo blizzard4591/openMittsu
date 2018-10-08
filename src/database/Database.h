@@ -131,7 +131,7 @@ namespace openmittsu {
 			virtual void storeNewGroup(openmittsu::protocol::GroupId const& groupId, QSet<openmittsu::protocol::ContactId> const& members, bool isAwaitingSync) = 0;
 			virtual void storeNewGroup(QVector<NewGroupData> const& newGroupData) = 0;
 
-			virtual void sendAllWaitingMessages(openmittsu::dataproviders::SentMessageAcceptor& messageAcceptor) = 0;
+			virtual void sendAllWaitingMessages(std::shared_ptr<openmittsu::dataproviders::SentMessageAcceptor> messageAcceptor) = 0;
 
 			// Contact Data
 			virtual openmittsu::database::ContactData getContactData(openmittsu::protocol::ContactId const& contact, bool fetchMessageCount) const = 0;
@@ -185,6 +185,13 @@ namespace openmittsu {
 		};
 	}
 }
+
+Q_DECLARE_METATYPE(openmittsu::database::ContactToContactDataMap)
+Q_DECLARE_METATYPE(openmittsu::database::GroupToGroupDataMap)
+Q_DECLARE_METATYPE(openmittsu::database::OptionNameToValueMap)
+Q_DECLARE_METATYPE(openmittsu::database::GroupToTitleMap)
+Q_DECLARE_METATYPE(openmittsu::database::ContactToAccountStatusMap)
+Q_DECLARE_METATYPE(openmittsu::database::ContactToFeatureLevelMap)
 
 Q_DECLARE_INTERFACE(openmittsu::database::Database, "openmittsu.database.Database")
 

@@ -438,7 +438,7 @@ namespace openmittsu {
 		void SimpleMessageCenter::tryResendingMessagesToNetwork() {
 			if ((this->m_networkSentMessageAcceptor != nullptr) && (this->m_networkSentMessageAcceptor->isConnected()) && (this->m_storage.hasDatabase())) {
 				LOGGER()->info("Asking database to send all queued messges now...");
-				this->m_storage.sendAllWaitingMessages(*m_networkSentMessageAcceptor);
+				this->m_storage.sendAllWaitingMessages(m_networkSentMessageAcceptor);
 			}
 		}
 

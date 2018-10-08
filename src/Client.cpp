@@ -301,9 +301,10 @@ void Client::setupProtocolClient() {
 	}
 	eventLoop.exec(); // blocks until "finished()" has been called
 
-	if (!QMetaObject::invokeMethod(m_messageCenterThread.getWorker().getMessageCenter().get(), "setNetworkSentMessageAcceptor", Q_ARG(std::shared_ptr<openmittsu::dataproviders::NetworkSentMessageAcceptor> const&, std::make_shared<openmittsu::dataproviders::NetworkSentMessageAcceptor>(m_protocolClient)))) {
-		throw openmittsu::exceptions::InternalErrorException() << "Could not set NetworkSentMessageAcceptor!";
-	}
+	m_messageCenterWrapper.setNetworkSentMessageAcceptor(std::make_shared<openmittsu::dataproviders::NetworkSentMessageAcceptor>(m_protocolClient));
+	//if (!QMetaObject::invokeMethod(m_messageCenterThread.getWorker().getMessageCenter().get(), "setNetworkSentMessageAcceptor", Q_ARG(std::shared_ptr<openmittsu::dataproviders::NetworkSentMessageAcceptor> const&, std::make_shared<openmittsu::dataproviders::NetworkSentMessageAcceptor>(m_protocolClient)))) {
+	//	throw openmittsu::exceptions::InternalErrorException() << "Could not set NetworkSentMessageAcceptor!";
+	//}
 }
 
 void Client::threadFinished() {
@@ -713,7 +714,7 @@ void Client::listContactsOnContextMenu(QPoint const& pos) {
 
 				auto it = groups.constBegin();
 				auto const end = groups.constEnd();
-				while (it != end) {
+				for (;it != end; ++it) {
 					QAction* groupMember = new QAction(QString(" - ").append(*it), &listContactsContextMenu);
 					groupMember->setDisabled(true);
 					listContactsContextMenu.addAction(groupMember);

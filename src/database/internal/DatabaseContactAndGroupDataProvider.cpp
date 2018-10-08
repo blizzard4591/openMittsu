@@ -128,7 +128,7 @@ namespace openmittsu {
 				auto it = newGroupData.constBegin();
 				auto const end = newGroupData.constEnd();
 
-				while (it != end) {
+				for (;it != end; ++it) {
 					openmittsu::protocol::GroupStatus const groupStatus = this->getGroupStatus(it->id);
 					if ((groupStatus == openmittsu::protocol::GroupStatus::DELETED) || (groupStatus == openmittsu::protocol::GroupStatus::TEMPORARY) || (groupStatus == openmittsu::protocol::GroupStatus::KNOWN)) {
 						openmittsu::protocol::ContactId const ourId = m_database->getSelfContact();
@@ -407,7 +407,7 @@ namespace openmittsu {
 				auto it = newContactData.constBegin();
 				auto const end = newContactData.constEnd();
 
-				while (it != end) {
+				for (; it != end; ++it) {
 					openmittsu::protocol::ContactStatus const contactStatus = this->getContactStatus(it->id);
 					if ((contactStatus == openmittsu::protocol::ContactStatus::DELETED) || (contactStatus == openmittsu::protocol::ContactStatus::KNOWN)) {
 						if (getPublicKey(it->id) != it->publicKey) {
