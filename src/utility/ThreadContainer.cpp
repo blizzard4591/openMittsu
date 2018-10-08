@@ -9,29 +9,29 @@ namespace openmittsu {
 	namespace utility {
 
 		template <typename T>
-		ThreadContainer::ThreadContainer() : QObject() {
+		ThreadContainer<T>::ThreadContainer() : QObject() {
 			m_threadWorker = std::make_unique<T>();
 			m_threadWorker->moveToThread(&m_workerThread);
 			m_workerThread.start();
 		}
 
 		template <typename T>
-		ThreadContainer::~ThreadContainer() {
+		ThreadContainer<T>::~ThreadContainer() {
 			//
 		}
 
 		template <typename T>
-		QObject* ThreadContainer::getQObjectPtr() const {
+		QObject* ThreadContainer<T>::getQObjectPtr() const {
 			return m_threadWorker.get();
 		}
 
 		template <typename T>
-		T& ThreadContainer::getWorker() {
+		T& ThreadContainer<T>::getWorker() {
 			return *m_threadWorker;
 		}
 
 		template <typename T>
-		T const& ThreadContainer::getWorker() const {
+		T const& ThreadContainer<T>::getWorker() const {
 			return *m_threadWorker;
 		}
 

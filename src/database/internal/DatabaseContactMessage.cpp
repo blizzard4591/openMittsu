@@ -29,11 +29,11 @@ namespace openmittsu {
 				return m_contact;
 			}
 
-			int DatabaseContactMessage::getContactMessageCount(InternalDatabaseInterface* database) {
+			int DatabaseContactMessage::getContactMessageCount(InternalDatabaseInterface const* database) {
 				return openmittsu::database::internal::DatabaseUtilities::countQuery(database, QStringLiteral("contact_messages"));
 			}
 
-			int DatabaseContactMessage::getContactMessageCount(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact) {
+			int DatabaseContactMessage::getContactMessageCount(InternalDatabaseInterface const* database, openmittsu::protocol::ContactId const& contact) {
 				return openmittsu::database::internal::DatabaseUtilities::countQuery(database, QStringLiteral("contact_messages"), { { QStringLiteral("identity"), contact.toQString() } });
 			}
 

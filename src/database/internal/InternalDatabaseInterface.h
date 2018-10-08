@@ -19,11 +19,11 @@ namespace openmittsu {
 			public:
 				virtual ~InternalDatabaseInterface() {}
 
-				virtual openmittsu::protocol::ContactId const& getSelfContact() const = 0;
+				virtual openmittsu::protocol::ContactId getSelfContact() const = 0;
 				virtual QString generateUuid() const = 0;
 
 				// Queries
-				virtual QSqlQuery getQueryObject() = 0;
+				virtual QSqlQuery getQueryObject() const = 0;
 				virtual bool transactionStart() = 0;
 				virtual bool transactionCommit() = 0;
 

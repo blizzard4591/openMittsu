@@ -6,9 +6,19 @@
 #include <QSet>
 #include <QString>
 
-#include "src/dataproviders/BackedContact.h"
-#include "src/dataproviders/BackedGroup.h"
+#include <memory>
+
+#include "src/backup/IdentityBackup.h"
+#include "src/database/DatabaseSeekResult.h"
+#include "src/database/ContactData.h"
+#include "src/database/GroupData.h"
+#include "src/database/NewContactData.h"
+#include "src/database/NewGroupData.h"
 #include "src/dataproviders/SentMessageAcceptor.h"
+#include "src/dataproviders/messages/ReadonlyContactMessage.h"
+#include "src/dataproviders/messages/ReadonlyGroupMessage.h"
+#include "src/crypto/PublicKey.h"
+#include "src/protocol/AccountStatus.h"
 #include "src/protocol/ContactId.h"
 #include "src/protocol/ContactStatus.h"
 #include "src/protocol/ContactIdVerificationStatus.h"
@@ -22,13 +32,33 @@
 
 namespace openmittsu {
 	namespace dataproviders {
-		class MessageCenter;
+		class MessageCenterWrapper;
+		class BackedContact;
+		class BackedGroup;
 	}
 
 	namespace database {
+		class DatabaseReadonlyContactMessage;
+		class DatabaseReadonlyGroupMessage;
+
+		typedef QHash<openmittsu::protocol::ContactId, ContactData> ContactToContactDataMap;
+		typedef QHash<openmittsu::protocol::GroupId, GroupData> GroupToGroupDataMap;
+		typedef QHash<QString, QString> OptionNameToValueMap;
+		typedef QHash<openmittsu::protocol::GroupId, QString> GroupToTitleMap;
+		typedef QHash<openmittsu::protocol::ContactId, openmittsu::protocol::AccountStatus> ContactToAccountStatusMap;
+		typedef QHash<openmittsu::protocol::ContactId, openmittsu::protocol::FeatureLevel> ContactToFeatureLevelMap;
+
 		class Database : public QObject {
 			Q_OBJECT
 		public:
+			enum class SortOrder {
+				ASCENDING,
+				DESCENDING
+			};
+			enum class SortByMode {
+				ColSpecialSortBy,
+			};
+
 			virtual ~Database() {}
 
 			// Misc
@@ -97,50 +127,49 @@ namespace openmittsu {
 			virtual void storeMessageSendDone(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId) = 0;
 
 			virtual void storeNewContact(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& publicKey) = 0;
+			virtual void storeNewContact(QVector<NewContactData> const& newContactData) = 0;
 			virtual void storeNewGroup(openmittsu::protocol::GroupId const& groupId, QSet<openmittsu::protocol::ContactId> const& members, bool isAwaitingSync) = 0;
+			virtual void storeNewGroup(QVector<NewGroupData> const& newGroupData) = 0;
 
 			virtual void sendAllWaitingMessages(openmittsu::dataproviders::SentMessageAcceptor& messageAcceptor) = 0;
 
-			virtual std::unique_ptr<openmittsu::dataproviders::BackedContact> getBackedContact(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::MessageCenter& messageCenter) = 0;
-			virtual std::unique_ptr<openmittsu::dataproviders::BackedGroup> getBackedGroup(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::MessageCenter& messageCenter) = 0;
-			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const = 0;
-
 			// Contact Data
-			virtual QString getFirstName(openmittsu::protocol::ContactId const& contact) const = 0;
-			virtual QString getLastName(openmittsu::protocol::ContactId const& contact) const = 0;
-			virtual QString getNickName(openmittsu::protocol::ContactId const& contact) const = 0;
-			virtual openmittsu::protocol::AccountStatus getAccountStatus(openmittsu::protocol::ContactId const& contact) const = 0;
-			virtual openmittsu::protocol::ContactIdVerificationStatus getVerificationStatus(openmittsu::protocol::ContactId const& contact) const = 0;
-			virtual openmittsu::protocol::FeatureLevel getFeatureLevel(openmittsu::protocol::ContactId const& contact) const = 0;
-			virtual int getColor(openmittsu::protocol::ContactId const& contact) const = 0;
+			virtual openmittsu::database::ContactData getContactData(openmittsu::protocol::ContactId const& contact, bool fetchMessageCount) const = 0;
+			virtual openmittsu::database::ContactToContactDataMap getContactDataAll(bool fetchMessageCount) const = 0;
+			virtual openmittsu::crypto::PublicKey getContactPublicKey(openmittsu::protocol::ContactId const& identity) const = 0;
 			virtual int getContactCount() const = 0;
-			virtual int getContactMessageCount(openmittsu::protocol::ContactId const& contact) const = 0;
 
-			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::ContactId const& contact, std::size_t n) const = 0;
-			virtual openmittsu::dataproviders::ContactMessage getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) const = 0;
+			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::ContactId const& contact, std::size_t n) = 0;
+			virtual std::shared_ptr<DatabaseReadonlyContactMessage> getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid) = 0;
 
-			virtual void setFirstName(openmittsu::protocol::ContactId const& contact, QString const& firstName) = 0;
-			virtual void setLastName(openmittsu::protocol::ContactId const& contact, QString const& lastName) = 0;
-			virtual void setNickName(openmittsu::protocol::ContactId const& contact, QString const& nickname) = 0;
-			virtual void setAccountStatus(openmittsu::protocol::ContactId const& contact, openmittsu::protocol::AccountStatus const& status) = 0;
-			virtual void setVerificationStatus(openmittsu::protocol::ContactId const& contact, openmittsu::protocol::ContactIdVerificationStatus const& verificationStatus) = 0;
-			virtual void setFeatureLevel(openmittsu::protocol::ContactId const& contact, openmittsu::protocol::FeatureLevel const& featureLevel) = 0;
-			virtual void setColor(openmittsu::protocol::ContactId const& contact, int color) = 0;
+			virtual void setContactFirstName(openmittsu::protocol::ContactId const& contact, QString const& firstName) = 0;
+			virtual void setContactLastName(openmittsu::protocol::ContactId const& contact, QString const& lastName) = 0;
+			virtual void setContactNickName(openmittsu::protocol::ContactId const& contact, QString const& nickname) = 0;
+			virtual void setContactAccountStatus(openmittsu::protocol::ContactId const& contact, openmittsu::protocol::AccountStatus const& status) = 0;
+			virtual void setContactVerificationStatus(openmittsu::protocol::ContactId const& contact, openmittsu::protocol::ContactIdVerificationStatus const& verificationStatus) = 0;
+			virtual void setContactFeatureLevel(openmittsu::protocol::ContactId const& contact, openmittsu::protocol::FeatureLevel const& featureLevel) = 0;
+			virtual void setContactColor(openmittsu::protocol::ContactId const& contact, int color) = 0;
 
 			// Group Data
-			virtual QString getGroupTitle(openmittsu::protocol::GroupId const& group) const = 0;
-			virtual QString getGroupDescription(openmittsu::protocol::GroupId const& group) const = 0;
-			virtual bool getGroupHasImage(openmittsu::protocol::GroupId const& group) const = 0;
-			virtual openmittsu::database::MediaFileItem getGroupImage(openmittsu::protocol::GroupId const& group) const = 0;
-			virtual bool getGroupIsAwaitingSync(openmittsu::protocol::GroupId const& group) const = 0;
+			virtual openmittsu::database::GroupData getGroupData(openmittsu::protocol::GroupId const& group, bool withDescription) const = 0;
+			virtual openmittsu::database::GroupToGroupDataMap getGroupDataAll(bool withDescription) const = 0;
 			virtual int getGroupCount() const = 0;
-			virtual int getGroupMessageCount(openmittsu::protocol::GroupId const& group) const = 0;
+			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const = 0;
 
-			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::GroupId const& group, std::size_t n) const = 0;
+			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::GroupId const& group, std::size_t n) = 0;
+			virtual std::shared_ptr<DatabaseReadonlyGroupMessage> getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) = 0;
 
-			virtual void setGroupTitle(openmittsu::protocol::GroupId const& group, QString const& newTitle) = 0;
-			virtual void setGroupImage(openmittsu::protocol::GroupId const& group, QByteArray const& newImage) = 0;
-			virtual void setGroupMembers(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& newMembers) = 0;
+			// Mass Data, checks
+			virtual std::shared_ptr<openmittsu::backup::IdentityBackup> getBackup() const = 0;
+			virtual QSet<openmittsu::protocol::ContactId> getContactsRequiringFeatureLevelCheck(int maximalAgeInSeconds) const = 0;
+			virtual QSet<openmittsu::protocol::ContactId> getContactsRequiringAccountStatusCheck(int maximalAgeInSeconds) const = 0;
+			virtual void setContactAccountStatusBatch(openmittsu::database::ContactToAccountStatusMap const& status) = 0;
+			virtual void setContactFeatureLevelBatch(openmittsu::database::ContactToFeatureLevelMap const& featureLevels) = 0;
+			virtual openmittsu::database::GroupToTitleMap getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const = 0;
+
+			// Options
+			virtual openmittsu::database::OptionNameToValueMap getOptions() = 0;
+			virtual void setOptions(openmittsu::database::OptionNameToValueMap const& options) = 0;
 		signals:
 			void contactChanged(openmittsu::protocol::ContactId const& identity);
 			void groupChanged(openmittsu::protocol::GroupId const& changedGroupId);
@@ -152,6 +181,7 @@ namespace openmittsu {
 			void haveQueuedMessages();
 			void contactStartedTyping(openmittsu::protocol::ContactId const& identity);
 			void contactStoppedTyping(openmittsu::protocol::ContactId const& identity);
+			void optionsChanged();
 		};
 	}
 }

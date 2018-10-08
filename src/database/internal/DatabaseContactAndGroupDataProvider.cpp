@@ -11,6 +11,7 @@
 #include "src/protocol/ContactIdList.h"
 
 #include "src/utility/Logging.h"
+#include "src/utility/MakeUnique.h"
 #include "src/utility/QObjectConnectionMacro.h"
 
 namespace openmittsu {
@@ -82,40 +83,7 @@ namespace openmittsu {
 			}
 
 			int DatabaseContactAndGroupDataProvider::getGroupCount() const {
-				return openmittsu::database::DatabaseUtilities::countQuery(m_database, QStringLiteral("groups"));
-			}
-
-			int DatabaseContactAndGroupDataProvider::getGroupMessageCount(openmittsu::protocol::GroupId const& group) const {
-				return openmittsu::database::DatabaseGroupMessage::getGroupMessageCount(m_database, group);
-			}
-
-			QString DatabaseContactAndGroupDataProvider::getGroupTitle(openmittsu::protocol::GroupId const& group) const {
-				return queryField(group, QStringLiteral("groupname")).toString();
-			}
-
-			QString DatabaseContactAndGroupDataProvider::getGroupDescription(openmittsu::protocol::GroupId const& group) const {
-				QSet<openmittsu::protocol::ContactId> const groupMembers = this->getGroupMembers(group, false);
-				QString result;
-				QSet<openmittsu::protocol::ContactId>::const_iterator it = groupMembers.constBegin();
-				QSet<openmittsu::protocol::ContactId>::const_iterator end = groupMembers.constEnd();
-				for (; it != end; ++it) {
-					if (!result.isEmpty()) {
-						result.append(QStringLiteral(", "));
-					}
-
-					result.append(this->getNickName(*it));
-				}
-
-				return result;
-			}
-
-			bool DatabaseContactAndGroupDataProvider::getGroupHasImage(openmittsu::protocol::GroupId const& group) const {
-				QVariant const result = queryField(group, QStringLiteral("avatar_uuid"));
-				if (result.isNull() || result.toString().isEmpty()) {
-					return false;
-				}
-
-				return true;
+				return openmittsu::database::internal::DatabaseUtilities::countQuery(m_database, QStringLiteral("groups"));
 			}
 
 			openmittsu::database::MediaFileItem DatabaseContactAndGroupDataProvider::getGroupImage(openmittsu::protocol::GroupId const& group) const {
@@ -156,34 +124,56 @@ namespace openmittsu {
 				return queryField(group, QStringLiteral("is_awaiting_sync")).toBool();
 			}
 
-			void DatabaseContactAndGroupDataProvider::addGroup(openmittsu::protocol::GroupId const& group, QString const& name, openmittsu::protocol::MessageTime const& createdAt, QSet<openmittsu::protocol::ContactId> const& members, bool isDeleted, bool isAwaitingSync) {
-				openmittsu::protocol::GroupStatus const groupStatus = this->getGroupStatus(group);
-				if ((groupStatus == openmittsu::protocol::GroupStatus::DELETED) || (groupStatus == openmittsu::protocol::GroupStatus::TEMPORARY) || (groupStatus == openmittsu::protocol::GroupStatus::KNOWN)) {
-					setGroupMembers(group, members);
-					setFields(group, { {QStringLiteral("is_awaiting_sync"), isAwaitingSync} });
-				} else {
-					openmittsu::protocol::ContactId const ourId = m_database->getSelfContact();
-					bool containsUs = members.contains(ourId);
-					QString const memberString = openmittsu::protocol::ContactIdList(members).toString();
-					int const isDeletedInt = (containsUs && (!isDeleted)) ? 0 : 1;
+			void DatabaseContactAndGroupDataProvider::addGroup(QVector<openmittsu::database::NewGroupData> const& newGroupData) {
+				auto it = newGroupData.constBegin();
+				auto const end = newGroupData.constEnd();
 
-					QSqlQuery query(m_database->getQueryObject());
-					query.prepare(QStringLiteral("INSERT INTO `groups` (`id`, `creator`, `groupname`, `created_at`, `members`, `avatar_uuid`, `is_deleted`, `is_awaiting_sync`) VALUES "
-												 "(:groupId, :groupCreator, :groupName, :createdAt, :members, :avatarUuid, :isDeleted, :isAwaitingSync);"));
-					query.bindValue(QStringLiteral(":groupId"), QVariant(group.groupIdWithoutOwnerToQString()));
-					query.bindValue(QStringLiteral(":groupCreator"), QVariant(group.getOwner().toQString()));
-					query.bindValue(QStringLiteral(":groupName"), QVariant(name));
-					query.bindValue(QStringLiteral(":createdAt"), QVariant(createdAt.getMessageTimeMSecs()));
-					query.bindValue(QStringLiteral(":members"), QVariant(memberString));
-					query.bindValue(QStringLiteral(":avatarUuid"), QVariant(""));
-					query.bindValue(QStringLiteral(":isDeleted"), QVariant(isDeletedInt));
-					query.bindValue(QStringLiteral(":isAwaitingSync"), QVariant(isAwaitingSync));
+				while (it != end) {
+					openmittsu::protocol::GroupStatus const groupStatus = this->getGroupStatus(it->id);
+					if ((groupStatus == openmittsu::protocol::GroupStatus::DELETED) || (groupStatus == openmittsu::protocol::GroupStatus::TEMPORARY) || (groupStatus == openmittsu::protocol::GroupStatus::KNOWN)) {
+						openmittsu::protocol::ContactId const ourId = m_database->getSelfContact();
+						bool containsUs = it->members.contains(ourId);
+						QString const memberString = openmittsu::protocol::ContactIdList(it->members).toString();
+						int const isDeletedInt = (containsUs && (!it->isDeleted)) ? 0 : 1;
 
-					if (!query.exec()) {
-						throw openmittsu::exceptions::InternalErrorException() << "Could not insert group into 'groups'. Query error: " << query.lastError().text().toStdString();
+						QSqlQuery query(m_database->getQueryObject());
+						query.prepare(QStringLiteral("UPDATE `groups` SET `groupname` = :groupName, `members` = :members, `is_deleted` = :isDeleted, `is_awaiting_sync` = :isAwaitingSync WHERE `id` = :groupId AND `creator` = :groupCreator;"));
+						query.bindValue(QStringLiteral(":groupId"), QVariant(it->id.groupIdWithoutOwnerToQString()));
+						query.bindValue(QStringLiteral(":groupCreator"), QVariant(it->id.getOwner().toQString()));
+						query.bindValue(QStringLiteral(":groupName"), QVariant(it->name));
+						query.bindValue(QStringLiteral(":members"), QVariant(memberString));
+						query.bindValue(QStringLiteral(":isDeleted"), QVariant(isDeletedInt));
+						query.bindValue(QStringLiteral(":isAwaitingSync"), QVariant(it->isAwaitingSync));
+
+						if (!query.exec()) {
+							throw openmittsu::exceptions::InternalErrorException() << "Could not update group data for group ID \"" << it->id.toString() << "\". Query error: " << query.lastError().text().toStdString();
+						}
+
+						m_database->announceGroupChanged(it->id);
+					} else {
+						openmittsu::protocol::ContactId const ourId = m_database->getSelfContact();
+						bool containsUs = it->members.contains(ourId);
+						QString const memberString = openmittsu::protocol::ContactIdList(it->members).toString();
+						int const isDeletedInt = (containsUs && (!it->isDeleted)) ? 0 : 1;
+
+						QSqlQuery query(m_database->getQueryObject());
+						query.prepare(QStringLiteral("INSERT INTO `groups` (`id`, `creator`, `groupname`, `created_at`, `members`, `avatar_uuid`, `is_deleted`, `is_awaiting_sync`) VALUES "
+													 "(:groupId, :groupCreator, :groupName, :createdAt, :members, :avatarUuid, :isDeleted, :isAwaitingSync);"));
+						query.bindValue(QStringLiteral(":groupId"), QVariant(it->id.groupIdWithoutOwnerToQString()));
+						query.bindValue(QStringLiteral(":groupCreator"), QVariant(it->id.getOwner().toQString()));
+						query.bindValue(QStringLiteral(":groupName"), QVariant(it->name));
+						query.bindValue(QStringLiteral(":createdAt"), QVariant(it->createdAt.getMessageTimeMSecs()));
+						query.bindValue(QStringLiteral(":members"), QVariant(memberString));
+						query.bindValue(QStringLiteral(":avatarUuid"), QVariant(""));
+						query.bindValue(QStringLiteral(":isDeleted"), QVariant(isDeletedInt));
+						query.bindValue(QStringLiteral(":isAwaitingSync"), QVariant(it->isAwaitingSync));
+
+						if (!query.exec()) {
+							throw openmittsu::exceptions::InternalErrorException() << "Could not insert group into 'groups'. Query error: " << query.lastError().text().toStdString();
+						}
+
+						m_database->announceGroupChanged(it->id);
 					}
-
-					m_database->announceGroupChanged(group);
 				}
 			}
 
@@ -221,10 +211,6 @@ namespace openmittsu {
 				setFields(group, { {QStringLiteral("members"), memberString}, {QStringLiteral("is_deleted"), isDeleted} });
 
 				m_database->announceGroupChanged(group);
-			}
-
-			openmittsu::dataproviders::BackedGroup DatabaseContactAndGroupDataProvider::getGroup(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::MessageCenter& messageCenter) {
-				return openmittsu::dataproviders::BackedGroup(group, *this, *this, messageCenter);
 			}
 
 			QSet<openmittsu::protocol::GroupId> DatabaseContactAndGroupDataProvider::getKnownGroups() const {
@@ -268,12 +254,12 @@ namespace openmittsu {
 				}
 			}
 
-			QSet<openmittsu::protocol::GroupId> DatabaseContactAndGroupDataProvider::getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const {
+			QHash<openmittsu::protocol::GroupId, QString> DatabaseContactAndGroupDataProvider::getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const {
 				QSqlQuery query(m_database->getQueryObject());
-				query.prepare(QStringLiteral("SELECT `id`, `creator`, `members` FROM `groups` WHERE `is_deleted` = 0"));
+				query.prepare(QStringLiteral("SELECT `id`, `creator`, `groupname`, `members` FROM `groups` WHERE `is_deleted` = 0"));
 
 				if (query.exec() && query.isSelect()) {
-					QSet<openmittsu::protocol::GroupId> result;
+					QHash<openmittsu::protocol::GroupId, QString> result;
 					QString const keyMember = identity.toQString();
 
 					while (query.next()) {
@@ -282,13 +268,14 @@ namespace openmittsu {
 							QString const groupId = query.value(QStringLiteral("id")).toString();
 							openmittsu::protocol::ContactId const creator(query.value(QStringLiteral("creator")).toString());
 							openmittsu::protocol::GroupId const group(creator, groupId);
+							QString const title(query.value(QStringLiteral("groupname")).toString());
 
-							result.insert(group);
+							result.insert(group, title);
 						}
 					}
 					return result;
 				} else {
-					throw openmittsu::exceptions::InternalErrorException() << "Could not execute group enumeration query for table groups for key memver " << identity.toString() << ". Query error: " << query.lastError().text().toStdString();
+					throw openmittsu::exceptions::InternalErrorException() << "Could not execute group enumeration query for table groups for key member " << identity.toString() << ". Query error: " << query.lastError().text().toStdString();
 				}
 			}
 
@@ -332,7 +319,7 @@ namespace openmittsu {
 				if (fieldsAndValues.size() > 0) {
 					QSqlQuery query(m_database->getQueryObject());
 
-					openmittsu::database::DatabaseUtilities::prepareSetFieldsUpdateQuery(query, QStringLiteral("UPDATE `groups` SET %1 WHERE `id` = :groupId AND `creator` = :groupCreator;"), fieldsAndValues);
+					openmittsu::database::internal::DatabaseUtilities::prepareSetFieldsUpdateQuery(query, QStringLiteral("UPDATE `groups` SET %1 WHERE `id` = :groupId AND `creator` = :groupCreator;"), fieldsAndValues);
 					query.bindValue(QStringLiteral(":groupId"), QVariant(group.groupIdWithoutOwnerToQString()));
 					query.bindValue(QStringLiteral(":groupCreator"), QVariant(group.getOwner().toQString()));
 
@@ -352,7 +339,7 @@ namespace openmittsu {
 				if (fieldsAndValues.size() > 0) {
 					QSqlQuery query(m_database->getQueryObject());
 
-					openmittsu::database::DatabaseUtilities::prepareSetFieldsUpdateQuery(query, QStringLiteral("UPDATE `contacts` SET %1 WHERE `identity` = :identity;"), fieldsAndValues);
+					openmittsu::database::internal::DatabaseUtilities::prepareSetFieldsUpdateQuery(query, QStringLiteral("UPDATE `contacts` SET %1 WHERE `identity` = :identity;"), fieldsAndValues);
 					query.bindValue(QStringLiteral(":identity"), QVariant(contact.toQString()));
 
 					if (!query.exec()) {
@@ -386,17 +373,6 @@ namespace openmittsu {
 				return std::make_shared<openmittsu::database::internal::DatabaseGroupMessageCursor>(m_database, group);
 			}
 
-			openmittsu::dataproviders::BackedGroupMessage DatabaseContactAndGroupDataProvider::getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid, openmittsu::dataproviders::MessageCenter& messageCenter) {
-				openmittsu::database::internal::DatabaseGroupMessageCursor cursor(m_database, group);
-				if (!cursor.seekByUuid(uuid)) {
-					throw openmittsu::exceptions::InternalErrorException() << "Could not find message with UUID " << uuid.toStdString() << " for group " << group.toString() << ".";
-				}
-				auto message = cursor.getMessage();
-
-				return openmittsu::dataproviders::BackedGroupMessage(message, getContact(message->getSender(), messageCenter), messageCenter);
-			}
-
-
 			// Contacts
 			bool DatabaseContactAndGroupDataProvider::hasContact(openmittsu::protocol::ContactId const& contact) const {
 				QSqlQuery query(m_database->getQueryObject());
@@ -411,36 +387,8 @@ namespace openmittsu {
 				return query.next();
 			}
 
-			openmittsu::dataproviders::BackedContact DatabaseContactAndGroupDataProvider::getSelfContact(openmittsu::dataproviders::MessageCenter& messageCenter) {
-				return getContact(m_database->getSelfContact(), messageCenter);
-			}
-
 			openmittsu::crypto::PublicKey DatabaseContactAndGroupDataProvider::getPublicKey(openmittsu::protocol::ContactId const& contact) const {
 				return openmittsu::crypto::PublicKey::fromHexString(queryField(contact, QStringLiteral("publickey")).toString());
-			}
-
-			QString DatabaseContactAndGroupDataProvider::getFirstName(openmittsu::protocol::ContactId const& contact) const {
-				return queryField(contact, QStringLiteral("firstname")).toString();
-			}
-
-			QString DatabaseContactAndGroupDataProvider::getLastName(openmittsu::protocol::ContactId const& contact) const {
-				return queryField(contact, QStringLiteral("lastname")).toString();
-			}
-
-			QString DatabaseContactAndGroupDataProvider::getNickName(openmittsu::protocol::ContactId const& contact) const {
-				return queryField(contact, QStringLiteral("nick_name")).toString();
-			}
-
-			openmittsu::protocol::AccountStatus DatabaseContactAndGroupDataProvider::getAccountStatus(openmittsu::protocol::ContactId const& contact) const {
-				return openmittsu::protocol::AccountStatusHelper::fromInt(queryField(contact, QStringLiteral("status")).toInt());
-			}
-
-			openmittsu::protocol::ContactIdVerificationStatus DatabaseContactAndGroupDataProvider::getVerificationStatus(openmittsu::protocol::ContactId const& contact) const {
-				return openmittsu::protocol::ContactIdVerificationStatusHelper::fromQString(queryField(contact, QStringLiteral("verification")).toString());
-			}
-
-			openmittsu::protocol::FeatureLevel DatabaseContactAndGroupDataProvider::getFeatureLevel(openmittsu::protocol::ContactId const& contact) const {
-				return openmittsu::protocol::FeatureLevelHelper::fromInt(queryField(contact, QStringLiteral("feature_level")).toInt());
 			}
 
 			openmittsu::protocol::ContactStatus DatabaseContactAndGroupDataProvider::getContactStatus(openmittsu::protocol::ContactId const& contact) const {
@@ -451,49 +399,54 @@ namespace openmittsu {
 				}
 			}
 
-			int DatabaseContactAndGroupDataProvider::getColor(openmittsu::protocol::ContactId const& contact) const {
-				return queryField(contact, QStringLiteral("color")).toInt();
-			}
-
 			int DatabaseContactAndGroupDataProvider::getContactCount() const {
 				return openmittsu::database::internal::DatabaseUtilities::countQuery(m_database, QStringLiteral("contacts"));
 			}
 
-			int DatabaseContactAndGroupDataProvider::getContactMessageCount(openmittsu::protocol::ContactId const& contact) const {
-				return openmittsu::database::internal::DatabaseContactMessage::getContactMessageCount(m_database, contact);
-			}
+			void DatabaseContactAndGroupDataProvider::addContact(QVector<openmittsu::database::NewContactData> const& newContactData) {
+				auto it = newContactData.constBegin();
+				auto const end = newContactData.constEnd();
 
-			void DatabaseContactAndGroupDataProvider::addContact(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& publicKey) {
-				addContact(contact, publicKey, openmittsu::protocol::ContactIdVerificationStatus::VERIFICATION_STATUS_UNVERIFIED, QStringLiteral(""), QStringLiteral(""), QStringLiteral(""), 0);
-			}
+				while (it != end) {
+					openmittsu::protocol::ContactStatus const contactStatus = this->getContactStatus(it->id);
+					if ((contactStatus == openmittsu::protocol::ContactStatus::DELETED) || (contactStatus == openmittsu::protocol::ContactStatus::KNOWN)) {
+						if (getPublicKey(it->id) != it->publicKey) {
+							throw openmittsu::exceptions::InternalErrorException() << "Can not create contact, inconsistent data: Contact " << it->id.toString() << " already exists with public key " << getPublicKey(it->id).toString() << ", which is different from the new public key " << it->publicKey.toString() << "!";
+						}
 
-			void DatabaseContactAndGroupDataProvider::addContact(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& publicKey, openmittsu::protocol::ContactIdVerificationStatus const& verificationStatus, QString const& firstName, QString const& lastName, QString const& nickName, int color) {
-				openmittsu::protocol::ContactStatus const contactStatus = this->getContactStatus(contact);
-				if ((contactStatus == openmittsu::protocol::ContactStatus::DELETED) || (contactStatus == openmittsu::protocol::ContactStatus::KNOWN)) {
-					if (getPublicKey(contact) != publicKey) {
-						throw openmittsu::exceptions::InternalErrorException() << "Can not create contact, inconsistent data: Contact " << contact.toString() << " already exists with public key " << getPublicKey(contact).toString() << ", which is different from the new public key " << publicKey.toString() << "!";
-					}
-					setVerificationStatus(contact, verificationStatus);
-					setFirstName(contact, firstName);
-					setLastName(contact, lastName);
-					setNickName(contact, nickName);
-					setColor(contact, color);
-				} else {
-					QSqlQuery query(m_database->getQueryObject());
-					query.prepare(QStringLiteral("INSERT INTO `contacts` (`identity`, `publickey`, `verification`, `acid`, `tacid`, `firstname`, `lastname`, `nick_name`, `color`, `status`, `status_last_check`, `feature_level`, `feature_level_last_check`) VALUES "
-												 "(:identity, :publickey, :verificationStatus, '', '', :firstName, :lastName, :nickName, :color, :status, -1, :featureLevel, -1);"));
-					query.bindValue(QStringLiteral(":identity"), QVariant(contact.toQString()));
-					query.bindValue(QStringLiteral(":publickey"), QVariant(QString(publicKey.getPublicKey().toHex())));
-					query.bindValue(QStringLiteral(":verificationStatus"), QVariant(openmittsu::protocol::ContactIdVerificationStatusHelper::toQString(verificationStatus)));
-					query.bindValue(QStringLiteral(":firstName"), QVariant(firstName));
-					query.bindValue(QStringLiteral(":lastName"), QVariant(lastName));
-					query.bindValue(QStringLiteral(":nickName"), QVariant(nickName));
-					query.bindValue(QStringLiteral(":color"), QVariant(color));
-					query.bindValue(QStringLiteral(":status"), QVariant(openmittsu::protocol::AccountStatusHelper::toInt(openmittsu::protocol::AccountStatus::STATUS_UNKNOWN)));
-					query.bindValue(QStringLiteral(":featureLevel"), QVariant(openmittsu::protocol::FeatureLevelHelper::toInt(openmittsu::protocol::FeatureLevel::LEVEL_UNKNOW)));
+						QSqlQuery query(m_database->getQueryObject());
+						query.prepare(QStringLiteral("UPDATE `contacts` SET `verification` = :verificationStatus, `firstname` = :firstName, `lastname` = :lastName, `nick_name` = :nickName, `color` = :color WHERE `identity` = :identity;"));
+						query.bindValue(QStringLiteral(":identity"), QVariant(it->id.toQString()));
+						query.bindValue(QStringLiteral(":verificationStatus"), QVariant(openmittsu::protocol::ContactIdVerificationStatusHelper::toQString(it->verificationStatus)));
+						query.bindValue(QStringLiteral(":firstName"), QVariant(it->firstName));
+						query.bindValue(QStringLiteral(":lastName"), QVariant(it->lastName));
+						query.bindValue(QStringLiteral(":nickName"), QVariant(it->nickName));
+						query.bindValue(QStringLiteral(":color"), QVariant(it->color));
 
-					if (!query.exec()) {
-						throw openmittsu::exceptions::InternalErrorException() << "Could not insert contact into 'contacts'. Query error: " << query.lastError().text().toStdString();
+						if (!query.exec()) {
+							throw openmittsu::exceptions::InternalErrorException() << "Could not update contact data for contact ID \"" << it->id.toString() << "\". Query error: " << query.lastError().text().toStdString();
+						}
+
+						m_database->announceContactChanged(it->id);
+					} else {
+						QSqlQuery query(m_database->getQueryObject());
+						query.prepare(QStringLiteral("INSERT INTO `contacts` (`identity`, `publickey`, `verification`, `acid`, `tacid`, `firstname`, `lastname`, `nick_name`, `color`, `status`, `status_last_check`, `feature_level`, `feature_level_last_check`) VALUES "
+													 "(:identity, :publickey, :verificationStatus, '', '', :firstName, :lastName, :nickName, :color, :status, -1, :featureLevel, -1);"));
+						query.bindValue(QStringLiteral(":identity"), QVariant(it->id.toQString()));
+						query.bindValue(QStringLiteral(":publickey"), QVariant(QString(it->publicKey.getPublicKey().toHex())));
+						query.bindValue(QStringLiteral(":verificationStatus"), QVariant(openmittsu::protocol::ContactIdVerificationStatusHelper::toQString(it->verificationStatus)));
+						query.bindValue(QStringLiteral(":firstName"), QVariant(it->firstName));
+						query.bindValue(QStringLiteral(":lastName"), QVariant(it->lastName));
+						query.bindValue(QStringLiteral(":nickName"), QVariant(it->nickName));
+						query.bindValue(QStringLiteral(":color"), QVariant(it->color));
+						query.bindValue(QStringLiteral(":status"), QVariant(openmittsu::protocol::AccountStatusHelper::toInt(openmittsu::protocol::AccountStatus::STATUS_UNKNOWN)));
+						query.bindValue(QStringLiteral(":featureLevel"), QVariant(openmittsu::protocol::FeatureLevelHelper::toInt(openmittsu::protocol::FeatureLevel::LEVEL_UNKNOW)));
+
+						if (!query.exec()) {
+							throw openmittsu::exceptions::InternalErrorException() << "Could not insert contact into 'contacts'. Query error: " << query.lastError().text().toStdString();
+						}
+
+						m_database->announceContactChanged(it->id);
 					}
 				}
 			}
@@ -554,10 +507,6 @@ namespace openmittsu {
 
 				// TODO: Fixme. This might be broken
 				m_database->announceContactChanged(m_database->getSelfContact());
-			}
-
-			openmittsu::dataproviders::BackedContact DatabaseContactAndGroupDataProvider::getContact(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::MessageCenter& messageCenter) {
-				return openmittsu::dataproviders::BackedContact(contact, getPublicKey(contact), *this, messageCenter);
 			}
 
 			QSet<openmittsu::protocol::ContactId> DatabaseContactAndGroupDataProvider::getKnownContacts() const {
@@ -628,6 +577,23 @@ namespace openmittsu {
 				}
 			}
 
+			QString DatabaseContactAndGroupDataProvider::buildNickname(QString const& nickname, QString const& firstName, QString const& lastName, openmittsu::protocol::ContactId const& contact) const {
+				QString result = nickname;
+				if (nickname.isNull() || nickname.isEmpty()) {
+					if (!firstName.isEmpty() && !lastName.isEmpty()) {
+						result = QString(firstName).append(" ").append(lastName);
+					} else if (!firstName.isEmpty() && lastName.isEmpty()) {
+						result = firstName;
+					} else if (firstName.isEmpty() && !lastName.isEmpty()) {
+						result = lastName;
+					} else {
+						result = contact.toQString();
+					}
+				}
+
+				return result;
+			}
+
 			QHash<openmittsu::protocol::ContactId, QString> DatabaseContactAndGroupDataProvider::getKnownContactsWithNicknames(bool withSelfContactId) const {
 				QHash<openmittsu::protocol::ContactId, QString> result;
 				openmittsu::protocol::ContactId const selfContact = m_database->getSelfContact();
@@ -638,16 +604,7 @@ namespace openmittsu {
 				if (query.exec() && query.isSelect()) {
 					while (query.next()) {
 						openmittsu::protocol::ContactId const contactId(query.value(QStringLiteral("identity")).toString());
-						QString nickname(query.value(QStringLiteral("nick_name")).toString());
-						if (nickname.isNull() || nickname.isEmpty()) {
-							QString const firstname = query.value(QStringLiteral("firstname")).toString();
-							QString const lastname = query.value(QStringLiteral("lastname")).toString();
-							if (!firstname.isEmpty() || !lastname.isEmpty()) {
-								nickname = QString(firstname).append(" ").append(lastname);
-							} else {
-								nickname = contactId.toQString();
-							}
-						}
+						QString const nickname = buildNickname(query.value(QStringLiteral("nick_name")).toString(), query.value(QStringLiteral("firstname")).toString(), query.value(QStringLiteral("lastname")).toString(), contactId);
 
 						if ((!withSelfContactId) && (selfContact == contactId)) {
 							continue;
@@ -674,15 +631,206 @@ namespace openmittsu {
 				return std::make_shared<openmittsu::database::internal::DatabaseContactMessageCursor>(m_database, contact);
 			}
 
-			openmittsu::dataproviders::BackedContactMessage DatabaseContactAndGroupDataProvider::getContactMessage(openmittsu::protocol::ContactId const& contact, QString const& uuid, openmittsu::dataproviders::MessageCenter& messageCenter) {
-				openmittsu::database::internal::DatabaseContactMessageCursor cursor(m_database, contact);
-				if (!cursor.seekByUuid(uuid)) {
-					throw openmittsu::exceptions::InternalErrorException() << "Could not find message with UUID " << uuid.toStdString() << " for contact " << contact.toString() << ".";
+			QString DatabaseContactAndGroupDataProvider::getGroupDescription(QString const& memberField) const {
+				QSet<openmittsu::protocol::ContactId> groupMembers = openmittsu::protocol::ContactIdList::fromString(memberField).getContactIds();
+				QHash<openmittsu::protocol::ContactId, QString> nicknames = getNicknames(groupMembers);
+
+				QString result;
+				auto it = groupMembers.constBegin();
+				auto end = groupMembers.constEnd();
+				for (; it != end; ++it) {
+					if (!result.isEmpty()) {
+						result.append(QStringLiteral(", "));
+					}
+
+					auto const nicknameIt = nicknames.constFind(*it);
+					if (nicknameIt == nicknames.constEnd()) {
+						throw openmittsu::exceptions::InternalErrorException() << "Could not build group description, missing contact nickname from set?!";
+					}
+
+					result.append(nicknameIt.value());
 				}
 
-				auto message = cursor.getMessage();
-				return openmittsu::dataproviders::BackedContactMessage(message, this->getContact(message->getSender(), messageCenter), messageCenter);
+				return result;
 			}
+
+			QHash<openmittsu::protocol::ContactId, QString> DatabaseContactAndGroupDataProvider::getNicknames(QSet<openmittsu::protocol::ContactId> const& contacts) const {
+				QHash<openmittsu::protocol::ContactId, QString> result;
+				if (contacts.size() == 0) {
+					return result;
+				}
+
+				QSqlQuery query(m_database->getQueryObject());
+
+				query.prepare(QStringLiteral("SELECT `firstname`, `lastname`, `nick_name`, `identity` FROM `contacts`;"));
+
+				if (!query.exec() || !query.isSelect()) {
+					throw openmittsu::exceptions::InternalErrorException() << "Could not execute contact nicknames query. Query error: " << query.lastError().text().toStdString();
+				}
+
+				while (query.next()) {
+					openmittsu::protocol::ContactId const identity = openmittsu::protocol::ContactId(query.value(QStringLiteral("identity")).toString());
+					if (contacts.contains(identity)) {
+						QString const firstName = query.value(QStringLiteral("firstname")).toString();
+						QString const lastName = query.value(QStringLiteral("lastname")).toString();
+						QString const nickName = buildNickname(query.value(QStringLiteral("lastname")).toString(), firstName, lastName, identity);
+						result.insert(identity, nickName);
+					}
+				}
+
+				if (result.size() != contacts.size()) {
+					throw openmittsu::exceptions::InternalErrorException() << "Fetching of contact nicknames failed, the result set has size " << result.size() << ", but the query set has size " << contacts.size() << "!";
+				}
+
+				return result;
+			}
+
+			openmittsu::database::ContactData DatabaseContactAndGroupDataProvider::getContactData(openmittsu::protocol::ContactId const& contact, bool fetchMessageCount) const {
+				QSqlQuery query(m_database->getQueryObject());
+
+				query.prepare(QStringLiteral("SELECT `publickey`, `firstname`, `lastname`, `nick_name`, `status`, `verification`, `feature_level`, `color` FROM `contacts` WHERE `identity` = :identity;"));
+				query.bindValue(QStringLiteral(":identity"), QVariant(contact.toQString()));
+
+				if (!query.exec() || !query.isSelect()) {
+					throw openmittsu::exceptions::InternalErrorException() << "Could not execute contact data query for ID \"" << contact.toString() << "\". Query error: " << query.lastError().text().toStdString();
+				} else if (!query.next()) {
+					throw openmittsu::exceptions::InternalErrorException() << "No contact with identity \"" << contact.toString() << "\" exists, can not manipulate.";
+				}
+
+				ContactData result;
+				result.publicKey = openmittsu::crypto::PublicKey::fromHexString(query.value(QStringLiteral("publickey")).toString());
+				result.firstName = query.value(QStringLiteral("firstname")).toString();
+				result.lastName = query.value(QStringLiteral("lastname")).toString();
+				result.nickName = buildNickname(query.value(QStringLiteral("lastname")).toString(), result.firstName, result.lastName, contact);
+				result.accountStatus = openmittsu::protocol::AccountStatusHelper::fromInt(query.value(QStringLiteral("status")).toInt());
+				result.verificationStatus = openmittsu::protocol::ContactIdVerificationStatusHelper::fromQString(query.value(QStringLiteral("verification")).toString());
+				result.featureLevel = openmittsu::protocol::FeatureLevelHelper::fromInt(query.value(QStringLiteral("feature_level")).toInt());
+				result.color = query.value(QStringLiteral("color")).toInt();
+				if (fetchMessageCount) {
+					result.messageCount = openmittsu::database::internal::DatabaseContactMessage::getContactMessageCount(m_database, contact);
+				} else {
+					result.messageCount = -1;
+				}
+
+				return result;
+			}
+
+			QHash<openmittsu::protocol::ContactId, openmittsu::database::ContactData> DatabaseContactAndGroupDataProvider::getContactDataAll(bool fetchMessageCount) const {
+				QSqlQuery query(m_database->getQueryObject());
+
+				query.prepare(QStringLiteral("SELECT `identity`, `publickey`, `firstname`, `lastname`, `nick_name`, `status`, `verification`, `feature_level`, `color` FROM `contacts`;"));
+
+				if (!query.exec() || !query.isSelect()) {
+					throw openmittsu::exceptions::InternalErrorException() << "Could not execute contact data enumeration query. Query error: " << query.lastError().text().toStdString();
+				}
+
+				QHash<openmittsu::protocol::ContactId, openmittsu::database::ContactData> result;
+				while (query.next()) {
+					ContactData data;
+					openmittsu::protocol::ContactId const identity = openmittsu::protocol::ContactId(query.value(QStringLiteral("identity")).toString());
+					data.publicKey = openmittsu::crypto::PublicKey::fromHexString(query.value(QStringLiteral("publickey")).toString());
+					data.firstName = query.value(QStringLiteral("firstname")).toString();
+					data.lastName = query.value(QStringLiteral("lastname")).toString();
+					data.nickName = buildNickname(query.value(QStringLiteral("lastname")).toString(), data.firstName, data.lastName, identity);
+					data.accountStatus = openmittsu::protocol::AccountStatusHelper::fromInt(query.value(QStringLiteral("status")).toInt());
+					data.verificationStatus = openmittsu::protocol::ContactIdVerificationStatusHelper::fromQString(query.value(QStringLiteral("verification")).toString());
+					data.featureLevel = openmittsu::protocol::FeatureLevelHelper::fromInt(query.value(QStringLiteral("feature_level")).toInt());
+					data.color = query.value(QStringLiteral("color")).toInt();
+					if (fetchMessageCount) {
+						data.messageCount = openmittsu::database::internal::DatabaseContactMessage::getContactMessageCount(m_database, identity);
+					} else {
+						data.messageCount = -1;
+					}
+
+					result.insert(identity, data);
+				}
+
+				return result;
+			}
+
+			openmittsu::database::GroupData DatabaseContactAndGroupDataProvider::getGroupData(openmittsu::protocol::GroupId const& group, bool withDescription) const {
+				QSqlQuery query(m_database->getQueryObject());
+
+				query.prepare(QStringLiteral("SELECT `groupname`, `members`, `avatar_uuid`, `is_awaiting_sync` FROM `groups` WHERE `id` = :groupId AND `creator` = :groupCreator;"));
+				query.bindValue(QStringLiteral(":groupId"), QVariant(group.groupIdWithoutOwnerToQString()));
+				query.bindValue(QStringLiteral(":groupCreator"), QVariant(group.getOwner().toQString()));
+
+				if (!query.exec() || !query.isSelect()) {
+					throw openmittsu::exceptions::InternalErrorException() << "Could not execute group data query for table groups with group \"" << group.toString() << "\". Query error: " << query.lastError().text().toStdString();
+				} else if (!query.next()) {
+					throw openmittsu::exceptions::InternalErrorException() << "No group with group ID \"" << group.toString() << "\" exists, can not manipulate.";
+				}
+
+				GroupData result;
+				result.title = query.value(QStringLiteral("groupname")).toString();
+
+				QString const memberField = query.value(QStringLiteral("members")).toString();
+				if (withDescription) {
+					result.description = getGroupDescription(memberField);
+				} else {
+					result.description = QStringLiteral("");
+				}
+
+				result.members = openmittsu::protocol::ContactIdList::fromString(memberField).getContactIds();
+
+				QVariant const avatar = queryField(group, QStringLiteral("avatar_uuid"));
+				result.hasImage = !(avatar.isNull() || avatar.toString().isEmpty());
+
+				if (result.hasImage) {
+					result.image = openmittsu::database::MediaFileItem(openmittsu::database::MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE);
+				} else {
+					result.image = m_database->getMediaItem(avatar.toString());
+				}
+
+				result.isAwaitingSync = query.value(QStringLiteral("is_awaiting_sync")).toBool();
+				result.messageCount = openmittsu::database::internal::DatabaseGroupMessage::getGroupMessageCount(m_database, group);
+
+				return result;
+			}
+
+			QHash<openmittsu::protocol::GroupId, openmittsu::database::GroupData> DatabaseContactAndGroupDataProvider::getGroupDataAll(bool withDescription) const {
+				QSqlQuery query(m_database->getQueryObject());
+
+				query.prepare(QStringLiteral("SELECT `id`, `creator`, `groupname`, `members`, `avatar_uuid`, `is_awaiting_sync` FROM `groups`;"));
+
+				if (!query.exec() || !query.isSelect()) {
+					throw openmittsu::exceptions::InternalErrorException() << "Could not execute group data enumeration query for table groups. Query error: " << query.lastError().text().toStdString();
+				}
+
+				QHash<openmittsu::protocol::GroupId, openmittsu::database::GroupData> result;
+				while (query.next()) {
+					GroupData groupData;
+					openmittsu::protocol::ContactId const creator(query.value(QStringLiteral("creator")).toString());
+					openmittsu::protocol::GroupId const group(creator, query.value(QStringLiteral("id")).toString());
+
+					groupData.title = query.value(QStringLiteral("groupname")).toString();
+
+					QString const memberField = query.value(QStringLiteral("members")).toString();
+					if (withDescription) {
+						groupData.description = getGroupDescription(memberField);
+					} else {
+						groupData.description = QStringLiteral("");
+					}
+					groupData.members = openmittsu::protocol::ContactIdList::fromString(memberField).getContactIds();
+
+					QVariant const avatar = queryField(group, QStringLiteral("avatar_uuid"));
+					groupData.hasImage = !(avatar.isNull() || avatar.toString().isEmpty());
+
+					if (!groupData.hasImage) {
+						groupData.image = openmittsu::database::MediaFileItem(openmittsu::database::MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE);
+					} else {
+						groupData.image = m_database->getMediaItem(avatar.toString());
+					}
+
+					groupData.isAwaitingSync = query.value(QStringLiteral("is_awaiting_sync")).toBool();
+					groupData.messageCount = openmittsu::database::internal::DatabaseGroupMessage::getGroupMessageCount(m_database, group);
+
+					result.insert(group, groupData);
+				}
+
+				return result;
+			}
+
 		}
 	}
 }

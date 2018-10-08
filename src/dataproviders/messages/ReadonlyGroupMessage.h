@@ -18,7 +18,7 @@ namespace openmittsu {
 				virtual ~ReadonlyGroupMessage() {}
 
 				virtual openmittsu::protocol::GroupId const& getGroupId() const = 0;
-				virtual GroupMessageType getMessageType() const = 0;
+				virtual GroupMessageType const& getMessageType() const = 0;
 			};
 
 		}

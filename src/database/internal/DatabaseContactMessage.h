@@ -28,8 +28,8 @@ namespace openmittsu {
 				virtual openmittsu::utility::Location getContentAsLocation() const override;
 				virtual MediaFileItem getContentAsImage() const override;
 
-				static int getContactMessageCount(InternalDatabaseInterface* database);
-				static int getContactMessageCount(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact);
+				static int getContactMessageCount(InternalDatabaseInterface const* database);
+				static int getContactMessageCount(InternalDatabaseInterface const* database, openmittsu::protocol::ContactId const& contact);
 
 				static bool exists(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, openmittsu::protocol::MessageId const& messageId);
 				static openmittsu::protocol::MessageId insertContactMessageFromUs(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, QString const& uuid, openmittsu::protocol::MessageTime const& createdAt, openmittsu::dataproviders::messages::ContactMessageType const& type, QString const& body, bool isQueued, bool isStatusMessage, QString const& caption);

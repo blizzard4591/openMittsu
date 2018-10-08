@@ -4,6 +4,7 @@
 #include <QSet>
 #include <QWizard>
 
+#include "src/database/ContactData.h"
 #include "src/protocol/ContactId.h"
 
 #include "src/wizards/GroupCreationWizardPageInfo.h"
@@ -18,7 +19,7 @@ namespace openmittsu {
 		class GroupCreationWizard : public QWizard {
 			Q_OBJECT
 		public:
-			explicit GroupCreationWizard(QHash<openmittsu::protocol::ContactId, QString> const& knownIdentitiesWithNicknamesExcludingSelfContactId, std::unique_ptr<openmittsu::dataproviders::GroupCreationProcessor> groupCreationProcessor, QWidget* parent = nullptr);
+			explicit GroupCreationWizard(QHash<openmittsu::protocol::ContactId, openmittsu::database::ContactData> const& knownIdentitiesWithNicknamesExcludingSelfContactId, std::unique_ptr<openmittsu::dataproviders::GroupCreationProcessor> groupCreationProcessor, QWidget* parent = nullptr);
 			virtual ~GroupCreationWizard();
 		public slots:
 			void pageNextOnClick(int pageId);

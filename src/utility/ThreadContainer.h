@@ -12,7 +12,7 @@ namespace openmittsu {
 	namespace utility {
 
 		template <typename T>
-		class ThreadContainer {
+		class ThreadContainer : public QObject {
 		public:
 			ThreadContainer();
 			virtual ~ThreadContainer();

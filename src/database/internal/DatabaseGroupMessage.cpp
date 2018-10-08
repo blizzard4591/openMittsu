@@ -28,12 +28,12 @@ namespace openmittsu {
 				return m_group;
 			}
 
-			int DatabaseGroupMessage::getGroupMessageCount(InternalDatabaseInterface* database) {
-				return openmittsu::database::DatabaseUtilities::countQuery(database, QStringLiteral("group_messages"));
+			int DatabaseGroupMessage::getGroupMessageCount(InternalDatabaseInterface const* database) {
+				return openmittsu::database::internal::DatabaseUtilities::countQuery(database, QStringLiteral("group_messages"));
 			}
 
-			int DatabaseGroupMessage::getGroupMessageCount(InternalDatabaseInterface* database, openmittsu::protocol::GroupId const& group) {
-				return openmittsu::database::DatabaseUtilities::countQuery(database, QStringLiteral("group_messages"), { { QStringLiteral("group_id"), group.groupIdWithoutOwnerToQString() }, { QStringLiteral("group_creator"), group.getOwner().toQString() } });
+			int DatabaseGroupMessage::getGroupMessageCount(InternalDatabaseInterface const* database, openmittsu::protocol::GroupId const& group) {
+				return openmittsu::database::internal::DatabaseUtilities::countQuery(database, QStringLiteral("group_messages"), { { QStringLiteral("group_id"), group.groupIdWithoutOwnerToQString() }, { QStringLiteral("group_creator"), group.getOwner().toQString() } });
 			}
 
 			bool DatabaseGroupMessage::exists(InternalDatabaseInterface* database, openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId) {

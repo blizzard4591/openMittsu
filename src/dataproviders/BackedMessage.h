@@ -9,7 +9,7 @@
 #include "src/protocol/MessageId.h"
 #include "src/protocol/MessageTime.h"
 #include "src/dataproviders/BackedContact.h"
-#include "src/dataproviders/messages/UserMessage.h"
+#include "src/dataproviders/messages/ReadonlyUserMessage.h"
 #include "src/dataproviders/messages/UserMessageState.h"
 #include "src/utility/Location.h"
 
@@ -19,7 +19,7 @@ namespace openmittsu {
 		class BackedMessage : public QObject {
 			Q_OBJECT
 		public:
-			BackedMessage(QString const& uuid, BackedContact const& sender, bool isMessageFromUs, openmittsu::protocol::MessageId const& messageId);
+			BackedMessage(QString const& uuid, std::shared_ptr<BackedContact> const& sender, bool isMessageFromUs, openmittsu::protocol::MessageId const& messageId);
 			BackedMessage(BackedMessage const& other);
 			virtual ~BackedMessage();
 
@@ -28,17 +28,17 @@ namespace openmittsu {
 
 			openmittsu::protocol::MessageId const& getMessageId() const;
 
-			messages::UserMessageState getMessageState() const;
+			messages::UserMessageState const& getMessageState() const;
 
-			openmittsu::protocol::MessageTime getCreatedAt() const;
-			openmittsu::protocol::MessageTime getSentAt() const;
-			openmittsu::protocol::MessageTime getReceivedAt() const;
-			openmittsu::protocol::MessageTime getSeenAt() const;
-			openmittsu::protocol::MessageTime getModifiedAt() const;
+			openmittsu::protocol::MessageTime const& getCreatedAt() const;
+			openmittsu::protocol::MessageTime const& getSentAt() const;
+			openmittsu::protocol::MessageTime const& getReceivedAt() const;
+			openmittsu::protocol::MessageTime const& getSeenAt() const;
+			openmittsu::protocol::MessageTime const& getModifiedAt() const;
 			bool isStatusMessage() const;
 
 			openmittsu::protocol::ContactId const& getSender() const;
-			BackedContact const& getContact() const;
+			std::shared_ptr<BackedContact> const& getContact() const;
 
 			bool isMessageFromUs() const;
 
@@ -46,7 +46,7 @@ namespace openmittsu {
 			openmittsu::utility::Location getContentAsLocation() const;
 			openmittsu::database::MediaFileItem getContentAsImage() const;
 
-			QString getCaption() const;
+			QString const& getCaption() const;
 
 			virtual void setIsSeen() = 0;
 
@@ -57,28 +57,12 @@ namespace openmittsu {
 		signals:
 			void messageDataChanged();
 		protected:
-			void loadCache();
-			virtual messages::UserMessage const& getMessage() const = 0;
-		private:
-			mutable QMutex m_mutex;
+			virtual void loadCache() = 0;
+			virtual messages::ReadonlyUserMessage const& getMessage() const = 0;
+			
 			QString const m_uuid;
-			BackedContact const m_contact;
-			openmittsu::protocol::ContactId const m_sender;
+			std::shared_ptr<BackedContact> const m_contact;
 			bool const m_isMessageFromUs;
-			openmittsu::protocol::MessageId const m_messageId;
-
-			bool m_cacheLoaded;
-
-			bool m_isRead;
-			bool m_isSent;
-			messages::UserMessageState m_messageState;
-			openmittsu::protocol::MessageTime m_timeOrderBy;
-			openmittsu::protocol::MessageTime m_timeCreatedAt;
-			openmittsu::protocol::MessageTime m_timeSent;
-			openmittsu::protocol::MessageTime m_timeReceived;
-			openmittsu::protocol::MessageTime m_timeSeen;
-			openmittsu::protocol::MessageTime m_timeModified;
-			bool m_isStatusMessage;
 		};
 
 	}

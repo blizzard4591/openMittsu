@@ -9,7 +9,7 @@
 
 namespace openmittsu {
 	namespace wizards {
-		GroupCreationWizardPageInfo::GroupCreationWizardPageInfo(QHash<openmittsu::protocol::ContactId, QString> const& knownIdentitiesWithNicknamesExcludingSelfContactId, std::unique_ptr<openmittsu::dataproviders::GroupCreationProcessor> groupCreationProcessor, QWidget* parent) : QWizardPage(parent), m_ui(new Ui::GroupCreationWizardPageInfo), m_knownIdentities(knownIdentitiesWithNicknamesExcludingSelfContactId), m_groupCreationProcessor(std::move(groupCreationProcessor)) {
+		GroupCreationWizardPageInfo::GroupCreationWizardPageInfo(QHash<openmittsu::protocol::ContactId, openmittsu::database::ContactData> const& knownIdentitiesWithNicknamesExcludingSelfContactId, std::unique_ptr<openmittsu::dataproviders::GroupCreationProcessor> groupCreationProcessor, QWidget* parent) : QWizardPage(parent), m_ui(new Ui::GroupCreationWizardPageInfo), m_knownIdentities(knownIdentitiesWithNicknamesExcludingSelfContactId), m_groupCreationProcessor(std::move(groupCreationProcessor)) {
 			m_ui->setupUi(this);
 
 			m_nameValidator = new QRegExpValidator(QRegExp(".+", Qt::CaseInsensitive, QRegExp::RegExp2), m_ui->edtName);
@@ -21,11 +21,11 @@ namespace openmittsu {
 			OPENMITTSU_CONNECT(m_ui->listWidget, itemSelectionChanged(), this, onListWidgetItemSelectionChanged());
 
 			// Load all Identities
-			QHash<openmittsu::protocol::ContactId, QString>::const_iterator it = m_knownIdentities.constBegin();
-			QHash<openmittsu::protocol::ContactId, QString>::const_iterator end = m_knownIdentities.constEnd();
+			auto it = m_knownIdentities.constBegin();
+			auto const end = m_knownIdentities.constEnd();
 
 			for (; it != end; ++it) {
-				ContactListWidgetItem* clwi = new ContactListWidgetItem(it.key(), false, it.value());
+				ContactListWidgetItem* clwi = new ContactListWidgetItem(it.key(), false, it->nickName);
 				m_ui->listWidget->addItem(clwi);
 			}
 			m_ui->listWidget->clearSelection();

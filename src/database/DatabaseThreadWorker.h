@@ -2,6 +2,7 @@
 #define OPENMITTSU_DATABASE_DATABASETHREADWORKER_H_
 
 #include <QDir>
+#include <QObject>
 #include <QString>
 #include <QThread>
 
@@ -14,12 +15,24 @@
 namespace openmittsu {
 	namespace database {
 
+		enum class DatabaseOpenFailureReason {
+			FREASON_NO_ERROR,
+			FREASON_INVALID_PASSWORD,
+			FREASON_UNKNOWN,
+			FREASON_OTHER
+		};
+
+		struct DatabaseOpenResult {
+			bool success;
+			DatabaseOpenFailureReason failureReason;
+		};
+
 		class DatabaseThreadWorker : public QObject {
 			Q_OBJECT
 		public:
 			virtual ~DatabaseThreadWorker();
 		public slots:
-			bool openDatabase(QString const& filename, QString const& password, QDir const& mediaStorageLocation);
+			int openDatabase(QString const& filename, QString const& password, QDir const& mediaStorageLocation);
 			bool createDatabase(QString const& filename, openmittsu::protocol::ContactId const& selfContact, openmittsu::crypto::KeyPair const& selfLongTermKeyPair, QString const& password, QDir const& mediaStorageLocation);
 
 			bool hasDatabase() const;
@@ -32,5 +45,7 @@ namespace openmittsu {
 
 	}
 }
+
+Q_DECLARE_METATYPE(openmittsu::database::DatabaseOpenResult)
 
 #endif // OPENMITTSU_DATABASE_DATABASETHREADWORKER_H_

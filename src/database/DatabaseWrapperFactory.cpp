@@ -7,7 +7,11 @@
 namespace openmittsu {
 	namespace database {
 
-		DatabaseWrapperFactory::DatabaseWrapperFactory(DatabasePointerAuthority const& databasePointerAuthority) : m_databasePointerAuthority(databasePointerAuthority) {
+		DatabaseWrapperFactory::DatabaseWrapperFactory() : m_databasePointerAuthority(nullptr) {
+			//
+		}
+
+		DatabaseWrapperFactory::DatabaseWrapperFactory(DatabasePointerAuthority const* databasePointerAuthority) : m_databasePointerAuthority(databasePointerAuthority) {
 			//
 		}
 
@@ -16,7 +20,7 @@ namespace openmittsu {
 		}
 
 		DatabaseWrapper DatabaseWrapperFactory::getDatabaseWrapper() const {
-			return DatabaseWrapper(m_databasePointerAuthority)
+			return DatabaseWrapper(m_databasePointerAuthority);
 		}
 
 	}

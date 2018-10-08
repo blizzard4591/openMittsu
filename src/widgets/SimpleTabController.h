@@ -22,8 +22,8 @@ namespace openmittsu {
 			virtual ChatTab* getTab(openmittsu::protocol::ContactId const& contact) const override;
 			virtual ChatTab* getTab(openmittsu::protocol::GroupId const& group) const override;
 
-			virtual void openTab(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::BackedContact const& backedContact) override;
-			virtual void openTab(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::BackedGroup const& backedGroup) override;
+			virtual void openTab(openmittsu::protocol::ContactId const& contact, std::shared_ptr<openmittsu::dataproviders::BackedContact> const& backedContact) override;
+			virtual void openTab(openmittsu::protocol::GroupId const& group, std::shared_ptr<openmittsu::dataproviders::BackedGroup> const& backedGroup) override;
 
 			virtual void closeTab(openmittsu::protocol::ContactId const& contact) override;
 			virtual void closeTab(openmittsu::protocol::GroupId const& group) override;

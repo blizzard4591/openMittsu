@@ -6,6 +6,8 @@
 
 #include <QObject>
 
+#include <memory>
+
 namespace openmittsu {
 	namespace dataproviders {
 		class BackedContact;
@@ -25,8 +27,8 @@ namespace openmittsu {
 			virtual ChatTab* getTab(openmittsu::protocol::ContactId const& contact) const = 0;
 			virtual ChatTab* getTab(openmittsu::protocol::GroupId const& group) const = 0;
 
-			virtual void openTab(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::BackedContact const& backedContact) = 0;
-			virtual void openTab(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::BackedGroup const& backedGroup) = 0;
+			virtual void openTab(openmittsu::protocol::ContactId const& contact, std::shared_ptr<openmittsu::dataproviders::BackedContact> const& backedContact) = 0;
+			virtual void openTab(openmittsu::protocol::GroupId const& group, std::shared_ptr < openmittsu::dataproviders::BackedGroup> const& backedGroup) = 0;
 
 			virtual void closeTab(openmittsu::protocol::ContactId const& contact) = 0;
 			virtual void closeTab(openmittsu::protocol::GroupId const& group) = 0;

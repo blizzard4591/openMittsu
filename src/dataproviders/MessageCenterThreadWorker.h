@@ -9,6 +9,8 @@
 
 #include "src/crypto/KeyPair.h"
 #include "src/database/Database.h"
+#include "src/database/DatabaseWrapperFactory.h"
+#include "src/dataproviders/MessageCenter.h"
 #include "src/protocol/ContactId.h"
 
 namespace openmittsu {
@@ -19,7 +21,7 @@ namespace openmittsu {
 		public:
 			virtual ~MessageCenterThreadWorker();
 		public slots:
-			bool createMessageCenter(std::shared_ptr<openmittsu::widgets::TabController> const& tabController, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster);
+			bool createMessageCenter(openmittsu::database::DatabaseWrapperFactory const& databaseWrapperFactory);
 
 			bool hasMessageCenter() const;
 			std::shared_ptr<openmittsu::dataproviders::MessageCenter> getMessageCenter();

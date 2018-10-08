@@ -1,5 +1,5 @@
-#ifndef OPENMITTSU_DATAPROVIDERS_READONLYCONTACTMESSAGE_H_
-#define OPENMITTSU_DATAPROVIDERS_READONLYCONTACTMESSAGE_H_
+#ifndef OPENMITTSU_DATAPROVIDERS_MESSAGES_READONLYCONTACTMESSAGE_H_
+#define OPENMITTSU_DATAPROVIDERS_MESSAGES_READONLYCONTACTMESSAGE_H_
 
 #include <QString>
 
@@ -17,11 +17,11 @@ namespace openmittsu {
 				virtual ~ReadonlyContactMessage() {}
 
 				virtual openmittsu::protocol::ContactId const& getContactId() const = 0;
-				virtual ContactMessageType getMessageType() const = 0;
+				virtual ContactMessageType const& getMessageType() const = 0;
 			};
 
 		}
 	}
 }
 
-#endif // OPENMITTSU_DATAPROVIDERS_READONLYCONTACTMESSAGE_H_
+#endif // OPENMITTSU_DATAPROVIDERS_MESSAGES_READONLYCONTACTMESSAGE_H_

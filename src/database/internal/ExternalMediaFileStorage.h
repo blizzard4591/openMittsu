@@ -11,7 +11,7 @@ namespace openmittsu {
 
 			class ExternalMediaFileStorage : public MediaFileStorage {
 			public:
-				explicit ExternalMediaFileStorage(QDir const& storagePath, openmittsu::database::InternalDatabaseInterface* database);
+				explicit ExternalMediaFileStorage(QDir const& storagePath, InternalDatabaseInterface* database);
 				virtual ~ExternalMediaFileStorage();
 
 				virtual bool hasMediaItem(QString const& uuid) const override;

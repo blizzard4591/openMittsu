@@ -9,12 +9,15 @@
 
 #include "src/dataproviders/MessageSource.h"
 
-#include "src/utility/Location.h"
-#include "src/database/Database.h"
+#include "src/database/DatabaseWrapper.h"
+#include "src/database/DatabaseReadonlyContactMessage.h"
+#include "src/dataproviders/BackedContactAndGroupPool.h"
 #include "src/dataproviders/messages/ContactMessageCursor.h"
 #include "src/dataproviders/MessageCenterWrapper.h"
 #include "src/protocol/ContactId.h"
 #include "src/protocol/AccountStatus.h"
+#include "src/utility/DeferredConstructionWrapper.h"
+#include "src/utility/Location.h"
 
 namespace openmittsu {
 	namespace database {
@@ -23,11 +26,12 @@ namespace openmittsu {
 
 	namespace dataproviders {
 		class BackedContactMessage;
+		class BackedGroupMessage;
 
 		class BackedContact : public QObject, public MessageSource {
 			Q_OBJECT
 		public:
-			BackedContact(openmittsu::protocol::ContactId const& contactId, openmittsu::crypto::PublicKey const& contactPublicKey, openmittsu::database::DatabaseWrapper const& database, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter);
+			BackedContact(openmittsu::protocol::ContactId const& contactId, openmittsu::database::DatabaseWrapper const& database, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter, BackedContactAndGroupPool& pool);
 			BackedContact(BackedContact const& other);
 			virtual ~BackedContact();
 
@@ -48,6 +52,11 @@ namespace openmittsu {
 			void setNickname(QString const& newNickname);
 			void setFirstName(QString const& newFirstName);
 			void setLastName(QString const& newLastName);
+
+			friend class BackedContactMessage;
+			friend class BackedGroupMessage;
+		protected:
+			openmittsu::database::DatabaseReadonlyContactMessage fetchMessageByUuid(QString const& uuid);
 		public slots:
 			bool sendTextMessage(QString const& text);
 			bool sendImageMessage(QByteArray const& image, QString const& caption);
@@ -61,18 +70,17 @@ namespace openmittsu {
 			void newMessageAvailable(QString const& uuid);
 		private:
 			openmittsu::protocol::ContactId const m_contactId;
-			openmittsu::crypto::PublicKey const m_contactPublicKey;
 			openmittsu::database::DatabaseWrapper m_database;
 			openmittsu::dataproviders::MessageCenterWrapper m_messageCenter;
+			BackedContactAndGroupPool& m_pool;
 
-			std::shared_ptr<messages::ContactMessageCursor> m_cursor;
+			openmittsu::database::ContactData m_contactData;
 		private slots:
 			void slotIdentityChanged(openmittsu::protocol::ContactId const& changedContactId);
 			void slotNewMessage(openmittsu::protocol::ContactId const& contactId, QString const& messageUuid);
 			void slotContactStartedTyping(openmittsu::protocol::ContactId const& contactId);
 			void slotContactStoppedTyping(openmittsu::protocol::ContactId const& contactId);
 		};
-
 	}
 }
 

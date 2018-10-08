@@ -33,6 +33,4 @@ namespace openmittsu {
 	}
 }
 
-Q_DECLARE_METATYPE(openmittsu::widgets::ChatTab)
-
 #endif // OPENMITTSU_WIDGETS_CHAT_CHATTAB_H_

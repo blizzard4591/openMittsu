@@ -7,6 +7,7 @@
 #include "src/protocol/GroupId.h"
 #include "src/protocol/MessageId.h"
 #include "src/protocol/MessageTime.h"
+#include "src/database/DatabaseReadonlyGroupMessage.h"
 #include "src/database/internal/DatabaseGroupMessage.h"
 #include "src/database/internal/DatabaseMessageCursor.h"
 #include "src/dataproviders/messages/GroupMessageCursor.h"
@@ -19,11 +20,12 @@ namespace openmittsu {
 			public:
 				explicit DatabaseGroupMessageCursor(InternalDatabaseInterface* database, openmittsu::protocol::GroupId const& group);
 				explicit DatabaseGroupMessageCursor(InternalDatabaseInterface* database, openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId);
+				explicit DatabaseGroupMessageCursor(InternalDatabaseInterface* database, openmittsu::protocol::GroupId const& group, QString const& uuid);
 				virtual ~DatabaseGroupMessageCursor();
 
 				virtual openmittsu::protocol::GroupId const& getGroupId() const override;
 				virtual std::shared_ptr<openmittsu::dataproviders::messages::GroupMessage> getMessage() const override;
-
+				virtual std::shared_ptr<DatabaseReadonlyGroupMessage> getReadonlyMessage() const;
 			protected:
 				virtual QString getWhereString() const override;
 				virtual void bindWhereStringValues(QSqlQuery& query) const override;

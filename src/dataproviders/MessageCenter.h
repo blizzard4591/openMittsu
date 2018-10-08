@@ -5,7 +5,6 @@
 #include <QObject>
 
 #include "src/utility/Location.h"
-#include "src/utility/OptionMaster.h"
 #include "src/protocol/ContactId.h"
 #include "src/protocol/GroupId.h"
 #include "src/protocol/MessageId.h"
@@ -26,7 +25,8 @@ namespace openmittsu {
 		public:
 			virtual ~MessageCenter() {}
 		signals:
-			void newUnreadMessageAvailable(openmittsu::widgets::ChatTab* source);
+			void newUnreadMessageAvailableContact(openmittsu::protocol::ContactId const& contact);
+			void newUnreadMessageAvailableGroup(openmittsu::protocol::GroupId const& group);
 			void messageChanged(QString const& uuid);
 		public slots:
 			virtual bool sendText(openmittsu::protocol::ContactId const& receiver, QString const& text) = 0;
@@ -48,7 +48,11 @@ namespace openmittsu {
 			virtual bool sendGroupImage(openmittsu::protocol::GroupId const& group, QByteArray const& image) = 0;
 
 			virtual void setNetworkSentMessageAcceptor(std::shared_ptr<NetworkSentMessageAcceptor> const& newNetworkSentMessageAcceptor) = 0;
-			virtual void setStorage(std::shared_ptr<openmittsu::database::Database> const& newStorage) = 0;
+
+			virtual void processMessageSendFailed(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId) = 0;
+			virtual void processMessageSendDone(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId) = 0;
+			virtual void processMessageSendFailed(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId) = 0;
+			virtual void processMessageSendDone(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId) = 0;
 
 			virtual void processReceivedContactMessageText(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& message) = 0;
 			virtual void processReceivedContactMessageImage(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& image) = 0;
@@ -71,6 +75,11 @@ namespace openmittsu {
 			virtual void processReceivedGroupSetTitle(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& groupTitle) = 0;
 			virtual void processReceivedGroupSyncRequest(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived) = 0;
 			virtual void processReceivedGroupLeave(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived) = 0;
+
+			virtual void addNewContact(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& publicKey) = 0;
+
+			virtual void resendGroupSetup(openmittsu::protocol::GroupId const& group) = 0;
+			virtual bool createNewGroupAndInformMembers(QSet<openmittsu::protocol::ContactId> const& members, bool addSelfContact, QVariant const& groupTitle, QVariant const& groupImage) = 0;
 		};
 	}
 }

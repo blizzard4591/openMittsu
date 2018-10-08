@@ -9,7 +9,7 @@ namespace openmittsu {
 	namespace database {
 		namespace internal {
 
-			int DatabaseUtilities::countQuery(InternalDatabaseInterface* database, QString const& tableName, QVariantMap const& whereQueryPart) {
+			int DatabaseUtilities::countQuery(InternalDatabaseInterface const* database, QString const& tableName, QVariantMap const& whereQueryPart) {
 				QSqlQuery query(database->getQueryObject());
 				QString whereString;
 				whereString.reserve(512);

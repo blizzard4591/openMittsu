@@ -3,7 +3,7 @@
 namespace openmittsu {
 	namespace dataproviders {
 
-		SimpleGroupCreationProcessor::SimpleGroupCreationProcessor(std::weak_ptr<openmittsu::dataproviders::MessageCenter> const& messageCenter) : GroupCreationProcessor(), 
+		SimpleGroupCreationProcessor::SimpleGroupCreationProcessor(openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) : GroupCreationProcessor(), 
 			m_messageCenter(messageCenter) {
 			//
 		}
@@ -13,12 +13,11 @@ namespace openmittsu {
 		}
 
 		bool SimpleGroupCreationProcessor::createNewGroup(QSet<openmittsu::protocol::ContactId> const& groupMembers, bool addSelfContact, QVariant const& groupTitle, QVariant const& groupImage) {
-			auto mc = m_messageCenter.lock();
-			if (!mc) {
+			if (!m_messageCenter.hasMessageCenter()) {
 				return false;
 			}
 
-			return mc->createNewGroupAndInformMembers(groupMembers, addSelfContact, groupTitle, groupImage);
+			return m_messageCenter.createNewGroupAndInformMembers(groupMembers, addSelfContact, groupTitle, groupImage);
 		}
 
 	}

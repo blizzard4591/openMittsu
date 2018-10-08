@@ -6,19 +6,19 @@
 #include <QSet>
 
 #include "src/dataproviders/GroupCreationProcessor.h"
-#include "src/dataproviders/MessageCenter.h"
+#include "src/dataproviders/MessageCenterWrapper.h"
 
 namespace openmittsu {
 	namespace dataproviders {
 
 		class SimpleGroupCreationProcessor : public GroupCreationProcessor {
 		public:
-			explicit SimpleGroupCreationProcessor(std::weak_ptr<openmittsu::dataproviders::MessageCenter> const& messageCenter);
+			explicit SimpleGroupCreationProcessor(openmittsu::dataproviders::MessageCenterWrapper const& messageCenter);
 			virtual ~SimpleGroupCreationProcessor();
 
 			virtual bool createNewGroup(QSet<openmittsu::protocol::ContactId> const& groupMembers, bool addSelfContact, QVariant const& groupTitle, QVariant const& groupImage) override;
 		private:
-			std::weak_ptr<openmittsu::dataproviders::MessageCenter> const m_messageCenter;
+			openmittsu::dataproviders::MessageCenterWrapper m_messageCenter;
 		};
 
 	}

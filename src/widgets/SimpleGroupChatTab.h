@@ -14,7 +14,7 @@ namespace openmittsu {
 		class SimpleGroupChatTab : public SimpleChatTab {
 			Q_OBJECT
 		public:
-			explicit SimpleGroupChatTab(openmittsu::dataproviders::BackedGroup const& backedGroup, QWidget* parent = nullptr);
+			explicit SimpleGroupChatTab(std::shared_ptr<openmittsu::dataproviders::BackedGroup> const& backedGroup, QWidget* parent = nullptr);
 			virtual ~SimpleGroupChatTab();
 
 			virtual QString getTabName() override;
@@ -31,7 +31,7 @@ namespace openmittsu {
 		private slots:
 			void onGroupDataChanged();
 		private:
-			openmittsu::dataproviders::BackedGroup m_group;
+			std::shared_ptr<openmittsu::dataproviders::BackedGroup> m_group;
 		};
 
 	}

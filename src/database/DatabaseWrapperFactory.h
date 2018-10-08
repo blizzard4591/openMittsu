@@ -11,15 +11,18 @@ namespace openmittsu {
 
 		class DatabaseWrapperFactory {
 		public:
-			DatabaseWrapperFactory(DatabasePointerAuthority const& databasePointerAuthority);
+			DatabaseWrapperFactory();
+			DatabaseWrapperFactory(DatabasePointerAuthority const* databasePointerAuthority);
 			virtual ~DatabaseWrapperFactory();
 
 			DatabaseWrapper getDatabaseWrapper() const;
 		private:
-			DatabasePointerAuthority const& m_databasePointerAuthority;
+			DatabasePointerAuthority const* m_databasePointerAuthority;
 		};
 
 	}
 }
+
+Q_DECLARE_METATYPE(openmittsu::database::DatabaseWrapperFactory)
 
 #endif // OPENMITTSU_DATABASE_DATABASEWRAPPERFACTORY_H_

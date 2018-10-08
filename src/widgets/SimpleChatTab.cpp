@@ -1,16 +1,19 @@
 #include "src/widgets/SimpleChatTab.h"
-#include <QListWidgetItem>
+
+#include <QAction>
+#include <QApplication>
+#include <QBuffer>
+#include <QClipboard>
 #include <QDateTime>
 #include <QFile>
 #include <QFileDialog>
-#include <QInputDialog>
-#include <QMessageBox>
+#include <QListWidgetItem>
 #include <QImage>
-#include <QThread>
+#include <QInputDialog>
 #include <QMenu>
-#include <QAction>
-#include <QClipboard>
-#include <QApplication>
+#include <QMessageBox>
+#include <QThread>
+
 
 #include "src/exceptions/InternalErrorException.h"
 #include "src/exceptions/NotConnectedException.h"

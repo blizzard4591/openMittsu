@@ -1,6 +1,7 @@
 #include "src/dataproviders/MessageCenterThreadWorker.h"
 
 #include "src/exceptions/InternalErrorException.h"
+#include "src/dataproviders/SimpleMessageCenter.h"
 #include "src/utility/Logging.h"
 #include "src/utility/MakeUnique.h"
 #include "src/utility/QObjectConnectionMacro.h"
@@ -12,8 +13,8 @@ namespace openmittsu {
 			//
 		}
 
-		bool MessageCenterThreadWorker::createMessageCenter(std::shared_ptr<openmittsu::widgets::TabController> const& tabController, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster) {
-			std::shared_ptr<openmittsu::dataproviders::MessageCenter> newMessageCenter = std::make_shared<openmittsu::dataproviders::MessageCenter>(tabController, optionMaster);
+		bool MessageCenterThreadWorker::createMessageCenter(openmittsu::database::DatabaseWrapperFactory const& databaseWrapperFactory) {
+			std::shared_ptr<openmittsu::dataproviders::MessageCenter> newMessageCenter = std::make_shared<openmittsu::dataproviders::SimpleMessageCenter>(databaseWrapperFactory);
 			if (newMessageCenter) {
 				m_messageCenter = newMessageCenter;
 

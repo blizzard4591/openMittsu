@@ -91,7 +91,7 @@ namespace openmittsu {
 					sortOrderSign = QStringLiteral("<");
 				}
 
-#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
+#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)) && (QT_VERSION < QT_VERSION_CHECK(5, 10, 1))
 				// Check in two steps to mitigate a cool bug in the query engine.
 				QSqlQuery query(m_database->getQueryObject());
 				query.prepare(QStringLiteral("SELECT `apiid`, `uid`, `sort_by` FROM `%1` WHERE (%2) AND (((`sort_by` = :sortByValue) AND (`uid` %3 :uid))) ORDER BY `sort_by` %4, `uid` %4 LIMIT 1;").arg(getTableName()).arg(getWhereString()).arg(sortOrderSign).arg(sortOrder));
@@ -210,6 +210,10 @@ namespace openmittsu {
 
 			openmittsu::protocol::MessageId const& DatabaseMessageCursor::getMessageId() const {
 				return m_messageId;
+			}
+
+			QString const& DatabaseMessageCursor::getMessageUuid() const {
+				return m_uid;
 			}
 
 		}
