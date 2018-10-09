@@ -73,6 +73,7 @@ public slots:
 	void contactRegistryOnIdentitiesChanged();
 	void connectionTimerOnTimer();
 
+	void onDatabaseUpdated();
 	void onDatabaseContactChanged(openmittsu::protocol::ContactId const& contact);
 	void onDatabaseGroupChanged(openmittsu::protocol::GroupId const& group);
 	void onDatabaseReceivedNewContactMessage(openmittsu::protocol::ContactId const& contact);

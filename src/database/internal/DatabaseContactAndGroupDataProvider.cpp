@@ -128,7 +128,7 @@ namespace openmittsu {
 				auto it = newGroupData.constBegin();
 				auto const end = newGroupData.constEnd();
 
-				while (it != end) {
+				for (;it != end; ++it) {
 					openmittsu::protocol::GroupStatus const groupStatus = this->getGroupStatus(it->id);
 					if ((groupStatus == openmittsu::protocol::GroupStatus::DELETED) || (groupStatus == openmittsu::protocol::GroupStatus::TEMPORARY) || (groupStatus == openmittsu::protocol::GroupStatus::KNOWN)) {
 						openmittsu::protocol::ContactId const ourId = m_database->getSelfContact();
@@ -407,7 +407,7 @@ namespace openmittsu {
 				auto it = newContactData.constBegin();
 				auto const end = newContactData.constEnd();
 
-				while (it != end) {
+				for (; it != end; ++it) {
 					openmittsu::protocol::ContactStatus const contactStatus = this->getContactStatus(it->id);
 					if ((contactStatus == openmittsu::protocol::ContactStatus::DELETED) || (contactStatus == openmittsu::protocol::ContactStatus::KNOWN)) {
 						if (getPublicKey(it->id) != it->publicKey) {
@@ -701,7 +701,7 @@ namespace openmittsu {
 				result.publicKey = openmittsu::crypto::PublicKey::fromHexString(query.value(QStringLiteral("publickey")).toString());
 				result.firstName = query.value(QStringLiteral("firstname")).toString();
 				result.lastName = query.value(QStringLiteral("lastname")).toString();
-				result.nickName = buildNickname(query.value(QStringLiteral("lastname")).toString(), result.firstName, result.lastName, contact);
+				result.nickName = buildNickname(query.value(QStringLiteral("nick_name")).toString(), result.firstName, result.lastName, contact);
 				result.accountStatus = openmittsu::protocol::AccountStatusHelper::fromInt(query.value(QStringLiteral("status")).toInt());
 				result.verificationStatus = openmittsu::protocol::ContactIdVerificationStatusHelper::fromQString(query.value(QStringLiteral("verification")).toString());
 				result.featureLevel = openmittsu::protocol::FeatureLevelHelper::fromInt(query.value(QStringLiteral("feature_level")).toInt());
@@ -731,7 +731,7 @@ namespace openmittsu {
 					data.publicKey = openmittsu::crypto::PublicKey::fromHexString(query.value(QStringLiteral("publickey")).toString());
 					data.firstName = query.value(QStringLiteral("firstname")).toString();
 					data.lastName = query.value(QStringLiteral("lastname")).toString();
-					data.nickName = buildNickname(query.value(QStringLiteral("lastname")).toString(), data.firstName, data.lastName, identity);
+					data.nickName = buildNickname(query.value(QStringLiteral("nick_name")).toString(), data.firstName, data.lastName, identity);
 					data.accountStatus = openmittsu::protocol::AccountStatusHelper::fromInt(query.value(QStringLiteral("status")).toInt());
 					data.verificationStatus = openmittsu::protocol::ContactIdVerificationStatusHelper::fromQString(query.value(QStringLiteral("verification")).toString());
 					data.featureLevel = openmittsu::protocol::FeatureLevelHelper::fromInt(query.value(QStringLiteral("feature_level")).toInt());
@@ -776,7 +776,7 @@ namespace openmittsu {
 				QVariant const avatar = queryField(group, QStringLiteral("avatar_uuid"));
 				result.hasImage = !(avatar.isNull() || avatar.toString().isEmpty());
 
-				if (result.hasImage) {
+				if (!result.hasImage) {
 					result.image = openmittsu::database::MediaFileItem(openmittsu::database::MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE);
 				} else {
 					result.image = m_database->getMediaItem(avatar.toString());

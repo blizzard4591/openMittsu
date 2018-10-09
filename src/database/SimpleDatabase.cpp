@@ -912,7 +912,7 @@ namespace openmittsu {
 		void SimpleDatabase::setOptions(OptionNameToValueMap const& options) {
 			auto it = options.constBegin();
 			auto const end = options.constEnd();
-			while (it != end) {
+			for (; it != end; ++it) {
 				setOptionInternal(it.key(), it.value(), false);
 			}
 
@@ -994,22 +994,6 @@ namespace openmittsu {
 		openmittsu::crypto::PublicKey SimpleDatabase::getContactPublicKey(openmittsu::protocol::ContactId const& identity) const {
 			return m_contactAndGroupDataProvider.getPublicKey(identity);
 		}
-
-		/*QString SimpleDatabase::getContactNickname(openmittsu::protocol::ContactId const& identity) const {
-			return m_contactAndGroupDataProvider.getNickName(identity);
-		}
-
-		openmittsu::protocol::ContactIdVerificationStatus SimpleDatabase::getContactVerficationStatus(openmittsu::protocol::ContactId const& identity) const {
-			return m_contactAndGroupDataProvider.getVerificationStatus(identity);
-		}
-
-		openmittsu::protocol::AccountStatus SimpleDatabase::getContactAccountStatus(openmittsu::protocol::ContactId const& identity) const {
-			return m_contactAndGroupDataProvider.getAccountStatus(identity);
-		}
-
-		openmittsu::protocol::FeatureLevel SimpleDatabase::getContactFeatureLevel(openmittsu::protocol::ContactId const& identity) const {
-			return m_contactAndGroupDataProvider.getFeatureLevel(identity);
-		}*/
 
 		int SimpleDatabase::getContactCount() const {
 			return m_contactAndGroupDataProvider.getContactCount();
@@ -1179,7 +1163,7 @@ namespace openmittsu {
 			emit receivedNewGroupMessage(group);
 		}
 
-		void SimpleDatabase::sendAllWaitingMessages(openmittsu::dataproviders::SentMessageAcceptor& messageAcceptor) {
+		void SimpleDatabase::sendAllWaitingMessages(std::shared_ptr<openmittsu::dataproviders::SentMessageAcceptor> messageAcceptor) {
 			{
 				QSqlQuery query(database);
 				query.prepare(QStringLiteral("SELECT `identity`, `apiid`, `uid`, `created_at`, `contact_message_type`, `body`, `caption` FROM `contact_messages` WHERE `is_outbox` = 1 AND `is_queued` = 0 AND `is_sent` = 0;"));
@@ -1201,20 +1185,20 @@ namespace openmittsu {
 						{
 							MediaFileItem const image = message.getContentAsImage();
 							if (image.isAvailable()) {
-								messageAcceptor.processSentContactMessageImage(receiver, messageId, message.getCreatedAt(), image.getData(), message.getCaption());
+								messageAcceptor->processSentContactMessageImage(receiver, messageId, message.getCreatedAt(), image.getData(), message.getCaption());
 								message.setIsQueued(true);
 							}
 							break;
 						}
 						case ContactMessageType::LOCATION:
-							messageAcceptor.processSentContactMessageLocation(receiver, messageId, message.getCreatedAt(), message.getContentAsLocation());
+							messageAcceptor->processSentContactMessageLocation(receiver, messageId, message.getCreatedAt(), message.getContentAsLocation());
 							message.setIsQueued(true);
 							break;
 						case ContactMessageType::POLL:
 							throw openmittsu::exceptions::InternalErrorException() << "A waiting message has type POLL?!";
 							break;
 						case ContactMessageType::TEXT:
-							messageAcceptor.processSentContactMessageText(receiver, messageId, message.getCreatedAt(), message.getContentAsText());
+							messageAcceptor->processSentContactMessageText(receiver, messageId, message.getCreatedAt(), message.getContentAsText());
 							message.setIsQueued(true);
 							break;
 						case ContactMessageType::VIDEO:
@@ -1246,34 +1230,34 @@ namespace openmittsu {
 						{
 							MediaFileItem const image = message.getContentAsImage();
 							if (image.isAvailable()) {
-								messageAcceptor.processSentGroupMessageImage(group, m_contactAndGroupDataProvider.getGroupMembers(group, false), messageId, message.getCreatedAt(), image.getData(), message.getCaption());
+								messageAcceptor->processSentGroupMessageImage(group, m_contactAndGroupDataProvider.getGroupMembers(group, false), messageId, message.getCreatedAt(), image.getData(), message.getCaption());
 								message.setIsQueued(true);
 								break;
 							}
 						}
 						case GroupMessageType::LOCATION:
-							messageAcceptor.processSentGroupMessageLocation(group, m_contactAndGroupDataProvider.getGroupMembers(group, false), messageId, message.getCreatedAt(), message.getContentAsLocation());
+							messageAcceptor->processSentGroupMessageLocation(group, m_contactAndGroupDataProvider.getGroupMembers(group, false), messageId, message.getCreatedAt(), message.getContentAsLocation());
 							message.setIsQueued(true);
 							break;
 						case GroupMessageType::POLL:
 							throw openmittsu::exceptions::InternalErrorException() << "A waiting message has type POLL?!";
 							break;
 						case GroupMessageType::TEXT:
-							messageAcceptor.processSentGroupMessageText(group, m_contactAndGroupDataProvider.getGroupMembers(group, false), messageId, message.getCreatedAt(), message.getContentAsText());
+							messageAcceptor->processSentGroupMessageText(group, m_contactAndGroupDataProvider.getGroupMembers(group, false), messageId, message.getCreatedAt(), message.getContentAsText());
 							message.setIsQueued(true);
 							break;
 						case GroupMessageType::VIDEO:
 							throw openmittsu::exceptions::InternalErrorException() << "A waiting message has type VIDEO?!";
 							break;
 						case GroupMessageType::SYNC_REQUEST:
-							messageAcceptor.processSentGroupSyncRequest(group, { group.getOwner() }, messageId, message.getCreatedAt());
+							messageAcceptor->processSentGroupSyncRequest(group, { group.getOwner() }, messageId, message.getCreatedAt());
 							message.setIsQueued(true);
 							break;
 						case GroupMessageType::SET_IMAGE:
 						{
 							MediaFileItem const image = m_contactAndGroupDataProvider.getGroupImage(group);
 							if (image.isAvailable()) {
-								messageAcceptor.processSentGroupSetImage(group, m_contactAndGroupDataProvider.getGroupMembers(group, false), messageId, message.getCreatedAt(), image.getData());
+								messageAcceptor->processSentGroupSetImage(group, m_contactAndGroupDataProvider.getGroupMembers(group, false), messageId, message.getCreatedAt(), image.getData());
 								message.setIsQueued(true);
 								break;
 							}
@@ -1281,19 +1265,19 @@ namespace openmittsu {
 						case GroupMessageType::SET_TITLE:
 						{
 							GroupData groupData = m_contactAndGroupDataProvider.getGroupData(group, false);
-							messageAcceptor.processSentGroupSetTitle(group, groupData.members, messageId, message.getCreatedAt(), groupData.title);
+							messageAcceptor->processSentGroupSetTitle(group, groupData.members, messageId, message.getCreatedAt(), groupData.title);
 							message.setIsQueued(true);
 							break;
 						}
 						case GroupMessageType::GROUP_CREATION:
 						{
 							auto const members = m_contactAndGroupDataProvider.getGroupMembers(group, false);
-							messageAcceptor.processSentGroupCreation(group, members, messageId, message.getCreatedAt(), members);
+							messageAcceptor->processSentGroupCreation(group, members, messageId, message.getCreatedAt(), members);
 							message.setIsQueued(true);
 							break;
 						}
 						case GroupMessageType::LEAVE:
-							messageAcceptor.processSentGroupLeave(group, m_contactAndGroupDataProvider.getGroupMembers(group, false), messageId, message.getCreatedAt(), m_selfContact);
+							messageAcceptor->processSentGroupLeave(group, m_contactAndGroupDataProvider.getGroupMembers(group, false), messageId, message.getCreatedAt(), m_selfContact);
 							message.setIsQueued(true);
 							break;
 						default:
@@ -1317,19 +1301,19 @@ namespace openmittsu {
 
 					switch (messageType) {
 						case ControlMessageType::AGREE:
-							messageAcceptor.processSentContactMessageReceiptAgree(receiver, messageId, message.getCreatedAt(), relatedMessageId);
+							messageAcceptor->processSentContactMessageReceiptAgree(receiver, messageId, message.getCreatedAt(), relatedMessageId);
 							message.setIsQueued(true);
 							break;
 						case ControlMessageType::DISAGREE:
-							messageAcceptor.processSentContactMessageReceiptDisagree(receiver, messageId, message.getCreatedAt(), relatedMessageId);
+							messageAcceptor->processSentContactMessageReceiptDisagree(receiver, messageId, message.getCreatedAt(), relatedMessageId);
 							message.setIsQueued(true);
 							break;
 						case ControlMessageType::READ:
-							messageAcceptor.processSentContactMessageReceiptSeen(receiver, messageId, message.getCreatedAt(), relatedMessageId);
+							messageAcceptor->processSentContactMessageReceiptSeen(receiver, messageId, message.getCreatedAt(), relatedMessageId);
 							message.setIsQueued(true);
 							break;
 						case ControlMessageType::RECEIVED:
-							messageAcceptor.processSentContactMessageReceiptReceived(receiver, messageId, message.getCreatedAt(), relatedMessageId);
+							messageAcceptor->processSentContactMessageReceiptReceived(receiver, messageId, message.getCreatedAt(), relatedMessageId);
 							message.setIsQueued(true);
 							break;
 						default:

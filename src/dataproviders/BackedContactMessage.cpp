@@ -8,11 +8,11 @@ namespace openmittsu {
 	namespace dataproviders {
 
 		BackedContactMessage::BackedContactMessage(openmittsu::database::DatabaseReadonlyContactMessage const& message, std::shared_ptr<BackedContact> const& sender, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) : BackedMessage(message.getUid(), sender, message.isMessageFromUs(), message.getMessageId()), m_message(message), m_messageCenter(messageCenter) {
-			OPENMITTSU_CONNECT(&m_messageCenter, messageChanged(QString const&), this, onMessageChanged(QString const&));
+			OPENMITTSU_CONNECT_QUEUED(&m_messageCenter, messageChanged(QString const&), this, onMessageChanged(QString const&));
 		}
 
 		BackedContactMessage::BackedContactMessage(BackedContactMessage const& other) : BackedMessage(other), m_message(other.m_message), m_messageCenter(other.m_messageCenter) {
-			OPENMITTSU_CONNECT(&m_messageCenter, messageChanged(QString const&), this, onMessageChanged(QString const&));
+			OPENMITTSU_CONNECT_QUEUED(&m_messageCenter, messageChanged(QString const&), this, onMessageChanged(QString const&));
 		}
 
 		BackedContactMessage::~BackedContactMessage() {

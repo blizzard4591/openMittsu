@@ -102,6 +102,7 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 	OPENMITTSU_CONNECT(&m_messageCenterWrapper, newUnreadMessageAvailableContact(openmittsu::protocol::ContactId const&), this, onMessageCenterHasUnreadMessageContact(openmittsu::protocol::ContactId const&));
 	OPENMITTSU_CONNECT(&m_messageCenterWrapper, newUnreadMessageAvailableGroup(openmittsu::protocol::GroupId const&), this, onMessageCenterHasUnreadMessageGroup(openmittsu::protocol::GroupId const&));
 
+	OPENMITTSU_CONNECT(&m_databaseWrapper, gotDatabase(), this, onDatabaseUpdated());
 	OPENMITTSU_CONNECT(&m_databaseWrapper, contactChanged(openmittsu::protocol::ContactId const&), this, onDatabaseContactChanged(openmittsu::protocol::ContactId const&));
 	OPENMITTSU_CONNECT(&m_databaseWrapper, groupChanged(openmittsu::protocol::GroupId const&), this, onDatabaseGroupChanged(openmittsu::protocol::GroupId const&));
 	OPENMITTSU_CONNECT(&m_databaseWrapper, receivedNewContactMessage(openmittsu::protocol::ContactId const&), this, onDatabaseReceivedNewContactMessage(openmittsu::protocol::ContactId const&));
@@ -301,9 +302,10 @@ void Client::setupProtocolClient() {
 	}
 	eventLoop.exec(); // blocks until "finished()" has been called
 
-	if (!QMetaObject::invokeMethod(m_messageCenterThread.getWorker().getMessageCenter().get(), "setNetworkSentMessageAcceptor", Q_ARG(std::shared_ptr<openmittsu::dataproviders::NetworkSentMessageAcceptor> const&, std::make_shared<openmittsu::dataproviders::NetworkSentMessageAcceptor>(m_protocolClient)))) {
-		throw openmittsu::exceptions::InternalErrorException() << "Could not set NetworkSentMessageAcceptor!";
-	}
+	m_messageCenterWrapper.setNetworkSentMessageAcceptor(std::make_shared<openmittsu::dataproviders::NetworkSentMessageAcceptor>(m_protocolClient));
+	//if (!QMetaObject::invokeMethod(m_messageCenterThread.getWorker().getMessageCenter().get(), "setNetworkSentMessageAcceptor", Q_ARG(std::shared_ptr<openmittsu::dataproviders::NetworkSentMessageAcceptor> const&, std::make_shared<openmittsu::dataproviders::NetworkSentMessageAcceptor>(m_protocolClient)))) {
+	//	throw openmittsu::exceptions::InternalErrorException() << "Could not set NetworkSentMessageAcceptor!";
+	//}
 }
 
 void Client::threadFinished() {
@@ -547,6 +549,10 @@ void Client::onDatabaseReceivedNewGroupMessage(openmittsu::protocol::GroupId con
 	}
 }
 
+void Client::onDatabaseUpdated() {
+	contactRegistryOnIdentitiesChanged();
+}
+
 void Client::onDatabaseContactChanged(openmittsu::protocol::ContactId const& contact) {
 	// TODO: Better
 	contactRegistryOnIdentitiesChanged();
@@ -713,7 +719,7 @@ void Client::listContactsOnContextMenu(QPoint const& pos) {
 
 				auto it = groups.constBegin();
 				auto const end = groups.constEnd();
-				while (it != end) {
+				for (;it != end; ++it) {
 					QAction* groupMember = new QAction(QString(" - ").append(*it), &listContactsContextMenu);
 					groupMember->setDisabled(true);
 					listContactsContextMenu.addAction(groupMember);

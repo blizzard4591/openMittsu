@@ -31,7 +31,7 @@ namespace openmittsu {
 		}
 
 		bool SimpleMessageCenter::sendText(openmittsu::protocol::ContactId const& receiver, QString const& text) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				return false;
 			} else if (!this->m_storage.hasContact(receiver)) {
 				LOGGER()->warn("Trying to send text message to unknown contact {}", receiver.toString());
@@ -54,7 +54,7 @@ namespace openmittsu {
 		}
 
 		bool SimpleMessageCenter::sendImage(openmittsu::protocol::ContactId const& receiver, QByteArray const& image, QString const& caption) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				return false;
 			} else if (!this->m_storage.hasContact(receiver)) {
 				LOGGER()->warn("Trying to send image message to unknown contact {}", receiver.toString());
@@ -80,7 +80,7 @@ namespace openmittsu {
 		}
 
 		bool SimpleMessageCenter::sendLocation(openmittsu::protocol::ContactId const& receiver, openmittsu::utility::Location const& location) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				return false;
 			} else if (!this->m_storage.hasContact(receiver)) {
 				LOGGER()->warn("Trying to send location message to unknown contact {}", receiver.toString());
@@ -107,7 +107,7 @@ namespace openmittsu {
 				return;
 			}
 
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				return;
 			} else if (!this->m_storage.hasContact(receiver)) {
 				LOGGER()->warn("Trying to send typing message to unknown contact {}", receiver.toString());
@@ -137,7 +137,7 @@ namespace openmittsu {
 		}
 
 		bool SimpleMessageCenter::sendReceipt(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& receiptedMessageId, openmittsu::messages::contact::ReceiptMessageContent::ReceiptType const& receiptType) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				return false;
 			} else if (!this->m_storage.hasContact(receiver)) {
 				LOGGER()->warn("Trying to send receipt message to unknown contact {}", receiver.toString());
@@ -188,7 +188,7 @@ namespace openmittsu {
 		}
 
 		bool SimpleMessageCenter::sendReceipt(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& receiptedMessageId, openmittsu::messages::contact::ReceiptMessageContent::ReceiptType const& receiptType) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				return false;
 			} else if (!this->m_storage.hasGroup(group)) {
 				LOGGER()->warn("Trying to send receipt message to unknown group {}", group.toString());
@@ -208,7 +208,7 @@ namespace openmittsu {
 		}
 
 		bool SimpleMessageCenter::sendLeave(openmittsu::protocol::GroupId const& group) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				return false;
 			} else if (this->m_storage.getSelfContact() == group.getOwner()) {
 				LOGGER()->warn("Trying to send leave message to group {} which is owned by us.", group.toString());
@@ -231,7 +231,7 @@ namespace openmittsu {
 		}
 
 		bool SimpleMessageCenter::sendSyncRequest(openmittsu::protocol::GroupId const& group) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				return false;
 			} else if (this->m_storage.getSelfContact() == group.getOwner()) {
 				LOGGER()->warn("Trying to send sync request message to group {} which is owned by us.", group.toString());
@@ -254,7 +254,7 @@ namespace openmittsu {
 		}
 
 		bool SimpleMessageCenter::sendGroupCreation(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& members) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				return false;
 			} else if (this->m_storage.getSelfContact() != group.getOwner()) {
 				LOGGER()->warn("Trying to send group creation message to group {} which is not owned by us.", group.toString());
@@ -265,7 +265,7 @@ namespace openmittsu {
 		}
 
 		bool SimpleMessageCenter::sendGroupCreation(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& members, QSet<openmittsu::protocol::ContactId> const& recipients, bool applyOperationInDatabase) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				return false;
 			} else if (this->m_storage.getSelfContact() != group.getOwner()) {
 				LOGGER()->warn("Trying to send group creation message to group {} which is not owned by us.", group.toString());
@@ -288,7 +288,7 @@ namespace openmittsu {
 		}
 		
 		bool SimpleMessageCenter::sendGroupTitle(openmittsu::protocol::GroupId const& group, QString const& title) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				return false;
 			} else if (this->m_storage.getSelfContact() != group.getOwner()) {
 				LOGGER()->warn("Trying to send group title message to group {} which is not owned by us.", group.toString());
@@ -299,7 +299,7 @@ namespace openmittsu {
 		}
 
 		bool SimpleMessageCenter::sendGroupTitle(openmittsu::protocol::GroupId const& group, QString const& title, QSet<openmittsu::protocol::ContactId> const& recipients, bool applyOperationInDatabase) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				return false;
 			} else if (this->m_storage.getSelfContact() != group.getOwner()) {
 				LOGGER()->warn("Trying to send group title message to group {} which is not owned by us.", group.toString());
@@ -322,7 +322,7 @@ namespace openmittsu {
 		}
 		
 		bool SimpleMessageCenter::sendGroupImage(openmittsu::protocol::GroupId const& group, QByteArray const& image) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				return false;
 			} else if (this->m_storage.getSelfContact() != group.getOwner()) {
 				LOGGER()->warn("Trying to send group image message to group {} which is not owned by us.", group.toString());
@@ -333,7 +333,7 @@ namespace openmittsu {
 		}
 
 		bool SimpleMessageCenter::sendGroupImage(openmittsu::protocol::GroupId const& group, QByteArray const& image, QSet<openmittsu::protocol::ContactId> const& recipients, bool applyOperationInDatabase) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				return false;
 			} else if (this->m_storage.getSelfContact() != group.getOwner()) {
 				LOGGER()->warn("Trying to send group image message to group {} which is not owned by us.", group.toString());
@@ -356,7 +356,7 @@ namespace openmittsu {
 		}
 
 		bool SimpleMessageCenter::sendText(openmittsu::protocol::GroupId const& group, QString const& text) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				return false;
 			} else if (!this->m_storage.hasGroup(group)) {
 				LOGGER()->warn("Trying to send text message to unknown group {}", group.toString());
@@ -379,7 +379,7 @@ namespace openmittsu {
 		}
 
 		bool SimpleMessageCenter::sendImage(openmittsu::protocol::GroupId const& group, QByteArray const& image, QString const& caption) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				return false;
 			} else if (!this->m_storage.hasGroup(group)) {
 				LOGGER()->warn("Trying to send image message to unknown group {}", group.toString());
@@ -405,7 +405,7 @@ namespace openmittsu {
 		}
 
 		bool SimpleMessageCenter::sendLocation(openmittsu::protocol::GroupId const& group, openmittsu::utility::Location const& location) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				return false;
 			} else if (!this->m_storage.hasGroup(group)) {
 				LOGGER()->warn("Trying to send location message to unknown group {}", group.toString());
@@ -438,7 +438,7 @@ namespace openmittsu {
 		void SimpleMessageCenter::tryResendingMessagesToNetwork() {
 			if ((this->m_networkSentMessageAcceptor != nullptr) && (this->m_networkSentMessageAcceptor->isConnected()) && (this->m_storage.hasDatabase())) {
 				LOGGER()->info("Asking database to send all queued messges now...");
-				this->m_storage.sendAllWaitingMessages(*m_networkSentMessageAcceptor);
+				this->m_storage.sendAllWaitingMessages(m_networkSentMessageAcceptor);
 			}
 		}
 
@@ -446,7 +446,7 @@ namespace openmittsu {
 			Received Messages from Network
 		*/
 		void SimpleMessageCenter::processReceivedContactMessageText(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& message) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We received a contact text message from sender {} with message ID #{} sent at {} with text {} that could not be saved as the storage system is not ready.", sender.toString(), messageId.toString(), timeSent.toString(), message.toStdString());
 				return;
 			} else if (!this->m_storage.hasContact(sender)) {
@@ -463,7 +463,7 @@ namespace openmittsu {
 		}
 
 		void SimpleMessageCenter::processReceivedContactMessageImage(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& image) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We received a contact image message from sender {} with message ID #{} sent at {} with image {} that could not be saved as the storage system is not ready.", sender.toString(), messageId.toString(), timeSent.toString(), QString(image.toHex()).toStdString());
 				return;
 			}
@@ -480,7 +480,7 @@ namespace openmittsu {
 		}
 		
 		void SimpleMessageCenter::processReceivedContactMessageLocation(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, openmittsu::utility::Location const& location) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We received a contact location message from sender {} with message ID #{} sent at {} with location {} that could not be saved as the storage system is not ready.", sender.toString(), messageId.toString(), timeSent.toString(), location.toString());
 				return;
 			}
@@ -495,7 +495,7 @@ namespace openmittsu {
 		}
 
 		void SimpleMessageCenter::processReceivedContactMessageReceiptReceived(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageId const& referredMessageId) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We received a contact message receipt type RECEIVED from sender {} with message ID #{} sent at {} for message ID #{} that could not be saved as the storage system is not ready.", sender.toString(), messageId.toString(), timeSent.toString(), referredMessageId.toString());
 				return;
 			}
@@ -508,7 +508,7 @@ namespace openmittsu {
 		}
 
 		void SimpleMessageCenter::processReceivedContactMessageReceiptSeen(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageId const& referredMessageId) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We received a contact message receipt type SEEN from sender {} with message ID #{} sent at {} for message ID #{} that could not be saved as the storage system is not ready.", sender.toString(), messageId.toString(), timeSent.toString(), referredMessageId.toString());
 				return;
 			}
@@ -521,7 +521,7 @@ namespace openmittsu {
 		}
 
 		void SimpleMessageCenter::processReceivedContactMessageReceiptAgree(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageId const& referredMessageId) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We received a contact message receipt type AGREE from sender {} with message ID #{} sent at {} for message ID #{} that could not be saved as the storage system is not ready.", sender.toString(), messageId.toString(), timeSent.toString(), referredMessageId.toString());
 				return;
 			}
@@ -535,7 +535,7 @@ namespace openmittsu {
 		}
 
 		void SimpleMessageCenter::processReceivedContactMessageReceiptDisagree(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageId const& referredMessageId) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We received a contact message receipt type DISAGREE from sender {} with message ID #{} sent at {} for message ID #{} that could not be saved as the storage system is not ready.", sender.toString(), messageId.toString(), timeSent.toString(), referredMessageId.toString());
 				return;
 			}
@@ -549,7 +549,7 @@ namespace openmittsu {
 		}
 
 		void SimpleMessageCenter::processReceivedContactTypingNotificationTyping(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We received a typing start notification from sender {} with message ID #{} sent at {} that could not be saved as the storage system is not ready.", sender.toString(), messageId.toString(), timeSent.toString());
 				return;
 			}
@@ -562,7 +562,7 @@ namespace openmittsu {
 		}
 
 		void SimpleMessageCenter::processReceivedContactTypingNotificationStopped(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We received a typing stop notification from sender {} with message ID #{} sent at {} that could not be saved as the storage system is not ready.", sender.toString(), messageId.toString(), timeSent.toString());
 				return;
 			}
@@ -575,7 +575,7 @@ namespace openmittsu {
 		}
 
 		void SimpleMessageCenter::processReceivedGroupMessageText(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& message) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We received a group text message from sender {} for group {} with message ID #{} sent at {} with text {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), message.toStdString());
 				return;
 			}
@@ -593,7 +593,7 @@ namespace openmittsu {
 		}
 
 		void SimpleMessageCenter::processReceivedGroupMessageImage(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& image) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We received a group image message from sender {} for group {} with message ID #{} sent at {} with image {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), QString(image.toHex()).toStdString());
 				return;
 			}
@@ -613,7 +613,7 @@ namespace openmittsu {
 		}
 
 		void SimpleMessageCenter::processReceivedGroupMessageLocation(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, openmittsu::utility::Location const& location) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We received a group location message from sender {} for group {} with message ID #{} sent at {} with location {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), location.toString());
 				return;
 			}
@@ -634,7 +634,7 @@ namespace openmittsu {
 
 
 		void SimpleMessageCenter::processReceivedGroupCreation(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QSet<openmittsu::protocol::ContactId> const& members) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				QString memberString;
 				for (openmittsu::protocol::ContactId const&c : members) {
 					if (!memberString.isEmpty()) {
@@ -697,7 +697,7 @@ namespace openmittsu {
 		}
 
 		void SimpleMessageCenter::processReceivedGroupSetImage(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& image) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We received a group set image message from sender {} for group {} with message ID #{} sent at {} with members {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), QString(image.toHex()).toStdString());
 				return;
 			} else if (sender != group.getOwner()) {
@@ -717,7 +717,7 @@ namespace openmittsu {
 		}
 
 		void SimpleMessageCenter::processReceivedGroupSetTitle(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& groupTitle) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We received a group set title message from sender {} for group {} with message ID #{} sent at {} with members {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), groupTitle.toStdString());
 				return;
 			} else if (sender != group.getOwner()) {
@@ -737,7 +737,7 @@ namespace openmittsu {
 		}
 
 		void SimpleMessageCenter::processReceivedGroupSyncRequest(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We received a group sync request message from sender {} for group {} with message ID #{} sent at {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString());
 				return;
 			} else if (sender == group.getOwner()) {
@@ -762,7 +762,7 @@ namespace openmittsu {
 		}
 
 		void SimpleMessageCenter::processReceivedGroupLeave(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We received a group leave message from sender {} for group {} with message ID #{} sent at {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString());
 				return;
 			}
@@ -779,7 +779,7 @@ namespace openmittsu {
 		}
 
 		void SimpleMessageCenter::processMessageSendFailed(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We were notfied that sending a message to user {} with message ID #{} failed, but that could not be saved as the storage system is not ready.", receiver.toString(), messageId.toString());
 				return;
 			}
@@ -787,7 +787,7 @@ namespace openmittsu {
 		}
 
 		void SimpleMessageCenter::processMessageSendDone(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We were notfied that sending a message to user {} with message ID #{} was successful, but that could not be saved as the storage system is not ready.", receiver.toString(), messageId.toString());
 				return;
 			}
@@ -795,7 +795,7 @@ namespace openmittsu {
 		}
 
 		void SimpleMessageCenter::processMessageSendFailed(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We were notfied that sending a message to group {} with message ID #{} failed, but that could not be saved as the storage system is not ready.", group.toString(), messageId.toString());
 				return;
 			}
@@ -803,7 +803,7 @@ namespace openmittsu {
 		}
 
 		void SimpleMessageCenter::processMessageSendDone(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We were notfied that sending a message to group {} with message ID #{} was successful, but that could not be saved as the storage system is not ready.", group.toString(), messageId.toString());
 				return;
 			}
@@ -811,7 +811,7 @@ namespace openmittsu {
 		}
 
 		void SimpleMessageCenter::addNewContact(openmittsu::protocol::ContactId const& newContact, openmittsu::crypto::PublicKey const& publicKey) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We were notfied of a new contact with ID {}, but that could not be saved as the storage system is not ready.", newContact.toString());
 				return;
 			}
@@ -820,7 +820,7 @@ namespace openmittsu {
 		}
 
 		void SimpleMessageCenter::onFoundNewGroup(openmittsu::protocol::GroupId const& groupId, QSet<openmittsu::protocol::ContactId> const& members) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				QString memberString;
 				for (openmittsu::protocol::ContactId const&c : members) {
 					if (!memberString.isEmpty()) {
@@ -837,7 +837,7 @@ namespace openmittsu {
 		}
 
 		bool SimpleMessageCenter::createNewGroupAndInformMembers(QSet<openmittsu::protocol::ContactId> const& members, bool addSelfContact, QVariant const& groupTitle, QVariant const& groupImage) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				return false;
 			}
 
@@ -866,7 +866,7 @@ namespace openmittsu {
 		}
 
 		void SimpleMessageCenter::resendGroupSetup(openmittsu::protocol::GroupId const& group) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We were asked to re-send the group setup for group {}, but that could not be done as the storage system is not ready.", group.toString());
 				return;
 			}
@@ -875,7 +875,7 @@ namespace openmittsu {
 		}
 
 		void SimpleMessageCenter::resendGroupSetup(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& recipients) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We were asked to re-send the group setup for group {}, but that could not be done as the storage system is not ready.", group.toString());
 				return;
 			}
@@ -943,7 +943,7 @@ namespace openmittsu {
 		}
 
 		bool SimpleMessageCenter::checkAndFixGroupMembership(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender) {
-			if (this->m_storage.hasDatabase()) {
+			if (!this->m_storage.hasDatabase()) {
 				return false;
 			} else {
 				//	if group is unknown

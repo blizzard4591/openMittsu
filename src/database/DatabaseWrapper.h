@@ -17,6 +17,8 @@ namespace openmittsu {
 			virtual ~DatabaseWrapper();
 
 			bool hasDatabase() const;
+		signals:
+			void gotDatabase();
 		private slots:
 			void onDatabasePointerAuthorityHasNewDatabase();
 
@@ -93,7 +95,7 @@ namespace openmittsu {
 			virtual void storeNewContact(QVector<NewContactData> const& newContactData) override;
 			virtual void storeNewGroup(openmittsu::protocol::GroupId const& groupId, QSet<openmittsu::protocol::ContactId> const& members, bool isAwaitingSync) override;
 			virtual void storeNewGroup(QVector<NewGroupData> const& newGroupData) override;
-			virtual void sendAllWaitingMessages(openmittsu::dataproviders::SentMessageAcceptor& messageAcceptor) override;
+			virtual void sendAllWaitingMessages(std::shared_ptr<openmittsu::dataproviders::SentMessageAcceptor> messageAcceptor) override;
 			// Contact Data
 			virtual ContactData getContactData(openmittsu::protocol::ContactId const& contact, bool fetchMessageCount) const override;
 			virtual ContactToContactDataMap getContactDataAll(bool fetchMessageCount) const override;

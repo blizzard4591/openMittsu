@@ -33,6 +33,7 @@
 #include "src/database/GroupData.h"
 #include "src/database/NewContactData.h"
 #include "src/database/NewGroupData.h"
+#include "src/dataproviders/NetworkSentMessageAcceptor.h"
 #include "src/messages/FullMessageHeader.h"
 #include "src/messages/contact/PreliminaryContactMessage.h"
 #include "src/messages/contact/ReceiptMessageContent.h"
@@ -81,12 +82,22 @@
 	qRegisterMetaType<openmittsu::protocol::MessageId>(); \
 	qRegisterMetaType<openmittsu::protocol::MessageTime>(); \
 	qRegisterMetaType<openmittsu::utility::Location>(); \
-	qRegisterMetaType<openmittsu::database::ContactToContactDataMap>(); \
-	qRegisterMetaType<openmittsu::database::GroupToGroupDataMap>(); \
-	qRegisterMetaType<openmittsu::database::OptionNameToValueMap>(); \
-	qRegisterMetaType<openmittsu::database::GroupToTitleMap>(); \
-	qRegisterMetaType<openmittsu::database::ContactToAccountStatusMap>(); \
-	qRegisterMetaType<openmittsu::database::ContactToFeatureLevelMap>(); \
+	qRegisterMetaType<openmittsu::database::ContactToContactDataMap>("openmittsu::database::ContactToContactDataMap"); \
+	qRegisterMetaType<openmittsu::database::ContactToContactDataMap>("ContactToContactDataMap"); \
+	qRegisterMetaType<openmittsu::database::GroupToGroupDataMap>("openmittsu::database::GroupToGroupDataMap"); \
+	qRegisterMetaType<openmittsu::database::GroupToGroupDataMap>("GroupToGroupDataMap"); \
+	qRegisterMetaType<openmittsu::database::OptionNameToValueMap>("openmittsu::database::OptionNameToValueMap"); \
+	qRegisterMetaType<openmittsu::database::OptionNameToValueMap>("OptionNameToValueMap"); \
+	qRegisterMetaType<openmittsu::database::GroupToTitleMap>("openmittsu::database::GroupToTitleMap"); \
+	qRegisterMetaType<openmittsu::database::GroupToTitleMap>("GroupToTitleMap"); \
+	qRegisterMetaType<openmittsu::database::ContactToAccountStatusMap>("openmittsu::database::ContactToAccountStatusMap"); \
+	qRegisterMetaType<openmittsu::database::ContactToAccountStatusMap>("ContactToAccountStatusMap"); \
+	qRegisterMetaType<openmittsu::database::ContactToFeatureLevelMap>("openmittsu::database::ContactToFeatureLevelMap"); \
+	qRegisterMetaType<openmittsu::database::ContactToFeatureLevelMap>("ContactToFeatureLevelMap"); \
+	qRegisterMetaType<std::shared_ptr<openmittsu::dataproviders::NetworkSentMessageAcceptor>>("std::shared_ptr<openmittsu::dataproviders::NetworkSentMessageAcceptor>"); \
+	qRegisterMetaType<std::shared_ptr<openmittsu::dataproviders::NetworkSentMessageAcceptor>>("std::shared_ptr<NetworkSentMessageAcceptor>"); \
+	qRegisterMetaType<std::shared_ptr<openmittsu::dataproviders::SentMessageAcceptor>>("std::shared_ptr<openmittsu::dataproviders::SentMessageAcceptor>"); \
+	qRegisterMetaType<std::shared_ptr<openmittsu::dataproviders::SentMessageAcceptor>>("std::shared_ptr<SentMessageAcceptor>"); \
 } while (false)
 
 bool initializeLogging(std::size_t maxLogfileSize, std::size_t maxFileCount) {

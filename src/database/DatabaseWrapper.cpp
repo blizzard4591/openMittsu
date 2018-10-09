@@ -9,6 +9,9 @@
 #include "src/database/DatabaseReadonlyContactMessage.h"
 #include "src/database/DatabaseReadonlyGroupMessage.h"
 
+#include <QMetaObject>
+#include <QMetaMethod>
+
 namespace openmittsu {
 	namespace database {
 
@@ -42,6 +45,8 @@ namespace openmittsu {
 				OPENMITTSU_CONNECT_QUEUED(ptr.get(), contactStartedTyping(openmittsu::protocol::ContactId const&), this, onDatabaseContactStartedTyping(openmittsu::protocol::ContactId const&));
 				OPENMITTSU_CONNECT_QUEUED(ptr.get(), contactStoppedTyping(openmittsu::protocol::ContactId const&), this, onDatabaseContactStoppedTyping(openmittsu::protocol::ContactId const&));
 				OPENMITTSU_CONNECT_QUEUED(ptr.get(), optionsChanged(), this, onDatabaseOptionsChanged());
+
+				emit gotDatabase();
 			} else {
 				LOGGER_DEBUG("DatabaseWrapper was informed of new database, but we got nothing!");
 			}
@@ -292,8 +297,8 @@ namespace openmittsu {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(storeNewGroup, Q_ARG(QVector<NewGroupData> const&, newGroupData));
 		}
 
-		void DatabaseWrapper::sendAllWaitingMessages(openmittsu::dataproviders::SentMessageAcceptor& messageAcceptor) {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(sendAllWaitingMessages, Q_ARG(openmittsu::dataproviders::SentMessageAcceptor&, messageAcceptor));
+		void DatabaseWrapper::sendAllWaitingMessages(std::shared_ptr<openmittsu::dataproviders::SentMessageAcceptor> messageAcceptor) {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(sendAllWaitingMessages, Q_ARG(std::shared_ptr<openmittsu::dataproviders::SentMessageAcceptor>, messageAcceptor));
 		}
 
 		ContactData DatabaseWrapper::getContactData(openmittsu::protocol::ContactId const& contact, bool fetchMessageCount) const {
@@ -401,7 +406,7 @@ namespace openmittsu {
 		}
 
 		void DatabaseWrapper::setOptions(openmittsu::database::OptionNameToValueMap const& options) {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(setOptions, Q_ARG(openmittsu::database::OptionNameToValueMap const&, options));
+			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(setOptions, Q_ARG(OptionNameToValueMap const&, options));
 		}
 
 	}
