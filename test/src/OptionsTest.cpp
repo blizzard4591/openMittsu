@@ -1,6 +1,8 @@
 #include "DatabaseTestFramework.h"
 
-#include "utility/OptionMaster.h"
+#include "src/options/OptionMaster.h"
+#include "TestDatabaseWrapper.h"
+#include "TestDatabaseWrapperFactory.h"
 
 TEST_F(DatabaseTestFramework, optionMaster) {
 	/*
@@ -26,11 +28,15 @@ TEST_F(DatabaseTestFramework, optionMaster) {
 	
 	*/
 
-	openmittsu::utility::OptionMaster optionMaster;
-	optionMaster.setDatabase(db);
+	openmittsu::database::DatabasePointerAuthority dpa;
+	dpa.setDatabase(db);
 
-	bool const valueBefore = optionMaster.getOptionAsBool(openmittsu::utility::OptionMaster::Options::BOOLEAN_SEND_TYPING_NOTIFICATION);
-	optionMaster.setOption(openmittsu::utility::OptionMaster::Options::BOOLEAN_SEND_TYPING_NOTIFICATION, !valueBefore);
-	bool const valueAfter = optionMaster.getOptionAsBool(openmittsu::utility::OptionMaster::Options::BOOLEAN_SEND_TYPING_NOTIFICATION);
+	openmittsu::database::TestDatabaseWrapperFactory factory(&dpa);
+
+	openmittsu::options::OptionMaster optionMaster(factory.getDatabaseWrapper());
+
+	bool const valueBefore = optionMaster.getOptionAsBool(openmittsu::options::Options::BOOLEAN_SEND_TYPING_NOTIFICATION);
+	optionMaster.setOption(openmittsu::options::Options::BOOLEAN_SEND_TYPING_NOTIFICATION, !valueBefore);
+	bool const valueAfter = optionMaster.getOptionAsBool(openmittsu::options::Options::BOOLEAN_SEND_TYPING_NOTIFICATION);
 	ASSERT_EQ(!valueBefore, valueAfter);
 }

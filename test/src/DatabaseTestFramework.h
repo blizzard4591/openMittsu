@@ -62,7 +62,7 @@ protected:
 		tempMediaStorageLocation.mkdir(QStringLiteral("openMittsuTests-tmpdir"));
 		ASSERT_TRUE(tempMediaStorageLocation.cd(QStringLiteral("openMittsuTests-tmpdir")));
 
-		db = std::make_shared<openmittsu::database::Database>(databaseFilename, selfContactId, selfKeyPair, QStringLiteral("AAAAAAAA"), tempMediaStorageLocation);
+		db = std::make_shared<openmittsu::database::SimpleDatabase>(databaseFilename, selfContactId, selfKeyPair, QStringLiteral("AAAAAAAA"), tempMediaStorageLocation);
 
 		usedMessageIds.clear();
 	}

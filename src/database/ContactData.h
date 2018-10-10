@@ -16,6 +16,7 @@ namespace openmittsu {
 			QString firstName;
 			QString lastName;
 			QString nickName;
+			QString nickNameRaw;
 			openmittsu::protocol::AccountStatus accountStatus;
 			openmittsu::protocol::ContactIdVerificationStatus verificationStatus;
 			openmittsu::protocol::FeatureLevel featureLevel;
