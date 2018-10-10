@@ -37,6 +37,7 @@ namespace openmittsu {
 			OPENMITTSU_CONNECT(m_ui->btnMenu, clicked(), this, btnMenuOnClick());
 			OPENMITTSU_CONNECT(m_ui->emojiSelector, emojiDoubleClicked(QString const&), this, emojiDoubleClicked(QString const&));
 			OPENMITTSU_CONNECT(&m_typingTimer, timeout(), this, typingTimerOnTimer());
+			OPENMITTSU_CONNECT(this->m_ui->chatWidget, hasUnreadMessages(), this, onChatWidgetHasUnreadMessages());
 
 			m_ui->edtInput->setFocus();
 
@@ -47,6 +48,10 @@ namespace openmittsu {
 		SimpleChatTab::~SimpleChatTab() {
 			//
 			delete m_ui;
+		}
+
+		void SimpleChatTab::onChatWidgetHasUnreadMessages() {
+			emit hasUnreadMessages(this);
 		}
 
 		void SimpleChatTab::loadLastNMessages() {

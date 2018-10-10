@@ -188,10 +188,6 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 
 	contactRegistryOnIdentitiesChanged();
 
-	// Restore Window location and size
-	restoreGeometry(m_optionMaster->getOptionAsQByteArray(openmittsu::options::Options::BINARY_MAINWINDOW_GEOMETRY));
-	restoreState(m_optionMaster->getOptionAsQByteArray(openmittsu::options::Options::BINARY_MAINWINDOW_STATE));
-
 	if (showFirstUseWizard) {
 		menuFileShowFirstUseWizardOnClick();
 	} else if (showFromBackupWizard) {
@@ -212,6 +208,10 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 			}
 		}
 	}
+
+	// Restore Window location and size
+	restoreGeometry(m_optionMaster->getOptionAsQByteArray(openmittsu::options::Options::BINARY_MAINWINDOW_GEOMETRY));
+	restoreState(m_optionMaster->getOptionAsQByteArray(openmittsu::options::Options::BINARY_MAINWINDOW_STATE));
 }
 
 Client::~Client() {
