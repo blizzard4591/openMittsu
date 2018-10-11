@@ -33,10 +33,10 @@ namespace openmittsu {
 			void onDatabaseContactStartedTyping(openmittsu::protocol::ContactId const& identity);
 			void onDatabaseContactStoppedTyping(openmittsu::protocol::ContactId const& identity);
 			void onDatabaseOptionsChanged();
-		private:
+		protected:
 			DatabasePointerAuthority const* m_databasePointerAuthority;
 			std::weak_ptr<Database> m_database;
-
+			Qt::ConnectionType m_connectionType;
 		public:
 			// Inherited via Database
 			

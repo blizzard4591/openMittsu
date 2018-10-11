@@ -15,7 +15,7 @@ namespace openmittsu {
 			DatabaseWrapperFactory(DatabasePointerAuthority const* databasePointerAuthority);
 			virtual ~DatabaseWrapperFactory();
 
-			DatabaseWrapper getDatabaseWrapper() const;
+			virtual DatabaseWrapper getDatabaseWrapper() const;
 		private:
 			DatabasePointerAuthority const* m_databasePointerAuthority;
 		};

@@ -188,10 +188,6 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 
 	contactRegistryOnIdentitiesChanged();
 
-	// Restore Window location and size
-	restoreGeometry(m_optionMaster->getOptionAsQByteArray(openmittsu::options::Options::BINARY_MAINWINDOW_GEOMETRY));
-	restoreState(m_optionMaster->getOptionAsQByteArray(openmittsu::options::Options::BINARY_MAINWINDOW_STATE));
-
 	if (showFirstUseWizard) {
 		menuFileShowFirstUseWizardOnClick();
 	} else if (showFromBackupWizard) {
@@ -212,6 +208,10 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 			}
 		}
 	}
+
+	// Restore Window location and size
+	restoreGeometry(m_optionMaster->getOptionAsQByteArray(openmittsu::options::Options::BINARY_MAINWINDOW_GEOMETRY));
+	restoreState(m_optionMaster->getOptionAsQByteArray(openmittsu::options::Options::BINARY_MAINWINDOW_STATE));
 }
 
 Client::~Client() {
@@ -438,6 +438,7 @@ void Client::openDatabaseFile(QString const& fileName) {
 void Client::contactRegistryOnIdentitiesChanged() {
 	LOGGER_DEBUG("Updating contacts list on IdentitiesChanged() signal.");
 	m_ui.listContacts->clear();
+	m_ui.listGroups->clear();
 	
 	if (m_databaseWrapper.hasDatabase()) {
 		QHash<openmittsu::protocol::ContactId, openmittsu::database::ContactData> knownIdentities = m_databaseWrapper.getContactDataAll(false);
@@ -486,15 +487,15 @@ void Client::contactRegistryOnIdentitiesChanged() {
 			GroupListWidgetItem* glwi = new GroupListWidgetItem(groupId, false, itGroups->title);
 
 			bool inserted = false;
-			for (int i = 0; i < m_ui.listContacts->count(); ++i) {
-				if (*glwi < *m_ui.listContacts->item(i)) {
-					m_ui.listContacts->insertItem(i, glwi);
+			for (int i = 0; i < m_ui.listGroups->count(); ++i) {
+				if (*glwi < *m_ui.listGroups->item(i)) {
+					m_ui.listGroups->insertItem(i, glwi);
 					inserted = true;
 					break;
 				}
 			}
 			if (!inserted) {
-				m_ui.listContacts->addItem(glwi);
+				m_ui.listGroups->addItem(glwi);
 			}
 		}
 	}

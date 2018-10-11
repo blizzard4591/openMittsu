@@ -15,12 +15,12 @@
 namespace openmittsu {
 	namespace database {
 
-		DatabaseWrapper::DatabaseWrapper(DatabasePointerAuthority const* databasePointerAuthority) : Database(), m_databasePointerAuthority(databasePointerAuthority), m_database() {
+		DatabaseWrapper::DatabaseWrapper(DatabasePointerAuthority const* databasePointerAuthority) : Database(), m_databasePointerAuthority(databasePointerAuthority), m_database(), m_connectionType(Qt::ConnectionType::BlockingQueuedConnection) {
 			OPENMITTSU_CONNECT_QUEUED(m_databasePointerAuthority, newDatabaseAvailable(), this, onDatabasePointerAuthorityHasNewDatabase());
 			onDatabasePointerAuthorityHasNewDatabase();
 		}
 
-		DatabaseWrapper::DatabaseWrapper(DatabaseWrapper const& other) : Database(), m_databasePointerAuthority(other.m_databasePointerAuthority), m_database() {
+		DatabaseWrapper::DatabaseWrapper(DatabaseWrapper const& other) : Database(), m_databasePointerAuthority(other.m_databasePointerAuthority), m_database(), m_connectionType(other.m_connectionType) {
 			OPENMITTSU_CONNECT_QUEUED(m_databasePointerAuthority, newDatabaseAvailable(), this, onDatabasePointerAuthorityHasNewDatabase());
 			onDatabasePointerAuthorityHasNewDatabase();
 		}
