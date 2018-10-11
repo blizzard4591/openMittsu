@@ -37,6 +37,10 @@ namespace openmittsu {
 				QHash<QString, QString> optionToSet;
 				optionToSet.insert(optionName, toStringRepresentation(value, type));
 				m_database.setOptions(optionToSet);
+
+				if (m_database.hasDatabase()) {
+					m_databaseCache = m_database.getOptions();
+				}
 			} else if (optionStorage == OptionStorage::STORAGE_SIMPLE) {
 				if (value.canConvert(optionTypeToMetaType(type))) {
 					QSettings* settings = getSettings();
