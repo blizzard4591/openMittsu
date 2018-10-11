@@ -22,6 +22,8 @@ int main(int argc, char *argv[]) {
 	// Set encoding
 	QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
 
+	LOGGER()->info("Qt library load paths are: {}", QCoreApplication::libraryPaths().join(", ").toStdString());
+
 	LOGGER()->info("Starting OpenMittsu {}...", openmittsu::utility::Version::longVersionString());
 
 	int result = 0;
