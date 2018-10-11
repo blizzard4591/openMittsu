@@ -136,10 +136,10 @@ else ()
 endif(Libsodium_FOUND)
 
 if (Libqrencode_FOUND)
-	message(STATUS "Found LibQREncode with include directory: ${LIBQRENCODE_INCLUDE_DIR}")
+	message(STATUS "Found LibQREncode with include directory: ${Libqrencode_INCLUDE_DIRS}")
 	SET(OPENMITTSU_CONFIG_HAVE_LIBQRENCODE ON)
 	# Add libQrEncode Includes
-	include_directories(${LIBQRENCODE_INCLUDE_DIR})
+	include_directories(${Libqrencode_INCLUDE_DIRS})
 else (Libqrencode_FOUND)
 	message(STATUS "Could not find LibQREncode, disabling QR Code features.")
 	SET(OPENMITTSU_CONFIG_HAVE_LIBQRENCODE OFF)
@@ -508,7 +508,10 @@ endif(MSVC)
 
 # Add target link dependencies
 target_link_libraries(openMittsuCore ${Libsodium_LIBRARIES})
-target_link_libraries(openMittsu ${LIBQRENCODE_LIBRARY})
+
+if (OPENMITTSU_CONFIG_HAVE_LIBQRENCODE)
+	target_link_libraries(openMittsu ${Libqrencode_LIBRARIES})
+endif()
 
 if (OPENMITTSU_ENABLE_TESTS AND NOT CMAKE_BUILD_TYPE MATCHES "^Gentoo")
 	add_dependencies(openMittsuTests gmock gtest)
