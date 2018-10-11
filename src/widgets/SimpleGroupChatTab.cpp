@@ -5,7 +5,6 @@
 #include "src/protocol/GroupId.h"
 #include "src/messages/PreliminaryMessageFactory.h"
 
-#include "src/utility/OptionMaster.h"
 #include "src/utility/Logging.h"
 #include "src/utility/QObjectConnectionMacro.h"
 
@@ -17,9 +16,9 @@
 namespace openmittsu {
 	namespace widgets {
 
-		SimpleGroupChatTab::SimpleGroupChatTab(openmittsu::dataproviders::BackedGroup const& backedGroup, QWidget* parent) : SimpleChatTab(parent), m_group(backedGroup) {
-			OPENMITTSU_CONNECT(&m_group, groupDataChanged(), this, onGroupDataChanged());
-			OPENMITTSU_CONNECT(&m_group, newMessageAvailable(QString const&), this, onNewMessage(QString const&));
+		SimpleGroupChatTab::SimpleGroupChatTab(std::shared_ptr<openmittsu::dataproviders::BackedGroup> const& backedGroup, QWidget* parent) : SimpleChatTab(parent), m_group(backedGroup) {
+			OPENMITTSU_CONNECT(m_group.get(), groupDataChanged(), this, onGroupDataChanged());
+			OPENMITTSU_CONNECT(m_group.get(), newMessageAvailable(QString const&), this, onNewMessage(QString const&));
 		}
 
 		SimpleGroupChatTab::~SimpleGroupChatTab() {
@@ -27,15 +26,15 @@ namespace openmittsu {
 		}
 
 		bool SimpleGroupChatTab::sendText(QString const& text) {
-			return m_group.sendTextMessage(text);
+			return m_group->sendTextMessage(text);
 		}
 
 		bool SimpleGroupChatTab::sendImage(QByteArray const& image, QString const& caption) {
-			return m_group.sendImageMessage(image, caption);
+			return m_group->sendImageMessage(image, caption);
 		}
 
 		bool SimpleGroupChatTab::sendLocation(openmittsu::utility::Location const& location) {
-			return m_group.sendLocationMessage(location);
+			return m_group->sendLocationMessage(location);
 		}
 
 		void SimpleGroupChatTab::sendUserTypingStatus(bool) {
@@ -43,7 +42,7 @@ namespace openmittsu {
 		}
 
 		openmittsu::dataproviders::MessageSource& SimpleGroupChatTab::getMessageSource() {
-			return m_group;
+			return *m_group;
 		}
 
 		bool SimpleGroupChatTab::canUserAgree() const {
@@ -58,37 +57,37 @@ namespace openmittsu {
 				}
 				m_knownUuids.insert(uuid);
 			}
-			setMessageCount(m_group.getMessageCount());
+			setMessageCount(m_group->getMessageCount());
 
-			openmittsu::dataproviders::BackedGroupMessage message = m_group.getMessageByUuid(uuid);
+			openmittsu::dataproviders::BackedGroupMessage message = m_group->getMessageByUuid(uuid);
 			openmittsu::dataproviders::messages::GroupMessageType messageType = message.getMessageType();
 			switch (messageType) {
 				case openmittsu::dataproviders::messages::GroupMessageType::AUDIO:
 					LOGGER()->warn("Can not create audio message item in GUI, not supported yet.");
 					break;
 				case openmittsu::dataproviders::messages::GroupMessageType::GROUP_CREATION:
-					this->addChatWidgetItem(new GroupStatusChatWidgetItem(m_group.getMessageByUuid(uuid)));
+					this->addChatWidgetItem(new GroupStatusChatWidgetItem(m_group->getMessageByUuid(uuid)));
 					break;
 				case openmittsu::dataproviders::messages::GroupMessageType::IMAGE:
-					this->addChatWidgetItem(new GroupImageChatWidgetItem(m_group.getMessageByUuid(uuid)));
+					this->addChatWidgetItem(new GroupImageChatWidgetItem(m_group->getMessageByUuid(uuid)));
 					break;
 				case openmittsu::dataproviders::messages::GroupMessageType::LOCATION:
-					this->addChatWidgetItem(new GroupLocationChatWidgetItem(m_group.getMessageByUuid(uuid)));
+					this->addChatWidgetItem(new GroupLocationChatWidgetItem(m_group->getMessageByUuid(uuid)));
 					break;
 				case openmittsu::dataproviders::messages::GroupMessageType::POLL:
 					LOGGER()->warn("Can not create poll message item in GUI, not supported yet.");
 					break;
 				case openmittsu::dataproviders::messages::GroupMessageType::SET_IMAGE:
-					this->addChatWidgetItem(new GroupStatusChatWidgetItem(m_group.getMessageByUuid(uuid)));
+					this->addChatWidgetItem(new GroupStatusChatWidgetItem(m_group->getMessageByUuid(uuid)));
 					break;
 				case openmittsu::dataproviders::messages::GroupMessageType::SET_TITLE:
-					this->addChatWidgetItem(new GroupStatusChatWidgetItem(m_group.getMessageByUuid(uuid)));
+					this->addChatWidgetItem(new GroupStatusChatWidgetItem(m_group->getMessageByUuid(uuid)));
 					break;
 				case openmittsu::dataproviders::messages::GroupMessageType::SYNC_REQUEST:
-					this->addChatWidgetItem(new GroupStatusChatWidgetItem(m_group.getMessageByUuid(uuid)));
+					this->addChatWidgetItem(new GroupStatusChatWidgetItem(m_group->getMessageByUuid(uuid)));
 					break;
 				case openmittsu::dataproviders::messages::GroupMessageType::TEXT:
-					this->addChatWidgetItem(new GroupTextChatWidgetItem(m_group.getMessageByUuid(uuid)));
+					this->addChatWidgetItem(new GroupTextChatWidgetItem(m_group->getMessageByUuid(uuid)));
 					break;
 				case openmittsu::dataproviders::messages::GroupMessageType::VIDEO:
 					LOGGER()->warn("Can not create video message item in GUI, not supported yet.");
@@ -103,7 +102,7 @@ namespace openmittsu {
 		}
 
 		QString SimpleGroupChatTab::getTabName() {
-			return m_group.getTitle();
+			return m_group->getTitle();
 		}
 
 	}

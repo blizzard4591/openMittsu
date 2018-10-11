@@ -23,8 +23,11 @@ namespace openmittsu {
 			void addChatTab(ChatTab* tab);
 		public slots:
 			void onTabNameChanged(ChatTab* tab);
+			void onTabHasUnreadMessages(ChatTab* tab);
 		signals:
 			void hasUnreadMessages();
+		protected:
+			virtual void tabInserted(int index) override;
 		private:
 			class IconSet {
 			public:

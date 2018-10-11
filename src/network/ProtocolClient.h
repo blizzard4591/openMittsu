@@ -17,9 +17,11 @@
 
 #include "src/crypto/KeyPair.h"
 #include "src/crypto/PublicKey.h"
+#include "src/database/DatabaseWrapperFactory.h"
 #include "src/network/ServerConfiguration.h"
-#include "src/network/MessageCenterWrapper.h"
-#include "src/utility/OptionMaster.h"
+#include "src/dataproviders/MessageCenterWrapperFactory.h"
+#include "src/dataproviders/MessageCenterWrapper.h"
+#include "src/options/OptionReaderFactory.h"
 #include "src/network/MissingIdentityProcessor.h"
 
 #include "src/acknowledgments/AcknowledgmentProcessor.h"
@@ -58,7 +60,7 @@ namespace openmittsu {
 			Q_OBJECT
 
 		public:
-			ProtocolClient(std::shared_ptr<openmittsu::crypto::FullCryptoBox> cryptoBox, openmittsu::protocol::ContactId const& ourContactId, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster, std::shared_ptr<openmittsu::network::MessageCenterWrapper> const& messageCenterWrapper, openmittsu::protocol::PushFromId const& pushFromId);
+			ProtocolClient(openmittsu::database::DatabaseWrapperFactory const& databaseFactory, openmittsu::protocol::ContactId const& ourContactId, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, openmittsu::options::OptionReaderFactory const& optionReaderFactory, openmittsu::dataproviders::MessageCenterWrapperFactory const& messageCenterWrapperFactory, openmittsu::protocol::PushFromId const& pushFromId);
 			virtual ~ProtocolClient();
 			bool getIsConnected() const;
 
@@ -100,8 +102,10 @@ namespace openmittsu {
 			void keepAliveTimerOnTimer();
 			void callbackTaskFinished(openmittsu::tasks::CallbackTask* callbackTask);
 		private:
+			openmittsu::database::DatabaseWrapperFactory m_databaseWrapperFactory;
 			std::shared_ptr<openmittsu::crypto::FullCryptoBox> m_cryptoBox;
-			std::shared_ptr<openmittsu::network::MessageCenterWrapper> const m_messageCenterWrapper;
+			openmittsu::dataproviders::MessageCenterWrapperFactory const m_messageCenterWrapperFactory;
+			std::shared_ptr<openmittsu::dataproviders::MessageCenterWrapper> m_messageCenterWrapper;
 			std::unique_ptr<openmittsu::protocol::PushFromId> m_pushFromIdPtr;
 
 			bool m_isSetupDone;
@@ -114,7 +118,8 @@ namespace openmittsu {
 			std::unique_ptr<QNetworkSession> m_networkSession;
 			openmittsu::protocol::ContactId const m_ourContactId;
 			std::shared_ptr<openmittsu::network::ServerConfiguration> m_serverConfiguration;
-			std::shared_ptr<openmittsu::utility::OptionMaster> m_optionMaster;
+			openmittsu::options::OptionReaderFactory m_optionReaderFactory;
+			std::unique_ptr<openmittsu::options::OptionReader> m_optionReader;
 
 			// Outgoing Message List
 			QList<QByteArray> outgoingMessages;

@@ -13,7 +13,7 @@
 namespace openmittsu {
 	namespace dialogs {
 
-		OptionsDialog::OptionsDialog(std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster, QWidget* parent) : QDialog(parent), m_ui(new Ui::OptionsDialog), m_optionMaster(optionMaster) {
+		OptionsDialog::OptionsDialog(std::shared_ptr<openmittsu::options::OptionMaster> const& optionMaster, QWidget* parent) : QDialog(parent), m_ui(new Ui::OptionsDialog), m_optionMaster(optionMaster) {
 			m_ui->setupUi(this);
 
 			int nWidth = 300;
@@ -26,11 +26,11 @@ namespace openmittsu {
 
 			// Generate UI
 
-			QList<openmittsu::utility::OptionMaster::OptionGroups> const groups = m_optionMaster->m_groupToOptionsMap.uniqueKeys();
+			QList<openmittsu::options::OptionGroups> const groups = m_optionMaster->m_groupToOptionsMap.uniqueKeys();
 
 			// Groups
 			for (int i = 0, sizeKeys = groups.size(); i < sizeKeys; ++i) {
-				QList<openmittsu::utility::OptionMaster::Options> const values = optionMaster->m_groupToOptionsMap.values(groups.at(i));
+				QList<openmittsu::options::Options> const values = optionMaster->m_groupToOptionsMap.values(groups.at(i));
 				if (!optionMaster->m_groupToNameMap.contains(groups.at(i))) {
 					continue;
 				}
@@ -52,11 +52,11 @@ namespace openmittsu {
 
 
 				for (int j = 0; j < sizeValues; ++j) {
-					openmittsu::utility::OptionMaster::Options const option = values.at(j);
-					openmittsu::utility::OptionMaster::OptionContainer const optionData = optionMaster->m_optionToOptionContainerMap.value(option);
+					openmittsu::options::Options const option = values.at(j);
+					openmittsu::options::OptionContainer const optionData = optionMaster->m_optionToOptionContainerMap.value(option);
 					LOGGER_DEBUG("Option: {}", optionData.name.toStdString());
 
-					if (optionData.type == openmittsu::utility::OptionMaster::OptionTypes::TYPE_BOOL) {
+					if (optionData.type == openmittsu::options::OptionTypes::TYPE_BOOL) {
 						QCheckBox* cbox = new QCheckBox();
 						cbox->setChecked(optionMaster->getOptionAsBool(option));
 						cbox->setText(optionData.description);
@@ -67,7 +67,7 @@ namespace openmittsu {
 
 						optionToWidgetMap.insert(option, ow);
 						layout->addWidget(cbox);
-					} else if (optionData.type == openmittsu::utility::OptionMaster::OptionTypes::TYPE_FILEPATH) {
+					} else if (optionData.type == openmittsu::options::OptionTypes::TYPE_FILEPATH) {
 						QLineEdit* edt = new QLineEdit();
 						edt->setText(optionMaster->getOptionAsQString(option));
 						edt->setToolTip(optionData.description);
@@ -95,12 +95,12 @@ namespace openmittsu {
 		}
 
 		void OptionsDialog::saveOptions() {
-			QHash<openmittsu::utility::OptionMaster::Options, OptionWidget>::const_iterator i = optionToWidgetMap.constBegin();
+			QHash<openmittsu::options::Options, OptionWidget>::const_iterator i = optionToWidgetMap.constBegin();
 			while (i != optionToWidgetMap.constEnd()) {
-				if (i.value().type == openmittsu::utility::OptionMaster::OptionTypes::TYPE_BOOL) {
+				if (i.value().type == openmittsu::options::OptionTypes::TYPE_BOOL) {
 					bool const value = i.value().cboxPtr->isChecked();
 					m_optionMaster->setOption(i.key(), value);
-				} else if (i.value().type == openmittsu::utility::OptionMaster::OptionTypes::TYPE_FILEPATH) {
+				} else if (i.value().type == openmittsu::options::OptionTypes::TYPE_FILEPATH) {
 					QString const value = i.value().edtPtr->text();
 					m_optionMaster->setOption(i.key(), value);
 				} else {

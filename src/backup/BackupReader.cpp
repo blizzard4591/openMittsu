@@ -7,6 +7,7 @@
 
 #include "src/backup/FileReader.h"
 
+#include "src/backup/IdentityBackup.h"
 #include "src/backup/IdentityBackupObject.h"
 #include "src/backup/ContactBackupObject.h"
 #include "src/backup/GroupBackupObject.h"
@@ -18,6 +19,8 @@
 #include "src/backup/GroupMediaItemBackupObject.h"
 #include "src/backup/GroupThumbnailMediaItemBackupObject.h"
 #include "src/backup/GroupAvatarMediaItemBackupObject.h"
+
+#include "src/database/SimpleDatabase.h"
 
 #include "src/exceptions/InvalidInputException.h"
 #include "src/utility/Logging.h"
@@ -50,34 +53,48 @@ namespace openmittsu {
 				// This will throw if the password/backup is invalid.
 				IdentityBackup const identityBackup = IdentityBackup::fromBackupString(identityBackupString, m_backupPassword);
 
-				std::shared_ptr<openmittsu::database::Database> const database = std::make_shared<openmittsu::database::Database>(m_databaseFilename, identityBackup.getClientContactId(), identityBackup.getClientLongTermKeyPair(), m_databasePassword, m_mediaStorageLocation);
+				std::shared_ptr<openmittsu::database::SimpleDatabase> const database = std::make_shared<openmittsu::database::SimpleDatabase>(m_databaseFilename, identityBackup.getClientContactId(), identityBackup.getClientLongTermKeyPair(), m_databasePassword, m_mediaStorageLocation);
 
 				{
 					FileReader<ContactBackupObject> fileReader(m_backupFilePath, QStringLiteral("contacts.csv"));
+					QSet<openmittsu::protocol::ContactId> knownContacts;
+					QVector<openmittsu::database::NewContactData> newContacts;
+
 					while (fileReader.hasNext()) {
 						ContactBackupObject const cbo = fileReader.getNext();
-						if (!database->hasContact(cbo.getContactId())) {
-							database->storeNewContact(cbo.getContactId(), cbo.getPublicKey(), cbo.getVerificationStatus(), cbo.getFirstName(), cbo.getLastName(), cbo.getNickName(), cbo.getColor());
+						if (!knownContacts.contains(cbo.getContactId())) {
+							knownContacts.insert(cbo.getContactId());
+							openmittsu::database::NewContactData newContact(cbo.getContactId(), cbo.getPublicKey(), cbo.getVerificationStatus(), cbo.getFirstName(), cbo.getLastName(), cbo.getNickName(), cbo.getColor());
+							newContacts.append(newContact);
 						} else {
 							LOGGER()->warn("Contact {} is already in database, this should not happen!", cbo.getContactId().toString());
 						}
 						contacts.append(cbo);
 					}
+					database->storeNewContact(newContacts);
+
 					LOGGER()->info("Parsed {} contacts from file.", contacts.size());
 					emit progressUpdated(5);
 				}
 
 				{
 					FileReader<GroupBackupObject> fileReader(m_backupFilePath, QStringLiteral("groups.csv"));
+					QSet<openmittsu::protocol::GroupId> knownGroups;
+					QVector<openmittsu::database::NewGroupData> newGroups;
+
 					while (fileReader.hasNext()) {
 						GroupBackupObject const gbo = fileReader.getNext();
-						if (!database->hasGroup(gbo.getGroupId())) {
-							database->storeNewGroup(gbo.getGroupId(), gbo.getName(), gbo.getCreatedAt(), gbo.getMembers(), gbo.getIsDeleted(), false);
+						if (!knownGroups.contains(gbo.getGroupId())) {
+							knownGroups.insert(gbo.getGroupId());
+							openmittsu::database::NewGroupData newGroup(gbo.getGroupId(), gbo.getName(), gbo.getCreatedAt(), gbo.getMembers(), gbo.getIsDeleted(), false);
+							newGroups.append(newGroup);
 						} else {
 							LOGGER()->warn("Group {} is already in database, this should not happen!", gbo.getGroupId().toString());
 						}
 						groups.append(gbo);
 					}
+					database->storeNewGroup(newGroups);
+
 					LOGGER()->info("Parsed {} groups from file.", groups.size());
 					emit progressUpdated(10);
 				}

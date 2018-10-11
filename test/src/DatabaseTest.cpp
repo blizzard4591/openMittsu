@@ -14,9 +14,9 @@ TEST_F(DatabaseTestFramework, createNew) {
 	ASSERT_EQ(0, db->getGroupCount());
 	ASSERT_EQ(1, db->getContactCount());
 
-	openmittsu::backup::IdentityBackup const backupData = db->getBackup();
-	ASSERT_EQ(selfContactId, backupData.getClientContactId());
-	ASSERT_EQ(selfKeyPair, backupData.getClientLongTermKeyPair());
+	std::shared_ptr<openmittsu::backup::IdentityBackup> const backupData = db->getBackup();
+	ASSERT_EQ(selfContactId, backupData->getClientContactId());
+	ASSERT_EQ(selfKeyPair, backupData->getClientLongTermKeyPair());
 
 	openmittsu::protocol::GroupId nonExistantGroupId(selfContactId, 0);
 	ASSERT_FALSE(db->hasGroup(nonExistantGroupId));
@@ -67,11 +67,12 @@ TEST_F(DatabaseTestFramework, contacts) {
 	openmittsu::crypto::PublicKey const publicKeyIdCFromDatabase = db->getContactPublicKey(contactIdC);
 
 	ASSERT_EQ(contactIdCPublicKey, publicKeyIdCFromDatabase);
-	ASSERT_EQ(QString(""), db->getContactNickname(contactIdC));
+	openmittsu::database::ContactData cData = db->getContactData(contactIdC, true);
+	ASSERT_EQ(QString(""), cData.nickNameRaw);
 	ASSERT_EQ(openmittsu::protocol::ContactStatus::KNOWN, db->getContactStatus(contactIdC));
-	ASSERT_EQ(openmittsu::protocol::AccountStatus::STATUS_UNKNOWN, db->getContactAccountStatus(contactIdC));
-	ASSERT_EQ(openmittsu::protocol::ContactIdVerificationStatus::VERIFICATION_STATUS_UNVERIFIED, db->getContactVerficationStatus(contactIdC));
-	ASSERT_EQ(openmittsu::protocol::FeatureLevel::LEVEL_UNKNOW , db->getContactFeatureLevel(contactIdC));
+	ASSERT_EQ(openmittsu::protocol::AccountStatus::STATUS_UNKNOWN, cData.accountStatus);
+	ASSERT_EQ(openmittsu::protocol::ContactIdVerificationStatus::VERIFICATION_STATUS_UNVERIFIED, cData.verificationStatus);
+	ASSERT_EQ(openmittsu::protocol::FeatureLevel::LEVEL_UNKNOW, cData.featureLevel);
 
 	QSet<openmittsu::protocol::ContactId> const knownContacts = db->getKnownContacts();
 	ASSERT_EQ(2, knownContacts.size());
@@ -90,33 +91,38 @@ TEST_F(DatabaseTestFramework, contacts) {
 	ASSERT_EQ(3, db->getContactCount());
 
 	QString const newNickname(QStringLiteral("testNickName"));
-	ASSERT_THROW(db->setContactNickname(nonExistantContactId, newNickname), openmittsu::exceptions::InternalErrorException);
-	ASSERT_NO_THROW(db->setContactNickname(contactIdC, newNickname));
-	ASSERT_EQ(newNickname, db->getContactNickname(contactIdC));
+	ASSERT_THROW(db->setContactNickName(nonExistantContactId, newNickname), openmittsu::exceptions::InternalErrorException);
+	ASSERT_NO_THROW(db->setContactNickName(contactIdC, newNickname));
+	cData = db->getContactData(contactIdC, true);
+	ASSERT_EQ(newNickname, cData.nickName);
 
 	openmittsu::protocol::AccountStatus const newContactIdStatus = openmittsu::protocol::AccountStatus::STATUS_ACTIVE;
 	ASSERT_THROW(db->setContactAccountStatus(nonExistantContactId, newContactIdStatus), openmittsu::exceptions::InternalErrorException);
 	ASSERT_NO_THROW(db->setContactAccountStatus(contactIdC, newContactIdStatus));
-	ASSERT_EQ(newContactIdStatus, db->getContactAccountStatus(contactIdC));
+	cData = db->getContactData(contactIdC, true);
+	ASSERT_EQ(newContactIdStatus, cData.accountStatus);
 
 	openmittsu::protocol::ContactIdVerificationStatus const newContactIdVerificationStatus = openmittsu::protocol::ContactIdVerificationStatus::VERIFICATION_STATUS_FULLY_VERIFIED;
-	ASSERT_THROW(db->setContactVerficationStatus(nonExistantContactId, newContactIdVerificationStatus), openmittsu::exceptions::InternalErrorException);
-	ASSERT_NO_THROW(db->setContactVerficationStatus(contactIdC, newContactIdVerificationStatus));
-	ASSERT_EQ(newContactIdVerificationStatus, db->getContactVerficationStatus(contactIdC));
+	ASSERT_THROW(db->setContactVerificationStatus(nonExistantContactId, newContactIdVerificationStatus), openmittsu::exceptions::InternalErrorException);
+	ASSERT_NO_THROW(db->setContactVerificationStatus(contactIdC, newContactIdVerificationStatus));
+	cData = db->getContactData(contactIdC, true);
+	ASSERT_EQ(newContactIdVerificationStatus, cData.verificationStatus);
 
 	openmittsu::protocol::FeatureLevel const newContactFeatureLevel = openmittsu::protocol::FeatureLevel::LEVEL_3;
 	ASSERT_THROW(db->setContactFeatureLevel(nonExistantContactId, newContactFeatureLevel), openmittsu::exceptions::InternalErrorException);
 	ASSERT_NO_THROW(db->setContactFeatureLevel(contactIdC, newContactFeatureLevel));
-	ASSERT_EQ(newContactFeatureLevel, db->getContactFeatureLevel(contactIdC));
+	cData = db->getContactData(contactIdC, true);
+	ASSERT_EQ(newContactFeatureLevel, cData.featureLevel);
 
 	openmittsu::crypto::PublicKey const contactIdDPublicKey = contactIdDKeyPair;
 	openmittsu::crypto::PublicKey const publicKeyIdDFromDatabase = db->getContactPublicKey(contactIdD);
 	ASSERT_EQ(contactIdDPublicKey, publicKeyIdDFromDatabase);
-	ASSERT_EQ(QString(""), db->getContactNickname(contactIdD));
+	openmittsu::database::ContactData dData = db->getContactData(contactIdD, true);
+	ASSERT_EQ(QString(""), dData.nickNameRaw);
 	ASSERT_EQ(openmittsu::protocol::ContactStatus::KNOWN, db->getContactStatus(contactIdD));
-	ASSERT_EQ(openmittsu::protocol::AccountStatus::STATUS_UNKNOWN, db->getContactAccountStatus(contactIdD));
-	ASSERT_EQ(openmittsu::protocol::ContactIdVerificationStatus::VERIFICATION_STATUS_UNVERIFIED, db->getContactVerficationStatus(contactIdD));
-	ASSERT_EQ(openmittsu::protocol::FeatureLevel::LEVEL_UNKNOW, db->getContactFeatureLevel(contactIdD));
+	ASSERT_EQ(openmittsu::protocol::AccountStatus::STATUS_UNKNOWN, dData.accountStatus);
+	ASSERT_EQ(openmittsu::protocol::ContactIdVerificationStatus::VERIFICATION_STATUS_UNVERIFIED, dData.verificationStatus);
+	ASSERT_EQ(openmittsu::protocol::FeatureLevel::LEVEL_UNKNOW, dData.featureLevel);
 }
 
 TEST_F(DatabaseTestFramework, contactMessages) {
@@ -161,9 +167,9 @@ TEST_F(DatabaseTestFramework, contactMessages) {
 	openmittsu::protocol::ContactId nonExistantContactId(QStringLiteral("XXXXXXXX"));
 	ASSERT_THROW(db->getMessageCursor(nonExistantContactId), openmittsu::exceptions::InternalErrorException);
 
-	openmittsu::database::DatabaseContactMessageCursor cursorB = db->getMessageCursor(contactIdB);
-	openmittsu::database::DatabaseContactMessageCursor cursorC = db->getMessageCursor(contactIdC);
-	openmittsu::database::DatabaseContactMessageCursor cursorD = db->getMessageCursor(contactIdD);
+	openmittsu::database::internal::DatabaseContactMessageCursor cursorB = db->getMessageCursor(contactIdB);
+	openmittsu::database::internal::DatabaseContactMessageCursor cursorC = db->getMessageCursor(contactIdC);
+	openmittsu::database::internal::DatabaseContactMessageCursor cursorD = db->getMessageCursor(contactIdD);
 	ASSERT_FALSE(cursorB.isValid());
 	ASSERT_FALSE(cursorC.isValid());
 	ASSERT_FALSE(cursorD.isValid());
@@ -345,20 +351,27 @@ TEST_F(DatabaseTestFramework, groups) {
 	ASSERT_TRUE(groupCmembers.contains(contactIdC));
 	ASSERT_TRUE(groupCmembers.contains(contactIdD));
 
-	ASSERT_THROW(db->getGroupTitle(nonExistantGroupId), openmittsu::exceptions::InternalErrorException);
+	ASSERT_THROW(db->getGroupData(nonExistantGroupId, false), openmittsu::exceptions::InternalErrorException);
 	QString const emptyString(QStringLiteral(""));
-	ASSERT_EQ(emptyString, db->getGroupTitle(groupA));
-	ASSERT_EQ(emptyString, db->getGroupTitle(groupB));
-	ASSERT_EQ(emptyString, db->getGroupTitle(groupC));
+
+	openmittsu::database::GroupData dataGroupA = db->getGroupData(groupA, false);
+	ASSERT_EQ(emptyString, dataGroupA.title);
+	openmittsu::database::GroupData dataGroupB = db->getGroupData(groupB, false);
+	ASSERT_EQ(emptyString, dataGroupB.title);
+	openmittsu::database::GroupData dataGroupC = db->getGroupData(groupC, false);
+	ASSERT_EQ(emptyString, dataGroupC.title);
 
 	QString const newGroupTitle(QStringLiteral("testTitle"));
 	openmittsu::protocol::MessageId const messageB = this->getFreeMessageId();
 	ASSERT_THROW(db->storeReceivedGroupSetTitle(nonExistantGroupId, nonExistantContactId, messageB, openmittsu::protocol::MessageTime::fromDatabase(123), openmittsu::protocol::MessageTime::fromDatabase(456), newGroupTitle), openmittsu::exceptions::InternalErrorException);
 	ASSERT_NO_THROW(db->storeReceivedGroupSetTitle(groupC, contactIdD, messageB, openmittsu::protocol::MessageTime::fromDatabase(123), openmittsu::protocol::MessageTime::fromDatabase(456), newGroupTitle));
 
-	ASSERT_EQ(emptyString, db->getGroupTitle(groupA));
-	ASSERT_EQ(emptyString, db->getGroupTitle(groupB));
-	ASSERT_EQ(newGroupTitle, db->getGroupTitle(groupC));
+	dataGroupA = db->getGroupData(groupA, false);
+	ASSERT_EQ(emptyString, dataGroupA.title);
+	dataGroupB = db->getGroupData(groupB, false);
+	ASSERT_EQ(emptyString, dataGroupB.title);
+	dataGroupC = db->getGroupData(groupC, false);
+	ASSERT_EQ(newGroupTitle, dataGroupC.title);
 
 	// getKnownGroupsWithMembersAndTitles
 	QHash<openmittsu::protocol::GroupId, std::pair<QSet<openmittsu::protocol::ContactId>, QString>> groupsWithMembersAndTitles;
@@ -381,7 +394,7 @@ TEST_F(DatabaseTestFramework, groups) {
 	ASSERT_EQ(emptyString, groupsWithMembersAndTitles.constFind(groupB)->second);
 	ASSERT_EQ(newGroupTitle, groupsWithMembersAndTitles.constFind(groupC)->second);
 
-	QSet<openmittsu::protocol::GroupId> knownGroupsContainingMember;
+	openmittsu::database::GroupToTitleMap knownGroupsContainingMember;
 	ASSERT_THROW(knownGroupsContainingMember = db->getKnownGroupsContainingMember(nonExistantContactId), openmittsu::exceptions::InternalErrorException);
 	ASSERT_NO_THROW(knownGroupsContainingMember = db->getKnownGroupsContainingMember(contactIdC));
 	ASSERT_EQ(2, knownGroupsContainingMember.size());
@@ -392,10 +405,13 @@ TEST_F(DatabaseTestFramework, groups) {
 	ASSERT_TRUE(knownGroupsContainingMember.contains(groupB));
 	ASSERT_TRUE(knownGroupsContainingMember.contains(groupC));
 
-	ASSERT_THROW(db->getGroupImage(nonExistantGroupId), openmittsu::exceptions::InternalErrorException);
-	ASSERT_FALSE(db->getGroupImage(groupA).isAvailable());
-	ASSERT_FALSE(db->getGroupImage(groupB).isAvailable());
-	ASSERT_FALSE(db->getGroupImage(groupC).isAvailable());
+	ASSERT_THROW(db->getGroupData(nonExistantGroupId, false), openmittsu::exceptions::InternalErrorException);
+	dataGroupA = db->getGroupData(groupA, false);
+	ASSERT_FALSE(dataGroupA.hasImage || dataGroupA.image.isAvailable());
+	dataGroupB = db->getGroupData(groupB, false);
+	ASSERT_FALSE(dataGroupB.hasImage || dataGroupB.image.isAvailable());
+	dataGroupC = db->getGroupData(groupC, false);
+	ASSERT_FALSE(dataGroupC.hasImage || dataGroupC.image.isAvailable());
 	ASSERT_EQ(0, db->getMediaItemCount());
 
 	QByteArray const testDataA(QStringLiteral("testDataA").toUtf8());
@@ -403,20 +419,26 @@ TEST_F(DatabaseTestFramework, groups) {
 	ASSERT_THROW(db->storeReceivedGroupSetImage(nonExistantGroupId, nonExistantContactId, messageC, openmittsu::protocol::MessageTime::fromDatabase(123), openmittsu::protocol::MessageTime::fromDatabase(456), testDataA), openmittsu::exceptions::InternalErrorException);
 	ASSERT_NO_THROW(db->storeReceivedGroupSetImage(groupC, contactIdD, messageC, openmittsu::protocol::MessageTime::fromDatabase(123), openmittsu::protocol::MessageTime::fromDatabase(456), testDataA));
 
-	ASSERT_FALSE(db->getGroupImage(groupA).isAvailable());
-	ASSERT_FALSE(db->getGroupImage(groupB).isAvailable());
-	ASSERT_TRUE(db->getGroupImage(groupC).isAvailable());
-	ASSERT_EQ(testDataA, db->getGroupImage(groupC).getData());
+	dataGroupA = db->getGroupData(groupA, false);
+	ASSERT_FALSE(dataGroupA.hasImage || dataGroupA.image.isAvailable());
+	dataGroupB = db->getGroupData(groupB, false);
+	ASSERT_FALSE(dataGroupB.hasImage || dataGroupB.image.isAvailable());
+	dataGroupC = db->getGroupData(groupC, false);
+	ASSERT_TRUE(dataGroupC.hasImage && dataGroupC.image.isAvailable());
+	ASSERT_EQ(testDataA, dataGroupC.image.getData());
 	ASSERT_EQ(2, db->getMediaItemCount());
 
 	QByteArray const testDataB(QStringLiteral("longerTestDataB").toUtf8());
 	openmittsu::protocol::MessageId const messageD = this->getFreeMessageId();
 	ASSERT_NO_THROW(db->storeReceivedGroupSetImage(groupC, contactIdD, messageD, openmittsu::protocol::MessageTime::fromDatabase(789), openmittsu::protocol::MessageTime::fromDatabase(1011), testDataB));
 
-	ASSERT_FALSE(db->getGroupImage(groupA).isAvailable());
-	ASSERT_FALSE(db->getGroupImage(groupB).isAvailable());
-	ASSERT_TRUE(db->getGroupImage(groupC).isAvailable());
-	ASSERT_EQ(testDataB, db->getGroupImage(groupC).getData());
+	dataGroupA = db->getGroupData(groupA, false);
+	ASSERT_FALSE(dataGroupA.hasImage || dataGroupA.image.isAvailable());
+	dataGroupB = db->getGroupData(groupB, false);
+	ASSERT_FALSE(dataGroupB.hasImage || dataGroupB.image.isAvailable());
+	dataGroupC = db->getGroupData(groupC, false);
+	ASSERT_TRUE(dataGroupC.hasImage && dataGroupC.image.isAvailable());
+	ASSERT_EQ(testDataB, dataGroupC.image.getData());
 	ASSERT_EQ(3, db->getMediaItemCount());
 }
 
@@ -464,9 +486,9 @@ TEST_F(DatabaseTestFramework, groupMessages) {
 	openmittsu::protocol::ContactId nonExistantContactId(QStringLiteral("XXXXXXXX"));
 	ASSERT_THROW(db->getMessageCursor(nonExistantContactId), openmittsu::exceptions::InternalErrorException);
 
-	openmittsu::database::DatabaseGroupMessageCursor cursorB = db->getMessageCursor(groupA);
-	openmittsu::database::DatabaseGroupMessageCursor cursorC = db->getMessageCursor(groupB);
-	openmittsu::database::DatabaseGroupMessageCursor cursorD = db->getMessageCursor(groupC);
+	openmittsu::database::internal::DatabaseGroupMessageCursor cursorB = db->getMessageCursor(groupA);
+	openmittsu::database::internal::DatabaseGroupMessageCursor cursorC = db->getMessageCursor(groupB);
+	openmittsu::database::internal::DatabaseGroupMessageCursor cursorD = db->getMessageCursor(groupC);
 	ASSERT_FALSE(cursorB.isValid());
 	ASSERT_FALSE(cursorC.isValid());
 	ASSERT_FALSE(cursorD.isValid());

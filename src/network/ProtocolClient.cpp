@@ -16,7 +16,6 @@
 #include "src/utility/ByteArrayToHexString.h"
 #include "src/utility/Logging.h"
 #include "src/utility/MakeUnique.h"
-#include "src/utility/OptionMaster.h"
 #include "src/utility/QObjectConnectionMacro.h"
 #include "src/utility/ThreadDeleter.h"
 
@@ -44,10 +43,11 @@
 namespace openmittsu {
 	namespace network {
 
-		ProtocolClient::ProtocolClient(std::shared_ptr<openmittsu::crypto::FullCryptoBox> cryptoBox, openmittsu::protocol::ContactId const& ourContactId, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, std::shared_ptr<openmittsu::utility::OptionMaster> const& optionMaster, std::shared_ptr<openmittsu::network::MessageCenterWrapper> const& messageCenterWrapper, openmittsu::protocol::PushFromId const& pushFromId)
-			: QObject(nullptr), m_cryptoBox(std::move(cryptoBox)), m_messageCenterWrapper(messageCenterWrapper), m_pushFromIdPtr(std::make_unique<openmittsu::protocol::PushFromId>(pushFromId)),
-			m_isSetupDone(false), m_isNetworkSessionReady(false), m_isConnected(false), m_isAllowedToSend(false), m_isDisconnecting(false), m_socket(nullptr), m_networkSession(nullptr), m_ourContactId(ourContactId), m_serverConfiguration(serverConfiguration), m_optionMaster(optionMaster), outgoingMessagesTimer(nullptr), acknowledgmentWaitingTimer(nullptr), keepAliveTimer(nullptr), keepAliveCounter(0), failedReconnectAttempts(0) {
+		ProtocolClient::ProtocolClient(openmittsu::database::DatabaseWrapperFactory const& databaseFactory, openmittsu::protocol::ContactId const& ourContactId, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, openmittsu::options::OptionReaderFactory const& optionReaderFactory, openmittsu::dataproviders::MessageCenterWrapperFactory const& messageCenterWrapperFactory, openmittsu::protocol::PushFromId const& pushFromId)
+			: QObject(nullptr), m_databaseWrapperFactory(databaseFactory), m_cryptoBox(nullptr), m_messageCenterWrapperFactory(messageCenterWrapperFactory), m_messageCenterWrapper(nullptr), m_pushFromIdPtr(std::make_unique<openmittsu::protocol::PushFromId>(pushFromId)),
+			m_isSetupDone(false), m_isNetworkSessionReady(false), m_isConnected(false), m_isAllowedToSend(false), m_isDisconnecting(false), m_socket(nullptr), m_networkSession(nullptr), m_ourContactId(ourContactId), m_serverConfiguration(serverConfiguration), m_optionReaderFactory(optionReaderFactory), m_optionReader(nullptr), outgoingMessagesTimer(nullptr), acknowledgmentWaitingTimer(nullptr), keepAliveTimer(nullptr), keepAliveCounter(0), failedReconnectAttempts(0) {
 			// Intentionally left empty.
+			LOGGER_DEBUG("Thread ID in ProtocolClient ctor = {}", QThread::currentThreadId());
 		}
 
 		ProtocolClient::~ProtocolClient() {
@@ -100,7 +100,7 @@ namespace openmittsu {
 			keepAliveTimer->stop();
 			outgoingMessagesTimer->stop();
 
-			if (!m_isDisconnecting && (failedReconnectAttempts < 3) && m_optionMaster->getOptionAsBool(openmittsu::utility::OptionMaster::Options::BOOLEAN_RECONNECT_ON_CONNECTION_LOSS)) {
+			if (!m_isDisconnecting && (failedReconnectAttempts < 3) && m_optionReader->getOptionAsBool(openmittsu::options::Options::BOOLEAN_RECONNECT_ON_CONNECTION_LOSS)) {
 				LOGGER()->info("Trying to reconnect...");
 				connectToServer();
 				return;
@@ -127,11 +127,23 @@ namespace openmittsu {
 
 		void ProtocolClient::setup() {
 			if (!m_isSetupDone) {
+				if (m_cryptoBox == nullptr) {
+					m_cryptoBox = std::make_shared<openmittsu::crypto::FullCryptoBox>(openmittsu::dataproviders::KeyRegistry(m_serverConfiguration->getServerLongTermPublicKey(), m_databaseWrapperFactory.getDatabaseWrapper()));
+				}
+
 				if (m_socket == nullptr) {
 					m_socket = std::make_unique<QTcpSocket>();
 					if (m_socket == nullptr) {
 						return;
 					}
+				}
+
+				if (m_messageCenterWrapper == nullptr) {
+					m_messageCenterWrapper = std::make_shared<openmittsu::dataproviders::MessageCenterWrapper>(m_messageCenterWrapperFactory.getMessageCenterWrapper());
+				}
+
+				if (m_optionReader == nullptr) {
+					m_optionReader = m_optionReaderFactory.getOptionReader();
 				}
 
 				OPENMITTSU_CONNECT(m_socket.get(), readyRead(), this, socketOnReadyRead());
@@ -320,78 +332,75 @@ namespace openmittsu {
 			bytesReceived += newData.size();
 
 			m_readyReadRemainingData.append(newData);
-			int bytesAvailable = m_readyReadRemainingData.size();
 
-			if (bytesAvailable < PROTO_DATA_HEADER_SIZE_LENGTH_BYTES) {
-				// Not enough data, not even the length Bytes!
-				return;
-			}
+			while (m_readyReadRemainingData.size() > 0) {
+				int bytesAvailable = m_readyReadRemainingData.size();
 
-			// Unsigned Two-Byte Integer in Little-Endian
-			quint16 packetLength = openmittsu::utility::Endian::uint16FromLittleEndianToHostEndian(openmittsu::utility::ByteArrayConversions::convert2ByteQByteArrayToQuint16(m_readyReadRemainingData.left(PROTO_DATA_HEADER_SIZE_LENGTH_BYTES)));
-			if (bytesAvailable < static_cast<int>((PROTO_DATA_HEADER_SIZE_LENGTH_BYTES + packetLength))) {
-				// packet not yet complete
-				LOGGER_DEBUG("Deferring, packet not yet complete.");
-				return;
-			}
-
-			// Remove the two length-bytes and packet
-			QByteArray const packet = m_readyReadRemainingData.mid(PROTO_DATA_HEADER_SIZE_LENGTH_BYTES, packetLength);
-			m_readyReadRemainingData = m_readyReadRemainingData.mid(PROTO_DATA_HEADER_SIZE_LENGTH_BYTES + packetLength, -1);
-
-			QByteArray const decodedPacket = m_cryptoBox->decryptFromServer(packet);
-
-			// Update stats
-			messagesReceived += 1;
-
-			// Handle packet
-			// Extract LSB:
-			char const packetTypeByte = decodedPacket.at(0);
-			QByteArray const packetContents = decodedPacket.mid(PROTO_DATA_HEADER_TYPE_LENGTH_BYTES, -1);
-
-			if (packetTypeByte == (PROTO_PACKET_SIGNATURE_SENDING_MSG)) {
-				LOGGER()->warn("Received a SENDING packet.\nThis should _NOT_ happen?!\nPayload: {}", QString(decodedPacket.toHex()).toStdString());
-			} else if (packetTypeByte == (PROTO_PACKET_SIGNATURE_DELIVERING_MSG)) {
-				LOGGER_DEBUG("Received a DELIVERING packet.");
-				openmittsu::messages::MessageWithEncryptedPayload const messageWithEncryptedPayload(openmittsu::messages::MessageWithEncryptedPayload::fromPacket(decodedPacket));
-				//sendClientAcknowlegmentForMessage(messageWithEncryptedPayload);
-
-				handleIncomingMessage(messageWithEncryptedPayload);
-			} else if (packetTypeByte == (PROTO_PACKET_SIGNATURE_KEEPALIVE_ANSWER)) {
-				LOGGER_DEBUG("Received a KEEP_ALIVE_REPLY packet.");
-				handleIncomingKeepAliveAnswer(packetContents);
-			} else if (packetTypeByte == (PROTO_PACKET_SIGNATURE_KEEPALIVE_REQUEST)) {
-				LOGGER_DEBUG("Received a KEEP_ALIVE_REQUEST packet.");
-				handleIncomingKeepAliveRequest(packetContents);
-			} else if (packetTypeByte == (PROTO_PACKET_SIGNATURE_SERVER_ACK)) {
-				// This should be OUR id. Does not make sense, maybe an early error in the server implementation?
-				openmittsu::protocol::ContactId const senderIdentity(packetContents.left(PROTO_IDENTITY_LENGTH_BYTES));
-				openmittsu::protocol::MessageId const messageId(packetContents.right(PROTO_MESSAGE_MESSAGEID_LENGTH_BYTES));
-				if (senderIdentity != m_ourContactId) {
-					LOGGER()->error("Received a SERVER_ACKNOWLEDGE packet for Sender {} and Message #{}, but we are NOT the sender?!", senderIdentity.toString(), messageId.toString());
-				} else {
-					LOGGER_DEBUG("Received a SERVER_ACKNOWLEDGE packet for message #{}.", messageId.toString());
-					handleIncomingAcknowledgment(messageId);
+				if (bytesAvailable < PROTO_DATA_HEADER_SIZE_LENGTH_BYTES) {
+					// Not enough data, not even the length Bytes!
+					return;
 				}
-			} else if (packetTypeByte == (PROTO_PACKET_SIGNATURE_CLIENT_ACK)) {
-				LOGGER()->warn("Received a CLIENT_ACKNOWLEDGE packet: {}", QString(packetContents.toHex()).toStdString());
-			} else if (packetTypeByte == (PROTO_PACKET_SIGNATURE_CONNECTION_ESTABLISHED)) {
-				LOGGER()->info("Received a CONNECTION_ESTABLISHED packet.");
-				m_isAllowedToSend = true;
-				keepAliveCounter = 1;
-				keepAliveTimer->start();
-			} else if (packetTypeByte == (PROTO_PACKET_SIGNATURE_CONNECTION_DUPLICATE)) {
-				LOGGER()->warn("Received a CONNECTION_DUPLICATE warning, we will be forcefully disconnected after this. Message from Server: {}", QString::fromUtf8(packetContents).toStdString());
-				failedReconnectAttempts = std::numeric_limits<decltype(failedReconnectAttempts)>::max();
 
-				emit duplicateIdUsageDetected();
-			} else {
-				LOGGER()->warn("Received an UNKNOWN packet with signature {} and payload {}.", QString(decodedPacket.left(PROTO_DATA_HEADER_TYPE_LENGTH_BYTES).toHex()).toStdString(), QString(decodedPacket.toHex()).toStdString());
-			}
+				// Unsigned Two-Byte Integer in Little-Endian
+				quint16 packetLength = openmittsu::utility::Endian::uint16FromLittleEndianToHostEndian(openmittsu::utility::ByteArrayConversions::convert2ByteQByteArrayToQuint16(m_readyReadRemainingData.left(PROTO_DATA_HEADER_SIZE_LENGTH_BYTES)));
+				if (bytesAvailable < static_cast<int>((PROTO_DATA_HEADER_SIZE_LENGTH_BYTES + packetLength))) {
+					// packet not yet complete
+					LOGGER_DEBUG("Deferring, packet not yet complete.");
+					return;
+				}
 
-			// Check if there is more to do
-			if (m_readyReadRemainingData.size() > 0) {
-				QTimer::singleShot(0, this, SLOT(socketOnReadyRead()));
+				// Remove the two length-bytes and packet
+				QByteArray const packet = m_readyReadRemainingData.mid(PROTO_DATA_HEADER_SIZE_LENGTH_BYTES, packetLength);
+				m_readyReadRemainingData = m_readyReadRemainingData.mid(PROTO_DATA_HEADER_SIZE_LENGTH_BYTES + packetLength, -1);
+
+				QByteArray const decodedPacket = m_cryptoBox->decryptFromServer(packet);
+
+				// Update stats
+				messagesReceived += 1;
+
+				// Handle packet
+				// Extract LSB:
+				char const packetTypeByte = decodedPacket.at(0);
+				QByteArray const packetContents = decodedPacket.mid(PROTO_DATA_HEADER_TYPE_LENGTH_BYTES, -1);
+
+				if (packetTypeByte == (PROTO_PACKET_SIGNATURE_SENDING_MSG)) {
+					LOGGER()->warn("Received a SENDING packet.\nThis should _NOT_ happen?!\nPayload: {}", QString(decodedPacket.toHex()).toStdString());
+				} else if (packetTypeByte == (PROTO_PACKET_SIGNATURE_DELIVERING_MSG)) {
+					LOGGER_DEBUG("Received a DELIVERING packet.");
+					openmittsu::messages::MessageWithEncryptedPayload const messageWithEncryptedPayload(openmittsu::messages::MessageWithEncryptedPayload::fromPacket(decodedPacket));
+
+					handleIncomingMessage(messageWithEncryptedPayload);
+				} else if (packetTypeByte == (PROTO_PACKET_SIGNATURE_KEEPALIVE_ANSWER)) {
+					LOGGER_DEBUG("Received a KEEP_ALIVE_REPLY packet.");
+					handleIncomingKeepAliveAnswer(packetContents);
+				} else if (packetTypeByte == (PROTO_PACKET_SIGNATURE_KEEPALIVE_REQUEST)) {
+					LOGGER_DEBUG("Received a KEEP_ALIVE_REQUEST packet.");
+					handleIncomingKeepAliveRequest(packetContents);
+				} else if (packetTypeByte == (PROTO_PACKET_SIGNATURE_SERVER_ACK)) {
+					// This should be OUR id. Does not make sense, maybe an early error in the server implementation?
+					openmittsu::protocol::ContactId const senderIdentity(packetContents.left(PROTO_IDENTITY_LENGTH_BYTES));
+					openmittsu::protocol::MessageId const messageId(packetContents.right(PROTO_MESSAGE_MESSAGEID_LENGTH_BYTES));
+					if (senderIdentity != m_ourContactId) {
+						LOGGER()->error("Received a SERVER_ACKNOWLEDGE packet for Sender {} and Message #{}, but we are NOT the sender?!", senderIdentity.toString(), messageId.toString());
+					} else {
+						LOGGER_DEBUG("Received a SERVER_ACKNOWLEDGE packet for message #{}.", messageId.toString());
+						handleIncomingAcknowledgment(messageId);
+					}
+				} else if (packetTypeByte == (PROTO_PACKET_SIGNATURE_CLIENT_ACK)) {
+					LOGGER()->warn("Received a CLIENT_ACKNOWLEDGE packet: {}", QString(packetContents.toHex()).toStdString());
+				} else if (packetTypeByte == (PROTO_PACKET_SIGNATURE_CONNECTION_ESTABLISHED)) {
+					LOGGER()->info("Received a CONNECTION_ESTABLISHED packet.");
+					m_isAllowedToSend = true;
+					keepAliveCounter = 1;
+					keepAliveTimer->start();
+				} else if (packetTypeByte == (PROTO_PACKET_SIGNATURE_CONNECTION_DUPLICATE)) {
+					LOGGER()->warn("Received a CONNECTION_DUPLICATE warning, we will be forcefully disconnected after this. Message from Server: {}", QString::fromUtf8(packetContents).toStdString());
+					failedReconnectAttempts = std::numeric_limits<decltype(failedReconnectAttempts)>::max();
+
+					emit duplicateIdUsageDetected();
+				} else {
+					LOGGER()->warn("Received an UNKNOWN packet with signature {} and payload {}.", QString(decodedPacket.left(PROTO_DATA_HEADER_TYPE_LENGTH_BYTES).toHex()).toStdString(), QString(decodedPacket.toHex()).toStdString());
+				}
 			}
 		}
 

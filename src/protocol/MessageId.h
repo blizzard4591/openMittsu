@@ -9,6 +9,10 @@
 #include <QString>
 
 namespace openmittsu {
+	namespace database {
+		class DatabaseWrapper;
+	}
+
 	namespace protocol {
 
 		class MessageId {
@@ -33,6 +37,7 @@ namespace openmittsu {
 
 			friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<MessageId, true>;
 			friend class QVector<MessageId>;
+			friend class openmittsu::database::DatabaseWrapper;
 		private:
 			quint64 messageId;
 			bool isValid;

@@ -8,6 +8,7 @@
 #include "src/backup/IdentityBackup.h"
 #include "src/backup/BackupReader.h"
 #include "src/database/Database.h"
+#include "src/database/SimpleDatabase.h"
 #include "src/utility/LegacyClientConfigurationImporter.h"
 #include "src/utility/MakeUnique.h"
 #include "src/utility/QObjectConnectionMacro.h"
@@ -132,8 +133,8 @@ namespace openmittsu {
 						openmittsu::backup::IdentityBackup data(openmittsu::backup::IdentityBackup::fromBackupString(m_backupString, m_backupPassword));
 
 						m_databaseFileName = "";
-						QString const dbFileName = databaseLocation.absoluteFilePath(openmittsu::database::Database::getDefaultDatabaseFileName());
-						openmittsu::database::Database db(dbFileName, data.getClientContactId(), data.getClientLongTermKeyPair(), databasePassword, databaseLocation);
+						QString const dbFileName = databaseLocation.absoluteFilePath(openmittsu::database::SimpleDatabase::getDefaultDatabaseFileName());
+						openmittsu::database::SimpleDatabase db(dbFileName, data.getClientContactId(), data.getClientLongTermKeyPair(), databasePassword, databaseLocation);
 						m_databaseFileName = dbFileName;
 					} catch (openmittsu::exceptions::BaseException& be) {
 						back();

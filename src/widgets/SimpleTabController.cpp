@@ -39,7 +39,7 @@ namespace openmittsu {
 			return m_groupTabs.value(group);
 		}
 
-		void SimpleTabController::openTab(openmittsu::protocol::ContactId const& contact, openmittsu::dataproviders::BackedContact const& backedContact) {
+		void SimpleTabController::openTab(openmittsu::protocol::ContactId const& contact, std::shared_ptr<openmittsu::dataproviders::BackedContact> const& backedContact) {
 			if (!hasTab(contact)) {
 				ChatTab* chatWindow = new SimpleContactChatTab(backedContact, m_chatTabWidget);
 				m_chatTabWidget->addChatTab(chatWindow);
@@ -50,7 +50,7 @@ namespace openmittsu {
 			}
 		}
 
-		void SimpleTabController::openTab(openmittsu::protocol::GroupId const& group, openmittsu::dataproviders::BackedGroup const& backedGroup) {
+		void SimpleTabController::openTab(openmittsu::protocol::GroupId const& group, std::shared_ptr<openmittsu::dataproviders::BackedGroup> const& backedGroup) {
 			if (!hasTab(group)) {
 				ChatTab* chatWindow = new SimpleGroupChatTab(backedGroup, m_chatTabWidget);
 				m_chatTabWidget->addChatTab(chatWindow);
@@ -114,28 +114,32 @@ namespace openmittsu {
 		}
 
 		void SimpleTabController::slotTabCloseRequested(int index) {
+			if (index == 0) {
+				return;
+			}
+
 			QWidget* const widget = m_chatTabWidget->widget(index);
 			ChatTab* const chatTab = dynamic_cast<ChatTab*>(widget);
 			if (chatTab != nullptr) {
-				QHash<openmittsu::protocol::ContactId, ChatTab*>::const_iterator itContacts = m_contactTabs.constBegin();
-				QHash<openmittsu::protocol::ContactId, ChatTab*>::const_iterator endContacts = m_contactTabs.constEnd();
+				auto itContacts = m_contactTabs.constBegin();
+				auto const endContacts = m_contactTabs.constEnd();
 				for (; itContacts != endContacts; ++itContacts) {
 					if (itContacts.value() == chatTab) {
 						openmittsu::protocol::ContactId const contact = itContacts.key();
-						LOGGER_DEBUG("ChatTab for contact {} is about to be closed, removing from index.", contact.toString());
-						m_contactTabs.remove(contact);
+						LOGGER_DEBUG("ChatTab for contact {} was requested to be closed.", contact.toString());
+						closeTab(contact);
 						return;
 					}
 				}
 
 				// Check groups next
-				QHash<openmittsu::protocol::GroupId, ChatTab*>::const_iterator itGroups = m_groupTabs.constBegin();
-				QHash<openmittsu::protocol::GroupId, ChatTab*>::const_iterator endGroups = m_groupTabs.constEnd();
+				auto itGroups = m_groupTabs.constBegin();
+				auto const endGroups = m_groupTabs.constEnd();
 				for (; itGroups != endGroups; ++itGroups) {
 					if (itGroups.value() == chatTab) {
 						openmittsu::protocol::GroupId const group = itGroups.key();
-						LOGGER_DEBUG("ChatTab for group {} is about to be closed, removing from index.", group.toString());
-						m_groupTabs.remove(group);
+						LOGGER_DEBUG("ChatTab for group {} was requested to be closed.", group.toString());
+						closeTab(group);
 						return;
 					}
 				}

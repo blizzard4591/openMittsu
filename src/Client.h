@@ -19,12 +19,21 @@
 #include "src/updater/Updater.h"
 
 #include "src/database/Database.h"
+#include "src/database/DatabasePointerAuthority.h"
+#include "src/database/DatabaseWrapper.h"
+
+#include "src/dataproviders/MessageCenterPointerAuthority.h"
+#include "src/dataproviders/MessageCenterWrapper.h"
+
+#include "src/utility/ThreadContainer.h"
 
 #include "src/dataproviders/KeyRegistry.h"
 #include "src/widgets/TabController.h"
 
 #include "src/utility/AudioNotification.h"
 #include "src/tasks/CallbackTask.h"
+
+#include "src/options/OptionMaster.h"
 
 class Client : public QMainWindow {
 	Q_OBJECT
@@ -37,6 +46,8 @@ private slots:
 	void btnOpenDatabaseOnClick();
 	void listContactsOnDoubleClick(QListWidgetItem* item);
 	void listContactsOnContextMenu(QPoint const& pos);
+	void listGroupsOnDoubleClick(QListWidgetItem* item);
+	void listGroupsOnContextMenu(QPoint const& pos);
 
 	void menuFileOptionsOnClick();
 	void menuFileShowFirstUseWizardOnClick();
@@ -62,8 +73,16 @@ private slots:
 	void updaterFoundNewVersion(int versionMajor, int versionMinor, int versionPatch, int commitsSinceTag, QString gitHash, QString channel, QString link);
 public slots:
 	void contactRegistryOnIdentitiesChanged();
-	void messageCenterOnHasUnreadMessages(openmittsu::widgets::ChatTab*);
 	void connectionTimerOnTimer();
+
+	void onDatabaseUpdated();
+	void onDatabaseContactChanged(openmittsu::protocol::ContactId const& contact);
+	void onDatabaseGroupChanged(openmittsu::protocol::GroupId const& group);
+	void onDatabaseReceivedNewContactMessage(openmittsu::protocol::ContactId const& contact);
+	void onDatabaseReceivedNewGroupMessage(openmittsu::protocol::GroupId const& group);
+	
+	void onMessageCenterHasUnreadMessageContact(openmittsu::protocol::ContactId const& contact);
+	void onMessageCenterHasUnreadMessageGroup(openmittsu::protocol::GroupId const& group);
 
 	// All messages from the ProtocolClient
 	void protocolClientOnReadyConnect();
@@ -96,10 +115,18 @@ private:
 
 	ConnectionState m_connectionState;
 	std::shared_ptr<openmittsu::widgets::TabController> m_tabController;
-	std::shared_ptr<openmittsu::dataproviders::MessageCenter> m_messageCenter;
+	
+	openmittsu::utility::MessageCenterThreadContainer m_messageCenterThread;
+	openmittsu::dataproviders::MessageCenterPointerAuthority m_messageCenterPointerAuthority;
+	openmittsu::dataproviders::MessageCenterWrapper m_messageCenterWrapper;
+
 	std::shared_ptr<openmittsu::network::ServerConfiguration> m_serverConfiguration;
-	std::shared_ptr<openmittsu::utility::OptionMaster> m_optionMaster;
-	std::shared_ptr<openmittsu::database::Database> m_database;
+	std::shared_ptr<openmittsu::options::OptionMaster> m_optionMaster;
+
+	openmittsu::utility::DatabaseThreadContainer m_databaseThread;
+	openmittsu::database::DatabasePointerAuthority m_databasePointerAuthority;
+	openmittsu::database::DatabaseWrapper m_databaseWrapper;
+
 	std::shared_ptr<openmittsu::utility::AudioNotification> m_audioNotifier;
 
 	void openDatabaseFile(QString const& fileName);
@@ -110,6 +137,7 @@ private:
 	void setupProtocolClient();
 
 	QString formatDuration(quint64 duration) const;
+	void onHasUnreadMessage(openmittsu::widgets::ChatTab* tab);
 };
 
 #endif

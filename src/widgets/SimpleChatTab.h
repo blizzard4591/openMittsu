@@ -43,6 +43,8 @@ namespace openmittsu {
 			void typingTimerOnTimer();
 			void scrollDownChatWidget();
 
+			void onChatWidgetHasUnreadMessages();
+
 			void emojiDoubleClicked(QString const& emoji);
 
 			void fileDownloaderCallbackTaskFinished(openmittsu::tasks::CallbackTask* callbackTask);

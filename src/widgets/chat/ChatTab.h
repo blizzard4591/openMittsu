@@ -20,6 +20,7 @@ namespace openmittsu {
 			virtual QString getTabName() = 0;
 		signals:
 			void tabNameChanged(ChatTab* tab);
+			void hasUnreadMessages(ChatTab* tab);
 		protected:
 			virtual void internalOnNewMessage(QString const& uuid) = 0;
 			virtual void internalOnReceivedFocus() = 0;

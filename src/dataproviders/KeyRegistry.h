@@ -3,6 +3,8 @@
 
 #include "src/crypto/PublicKey.h"
 #include "src/crypto/KeyPair.h"
+#include "src/database/ContactData.h"
+#include "src/database/DatabaseWrapper.h"
 #include "src/protocol/ContactId.h"
 
 #include <QObject>
@@ -12,16 +14,12 @@
 #include <memory>
 
 namespace openmittsu {
-	namespace database {
-		class Database;
-	}
-
 	namespace dataproviders {
 
 		class KeyRegistry : public QObject {
 			Q_OBJECT
 		public:
-			KeyRegistry(openmittsu::crypto::PublicKey const& serverLongTermPublicKey, std::weak_ptr<openmittsu::database::Database> const& database);
+			KeyRegistry(openmittsu::crypto::PublicKey const& serverLongTermPublicKey, openmittsu::database::DatabaseWrapper const& database);
 			KeyRegistry(KeyRegistry const& other);
 			virtual ~KeyRegistry();
 
@@ -35,7 +33,7 @@ namespace openmittsu {
 		private slots:
 			void onContactChanged();
 		private:
-			KeyRegistry();
+			KeyRegistry() = delete;
 			void invalidateCache();
 			void updateCache();
 
@@ -46,9 +44,9 @@ namespace openmittsu {
 			openmittsu::crypto::KeyPair m_cachedClientLongTermKeyPair;
 			openmittsu::crypto::PublicKey const m_serverLongTermPublicKey;
 
-			QHash<openmittsu::protocol::ContactId, openmittsu::crypto::PublicKey> m_cachedPublicKeys;
+			QHash<openmittsu::protocol::ContactId, openmittsu::database::ContactData> m_cachedPublicKeys;
 
-			std::weak_ptr<openmittsu::database::Database> const m_database;
+			openmittsu::database::DatabaseWrapper m_database;
 		};
 
 	}

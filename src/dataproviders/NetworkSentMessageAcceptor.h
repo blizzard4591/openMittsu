@@ -2,7 +2,6 @@
 #define OPENMITTSU_DATABASE_NETWORKSENTMESSAGEACCEPTOR_H_
 
 #include "src/dataproviders/SentMessageAcceptor.h"
-#include "src/network/ProtocolClient.h"
 
 #include "src/messages/contact/PreliminaryContactMessage.h"
 #include "src/messages/group/PreliminaryGroupMessage.h"
@@ -12,6 +11,10 @@
 #include <memory>
 
 namespace openmittsu {
+	namespace network {
+		class ProtocolClient;
+	}
+
 	namespace test {
 		class MockNetworkSentMessageAcceptor;
 	}

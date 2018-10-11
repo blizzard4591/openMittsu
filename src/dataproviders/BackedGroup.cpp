@@ -9,13 +9,13 @@
 namespace openmittsu {
 	namespace dataproviders {
 
-		BackedGroup::BackedGroup(openmittsu::protocol::GroupId const& groupId, GroupDataProvider& dataProvider, ContactDataProvider& contactDataProvider, openmittsu::dataproviders::MessageCenter& messageCenter) : m_groupId(groupId), m_dataProvider(dataProvider), m_contactDataProvider(contactDataProvider), m_messageCenter(messageCenter), m_cursor(dataProvider.getGroupMessageCursor(groupId)) {
-			OPENMITTSU_CONNECT(&dataProvider, groupChanged(openmittsu::protocol::GroupId const&), this, slotGroupChanged(openmittsu::protocol::GroupId const&));
-			OPENMITTSU_CONNECT(&dataProvider, contactChanged(openmittsu::protocol::ContactId const&), this, slotIdentityChanged(openmittsu::protocol::ContactId const&));
-			OPENMITTSU_CONNECT(&dataProvider, groupHasNewMessage(openmittsu::protocol::GroupId const&, QString const&), this, slotNewMessage(openmittsu::protocol::GroupId const&, QString const&));
+		BackedGroup::BackedGroup(openmittsu::protocol::GroupId const& groupId, openmittsu::database::DatabaseWrapper const& database, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter, BackedContactAndGroupPool& pool) : m_groupId(groupId), m_database(database), m_messageCenter(messageCenter), m_pool(pool), m_groupData(m_database.getGroupData(m_groupId, true)) {
+			OPENMITTSU_CONNECT(&m_database, groupChanged(openmittsu::protocol::GroupId const&), this, slotGroupChanged(openmittsu::protocol::GroupId const&));
+			OPENMITTSU_CONNECT(&m_database, contactChanged(openmittsu::protocol::ContactId const&), this, slotIdentityChanged(openmittsu::protocol::ContactId const&));
+			OPENMITTSU_CONNECT(&m_database, groupHasNewMessage(openmittsu::protocol::GroupId const&, QString const&), this, slotNewMessage(openmittsu::protocol::GroupId const&, QString const&));
 		}
 
-		BackedGroup::BackedGroup(BackedGroup const& other) : BackedGroup(other.m_groupId, other.m_dataProvider, other.m_contactDataProvider, other.m_messageCenter) {
+		BackedGroup::BackedGroup(BackedGroup const& other) : BackedGroup(other.m_groupId, other.m_database, other.m_messageCenter, other.m_pool) {
 			//
 		}
 
@@ -24,28 +24,27 @@ namespace openmittsu {
 		}
 
 		QString BackedGroup::getTitle() const {
-			return m_dataProvider.getGroupTitle(m_groupId);
+			return m_groupData.title;
 		}
 
 		QString BackedGroup::getDescription() const {
-			return m_dataProvider.getGroupDescription(m_groupId);
+			return m_groupData.description;
 		}
 
 		int BackedGroup::getMessageCount() const {
-			return m_dataProvider.getGroupMessageCount(m_groupId);
+			return m_groupData.messageCount;
 		}
 
 		openmittsu::database::MediaFileItem BackedGroup::getImage() const {
-			return m_dataProvider.getGroupImage(m_groupId);
+			return m_groupData.image;
 		}
 
 		bool BackedGroup::hasImage() const {
-			return m_dataProvider.getGroupHasImage(m_groupId);
+			return m_groupData.hasImage;
 		}
 
 		bool BackedGroup::hasMember(openmittsu::protocol::ContactId const& identity) const {
-			QSet<openmittsu::protocol::ContactId> const members = getMembers();
-			return members.contains(identity);
+			return m_groupData.members.contains(identity);
 		}
 
 		openmittsu::protocol::GroupId const& BackedGroup::getId() const {
@@ -53,29 +52,19 @@ namespace openmittsu {
 		}
 
 		QSet<openmittsu::protocol::ContactId> BackedGroup::getMembers() const {
-			return m_dataProvider.getGroupMembers(m_groupId, false);
-		}
-
-		void BackedGroup::setGroupTitle(QString const& newTitle) {
-			m_dataProvider.setGroupTitle(m_groupId, newTitle);
-		}
-
-		void BackedGroup::setGroupImage(QByteArray const& newImage) {
-			m_dataProvider.setGroupImage(m_groupId, newImage);
-		}
-
-		void BackedGroup::setGroupMembers(QSet<openmittsu::protocol::ContactId> const& newMembers) {
-			m_dataProvider.setGroupMembers(m_groupId, newMembers);
+			return m_groupData.members;
 		}
 
 		void BackedGroup::slotGroupChanged(openmittsu::protocol::GroupId const& changedGroupId) {
 			if (changedGroupId == m_groupId) {
+				m_groupData = m_database.getGroupData(m_groupId, true);
 				emit groupDataChanged();
 			}
 		}
 
 		void BackedGroup::slotIdentityChanged(openmittsu::protocol::ContactId const& changedContactId) {
 			if (m_groupId.getOwner() == changedContactId || hasMember(changedContactId)) {
+				m_groupData = m_database.getGroupData(m_groupId, true);
 				emit groupDataChanged();
 			}
 		}
@@ -83,6 +72,9 @@ namespace openmittsu {
 		void BackedGroup::slotNewMessage(openmittsu::protocol::GroupId const& group, QString const& messageUuid) {
 			if (group == m_groupId) {
 				emit newMessageAvailable(messageUuid);
+
+				m_groupData = m_database.getGroupData(m_groupId, true);
+				emit groupDataChanged();
 			}
 		}
 
@@ -99,16 +91,16 @@ namespace openmittsu {
 		}
 
 		QVector<QString> BackedGroup::getLastMessageUuids(std::size_t n) {
-			return m_cursor->getLastMessages(n);
+			return m_database.getLastMessageUuids(m_groupId, n);
 		}
 
 		BackedGroupMessage BackedGroup::getMessageByUuid(QString const& uuid) {
-			if (!m_cursor->seekByUuid(uuid)) {
-				throw openmittsu::exceptions::InternalErrorException() << "Can not return message with UUID " << uuid.toStdString() << " as it does not exist.";
-			}
-			auto message = m_cursor->getMessage();
+			auto message = m_database.getGroupMessage(m_groupId, uuid);
+			return BackedGroupMessage(*message, m_pool.getBackedContact(message->getSender(), m_database, m_messageCenter), m_pool.getBackedGroup(m_groupId, m_database, m_messageCenter), m_messageCenter);
+		}
 
-			return BackedGroupMessage(message, m_contactDataProvider.getContact(message->getSender(), m_messageCenter), m_messageCenter);
+		openmittsu::database::DatabaseReadonlyGroupMessage BackedGroup::fetchMessageByUuid(QString const& uuid) {
+			return *m_database.getGroupMessage(m_groupId, uuid);
 		}
 
 	}

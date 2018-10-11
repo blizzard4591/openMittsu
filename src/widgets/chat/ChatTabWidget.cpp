@@ -15,6 +15,9 @@ namespace openmittsu {
 		ChatTabWidget::ChatTabWidget(QWidget* parent) : QTabWidget(parent), standardColor(this->palette().color(QPalette::Foreground)), blinkColor(Qt::red), lastActiveIndex(-1) {
 			OPENMITTSU_CONNECT(&blinkTimer, timeout(), this, blinkTimerOnTimer());
 			OPENMITTSU_CONNECT(this, currentChanged(int), this, slotCurrentChanged(int));
+
+			// Make closable
+			this->setTabsClosable(true);
 		}
 
 		void ChatTabWidget::setTabBlinking(int index, bool doBlink) {
@@ -77,6 +80,7 @@ namespace openmittsu {
 			if (tab != nullptr) {
 				this->addTab(tab, tab->getTabName());
 				OPENMITTSU_CONNECT(tab, tabNameChanged(ChatTab*), this, onTabNameChanged(ChatTab*));
+				OPENMITTSU_CONNECT(tab, hasUnreadMessages(ChatTab*), this, onTabHasUnreadMessages(ChatTab*));
 			}
 		}
 
@@ -84,9 +88,16 @@ namespace openmittsu {
 			if (tab == nullptr) {
 				return;
 			}
-			int index = this->indexOf(tab);
+			auto const index = this->indexOf(tab);
 			if (index > -1) {
 				this->setTabText(index, tab->getTabName());
+			}
+		}
+
+		void ChatTabWidget::onTabHasUnreadMessages(ChatTab* tab) {
+			auto const index = this->indexOf(tab);
+			if (index > -1) {
+				this->setTabBlinking(index, true);
 			}
 		}
 
@@ -94,6 +105,7 @@ namespace openmittsu {
 			if (index != -1) {
 				ChatTab* const chatTab = dynamic_cast<ChatTab*>(this->widget(index));
 				if (chatTab != nullptr) {
+					this->setTabBlinking(index, false);
 					chatTab->onReceivedFocus();
 				}
 
@@ -105,6 +117,18 @@ namespace openmittsu {
 				}
 			}
 			lastActiveIndex = index;
+		}
+
+		// Overrides for tracking first Tab insertion
+		void ChatTabWidget::tabInserted(int index) {
+			if (index == 0) {
+				QTabBar* tabBar = this->tabBar();
+				QWidget* closeButton = tabBar->tabButton(0, QTabBar::ButtonPosition::RightSide);
+				if (closeButton != nullptr) {
+					tabBar->setTabButton(0, QTabBar::ButtonPosition::RightSide, nullptr);
+				}
+			}
+			QTabWidget::tabInserted(index);
 		}
 
 	}

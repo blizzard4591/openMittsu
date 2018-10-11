@@ -1814,13 +1814,13 @@ quint32 QExifImageHeader::writeExifValue(QDataStream &stream, const QExifValue &
 				stream << byte;
 				bytesWritten++;
 			}
-			Q_ASSERT(bytesWritten == value.count());
+			Q_ASSERT(bytesWritten == static_cast<quint32>(value.count()));
 		}
         break;
     case QExifValue::Undefined:
 		if (value.count() > 4) {
 			bytesWritten = stream.device()->write(value.toByteArray());
-			Q_ASSERT(bytesWritten == value.count());
+			Q_ASSERT(bytesWritten == static_cast<quint32>(value.count()));
 		}
         break;
     case QExifValue::Ascii:
@@ -1828,7 +1828,7 @@ quint32 QExifImageHeader::writeExifValue(QDataStream &stream, const QExifValue &
             QByteArray bytes = value.toByteArray();
 
             bytesWritten = stream.writeRawData(bytes.constData(), bytes.size() + 1);
-			Q_ASSERT(bytesWritten == value.count());
+			Q_ASSERT(bytesWritten == static_cast<quint32>(value.count()));
         }
         break;
     case QExifValue::Short:
@@ -1837,7 +1837,7 @@ quint32 QExifImageHeader::writeExifValue(QDataStream &stream, const QExifValue &
 				stream << shrt;
 				bytesWritten += sizeof(quint16);
 			}
-			Q_ASSERT(bytesWritten == (value.count() * sizeof(quint16)));
+			Q_ASSERT(bytesWritten == static_cast<quint32>((value.count() * sizeof(quint16))));
 		}
         break;
     case QExifValue::Long:
@@ -1846,7 +1846,7 @@ quint32 QExifImageHeader::writeExifValue(QDataStream &stream, const QExifValue &
 				stream << lng;
 				bytesWritten += sizeof(quint32);
 			}
-			Q_ASSERT(bytesWritten == (value.count() * sizeof(quint32)));
+			Q_ASSERT(bytesWritten == static_cast<quint32>((value.count() * sizeof(quint32))));
 		}
         break;
     case QExifValue::SignedLong:
@@ -1855,7 +1855,7 @@ quint32 QExifImageHeader::writeExifValue(QDataStream &stream, const QExifValue &
 				stream << lng;
 				bytesWritten += sizeof(qint32);
 			}
-			Q_ASSERT(bytesWritten == (value.count() * sizeof(qint32)));
+			Q_ASSERT(bytesWritten == static_cast<quint32>((value.count() * sizeof(qint32))));
 		}
         break;
     case QExifValue::Rational:
@@ -1864,7 +1864,7 @@ quint32 QExifImageHeader::writeExifValue(QDataStream &stream, const QExifValue &
 				stream << rational;
 				bytesWritten += (2 * sizeof(quint32));
 			}
-			Q_ASSERT(bytesWritten == (value.count() * sizeof(quint32) * 2));
+			Q_ASSERT(bytesWritten == static_cast<quint32>((value.count() * sizeof(quint32) * 2)));
 		}
         break;
     case QExifValue::SignedRational:
@@ -1873,7 +1873,7 @@ quint32 QExifImageHeader::writeExifValue(QDataStream &stream, const QExifValue &
 				stream << rational;
 				bytesWritten += (2 * sizeof(qint32));
 			}
-			Q_ASSERT(bytesWritten == (value.count() * sizeof(qint32) * 2));
+			Q_ASSERT(bytesWritten == static_cast<quint32>((value.count() * sizeof(qint32) * 2)));
 		}
         break;
     default:

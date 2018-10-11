@@ -10,14 +10,14 @@
 namespace openmittsu {
 	namespace dataproviders {
 
-		BackedContact::BackedContact(openmittsu::protocol::ContactId const& contactId, openmittsu::crypto::PublicKey const& contactPublicKey, ContactDataProvider& dataProvider, openmittsu::dataproviders::MessageCenter& messageCenter) : m_contactId(contactId), m_contactPublicKey(contactPublicKey), m_dataProvider(dataProvider), m_messageCenter(messageCenter), m_cursor(dataProvider.getContactMessageCursor(contactId)) {
-			OPENMITTSU_CONNECT(&dataProvider, contactChanged(openmittsu::protocol::ContactId const&), this, slotIdentityChanged(openmittsu::protocol::ContactId const&));
-			OPENMITTSU_CONNECT(&dataProvider, contactHasNewMessage(openmittsu::protocol::ContactId const&, QString const&), this, slotNewMessage(openmittsu::protocol::ContactId const&, QString const&));
-			OPENMITTSU_CONNECT(&dataProvider, contactStartedTyping(openmittsu::protocol::ContactId const&), this, slotContactStartedTyping(openmittsu::protocol::ContactId const&));
-			OPENMITTSU_CONNECT(&dataProvider, contactStoppedTyping(openmittsu::protocol::ContactId const&), this, slotContactStoppedTyping(openmittsu::protocol::ContactId const&));
+		BackedContact::BackedContact(openmittsu::protocol::ContactId const& contactId, openmittsu::database::DatabaseWrapper const& database, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter, BackedContactAndGroupPool& pool) : m_contactId(contactId), m_database(database), m_messageCenter(messageCenter), m_pool(pool), m_contactData(m_database.getContactData(m_contactId, true)) {
+			OPENMITTSU_CONNECT(&m_database, contactChanged(openmittsu::protocol::ContactId const&), this, slotIdentityChanged(openmittsu::protocol::ContactId const&));
+			OPENMITTSU_CONNECT(&m_database, contactHasNewMessage(openmittsu::protocol::ContactId const&, QString const&), this, slotNewMessage(openmittsu::protocol::ContactId const&, QString const&));
+			OPENMITTSU_CONNECT(&m_database, contactStartedTyping(openmittsu::protocol::ContactId const&), this, slotContactStartedTyping(openmittsu::protocol::ContactId const&));
+			OPENMITTSU_CONNECT(&m_database, contactStoppedTyping(openmittsu::protocol::ContactId const&), this, slotContactStoppedTyping(openmittsu::protocol::ContactId const&));
 		}
 
-		BackedContact::BackedContact(BackedContact const& other) : BackedContact(other.m_contactId, other.m_contactPublicKey, other.m_dataProvider, other.m_messageCenter) {
+		BackedContact::BackedContact(BackedContact const& other) : BackedContact(other.m_contactId, other.m_database, other.m_messageCenter, other.m_pool) {
 			//
 		}
 
@@ -26,40 +26,35 @@ namespace openmittsu {
 		}
 
 		QString BackedContact::getName() const {
-			QString const nickname = getNickname();
-			if (nickname.isNull() || nickname.isEmpty()) {
-				return m_contactId.toQString();
-			} else {
-				return QStringLiteral("%1 (%2)").arg(nickname).arg(m_contactId.toQString());
-			}
+			return m_contactData.nickName;
 		}
 
 		QString BackedContact::getFirstName() const {
-			return m_dataProvider.getFirstName(m_contactId);
+			return m_contactData.firstName;
 		}
 
 		QString BackedContact::getLastName() const {
-			return m_dataProvider.getLastName(m_contactId);
+			return m_contactData.lastName;
 		}
 
 		void BackedContact::setNickname(QString const& newNickname) {
-			m_dataProvider.setNickName(getId(), newNickname);
+			m_database.setContactNickName(getId(), newNickname);
 		}
 
 		void BackedContact::setFirstName(QString const& newFirstName) {
-			m_dataProvider.setFirstName(m_contactId, newFirstName);
+			m_database.setContactFirstName(m_contactId, newFirstName);
 		}
 
 		void BackedContact::setLastName(QString const& newLastName) {
-			m_dataProvider.setLastName(m_contactId, newLastName);
+			m_database.setContactLastName(m_contactId, newLastName);
 		}
 
 		QString BackedContact::getNickname() const {
-			return m_dataProvider.getNickName(m_contactId);
+			return m_contactData.nickName;
 		}
 
 		openmittsu::crypto::PublicKey const& BackedContact::getPublicKey() const {
-			return m_contactPublicKey;
+			return m_contactData.publicKey;
 		}
 
 		openmittsu::protocol::ContactId const& BackedContact::getId() const {
@@ -67,15 +62,16 @@ namespace openmittsu {
 		}
 
 		openmittsu::protocol::AccountStatus BackedContact::getActivityStatus() const {
-			return m_dataProvider.getAccountStatus(m_contactId);
+			return m_contactData.accountStatus;
 		}
 
 		int BackedContact::getMessageCount() const {
-			return m_dataProvider.getContactMessageCount(m_contactId);
+			return m_contactData.messageCount;
 		}
 
 		void BackedContact::slotIdentityChanged(openmittsu::protocol::ContactId const& changedContactId) {
 			if (m_contactId == changedContactId) {
+				m_contactData = m_database.getContactData(m_contactId, true);
 				emit contactDataChanged();
 			}
 		}
@@ -83,6 +79,9 @@ namespace openmittsu {
 		void BackedContact::slotNewMessage(openmittsu::protocol::ContactId const& contactId, QString const& messageUuid) {
 			if (m_contactId == contactId) {
 				emit newMessageAvailable(messageUuid);
+
+				m_contactData = m_database.getContactData(m_contactId, true);
+				emit contactDataChanged();
 			}
 		}
 
@@ -115,14 +114,15 @@ namespace openmittsu {
 		}
 
 		QVector<QString> BackedContact::getLastMessageUuids(std::size_t n) {
-			return m_cursor->getLastMessages(n);
+			return m_database.getLastMessageUuids(m_contactId, n);
 		}
 
 		BackedContactMessage BackedContact::getMessageByUuid(QString const& uuid) {
-			if (!m_cursor->seekByUuid(uuid)) {
-				throw openmittsu::exceptions::InternalErrorException() << "Can not return message with UUID " << uuid.toStdString() << " as it does not exist.";
-			}
-			return BackedContactMessage(m_cursor->getMessage(), *this, m_messageCenter);
+			return BackedContactMessage(*m_database.getContactMessage(m_contactId, uuid), m_pool.getBackedContact(m_contactId, m_database, m_messageCenter), m_messageCenter);
+		}
+
+		openmittsu::database::DatabaseReadonlyContactMessage BackedContact::fetchMessageByUuid(QString const& uuid) {
+			return *m_database.getContactMessage(m_contactId, uuid);
 		}
 
 	}

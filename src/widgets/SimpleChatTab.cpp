@@ -1,16 +1,19 @@
 #include "src/widgets/SimpleChatTab.h"
-#include <QListWidgetItem>
+
+#include <QAction>
+#include <QApplication>
+#include <QBuffer>
+#include <QClipboard>
 #include <QDateTime>
 #include <QFile>
 #include <QFileDialog>
-#include <QInputDialog>
-#include <QMessageBox>
+#include <QListWidgetItem>
 #include <QImage>
-#include <QThread>
+#include <QInputDialog>
 #include <QMenu>
-#include <QAction>
-#include <QClipboard>
-#include <QApplication>
+#include <QMessageBox>
+#include <QThread>
+
 
 #include "src/exceptions/InternalErrorException.h"
 #include "src/exceptions/NotConnectedException.h"
@@ -34,6 +37,7 @@ namespace openmittsu {
 			OPENMITTSU_CONNECT(m_ui->btnMenu, clicked(), this, btnMenuOnClick());
 			OPENMITTSU_CONNECT(m_ui->emojiSelector, emojiDoubleClicked(QString const&), this, emojiDoubleClicked(QString const&));
 			OPENMITTSU_CONNECT(&m_typingTimer, timeout(), this, typingTimerOnTimer());
+			OPENMITTSU_CONNECT(this->m_ui->chatWidget, hasUnreadMessages(), this, onChatWidgetHasUnreadMessages());
 
 			m_ui->edtInput->setFocus();
 
@@ -44,6 +48,10 @@ namespace openmittsu {
 		SimpleChatTab::~SimpleChatTab() {
 			//
 			delete m_ui;
+		}
+
+		void SimpleChatTab::onChatWidgetHasUnreadMessages() {
+			emit hasUnreadMessages(this);
 		}
 
 		void SimpleChatTab::loadLastNMessages() {

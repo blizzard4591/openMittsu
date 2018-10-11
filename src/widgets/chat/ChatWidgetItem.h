@@ -28,7 +28,7 @@ namespace openmittsu {
 		class ChatWidgetItem : public QWidget {
 			Q_OBJECT
 		public:
-			ChatWidgetItem(openmittsu::dataproviders::BackedContact const& contact, bool isMessageFromUs, QWidget* parent = nullptr);
+			ChatWidgetItem(std::shared_ptr<openmittsu::dataproviders::BackedContact> const& contact, bool isMessageFromUs, QWidget* parent = nullptr);
 			virtual ~ChatWidgetItem();
 
 			virtual QSize sizeHint() const override;
@@ -65,7 +65,7 @@ namespace openmittsu {
 			static QString preprocessLinks(QString const& text);
 			static void configureLabel(QLabel* label, int fontSize);
 
-			openmittsu::dataproviders::BackedContact m_contact;
+			std::shared_ptr<openmittsu::dataproviders::BackedContact> m_contact;
 		private:
 			QSize m_sizeHint;
 			Ui::ChatWidgetItem* m_ui;

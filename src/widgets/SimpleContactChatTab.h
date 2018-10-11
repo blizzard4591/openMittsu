@@ -16,7 +16,7 @@ namespace openmittsu {
 		class SimpleContactChatTab : public SimpleChatTab {
 			Q_OBJECT
 		public:
-			explicit SimpleContactChatTab(openmittsu::dataproviders::BackedContact const& contact, QWidget* parent = nullptr);
+			explicit SimpleContactChatTab(std::shared_ptr<openmittsu::dataproviders::BackedContact> const& contact, QWidget* parent = nullptr);
 			virtual ~SimpleContactChatTab();
 
 			virtual QString getTabName() override;
@@ -35,7 +35,7 @@ namespace openmittsu {
 			void onContactStartedTyping();
 			void onContactStoppedTyping();
 		private:
-			openmittsu::dataproviders::BackedContact m_contact;
+			std::shared_ptr<openmittsu::dataproviders::BackedContact> m_contact;
 		};
 
 	}

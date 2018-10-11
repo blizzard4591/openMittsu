@@ -9,6 +9,7 @@
 
 #include <memory>
 
+#include "src/database/ContactData.h"
 #include "src/dataproviders/GroupCreationProcessor.h"
 #include "src/protocol/ContactId.h"
 
@@ -22,7 +23,7 @@ namespace openmittsu {
 			Q_OBJECT
 
 		public:
-			explicit GroupCreationWizardPageInfo(QHash<openmittsu::protocol::ContactId, QString> const& knownIdentitiesWithNicknamesExcludingSelfContactId, std::unique_ptr<openmittsu::dataproviders::GroupCreationProcessor> groupCreationProcessor, QWidget* parent = nullptr);
+			explicit GroupCreationWizardPageInfo(QHash<openmittsu::protocol::ContactId, openmittsu::database::ContactData> const& knownIdentitiesWithNicknamesExcludingSelfContactId, std::unique_ptr<openmittsu::dataproviders::GroupCreationProcessor> groupCreationProcessor, QWidget* parent = nullptr);
 			virtual ~GroupCreationWizardPageInfo();
 
 			bool isComplete() const override;
@@ -31,7 +32,7 @@ namespace openmittsu {
 			void onListWidgetItemSelectionChanged();
 		private:
 			Ui::GroupCreationWizardPageInfo *m_ui;
-			QHash<openmittsu::protocol::ContactId, QString> const m_knownIdentities;
+			QHash<openmittsu::protocol::ContactId, openmittsu::database::ContactData> const m_knownIdentities;
 			std::unique_ptr<openmittsu::dataproviders::GroupCreationProcessor> const m_groupCreationProcessor;
 
 			QRegExpValidator* m_nameValidator;

@@ -1,4 +1,5 @@
 #include "src/widgets/chat/ChatWidgetItem.h"
+
 #include "src/exceptions/InternalErrorException.h"
 #include "src/utility/Logging.h"
 #include "src/utility/TextFormatter.h"
@@ -13,10 +14,10 @@
 namespace openmittsu {
 	namespace widgets {
 
-		ChatWidgetItem::ChatWidgetItem(openmittsu::dataproviders::BackedContact const& contact, bool isMessageFromUs, QWidget* parent) : QWidget(parent), m_contact(contact), m_sizeHint(60, 400), m_ui(new Ui::ChatWidgetItem), m_isMessageFromUs(isMessageFromUs), m_hasUserPic(false), m_hasFromLine(!isMessageFromUs) {
+		ChatWidgetItem::ChatWidgetItem(std::shared_ptr<openmittsu::dataproviders::BackedContact> const& contact, bool isMessageFromUs, QWidget* parent) : QWidget(parent), m_contact(contact), m_sizeHint(60, 400), m_ui(new Ui::ChatWidgetItem), m_isMessageFromUs(isMessageFromUs), m_hasUserPic(false), m_hasFromLine(!isMessageFromUs) {
 			m_ui->setupUi(this);
 
-			OPENMITTSU_CONNECT(&m_contact, contactDataChanged(), this, onContactDataChanged());
+			OPENMITTSU_CONNECT(m_contact.get(), contactDataChanged(), this, onContactDataChanged());
 
 			// Connect the context menu
 			setContextMenuPolicy(Qt::CustomContextMenu);
@@ -201,7 +202,7 @@ namespace openmittsu {
 			if (m_isMessageFromUs) {
 				throw openmittsu::exceptions::InternalErrorException() << "ChatWidgetItem::buildFromLabel() was called on a message originating from us!";
 			} else {
-				return m_contact.getName();
+				return m_contact->getName();
 			}
 		}
 
