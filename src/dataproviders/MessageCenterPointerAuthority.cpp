@@ -29,7 +29,7 @@ namespace openmittsu {
 		std::weak_ptr<MessageCenter> MessageCenterPointerAuthority::getMessageCenterWeak() const {
 			QMutexLocker lock(&m_mutex);
 			if (!m_messageCenter) {
-				LOGGER()->debug("The MessageCenter in this authority was NULL, but a weak reference was requested!");
+				LOGGER_DEBUG("The MessageCenter in this authority was NULL, but a weak reference was requested!");
 			}
 			return m_messageCenter;
 		}
@@ -37,7 +37,7 @@ namespace openmittsu {
 		std::shared_ptr<MessageCenter> MessageCenterPointerAuthority::getMessageCenterStrong() const {
 			QMutexLocker lock(&m_mutex);
 			if (!m_messageCenter) {
-				LOGGER()->debug("The MessageCenter in this authority was NULL, but a strong reference was requested!");
+				LOGGER_DEBUG("The MessageCenter in this authority was NULL, but a strong reference was requested!");
 			}
 			return m_messageCenter;
 		}

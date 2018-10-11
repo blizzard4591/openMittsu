@@ -31,7 +31,7 @@ namespace openmittsu {
 		std::weak_ptr<Database> DatabasePointerAuthority::getDatabaseWeak() const {
 			QMutexLocker lock(&m_mutex);
 			if (!m_database) {
-				LOGGER()->debug("The database in this authority was NULL, but a weak reference was requested!");
+				LOGGER_DEBUG("The database in this authority was NULL, but a weak reference was requested!");
 			}
 			return m_database;
 		}
@@ -39,7 +39,7 @@ namespace openmittsu {
 		std::shared_ptr<Database> DatabasePointerAuthority::getDatabaseStrong() const {
 			QMutexLocker lock(&m_mutex);
 			if (!m_database) {
-				LOGGER()->debug("The database in this authority was NULL, but a strong reference was requested!");
+				LOGGER_DEBUG("The database in this authority was NULL, but a strong reference was requested!");
 			}
 			return m_database;
 		}

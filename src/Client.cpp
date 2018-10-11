@@ -96,7 +96,6 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 	}
 	m_messageCenterPointerAuthority.setMessageCenter(m_messageCenterThread.getWorker().getMessageCenter());
 
-	m_ui.listContacts->setContextMenuPolicy(Qt::CustomContextMenu);
 	m_connectionTimer.start(500);
 	OPENMITTSU_CONNECT(&m_connectionTimer, timeout(), this, connectionTimerOnTimer());
 	OPENMITTSU_CONNECT(&m_messageCenterWrapper, newUnreadMessageAvailableContact(openmittsu::protocol::ContactId const&), this, onMessageCenterHasUnreadMessageContact(openmittsu::protocol::ContactId const&));
@@ -153,10 +152,13 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 
 	OPENMITTSU_CONNECT(m_ui.btnConnect, clicked(), this, btnConnectOnClick());
 	OPENMITTSU_CONNECT(m_ui.btnOpenDatabase, clicked(), this, btnOpenDatabaseOnClick());
+
+	m_ui.listContacts->setContextMenuPolicy(Qt::CustomContextMenu);
+	m_ui.listGroups->setContextMenuPolicy(Qt::CustomContextMenu);
 	OPENMITTSU_CONNECT(m_ui.listContacts, itemDoubleClicked(QListWidgetItem*), this, listContactsOnDoubleClick(QListWidgetItem*));
 	OPENMITTSU_CONNECT(m_ui.listContacts, customContextMenuRequested(const QPoint&), this, listContactsOnContextMenu(const QPoint&));
-	OPENMITTSU_CONNECT(m_ui.listContacts, itemDoubleClicked(QListWidgetItem*), this, listGroupsOnDoubleClick(QListWidgetItem*));
-	OPENMITTSU_CONNECT(m_ui.listContacts, customContextMenuRequested(const QPoint&), this, listGroupsOnContextMenu(const QPoint&));
+	OPENMITTSU_CONNECT(m_ui.listGroups, itemDoubleClicked(QListWidgetItem*), this, listGroupsOnDoubleClick(QListWidgetItem*));
+	OPENMITTSU_CONNECT(m_ui.listGroups, customContextMenuRequested(const QPoint&), this, listGroupsOnContextMenu(const QPoint&));
 
 	// Menus
 	OPENMITTSU_CONNECT(m_ui.actionLicense, triggered(), this, menuAboutLicenseOnClick());
@@ -664,7 +666,7 @@ void Client::listGroupsOnDoubleClick(QListWidgetItem* item) {
 }
 
 void Client::listContactsOnContextMenu(QPoint const& pos) {
-	if ((!m_databaseWrapper.hasDatabase()) || (m_messageCenterWrapper.hasMessageCenter()) || (m_tabController == nullptr)) {
+	if ((!m_databaseWrapper.hasDatabase()) || (!m_messageCenterWrapper.hasMessageCenter()) || (m_tabController == nullptr)) {
 		return;
 	}
 	QPoint globalPos = m_ui.listContacts->viewport()->mapToGlobal(pos);
@@ -768,12 +770,12 @@ void Client::listContactsOnContextMenu(QPoint const& pos) {
 }
 
 void Client::listGroupsOnContextMenu(QPoint const& pos) {
-	if ((!m_databaseWrapper.hasDatabase()) || (m_messageCenterWrapper.hasMessageCenter()) || (m_tabController == nullptr)) {
+	if ((!m_databaseWrapper.hasDatabase()) || (!m_messageCenterWrapper.hasMessageCenter()) || (m_tabController == nullptr)) {
 		return;
 	}
 
-	QPoint globalPos = m_ui.listContacts->viewport()->mapToGlobal(pos);
-	QListWidgetItem* listItem = m_ui.listContacts->itemAt(pos);
+	QPoint globalPos = m_ui.listGroups->viewport()->mapToGlobal(pos);
+	QListWidgetItem* listItem = m_ui.listGroups->itemAt(pos);
 	GroupListWidgetItem* glwi = dynamic_cast<GroupListWidgetItem*>(listItem);
 
 	if (glwi != nullptr) {
@@ -844,7 +846,7 @@ void Client::listGroupsOnContextMenu(QPoint const& pos) {
 					m_tabController->focusTab(glwi->getGroupId());
 				}
 			} else if ((selectedItem == actionRequestSync) && (actionRequestSync != nullptr)) {
-				if (m_protocolClient == nullptr || !m_protocolClient->getIsConnected() || (m_messageCenterWrapper.hasMessageCenter())) {
+				if (m_protocolClient == nullptr || !m_protocolClient->getIsConnected() || (!m_messageCenterWrapper.hasMessageCenter())) {
 					return;
 				}
 
@@ -902,7 +904,7 @@ void Client::menuAboutAboutQtOnClick() {
 }
 
 void Client::menuGroupAddOnClick() {
-	if ((!m_databaseWrapper.hasDatabase()) || (m_messageCenterWrapper.hasMessageCenter())) {
+	if ((!m_databaseWrapper.hasDatabase()) || (!m_messageCenterWrapper.hasMessageCenter())) {
 		QMessageBox::warning(this, "No database loaded", "Before you can use this feature you need to load a database from file (see main screen) or create one using a backup of your existing ID (see Identity -> Load Backup).");
 	} else if (m_protocolClient == nullptr || !m_protocolClient->getIsConnected()) {
 		QMessageBox::warning(this, "Not connected to a server", "Before you can use this feature you need to connect to a server.");
