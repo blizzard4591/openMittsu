@@ -72,6 +72,9 @@ namespace openmittsu {
 		void BackedGroup::slotNewMessage(openmittsu::protocol::GroupId const& group, QString const& messageUuid) {
 			if (group == m_groupId) {
 				emit newMessageAvailable(messageUuid);
+
+				m_groupData = m_database.getGroupData(m_groupId, true);
+				emit groupDataChanged();
 			}
 		}
 

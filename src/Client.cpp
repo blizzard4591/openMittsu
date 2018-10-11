@@ -700,7 +700,7 @@ void Client::listContactsOnContextMenu(QPoint const& pos) {
 			listContactsContextMenu.addAction(separator);
 
 			QString statusText;
-			openmittsu::database::ContactData const contactData = m_databaseWrapper.getContactData(clwi->getContactId(), false);
+			openmittsu::database::ContactData const contactData = m_databaseWrapper.getContactData(clwi->getContactId(), true);
 
 			openmittsu::protocol::AccountStatus const status = contactData.accountStatus;
 			if (status == openmittsu::protocol::AccountStatus::STATUS_ACTIVE) {
@@ -715,6 +715,10 @@ void Client::listContactsOnContextMenu(QPoint const& pos) {
 			QAction* contactStatus = new QAction(QString(tr("Status: %1")).arg(statusText), &listContactsContextMenu);
 			contactStatus->setDisabled(true);
 			listContactsContextMenu.addAction(contactStatus);
+
+			QAction* messageCount = new QAction(QString(tr("Stored Messages: %1")).arg(contactData.messageCount), &listContactsContextMenu);
+			messageCount->setDisabled(true);
+			listContactsContextMenu.addAction(messageCount);
 
 			QHash<openmittsu::protocol::GroupId, QString> const groups = m_databaseWrapper.getKnownGroupsContainingMember(clwi->getContactId());
 			if (groups.size() < 1) {
@@ -817,14 +821,19 @@ void Client::listGroupsOnContextMenu(QPoint const& pos) {
 			separator->setSeparator(true);
 			listGroupsContextMenu.addAction(separator);
 
+			openmittsu::database::GroupData const groupData = m_databaseWrapper.getGroupData(glwi->getGroupId(), false);
+			QAction* messageCount = new QAction(QString(tr("Stored Messages: %1")).arg(groupData.messageCount), &listGroupsContextMenu);
+			messageCount->setDisabled(true);
+			listGroupsContextMenu.addAction(messageCount);
+
 			QAction* groupMembers = new QAction(tr("Group members:"), &listGroupsContextMenu);
 			groupMembers->setDisabled(true);
 			listGroupsContextMenu.addAction(groupMembers);
 
-			QSet<openmittsu::protocol::ContactId> const members = m_databaseWrapper.getGroupMembers(glwi->getGroupId(), false);
+			//QSet<openmittsu::protocol::ContactId> const members = m_databaseWrapper.getGroupMembers(glwi->getGroupId(), false);
 			QHash<openmittsu::protocol::ContactId, openmittsu::database::ContactData> contactData = m_databaseWrapper.getContactDataAll(false);
 
-			for (openmittsu::protocol::ContactId const& member : members) {
+			for (openmittsu::protocol::ContactId const& member : groupData.members) {
 				QAction* groupMember = new QAction(QString(" - ").append(contactData.constFind(member)->nickName), &listGroupsContextMenu);
 				groupMember->setDisabled(true);
 				listGroupsContextMenu.addAction(groupMember);

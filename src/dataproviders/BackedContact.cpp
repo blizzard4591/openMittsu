@@ -79,6 +79,9 @@ namespace openmittsu {
 		void BackedContact::slotNewMessage(openmittsu::protocol::ContactId const& contactId, QString const& messageUuid) {
 			if (m_contactId == contactId) {
 				emit newMessageAvailable(messageUuid);
+
+				m_contactData = m_database.getContactData(m_contactId, true);
+				emit contactDataChanged();
 			}
 		}
 
