@@ -22,6 +22,6 @@ namespace openmittsu {
 	}
 }
 
-Q_DECLARE_METATYPE(openmittsu::database::DatabaseSeekResult);
+Q_DECLARE_METATYPE(openmittsu::database::DatabaseSeekResult)
 
 #endif // OPENMITTSU_DATABASE_DATABASESEEKRESULT_H_

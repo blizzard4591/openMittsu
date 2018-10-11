@@ -46,6 +46,8 @@ private slots:
 	void btnOpenDatabaseOnClick();
 	void listContactsOnDoubleClick(QListWidgetItem* item);
 	void listContactsOnContextMenu(QPoint const& pos);
+	void listGroupsOnDoubleClick(QListWidgetItem* item);
+	void listGroupsOnContextMenu(QPoint const& pos);
 
 	void menuFileOptionsOnClick();
 	void menuFileShowFirstUseWizardOnClick();

@@ -155,6 +155,8 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 	OPENMITTSU_CONNECT(m_ui.btnOpenDatabase, clicked(), this, btnOpenDatabaseOnClick());
 	OPENMITTSU_CONNECT(m_ui.listContacts, itemDoubleClicked(QListWidgetItem*), this, listContactsOnDoubleClick(QListWidgetItem*));
 	OPENMITTSU_CONNECT(m_ui.listContacts, customContextMenuRequested(const QPoint&), this, listContactsOnContextMenu(const QPoint&));
+	OPENMITTSU_CONNECT(m_ui.listContacts, itemDoubleClicked(QListWidgetItem*), this, listGroupsOnDoubleClick(QListWidgetItem*));
+	OPENMITTSU_CONNECT(m_ui.listContacts, customContextMenuRequested(const QPoint&), this, listGroupsOnContextMenu(const QPoint&));
 
 	// Menus
 	OPENMITTSU_CONNECT(m_ui.actionLicense, triggered(), this, menuAboutLicenseOnClick());
@@ -624,56 +626,60 @@ void Client::uiFocusOnOverviewTab() {
 }
 
 void Client::listContactsOnDoubleClick(QListWidgetItem* item) {
-	ContactListWidgetItem* clwi = dynamic_cast<ContactListWidgetItem*>(item);
-	GroupListWidgetItem* glwi = dynamic_cast<GroupListWidgetItem*>(item);
-
 	if ((!m_databaseWrapper.hasDatabase()) || (!m_messageCenterWrapper.hasMessageCenter()) || (m_tabController == nullptr)) {
 		return;
 	}
 
+	ContactListWidgetItem* clwi = dynamic_cast<ContactListWidgetItem*>(item);
 	if (clwi != nullptr) {
 		openmittsu::protocol::ContactId const contactId = clwi->getContactId();
-		openmittsu::dataproviders::BackedContactAndGroupPool& pool = openmittsu::dataproviders::BackedContactAndGroupPool::getInstance();
-		m_tabController->openTab(contactId, pool.getBackedContact(contactId, m_databaseWrapper, m_messageCenterWrapper));
+		if (!m_tabController->hasTab(contactId)) {
+			openmittsu::dataproviders::BackedContactAndGroupPool& pool = openmittsu::dataproviders::BackedContactAndGroupPool::getInstance();
+			m_tabController->openTab(contactId, pool.getBackedContact(contactId, m_databaseWrapper, m_messageCenterWrapper));
+		}
 		m_tabController->focusTab(contactId);
-	} else if (glwi != nullptr) {
+	} else {
+		LOGGER()->warn("Could not determine the type of element the user double clicked on in the contacts list.");
+		return;
+	}
+}
+
+void Client::listGroupsOnDoubleClick(QListWidgetItem* item) {
+	if ((!m_databaseWrapper.hasDatabase()) || (!m_messageCenterWrapper.hasMessageCenter()) || (m_tabController == nullptr)) {
+		return;
+	}
+
+	GroupListWidgetItem* glwi = dynamic_cast<GroupListWidgetItem*>(item);
+	if (glwi != nullptr) {
 		openmittsu::protocol::GroupId const groupId = glwi->getGroupId();
-		openmittsu::dataproviders::BackedContactAndGroupPool& pool = openmittsu::dataproviders::BackedContactAndGroupPool::getInstance();
-		m_tabController->openTab(groupId, pool.getBackedGroup(groupId, m_databaseWrapper, m_messageCenterWrapper));
+		if (!m_tabController->hasTab(groupId)) {
+			openmittsu::dataproviders::BackedContactAndGroupPool& pool = openmittsu::dataproviders::BackedContactAndGroupPool::getInstance();
+			m_tabController->openTab(groupId, pool.getBackedGroup(groupId, m_databaseWrapper, m_messageCenterWrapper));
+		}
 		m_tabController->focusTab(groupId);
 	} else {
 		LOGGER()->warn("Could not determine the type of element the user double clicked on in the contacts list.");
 		return;
 	}
-}	
+}
 
 void Client::listContactsOnContextMenu(QPoint const& pos) {
-	QPoint globalPos = m_ui.listContacts->viewport()->mapToGlobal(pos);
-
-	QListWidgetItem* listItem = m_ui.listContacts->itemAt(pos);
-
-	ContactListWidgetItem* clwi = dynamic_cast<ContactListWidgetItem*>(listItem);
-	GroupListWidgetItem* glwi = dynamic_cast<GroupListWidgetItem*>(listItem);
-
 	if ((!m_databaseWrapper.hasDatabase()) || (m_messageCenterWrapper.hasMessageCenter()) || (m_tabController == nullptr)) {
 		return;
 	}
+	QPoint globalPos = m_ui.listContacts->viewport()->mapToGlobal(pos);
+	QListWidgetItem* listItem = m_ui.listContacts->itemAt(pos);
+	ContactListWidgetItem* clwi = dynamic_cast<ContactListWidgetItem*>(listItem);
 
-	if ((clwi != nullptr) || (glwi != nullptr)) {
+	if (clwi != nullptr) {
 		QMenu listContactsContextMenu;
 
 		QAction* actionHeadline = nullptr;
 		QAction* actionEdit = nullptr;
 		QAction* actionOpenClose = nullptr;
-		QAction* actionRequestSync = nullptr;
 
 		bool isChatWindowOpen = false;
-		bool isIdentityContact = false;
-		bool isGroupSelfOwned = false;
-		//ChatTab* tab = nullptr;
 		if (clwi != nullptr) {
-			isIdentityContact = true;
-
 			actionHeadline = new QAction(QString(tr("Identity: %1")).arg(clwi->getContactId().toQString()), &listContactsContextMenu);
 			listContactsContextMenu.addAction(actionHeadline);
 			actionEdit = new QAction(tr("Edit Contact"), &listContactsContextMenu);
@@ -726,92 +732,118 @@ void Client::listContactsOnContextMenu(QPoint const& pos) {
 					listContactsContextMenu.addAction(groupMember);
 				}
 			}
-		} else if (glwi != nullptr) {
-			isIdentityContact = false;
-
-			actionHeadline = new QAction(QString(tr("Group: %1")).arg(glwi->getGroupId().toQString()), &listContactsContextMenu);
-			listContactsContextMenu.addAction(actionHeadline);
-			actionEdit = new QAction("Edit Group", &listContactsContextMenu);
-			listContactsContextMenu.addAction(actionEdit);
-
-			isChatWindowOpen = m_tabController->hasTab(glwi->getGroupId());
-			if (isChatWindowOpen) {
-				actionOpenClose = new QAction(tr("Close Chat Window"), &listContactsContextMenu);
-			} else {
-				actionOpenClose = new QAction(tr("Open Chat Window"), &listContactsContextMenu);
-			}
-			listContactsContextMenu.addAction(actionOpenClose);
-
-			if (glwi->getGroupId().getOwner() == m_databaseWrapper.getSelfContact()) {
-				isGroupSelfOwned = true;
-				actionRequestSync = new QAction(tr("Force Group Sync"), &listContactsContextMenu);
-			} else {
-				actionRequestSync = new QAction(tr("Request Group Sync"), &listContactsContextMenu);
-			}
-			listContactsContextMenu.addAction(actionRequestSync);
-			if (m_protocolClient == nullptr || !m_protocolClient->getIsConnected()) {
-				actionRequestSync->setDisabled(true);
-			}
-
-			QAction* separator = new QAction(&listContactsContextMenu);
-			separator->setSeparator(true);
-			listContactsContextMenu.addAction(separator);
-
-			QAction* groupMembers = new QAction(tr("Group members:"), &listContactsContextMenu);
-			groupMembers->setDisabled(true);
-			listContactsContextMenu.addAction(groupMembers);
-
-			QSet<openmittsu::protocol::ContactId> const members = m_databaseWrapper.getGroupMembers(glwi->getGroupId(), false);
-			QHash<openmittsu::protocol::ContactId, openmittsu::database::ContactData> contactData = m_databaseWrapper.getContactDataAll(false);
-
-			for (openmittsu::protocol::ContactId const& member : members) {
-				QAction* groupMember = new QAction(QString(" - ").append(contactData.constFind(member)->nickName), &listContactsContextMenu);
-				groupMember->setDisabled(true);
-				listContactsContextMenu.addAction(groupMember);
-			}
 		}
 
 		QAction* selectedItem = listContactsContextMenu.exec(globalPos);
 		if (selectedItem != nullptr) {
 			if (selectedItem == actionEdit) {
-				if (isIdentityContact) {
-					openmittsu::database::ContactData contactData = m_databaseWrapper.getContactData(clwi->getContactId(), false);
-					QString const id = clwi->getContactId().toQString();
-					QString const pubKey = contactData.publicKey.toQString();
-					QString const nickname = contactData.nickName;
+				openmittsu::database::ContactData contactData = m_databaseWrapper.getContactData(clwi->getContactId(), false);
+				QString const id = clwi->getContactId().toQString();
+				QString const pubKey = contactData.publicKey.toQString();
+				QString const nickname = contactData.nickName;
 
-					ContactEditDialog contactEditDialog(id, pubKey, nickname, this);
+				ContactEditDialog contactEditDialog(id, pubKey, nickname, this);
 					
-					int result = contactEditDialog.exec();
+				int result = contactEditDialog.exec();
 
-					if (result == QDialog::DialogCode::Accepted) {
-						QString const newNickname = contactEditDialog.getNickname();
-						if (nickname != newNickname) {
-							m_databaseWrapper.setContactNickName(clwi->getContactId(), newNickname);
-						}
+				if (result == QDialog::DialogCode::Accepted) {
+					QString const newNickname = contactEditDialog.getNickname();
+					if (nickname != newNickname) {
+						m_databaseWrapper.setContactNickName(clwi->getContactId(), newNickname);
 					}
-				} else {
-					showNotYetImplementedInfo();
 				}
 			} else if (selectedItem == actionOpenClose) {
 				if (isChatWindowOpen) {
-					if (isIdentityContact) {
-						m_tabController->closeTab(clwi->getContactId());
-					} else {
-						m_tabController->closeTab(glwi->getGroupId());
-					}
+					m_tabController->closeTab(clwi->getContactId());
 				} else {
-					if (isIdentityContact) {
+					if (!m_tabController->hasTab(clwi->getContactId())) {
 						openmittsu::dataproviders::BackedContactAndGroupPool& pool = openmittsu::dataproviders::BackedContactAndGroupPool::getInstance();
 						m_tabController->openTab(clwi->getContactId(), pool.getBackedContact(clwi->getContactId(), m_databaseWrapper, m_messageCenterWrapper));
-						m_tabController->focusTab(clwi->getContactId());
-					} else {
+					}
+					m_tabController->focusTab(clwi->getContactId());
+				}
+			}
+		}
+	}
+}
+
+void Client::listGroupsOnContextMenu(QPoint const& pos) {
+	if ((!m_databaseWrapper.hasDatabase()) || (m_messageCenterWrapper.hasMessageCenter()) || (m_tabController == nullptr)) {
+		return;
+	}
+
+	QPoint globalPos = m_ui.listContacts->viewport()->mapToGlobal(pos);
+	QListWidgetItem* listItem = m_ui.listContacts->itemAt(pos);
+	GroupListWidgetItem* glwi = dynamic_cast<GroupListWidgetItem*>(listItem);
+
+	if (glwi != nullptr) {
+		QMenu listGroupsContextMenu;
+
+		QAction* actionHeadline = nullptr;
+		QAction* actionEdit = nullptr;
+		QAction* actionOpenClose = nullptr;
+		QAction* actionRequestSync = nullptr;
+
+		bool isChatWindowOpen = false;
+		bool isGroupSelfOwned = false;
+		if (glwi != nullptr) {
+			actionHeadline = new QAction(QString(tr("Group: %1")).arg(glwi->getGroupId().toQString()), &listGroupsContextMenu);
+			listGroupsContextMenu.addAction(actionHeadline);
+			actionEdit = new QAction("Edit Group", &listGroupsContextMenu);
+			listGroupsContextMenu.addAction(actionEdit);
+
+			isChatWindowOpen = m_tabController->hasTab(glwi->getGroupId());
+			if (isChatWindowOpen) {
+				actionOpenClose = new QAction(tr("Close Chat Window"), &listGroupsContextMenu);
+			} else {
+				actionOpenClose = new QAction(tr("Open Chat Window"), &listGroupsContextMenu);
+			}
+			listGroupsContextMenu.addAction(actionOpenClose);
+
+			if (glwi->getGroupId().getOwner() == m_databaseWrapper.getSelfContact()) {
+				isGroupSelfOwned = true;
+				actionRequestSync = new QAction(tr("Force Group Sync"), &listGroupsContextMenu);
+			} else {
+				actionRequestSync = new QAction(tr("Request Group Sync"), &listGroupsContextMenu);
+			}
+			listGroupsContextMenu.addAction(actionRequestSync);
+			if (m_protocolClient == nullptr || !m_protocolClient->getIsConnected()) {
+				actionRequestSync->setDisabled(true);
+			}
+
+			QAction* separator = new QAction(&listGroupsContextMenu);
+			separator->setSeparator(true);
+			listGroupsContextMenu.addAction(separator);
+
+			QAction* groupMembers = new QAction(tr("Group members:"), &listGroupsContextMenu);
+			groupMembers->setDisabled(true);
+			listGroupsContextMenu.addAction(groupMembers);
+
+			QSet<openmittsu::protocol::ContactId> const members = m_databaseWrapper.getGroupMembers(glwi->getGroupId(), false);
+			QHash<openmittsu::protocol::ContactId, openmittsu::database::ContactData> contactData = m_databaseWrapper.getContactDataAll(false);
+
+			for (openmittsu::protocol::ContactId const& member : members) {
+				QAction* groupMember = new QAction(QString(" - ").append(contactData.constFind(member)->nickName), &listGroupsContextMenu);
+				groupMember->setDisabled(true);
+				listGroupsContextMenu.addAction(groupMember);
+			}
+		}
+
+		QAction* selectedItem = listGroupsContextMenu.exec(globalPos);
+		if (selectedItem != nullptr) {
+			if (selectedItem == actionEdit) {
+				showNotYetImplementedInfo();
+			} else if (selectedItem == actionOpenClose) {
+				if (isChatWindowOpen) {
+					m_tabController->closeTab(glwi->getGroupId());
+				} else {
+					if (!m_tabController->hasTab(glwi->getGroupId())) {
 						openmittsu::dataproviders::BackedContactAndGroupPool& pool = openmittsu::dataproviders::BackedContactAndGroupPool::getInstance();
 						m_tabController->openTab(glwi->getGroupId(), pool.getBackedGroup(glwi->getGroupId(), m_databaseWrapper, m_messageCenterWrapper));
-						m_tabController->focusTab(glwi->getGroupId());
 					}
+					m_tabController->focusTab(glwi->getGroupId());
 				}
-			} else if (!isIdentityContact && (selectedItem == actionRequestSync) && (actionRequestSync != nullptr)) {
+			} else if ((selectedItem == actionRequestSync) && (actionRequestSync != nullptr)) {
 				if (m_protocolClient == nullptr || !m_protocolClient->getIsConnected() || (m_messageCenterWrapper.hasMessageCenter())) {
 					return;
 				}
