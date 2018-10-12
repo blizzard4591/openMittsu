@@ -401,8 +401,11 @@ void Client::openDatabaseFile(QString const& fileName) {
 	QString password;
 	while (true) {
 		bool ok = false;
-		QString const password = QInputDialog::getText(this, tr("Database password"), tr("Please enter the database password for file \"%1\":").arg(fileName), QLineEdit::Password, QString(), &ok);
-		if (ok && !password.isNull()) {
+		QString password = QInputDialog::getText(this, tr("Database password"), tr("Please enter the database password for file \"%1\":").arg(fileName), QLineEdit::Password, QString(), &ok);
+		if (password.isNull()) {
+			password = QString("");
+		}
+		if (ok) {
 			QDir location(fileName);
 			location.cdUp();
 
