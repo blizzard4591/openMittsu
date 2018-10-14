@@ -25,12 +25,12 @@ Other platforms should work with no or minimal changes.
 
 ## Binaries
 Currently we only provide binaries for  the following platforms:
- - Windows 32bit (x86) and 64bit (x64) at https://downloads.openmittsu.de/ - Scroll down to find the latest build. Do not forget to install the Visual Studio Redistributable (vcredist_x64.exe).
+ - [Windows 32bit (x86) and 64bit (x64)](https://downloads.openmittsu.de/) – Scroll down to find the latest build. Do not forget to install the Visual Studio Redistributable (`vcredist_x64.exe`).
  - Debian 9 amd64 using our APT repository:
 
 	1. First, add the GPG key for the repository:
 		```wget -O - https://packages.openmittsu.de/openmittsu.packages.gpg.key|apt-key add -```
-	2. Now, add the repository. As root or using sudo, create a file called "openmittsu.list" in /etc/apt/sources.list.d/ with the following contents:
+	2. Now, add the repository. As root or using sudo, create a file called "openmittsu.list" in `/etc/apt/sources.list.d/` with the following contents:
 		```deb https://packages.openmittsu.de/apt/debian stretch main```
 	3. You can now install (or update) openMittsu using:
 		```sudo apt-get update```
@@ -85,7 +85,7 @@ Find detailed steps for Linux and Windows systems below.
     
 	A (patched) version of `libsqlcipher` which also builds under Windows (build using ```nmake -f Makefile.msc```, adapt paths in Makefile.msc to Windows SDK on variable TCC and RCC, adapt paths to OpenSSL binaries (use [these non-light installers](https://slproweb.com/products/Win32OpenSSL.html)) at all locations referencing OpenSSL) [is available here](https://github.com/blizzard4591/sqlcipher).
     
-	Now you need to build the wrapper between SqlCipher and Qt, which is available from https://github.com/blizzard4591/qt5-sqlcipher.
+	Now you need to build the [wrapper between SqlCipher and Qt](https://github.com/blizzard4591/qt5-sqlcipher).
     
 	Clone the repository (```git clone https://github.com/blizzard4591/qt5-sqlcipher.git```), configure with cmake (create `build/` directory in the cloned folder, execute ```cmake ..```).
     
@@ -167,11 +167,11 @@ a
 	Assuming you use the precompiled version and extracted them to `C:\cpp\libsodium-1.0.xx-msvc`, where xx is the most recent version, the values for CMake later on will be:  
 		`LIBSODIUM_LIBRARIES = optimized;C:\cpp\libsodium-1.0.xx-msvc\x64\Release\v141\static\libsodium.lib;debug;C:\cpp\libsodium-1.0.xx-msvc\x64\Debug\v141\static\libsodium.lib` and 
 		`LIBSODIUM_INCLUDE_DIRS = C:\cpp\libsodium-1.0.xx-msvc\include`.
-3. Clone and build [the `qrencode library`](https://github.com/blizzard4591/qrencode-win32)  
+3. Clone and build the [`qrencode library`](https://github.com/blizzard4591/qrencode-win32)  
 	Use the solution provided in `vc15/` and build only the target `qrcodelib` in modes `Debug-Lib` and `Release-Lib`.
 	The basepath where `qrencode.h` is located will serve as the include directory `LIBQRENCODE_INCLUDE_DIR` and
 	we define `LIBQRENCODE_LIBRARY = optimized;C:\cpp\qrencode-win32\qrencode-win32\vc15\x64\Release-Lib\qrcodelib.lib;debug;C:\cpp\qrencode-win32\qrencode-win32\vc15\x64\Debug-Lib\qrcodelib.lib` (change pathes according to your layout!).
-4. Download and install [the latest Qt version](https://www.qt.io/download-open-source/). Check that you select the right version for your version of Visual Studio, for example msvc-2017-x64 for Visual Studio 2017 and 64bit builds.
+4. Download and install the 8latest Qt version](https://www.qt.io/download-open-source/). Check that you select the right version for your version of Visual Studio, for example msvc-2017-x64 for Visual Studio 2017 and 64bit builds.
 5. Open the `CMakeLists.txt` file in the root folder of openMittsu and look for `OPENMITTSU_CMAKE_SEARCH_PATH`.  
 	Edit the path to point to your Qt installation.
 6. Start CMake and point it to the openMittsu directory.
