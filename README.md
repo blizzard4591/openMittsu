@@ -160,7 +160,7 @@ make # optionally add -j 4 for multi-threaded compilation with 4 threads
 
 
 ### Detailed steps – Windows
-a
+
 1. Install [CMake](https://cmake.org/download/)
 2. [Download the latest version of `libsodium`](https://download.libsodium.org/libsodium/releases/)  
 	Either pick the sources and compile them yourself, or use the provided binaries for MSVC in the -msvc.zip packages.
