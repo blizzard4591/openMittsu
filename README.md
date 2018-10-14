@@ -108,16 +108,12 @@ Prerequisites on Debian/Ubuntu:
 ```
 apt-get install libqt5core5a libqt5gui5 libqt5multimedia5 libqt5multimedia5-plugins libqt5sql5 libqt5sql5-sqlite libqt5widgets5 qt5-qmake qtbase5-dev qtbase5-dev-tools qtmultimedia5-dev libqrencode-dev git g++ libssl-dev make cmake qtbase5-dev qtbase5-private-dev pkgconf
 ```
-Important: If you are using Debian 9: To install a more recent version of `libsodium` (at least 1.0.12) and a fixed version of SqlCipher, you need to have the buster repository in your APT configuration.
-To do this safely, add ```deb http://ftp.halifax.rwth-aachen.de/debian/ buster main``` (or use any mirror that you like) to ```/etc/apt/sources.list``` and then do not forget to change its priority by adding a file ```buster.pref``` in ```/etc/apt/preferences.d/``` with the content:
-
-	Package: *
-	Pin: release buster
-	Pin-Priority: 250
+Important: If you are using Debian 9: To install a more recent version of `libsodium` (at least 1.0.12) and a fixed version of SqlCipher, you need to have the openMittsu repository in your APT configuration.
+To do this safely, add ```deb https://packages.openmittsu.de/apt/debian stretch main``` as described in the section on binaries.
 
 After running ```apt-get update```, you can install the additional packages using:
 
-	apt-get -t buster install libsodium-dev libsodium18 sqlcipher libsqlcipher0 libsqlcipher-dev
+	apt-get install libsodium-dev libsodium23 libsqlcipher0 libsqlcipher-dev
 
 Prerequisites on openSuse (incomplete): 
 
