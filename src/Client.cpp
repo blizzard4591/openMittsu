@@ -256,9 +256,8 @@ void Client::setupProtocolClient() {
 		OPENMITTSU_DISCONNECT(m_protocolClient.get(), lostConnection(), this, protocolClientOnLostConnection());
 		OPENMITTSU_DISCONNECT(m_protocolClient.get(), duplicateIdUsageDetected(), this, protocolClientOnDuplicateIdUsageDetected());
 
-		if (!QMetaObject::invokeMethod(m_messageCenterThread.getWorker().getMessageCenter().get(), "setNetworkSentMessageAcceptor", Qt::BlockingQueuedConnection, Q_ARG(std::shared_ptr<openmittsu::dataproviders::NetworkSentMessageAcceptor> const&, nullptr))) {
-			throw openmittsu::exceptions::InternalErrorException() << "Could not unset NetworkSentMessageAcceptor!";
-		}
+
+		m_messageCenterWrapper.setNetworkSentMessageAcceptor(nullptr);
 
 		if (m_protocolClient->getIsConnected()) {
 			m_protocolClient->disconnectFromServer();
@@ -307,9 +306,6 @@ void Client::setupProtocolClient() {
 	eventLoop.exec(); // blocks until "finished()" has been called
 
 	m_messageCenterWrapper.setNetworkSentMessageAcceptor(std::make_shared<openmittsu::dataproviders::NetworkSentMessageAcceptor>(m_protocolClient));
-	//if (!QMetaObject::invokeMethod(m_messageCenterThread.getWorker().getMessageCenter().get(), "setNetworkSentMessageAcceptor", Q_ARG(std::shared_ptr<openmittsu::dataproviders::NetworkSentMessageAcceptor> const&, std::make_shared<openmittsu::dataproviders::NetworkSentMessageAcceptor>(m_protocolClient)))) {
-	//	throw openmittsu::exceptions::InternalErrorException() << "Could not set NetworkSentMessageAcceptor!";
-	//}
 }
 
 void Client::threadFinished() {
