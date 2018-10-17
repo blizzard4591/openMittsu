@@ -38,7 +38,7 @@ if [ $TRAVIS_OS_NAME = linux ]; then
 
 		git clone https://github.com/sqlcipher/sqlcipher.git
 		pushd sqlcipher
-			./configure --enable-tempstore=yes CFLAGS="-DSQLITE_HAS_CODEC -DSQLITE_ENABLE_JSON1 -DSQLITE_ENABLE_FTS3 -DSQLITE_ENABLE_FTS3_PARENTHESIS -DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_COLUMN_METADATA" --prefix=/usr
+			LDFLAGS="-lm" ./configure --enable-tempstore=yes CFLAGS="-DSQLITE_HAS_CODEC -DSQLITE_ENABLE_JSON1 -DSQLITE_ENABLE_FTS3 -DSQLITE_ENABLE_FTS3_PARENTHESIS -DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_COLUMN_METADATA" --prefix=/usr
 			make
 			sudo make install
 		popd
