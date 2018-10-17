@@ -66,7 +66,7 @@ else
 	# OS X
 	brew install libsodium
 	brew install qt5
-	brew install sqlcipher
+	brew install sqlcipher --with-fts
 	brew install qrencode
 	brew link --force libsodium
 	brew link --force qt5
