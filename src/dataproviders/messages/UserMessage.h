@@ -29,7 +29,7 @@ namespace openmittsu {
 
 				virtual QString getContentAsText() const = 0;
 				virtual openmittsu::utility::Location getContentAsLocation() const = 0;
-				virtual openmittsu::database::MediaFileItem getContentAsImage() const = 0;
+				virtual openmittsu::database::MediaFileItem getContentAsMediaFile() const = 0;
 
 				virtual QString getCaption() const = 0;
 			};

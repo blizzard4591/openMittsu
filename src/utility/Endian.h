@@ -27,12 +27,18 @@ namespace openmittsu {
 			static uint32_t uint32FromHostEndianToLittleEndian(uint32_t source);
 			static uint64_t uint64FromHostEndianToLittleEndian(uint64_t source);
 
+			static QByteArray uint16FromHostToLittleEndianByteArray(quint16 source);
 			static QByteArray uint32FromHostToLittleEndianByteArray(quint32 source);
 
 			static QString getEndiannessDescriptionString();
 		private:
 			Endian() {}
 			virtual ~Endian() {}
+
+			union Quint16CharAccess {
+				quint16 number;
+				char chars[2];
+			};
 
 			union Quint32CharAccess {
 				quint32 number;

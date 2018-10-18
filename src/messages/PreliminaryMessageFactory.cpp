@@ -1,5 +1,6 @@
 #include "src/messages/PreliminaryMessageFactory.h"
 
+#include "src/messages/contact/ContactAudioMessageContent.h"
 #include "src/messages/contact/ContactTextMessageContent.h"
 #include "src/messages/contact/ContactImageMessageContent.h"
 #include "src/messages/contact/ContactLocationMessageContent.h"
@@ -8,6 +9,7 @@
 #include "src/messages/contact/UserTypingMessageContent.h"
 
 #include "src/messages/group/PreliminaryGroupMessageHeader.h"
+#include "src/messages/group/GroupAudioMessageContent.h"
 #include "src/messages/group/GroupTextMessageContent.h"
 #include "src/messages/group/GroupImageMessageContent.h"
 #include "src/messages/group/GroupLocationMessageContent.h"
@@ -35,6 +37,10 @@ namespace openmittsu {
 			// Intentionally left empty.
 		}
 
+		contact::PreliminaryContactMessage PreliminaryMessageFactory::createPreliminaryContactAudioMessage(openmittsu::protocol::ContactId const& receiverId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QByteArray const& audioData, quint16 lengthInSeconds) {
+			return contact::PreliminaryContactMessage(new contact::PreliminaryContactMessageHeader(receiverId, messageId, time, MessageFlagsFactory::createContactMessageFlags()), new contact::ContactAudioMessageContent(audioData, lengthInSeconds));
+		}
+
 		contact::PreliminaryContactMessage PreliminaryMessageFactory::createPreliminaryContactTextMessage(openmittsu::protocol::ContactId const& receiverId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QString const& text) {
 			return contact::PreliminaryContactMessage(new contact::PreliminaryContactMessageHeader(receiverId, messageId, time, MessageFlagsFactory::createContactMessageFlags()), new contact::ContactTextMessageContent(text));
 		}
@@ -57,6 +63,10 @@ namespace openmittsu {
 
 		contact::PreliminaryContactMessage PreliminaryMessageFactory::createPreliminaryContactMessageReceipt(openmittsu::protocol::ContactId const& receiverId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, openmittsu::protocol::MessageId const& relatedMessage, contact::ReceiptMessageContent::ReceiptType const& receiptType) {
 			return contact::PreliminaryContactMessage(new contact::PreliminaryContactMessageHeader(receiverId, messageId, time, MessageFlagsFactory::createReceiptMessageFlags()), new contact::ReceiptMessageContent({ relatedMessage }, receiptType));
+		}
+
+		group::PreliminaryGroupMessage PreliminaryMessageFactory::createPreliminaryGroupAudioMessage(openmittsu::protocol::GroupId const& groupId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QSet<openmittsu::protocol::ContactId> const& recipients, QByteArray const& audioData, quint16 lengthInSeconds) {
+			return group::PreliminaryGroupMessage(new group::PreliminaryGroupMessageHeader(groupId, messageId, time, MessageFlagsFactory::createGroupTextMessageFlags()), new group::GroupAudioMessageContent(groupId, audioData, lengthInSeconds), recipients);
 		}
 
 		group::PreliminaryGroupMessage PreliminaryMessageFactory::createPreliminaryGroupTextMessage(openmittsu::protocol::GroupId const& groupId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QSet<openmittsu::protocol::ContactId> const& recipients, QString const& text) {

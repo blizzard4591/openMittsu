@@ -551,6 +551,11 @@ namespace openmittsu {
 			return false;
 		}
 
+		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ContactAudioMessageContent const> contactAudioMessageContent) {
+			LOGGER_DEBUG("Received an audio message from {}.", messageHeader.getSender().toString());
+			m_messageCenterWrapper->processReceivedContactMessageAudio(messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTime(), openmittsu::protocol::MessageTime::now(), contactAudioMessageContent->getAudioData(), contactAudioMessageContent->getLengthInSeconds());
+		}
+
 		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ContactTextMessageContent const> contactTextMessageContent) {
 			LOGGER_DEBUG("Received a message from {} with {} Bytes of text.", messageHeader.getSender().toString(), contactTextMessageContent->getText().size());
 			m_messageCenterWrapper->processReceivedContactMessageText(messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTime(), openmittsu::protocol::MessageTime::now(), contactTextMessageContent->getText());

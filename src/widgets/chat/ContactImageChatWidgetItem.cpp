@@ -42,7 +42,7 @@ namespace openmittsu {
 
 		void ContactImageChatWidgetItem::onMessageDataChanged() {
 			QPixmap pixmap;
-			openmittsu::database::MediaFileItem const image = m_contactMessage.getContentAsImage();
+			openmittsu::database::MediaFileItem const image = m_contactMessage.getContentAsMediaFile();
 			if (image.isAvailable()) {
 				pixmap.loadFromData(image.getData());
 				m_lblImage->setPixmap(pixmap);
@@ -58,7 +58,7 @@ namespace openmittsu {
 
 		void ContactImageChatWidgetItem::copyToClipboard() {
 			QClipboard *clipboard = QApplication::clipboard();
-			openmittsu::database::MediaFileItem const image = m_contactMessage.getContentAsImage();
+			openmittsu::database::MediaFileItem const image = m_contactMessage.getContentAsMediaFile();
 			if (image.isAvailable()) {
 				QPixmap pixmap;
 				pixmap.loadFromData(image.getData());

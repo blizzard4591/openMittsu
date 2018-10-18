@@ -112,6 +112,17 @@ namespace openmittsu {
 			return target;
 		}
 
+		QByteArray Endian::uint16FromHostToLittleEndianByteArray(quint16 source) {
+			quint16 sourceInLittleEndian = Endian::uint16FromHostEndianToLittleEndian(source);
+
+			Quint16CharAccess accessUnion;
+			accessUnion.number = sourceInLittleEndian;
+
+			QByteArray target(accessUnion.chars, 2);
+
+			return target;
+		}
+
 		QByteArray Endian::uint32FromHostToLittleEndianByteArray(quint32 source) {
 			quint32 sourceInLittleEndian = Endian::uint32FromHostEndianToLittleEndian(source);
 

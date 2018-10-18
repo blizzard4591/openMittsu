@@ -53,7 +53,7 @@ namespace openmittsu {
 
 			virtual QString const& getContentAsText() const override;
 			virtual openmittsu::utility::Location getContentAsLocation() const override;
-			virtual MediaFileItem getContentAsImage() const override;
+			virtual MediaFileItem getContentAsMediaFile() const override;
 		private:
 			openmittsu::protocol::ContactId m_sender;
 			openmittsu::protocol::MessageId m_messageId;

@@ -28,6 +28,7 @@ namespace openmittsu {
 			virtual ~NetworkSentMessageAcceptor();
 
 		public slots:
+			virtual void processSentContactMessageAudio(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, QByteArray const& audio, quint16 lengthInSeconds) override;
 			virtual void processSentContactMessageText(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, QString const& message) override;
 			virtual void processSentContactMessageImage(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, QByteArray const& image, QString const& caption) override;
 			virtual void processSentContactMessageLocation(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::utility::Location const& location) override;
@@ -40,6 +41,7 @@ namespace openmittsu {
 			virtual void processSentContactMessageTypingStarted(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent) override;
 			virtual void processSentContactMessageTypingStopped(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent) override;
 
+			virtual void processSentGroupMessageAudio(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& targetGroupMembers, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, QByteArray const& audio, quint16 lengthInSeconds) override;
 			virtual void processSentGroupMessageText(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& targetGroupMembers, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, QString const& message) override;
 			virtual void processSentGroupMessageImage(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& targetGroupMembers, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, QByteArray const& image, QString const& caption) override;
 			virtual void processSentGroupMessageLocation(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& targetGroupMembers, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::utility::Location const& location) override;

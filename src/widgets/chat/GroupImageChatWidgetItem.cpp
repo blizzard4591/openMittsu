@@ -40,7 +40,7 @@ namespace openmittsu {
 
 		void GroupImageChatWidgetItem::onMessageDataChanged() {
 			QPixmap pixmap;
-			openmittsu::database::MediaFileItem const image = m_groupMessage.getContentAsImage();
+			openmittsu::database::MediaFileItem const image = m_groupMessage.getContentAsMediaFile();
 			if (image.isAvailable()) {
 				pixmap.loadFromData(image.getData());
 				m_lblImage->setPixmap(pixmap);
@@ -56,7 +56,7 @@ namespace openmittsu {
 
 		void GroupImageChatWidgetItem::copyToClipboard() {
 			QClipboard *clipboard = QApplication::clipboard();
-			openmittsu::database::MediaFileItem const image = m_groupMessage.getContentAsImage();
+			openmittsu::database::MediaFileItem const image = m_groupMessage.getContentAsMediaFile();
 			if (image.isAvailable()) {
 				QPixmap pixmap;
 				pixmap.loadFromData(image.getData());

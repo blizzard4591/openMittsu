@@ -28,7 +28,7 @@ namespace openmittsu {
 
 				virtual QString getContentAsText() const override;
 				virtual openmittsu::utility::Location getContentAsLocation() const override;
-				virtual MediaFileItem getContentAsImage() const override;
+				virtual MediaFileItem getContentAsMediaFile() const override;
 
 				static int getGroupMessageCount(InternalDatabaseInterface const* database);
 				static int getGroupMessageCount(InternalDatabaseInterface const* database, openmittsu::protocol::GroupId const& group);

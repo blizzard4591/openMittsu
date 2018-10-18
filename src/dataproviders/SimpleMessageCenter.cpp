@@ -31,6 +31,29 @@ namespace openmittsu {
 			emit messageChanged(uuid);
 		}
 
+		bool SimpleMessageCenter::sendAudio(openmittsu::protocol::ContactId const& receiver, QByteArray const& audio, quint16 lengthInSeconds) {
+			if (!this->m_storage.hasDatabase()) {
+				return false;
+			} else if (!this->m_storage.hasContact(receiver)) {
+				LOGGER()->warn("Trying to send image message to unknown contact {}", receiver.toString());
+				return false;
+			}
+
+			bool willQueue = true;
+			if ((this->m_networkSentMessageAcceptor == nullptr) || (!this->m_networkSentMessageAcceptor->isConnected())) {
+				willQueue = false;
+			}
+
+			openmittsu::protocol::MessageTime const sentTime = openmittsu::protocol::MessageTime::now();
+			openmittsu::protocol::MessageId const messageId = this->m_storage.storeSentContactMessageAudio(receiver, sentTime, willQueue, audio, lengthInSeconds);
+
+			if (willQueue) {
+				m_networkSentMessageAcceptor->processSentContactMessageAudio(receiver, messageId, sentTime, audio, lengthInSeconds);
+			}
+
+			return true;
+		}
+
 		bool SimpleMessageCenter::sendText(openmittsu::protocol::ContactId const& receiver, QString const& text) {
 			if (!this->m_storage.hasDatabase()) {
 				return false;
@@ -356,6 +379,29 @@ namespace openmittsu {
 			return true;
 		}
 
+		bool SimpleMessageCenter::sendAudio(openmittsu::protocol::GroupId const& group, QByteArray const& audio, quint16 lengthInSeconds) {
+			if (!this->m_storage.hasDatabase()) {
+				return false;
+			} else if (!this->m_storage.hasGroup(group)) {
+				LOGGER()->warn("Trying to send audio message to unknown group {}", group.toString());
+				return false;
+			}
+
+			bool willQueue = true;
+			if ((this->m_networkSentMessageAcceptor == nullptr) || (!this->m_networkSentMessageAcceptor->isConnected())) {
+				willQueue = false;
+			}
+
+			openmittsu::protocol::MessageTime const sentTime = openmittsu::protocol::MessageTime::now();
+			openmittsu::protocol::MessageId const messageId = this->m_storage.storeSentGroupMessageAudio(group, sentTime, willQueue, audio, lengthInSeconds);
+
+			if (willQueue) {
+				m_networkSentMessageAcceptor->processSentGroupMessageAudio(group, this->m_storage.getGroupMembers(group, true), messageId, sentTime, audio, lengthInSeconds);
+			}
+
+			return true;
+		}
+
 		bool SimpleMessageCenter::sendText(openmittsu::protocol::GroupId const& group, QString const& text) {
 			if (!this->m_storage.hasDatabase()) {
 				return false;
@@ -446,6 +492,24 @@ namespace openmittsu {
 		/*
 			Received Messages from Network
 		*/
+		void SimpleMessageCenter::processReceivedContactMessageAudio(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& audio, quint16 lengthInSeconds) {
+			if (!this->m_storage.hasDatabase()) {
+				LOGGER()->warn("We received a contact audio message from sender {} with message ID #{} sent at {} with audio {} that could not be saved as the storage system is not ready.", sender.toString(), messageId.toString(), timeSent.toString(), QString(audio.toHex()).toStdString());
+				return;
+			} else if (!this->m_storage.hasContact(sender)) {
+				LOGGER()->warn("We received a contact audio message from sender {} with message ID #{} sent at {} with audio {}, but we do not recognize the sender. Ignoring.", sender.toString(), messageId.toString(), timeSent.toString(), QString(audio.toHex()).toStdString());
+				return;
+			}
+
+			openTabForIncomingMessage(sender);
+			this->m_storage.storeReceivedContactMessageAudio(sender, messageId, timeSent, timeReceived, audio, lengthInSeconds);
+			if (this->m_networkSentMessageAcceptor != nullptr) {
+				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
+			}
+
+			sendReceipt(sender, messageId, openmittsu::messages::contact::ReceiptMessageContent::ReceiptType::RECEIVED);
+		}
+
 		void SimpleMessageCenter::processReceivedContactMessageText(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& message) {
 			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We received a contact text message from sender {} with message ID #{} sent at {} with text {} that could not be saved as the storage system is not ready.", sender.toString(), messageId.toString(), timeSent.toString(), message.toStdString());
@@ -595,6 +659,27 @@ namespace openmittsu {
 
 			LOGGER_DEBUG("We received a typing stop notification from sender {} with message ID #{} sent at {}.", sender.toString(), messageId.toString(), timeSent.toString());
 			this->m_storage.storeReceivedContactTypingNotificationStopped(sender, messageId, timeSent);
+			if (this->m_networkSentMessageAcceptor != nullptr) {
+				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
+			}
+		}
+
+		void SimpleMessageCenter::processReceivedGroupMessageAudio(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& audio, quint16 lengthInSeconds) {
+			if (!this->m_storage.hasDatabase()) {
+				LOGGER()->warn("We received a group audio message from sender {} for group {} with message ID #{} sent at {} with audio {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), QString(audio.toHex()).toStdString());
+				return;
+			} else if (!this->m_storage.hasContact(sender)) {
+				LOGGER()->warn("We received a group audio message from sender {} for group {} with message ID #{} sent at {} with audio {}, but we do not recognize the sender. Ignoring.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), QString(audio.toHex()).toStdString());
+				return;
+			}
+
+			if (!checkAndFixGroupMembership(group, sender)) {
+				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::AUDIO, audio));
+				return;
+			}
+
+			openTabForIncomingMessage(group);
+			this->m_storage.storeReceivedGroupMessageAudio(group, sender, messageId, timeSent, timeReceived, audio, lengthInSeconds);
 			if (this->m_networkSentMessageAcceptor != nullptr) {
 				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
 			}

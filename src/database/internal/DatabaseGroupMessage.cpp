@@ -254,7 +254,7 @@ namespace openmittsu {
 
 			QString DatabaseGroupMessage::getContentAsText() const {
 				GroupMessageType const messageType = getMessageType();
-				if ((messageType != GroupMessageType::TEXT) && (messageType != GroupMessageType::SET_IMAGE) && (messageType != GroupMessageType::SET_TITLE) && (messageType != GroupMessageType::GROUP_CREATION) && (messageType != GroupMessageType::LEAVE) && (messageType != GroupMessageType::SYNC_REQUEST)) {
+				if ((messageType != GroupMessageType::TEXT) && (messageType != GroupMessageType::AUDIO) && (messageType != GroupMessageType::SET_IMAGE) && (messageType != GroupMessageType::SET_TITLE) && (messageType != GroupMessageType::GROUP_CREATION) && (messageType != GroupMessageType::LEAVE) && (messageType != GroupMessageType::SYNC_REQUEST)) {
 					throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as text because it has type " << GroupMessageTypeHelper::toString(messageType) << "!";
 				}
 				return queryField(QStringLiteral("body")).toString();
@@ -268,10 +268,10 @@ namespace openmittsu {
 				return openmittsu::utility::Location::fromDatabaseString(queryField(QStringLiteral("body")).toString());
 			}
 
-			MediaFileItem DatabaseGroupMessage::getContentAsImage() const {
+			MediaFileItem DatabaseGroupMessage::getContentAsMediaFile() const {
 				GroupMessageType const messageType = getMessageType();
-				if (messageType != GroupMessageType::IMAGE) {
-					throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as image because it has type " << GroupMessageTypeHelper::toString(messageType) << "!";
+				if ((messageType != GroupMessageType::IMAGE) && (messageType != GroupMessageType::AUDIO) && (messageType != GroupMessageType::FILE) && (messageType != GroupMessageType::VIDEO)) {
+					throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as media file because it has type " << GroupMessageTypeHelper::toString(messageType) << "!";
 				}
 				return getMediaItem(getUid());
 			}

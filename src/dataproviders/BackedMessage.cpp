@@ -81,8 +81,8 @@ namespace openmittsu {
 			return getMessage().getContentAsLocation();
 		}
 
-		openmittsu::database::MediaFileItem BackedMessage::getContentAsImage() const {
-			return getMessage().getContentAsImage();
+		openmittsu::database::MediaFileItem BackedMessage::getContentAsMediaFile() const {
+			return getMessage().getContentAsMediaFile();
 		}
 
 		QString const& BackedMessage::getCaption() const {

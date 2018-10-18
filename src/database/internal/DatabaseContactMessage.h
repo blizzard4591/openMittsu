@@ -26,7 +26,7 @@ namespace openmittsu {
 
 				virtual QString getContentAsText() const override;
 				virtual openmittsu::utility::Location getContentAsLocation() const override;
-				virtual MediaFileItem getContentAsImage() const override;
+				virtual MediaFileItem getContentAsMediaFile() const override;
 
 				static int getContactMessageCount(InternalDatabaseInterface const* database);
 				static int getContactMessageCount(InternalDatabaseInterface const* database, openmittsu::protocol::ContactId const& contact);

@@ -53,6 +53,11 @@ namespace openmittsu {
 			}
 		}
 
+		void NetworkSentMessageAcceptor::processSentContactMessageAudio(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, QByteArray const& audio, quint16 lengthInSeconds) {
+			openmittsu::messages::contact::PreliminaryContactMessage const preliminaryMessage = openmittsu::messages::PreliminaryMessageFactory::createPreliminaryContactAudioMessage(receiver, messageId, timeSent, audio, lengthInSeconds);
+			send(preliminaryMessage);
+		}
+
 		void NetworkSentMessageAcceptor::processSentContactMessageText(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, QString const& message) {
 			openmittsu::messages::contact::PreliminaryContactMessage const preliminaryMessage = openmittsu::messages::PreliminaryMessageFactory::createPreliminaryContactTextMessage(receiver, messageId, timeSent, message);
 			send(preliminaryMessage);
@@ -86,6 +91,11 @@ namespace openmittsu {
 
 		void NetworkSentMessageAcceptor::processSentContactMessageReceiptDisagree(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageId const& referredMessageId) {
 			openmittsu::messages::contact::PreliminaryContactMessage const preliminaryMessage = openmittsu::messages::PreliminaryMessageFactory::createPreliminaryContactMessageReceipt(receiver, messageId, timeSent, referredMessageId, openmittsu::messages::contact::ReceiptMessageContent::ReceiptType::DISAGREE);
+			send(preliminaryMessage);
+		}
+
+		void NetworkSentMessageAcceptor::processSentGroupMessageAudio(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& targetGroupMembers, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, QByteArray const& audio, quint16 lengthInSeconds) {
+			openmittsu::messages::group::PreliminaryGroupMessage const preliminaryMessage = openmittsu::messages::PreliminaryMessageFactory::createPreliminaryGroupAudioMessage(group, messageId, timeSent, targetGroupMembers, audio, lengthInSeconds);
 			send(preliminaryMessage);
 		}
 

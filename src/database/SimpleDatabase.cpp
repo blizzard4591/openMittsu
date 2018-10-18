@@ -430,6 +430,15 @@ namespace openmittsu {
 			return id;
 		}
 
+		openmittsu::protocol::MessageId SimpleDatabase::storeSentContactMessageAudio(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, QByteArray const& audio, quint16 lengthInSeconds) {
+			if (!hasContact(receiver)) {
+				throw openmittsu::exceptions::InternalErrorException() << "Could not save contact audio message, the given contact " << receiver.toString() << " is unknown!";
+			}
+
+			QString const uuid = insertMediaItem(audio);
+			return internal::DatabaseContactMessage::insertContactMessageFromUs(this, receiver, uuid, timeCreated, ContactMessageType::AUDIO, QStringLiteral("[%1,true,\"\",\"\"]").arg(lengthInSeconds), isQueued, false, QStringLiteral(""));
+		}
+
 		openmittsu::protocol::MessageId SimpleDatabase::storeSentContactMessageText(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, QString const& message) {
 			return internal::DatabaseContactMessage::insertContactMessageFromUs(this, receiver, generateUuid(), timeCreated, ContactMessageType::TEXT, message, isQueued, false, QStringLiteral(""));
 		}
@@ -445,6 +454,15 @@ namespace openmittsu {
 
 		openmittsu::protocol::MessageId SimpleDatabase::storeSentContactMessageLocation(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, openmittsu::utility::Location const& location) {
 			return internal::DatabaseContactMessage::insertContactMessageFromUs(this, receiver, generateUuid(), timeCreated, ContactMessageType::LOCATION, location.toDatabaseString(), isQueued, false, location.getDescription());
+		}
+
+		openmittsu::protocol::MessageId SimpleDatabase::storeSentGroupMessageAudio(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, QByteArray const& audio, quint16 lengthInSeconds) {
+			if (!hasGroup(group)) {
+				throw openmittsu::exceptions::InternalErrorException() << "Could not save group audio message, the given group " << group.toString() << " is unknown!";
+			}
+
+			QString const uuid = insertMediaItem(audio);
+			return internal::DatabaseGroupMessage::insertGroupMessageFromUs(this, group, uuid, timeCreated, GroupMessageType::AUDIO, QStringLiteral("[%1,true,\"\",\"\"]").arg(lengthInSeconds), isQueued, false, QStringLiteral(""));
 		}
 
 		openmittsu::protocol::MessageId SimpleDatabase::storeSentGroupMessageText(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, QString const& message) {
@@ -488,6 +506,11 @@ namespace openmittsu {
 		openmittsu::protocol::MessageId SimpleDatabase::storeSentContactMessageNotificationTypingStopped(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued) {
 			// not stored
 			return getNextMessageId(receiver);
+		}
+
+		void SimpleDatabase::storeReceivedContactMessageAudio(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& audio, quint16 lengthInSeconds) {
+			QString const uuid = insertMediaItem(audio);
+			internal::DatabaseContactMessage::insertContactMessageFromThem(this, sender, messageId, uuid, timeSent, timeReceived, ContactMessageType::AUDIO, QStringLiteral("[%1,true,\"\",\"\"]").arg(lengthInSeconds), false, QStringLiteral(""));
 		}
 
 		void SimpleDatabase::storeReceivedContactMessageText(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& message) {
@@ -553,6 +576,15 @@ namespace openmittsu {
 			}
 	
 			emit contactStoppedTyping(sender);
+		}
+
+		void SimpleDatabase::storeReceivedGroupMessageAudio(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& audio, quint16 lengthInSeconds) {
+			if (!hasGroup(group)) {
+				throw openmittsu::exceptions::InternalErrorException() << "Could not save group audio message, the given group " << group.toString() << " is unknown!";
+			}
+
+			QString const uuid = insertMediaItem(audio);
+			internal::DatabaseGroupMessage::insertGroupMessageFromThem(this, group, sender, messageId, uuid, timeSent, timeReceived, GroupMessageType::AUDIO, QStringLiteral("[%1,true,\"\",\"\"]").arg(lengthInSeconds), false, QStringLiteral(""));
 		}
 
 		void SimpleDatabase::storeReceivedGroupMessageText(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& message) {
@@ -1174,18 +1206,37 @@ namespace openmittsu {
 				while (query.next()) {
 					ContactMessageType const messageType = ContactMessageTypeHelper::fromString(query.value(QStringLiteral("contact_message_type")).toString());
 					openmittsu::protocol::ContactId const receiver(query.value(QStringLiteral("identity")).toString());
+					QString const uuid(query.value(QStringLiteral("uid")).toString());
 					openmittsu::protocol::MessageId const messageId(query.value(QStringLiteral("apiid")).toString());
 					internal::DatabaseContactMessage message(this, receiver, messageId);
 
 					switch (messageType) {
 						case ContactMessageType::AUDIO:
-							throw openmittsu::exceptions::InternalErrorException() << "A waiting message has type AUDIO?!";
+						{
+							MediaFileItem const mediaFile = message.getContentAsMediaFile();
+							if (mediaFile.isAvailable()) {
+								QString const text = message.getContentAsText();
+								QRegularExpression regex(R"(\[(\d+),(?:true|false),"(?:[^"]|\\")*","(?:[^"]|\\")*"\])");
+								QRegularExpressionMatchIterator i = regex.globalMatch(text);
+
+								quint16 lengthInSeconds = 1;
+								if (i.hasNext()) {
+									QRegularExpressionMatch match = i.next();
+									lengthInSeconds = match.captured(1).toUShort();
+								} else {
+									LOGGER()->warn("Failed to extract length of audio clip from database field text: {}", text.toStdString());
+								}
+
+								messageAcceptor->processSentContactMessageAudio(receiver, messageId, message.getCreatedAt(), mediaFile.getData(), lengthInSeconds);
+								message.setIsQueued(true);
+							}
 							break;
+						}
 						case ContactMessageType::IMAGE:
 						{
-							MediaFileItem const image = message.getContentAsImage();
-							if (image.isAvailable()) {
-								messageAcceptor->processSentContactMessageImage(receiver, messageId, message.getCreatedAt(), image.getData(), message.getCaption());
+							MediaFileItem const mediaFile = message.getContentAsMediaFile();
+							if (mediaFile.isAvailable()) {
+								messageAcceptor->processSentContactMessageImage(receiver, messageId, message.getCreatedAt(), mediaFile.getData(), message.getCaption());
 								message.setIsQueued(true);
 							}
 							break;
@@ -1224,16 +1275,34 @@ namespace openmittsu {
 
 					switch (messageType) {
 						case GroupMessageType::AUDIO:
-							throw openmittsu::exceptions::InternalErrorException() << "A waiting message has type AUDIO?!";
+						{
+							MediaFileItem const mediaFile = message.getContentAsMediaFile();
+							if (mediaFile.isAvailable()) {
+								QString const text = message.getContentAsText();
+								QRegularExpression regex(R"(\[(\d+),(?:true|false),"(?:[^"]|\\")*","(?:[^"]|\\")*"\])");
+								QRegularExpressionMatchIterator i = regex.globalMatch(text);
+
+								quint16 lengthInSeconds = 1;
+								if (i.hasNext()) {
+									QRegularExpressionMatch match = i.next();
+									lengthInSeconds = match.captured(1).toUShort();
+								} else {
+									LOGGER()->warn("Failed to extract length of audio clip from database field text: {}", text.toStdString());
+								}
+
+								messageAcceptor->processSentGroupMessageAudio(group, m_contactAndGroupDataProvider.getGroupMembers(group, false), messageId, message.getCreatedAt(), mediaFile.getData(), lengthInSeconds);
+								message.setIsQueued(true);
+							}
 							break;
+						}
 						case GroupMessageType::IMAGE:
 						{
-							MediaFileItem const image = message.getContentAsImage();
-							if (image.isAvailable()) {
-								messageAcceptor->processSentGroupMessageImage(group, m_contactAndGroupDataProvider.getGroupMembers(group, false), messageId, message.getCreatedAt(), image.getData(), message.getCaption());
+							MediaFileItem const mediaFile = message.getContentAsMediaFile();
+							if (mediaFile.isAvailable()) {
+								messageAcceptor->processSentGroupMessageImage(group, m_contactAndGroupDataProvider.getGroupMembers(group, false), messageId, message.getCreatedAt(), mediaFile.getData(), message.getCaption());
 								message.setIsQueued(true);
-								break;
 							}
+							break;
 						}
 						case GroupMessageType::LOCATION:
 							messageAcceptor->processSentGroupMessageLocation(group, m_contactAndGroupDataProvider.getGroupMembers(group, false), messageId, message.getCreatedAt(), message.getContentAsLocation());

@@ -52,6 +52,10 @@ namespace openmittsu {
 			emit messageChanged(uuid);
 		}
 
+		bool MessageCenterWrapper::sendAudio(openmittsu::protocol::ContactId const& receiver, QByteArray const& audio, quint16 lengthInSeconds) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_RETURN(sendAudio, bool, Q_ARG(openmittsu::protocol::ContactId const&, receiver), Q_ARG(QByteArray const&, audio), Q_ARG(quint16, lengthInSeconds));
+		}
+
 		bool MessageCenterWrapper::sendText(openmittsu::protocol::ContactId const& receiver, QString const& text) {
 			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_RETURN(sendText, bool, Q_ARG(openmittsu::protocol::ContactId const&, receiver), Q_ARG(QString const&, text));
 		}
@@ -70,6 +74,10 @@ namespace openmittsu {
 
 		void MessageCenterWrapper::sendUserTypingStatus(openmittsu::protocol::ContactId const& receiver, bool isTyping) {
 			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(sendUserTypingStatus, Q_ARG(openmittsu::protocol::ContactId const&, receiver), Q_ARG(bool, isTyping));
+		}
+
+		bool MessageCenterWrapper::sendAudio(openmittsu::protocol::GroupId const& group, QByteArray const& audio, quint16 lengthInSeconds) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_RETURN(sendAudio, bool, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(QByteArray const&, audio), Q_ARG(quint16, lengthInSeconds));
 		}
 
 		bool MessageCenterWrapper::sendText(openmittsu::protocol::GroupId const& group, QString const& text) {
@@ -128,6 +136,10 @@ namespace openmittsu {
 			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processMessageSendDone, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(openmittsu::protocol::MessageId const&, messageId));
 		}
 
+		void MessageCenterWrapper::processReceivedContactMessageAudio(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& audio, quint16 lengthInSeconds) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedContactMessageAudio, Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived), Q_ARG(QByteArray const&, audio), Q_ARG(quint16, lengthInSeconds));
+		}
+
 		void MessageCenterWrapper::processReceivedContactMessageText(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& message) {
 			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedContactMessageText, Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived), Q_ARG(QString const&, message));
 		}
@@ -162,6 +174,10 @@ namespace openmittsu {
 
 		void MessageCenterWrapper::processReceivedContactTypingNotificationStopped(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent) {
 			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedContactTypingNotificationStopped, Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent));
+		}
+
+		void MessageCenterWrapper::processReceivedGroupMessageAudio(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& audio, quint16 lengthInSeconds) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedGroupMessageAudio, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived), Q_ARG(QByteArray const&, audio), Q_ARG(quint16, lengthInSeconds));
 		}
 
 		void MessageCenterWrapper::processReceivedGroupMessageText(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& message) {

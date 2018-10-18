@@ -115,10 +115,10 @@ namespace openmittsu {
 			return openmittsu::utility::Location::fromDatabaseString(m_body);
 		}
 
-		MediaFileItem DatabaseReadonlyGroupMessage::getContentAsImage() const {
+		MediaFileItem DatabaseReadonlyGroupMessage::getContentAsMediaFile() const {
 			GroupMessageType const messageType = getMessageType();
-			if (messageType != GroupMessageType::IMAGE) {
-				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as image because it has type " << GroupMessageTypeHelper::toString(messageType) << "!";
+			if ((messageType != GroupMessageType::IMAGE) && (messageType != GroupMessageType::AUDIO) && (messageType != GroupMessageType::FILE) && (messageType != GroupMessageType::VIDEO)) {
+				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as media file because it has type " << GroupMessageTypeHelper::toString(messageType) << "!";
 			}
 			return m_mediaItem;
 		}
