@@ -318,7 +318,20 @@ namespace openmittsu {
 		}
 
 		openmittsu::database::ContactData DatabaseWrapper::getContactData(openmittsu::protocol::ContactId const& contact, bool fetchMessageCount) const {
-			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getContactData, openmittsu::database::ContactData, Q_ARG(openmittsu::protocol::ContactId const&, contact), Q_ARG(bool, fetchMessageCount));
+			//OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getContactData, openmittsu::database::ContactData, Q_ARG(openmittsu::protocol::ContactId const&, contact), Q_ARG(bool, fetchMessageCount));
+
+			do {
+				openmittsu::database::ContactData returnVal;
+					auto ptr = m_database.lock();
+					if (!ptr) {
+						LOGGER()->error("Tried aquiring database pointer in wrapper for {} and failed!", "getContactData");
+						throw openmittsu::exceptions::InternalErrorException() << "Tried aquiring database pointer in wrapper for " << "getContactData" << " and failed!";
+					}
+					if (!QMetaObject::invokeMethod(ptr.get(), "getContactData", m_connectionType, Q_RETURN_ARG(openmittsu::database::ContactData, returnVal), Q_ARG(openmittsu::protocol::ContactId const&, contact), Q_ARG(bool, fetchMessageCount))) {
+						throw openmittsu::exceptions::InternalErrorException() << "Could not invoke " << "getContactData" << " from Database Wrapper";
+					}
+					return returnVal;
+			} while (false);
 		}
 
 		openmittsu::database::ContactToContactDataMap DatabaseWrapper::getContactDataAll(bool fetchMessageCount) const {

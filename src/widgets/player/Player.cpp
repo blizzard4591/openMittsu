@@ -63,6 +63,8 @@
 
 #include <iostream>
 
+#include "src/utility/QObjectConnectionMacro.h"
+
 namespace openmittsu {
 	namespace widgets {
 
@@ -80,15 +82,15 @@ namespace openmittsu {
 			m_player->setPlaylist(m_playlist);
 			//! [create-objs]
 
-			connect(m_player, &QMediaPlayer::durationChanged, this, &Player::durationChanged);
-			connect(m_player, &QMediaPlayer::positionChanged, this, &Player::positionChanged);
-			connect(m_player, SIGNAL(metaDataChanged()), this, SLOT(metaDataChanged()));
-			connect(m_playlist, &QMediaPlaylist::currentIndexChanged, this, &Player::playlistPositionChanged);
-			connect(m_player, &QMediaPlayer::mediaStatusChanged, this, &Player::statusChanged);
-			connect(m_player, &QMediaPlayer::bufferStatusChanged, this, &Player::bufferingProgress);
-			connect(m_player, &QMediaPlayer::videoAvailableChanged, this, &Player::videoAvailableChanged);
-			connect(m_player, SIGNAL(error(QMediaPlayer::Error)), this, SLOT(displayErrorMessage()));
-			connect(m_player, &QMediaPlayer::stateChanged, this, &Player::stateChanged);
+			OPENMITTSU_CONNECT(m_player, durationChanged(), this, durationChanged());
+			OPENMITTSU_CONNECT(m_player, positionChanged(), this, positionChanged());
+			OPENMITTSU_CONNECT(m_player, metaDataChanged(), this, metaDataChanged());
+			OPENMITTSU_CONNECT(m_playlist, currentIndexChanged(), this, playlistPositionChanged());
+			OPENMITTSU_CONNECT(m_player, mediaStatusChanged(), this, statusChanged());
+			OPENMITTSU_CONNECT(m_player, bufferStatusChanged(), this, bufferingProgress());
+			OPENMITTSU_CONNECT(m_player, videoAvailableChanged(), this, videoAvailableChanged());
+			OPENMITTSU_CONNECT(m_player, error(QMediaPlayer::Error), this, displayErrorMessage());
+			OPENMITTSU_CONNECT(m_player, stateChanged(), this, stateChanged());
 
 			//! [2]
 			if (m_useVideoWidget) {
@@ -104,28 +106,30 @@ namespace openmittsu {
 			m_slider->setRange(0, m_player->duration() / 1000);
 
 			m_labelDuration = new QLabel(this);
-			connect(m_slider, &QSlider::sliderMoved, this, &Player::seek);
+			OPENMITTSU_CONNECT(m_slider, sliderMoved(), this, seek());
 
 			PlayerControls *controls = new PlayerControls(this);
 			controls->setState(m_player->state());
 			controls->setVolume(m_player->volume());
 			controls->setMuted(controls->isMuted());
 
-			connect(controls, &PlayerControls::play, m_player, &QMediaPlayer::play);
-			connect(controls, &PlayerControls::pause, m_player, &QMediaPlayer::pause);
-			connect(controls, &PlayerControls::stop, m_player, &QMediaPlayer::stop);
-			connect(controls, &PlayerControls::changeVolume, m_player, &QMediaPlayer::setVolume);
-			connect(controls, &PlayerControls::changeMuting, m_player, &QMediaPlayer::setMuted);
+			OPENMITTSU_CONNECT(controls, play(), m_player, play());
+			OPENMITTSU_CONNECT(controls, pause(), m_player, pause());
+			OPENMITTSU_CONNECT(controls, stop(), m_player, stop());
+			OPENMITTSU_CONNECT(controls, changeVolume(), m_player, setVolume());
+			OPENMITTSU_CONNECT(controls, changeMuting(), m_player, setMuted());
 			if (m_useVideoWidget) {
-				connect(controls, SIGNAL(stop()), m_videoWidget, SLOT(update()));
+				OPENMITTSU_CONNECT(controls, stop(), m_videoWidget, update());
 			}
 
-			connect(m_player, &QMediaPlayer::stateChanged, controls, &PlayerControls::setState);
-			connect(m_player, &QMediaPlayer::volumeChanged, controls, &PlayerControls::setVolume);
-			connect(m_player, &QMediaPlayer::mutedChanged, controls, &PlayerControls::setMuted);
+			OPENMITTSU_CONNECT(m_player, stateChanged(), controls, setState());
+			OPENMITTSU_CONNECT(m_player, volumeChanged(), controls, setVolume());
+			OPENMITTSU_CONNECT(m_player, mutedChanged(), controls, setMuted());
 
-			m_fullScreenButton = new QPushButton(tr("FullScreen"), this);
-			m_fullScreenButton->setCheckable(true);
+			if (m_useVideoWidget) {
+				m_fullScreenButton = new QPushButton(tr("FullScreen"), this);
+				m_fullScreenButton->setCheckable(true);
+			}
 
 			QBoxLayout *displayLayout = nullptr;
 			if (m_useVideoWidget) {
@@ -136,8 +140,10 @@ namespace openmittsu {
 			QBoxLayout *controlLayout = new QHBoxLayout;
 			controlLayout->setMargin(0);
 			controlLayout->addWidget(controls);
-			controlLayout->addStretch(1);
-			controlLayout->addWidget(m_fullScreenButton);
+			if (m_useVideoWidget) {
+				controlLayout->addStretch(1);
+				controlLayout->addWidget(m_fullScreenButton);
+			}
 
 			QBoxLayout *layout = new QVBoxLayout;
 			if (m_useVideoWidget) {
@@ -321,12 +327,12 @@ namespace openmittsu {
 				return;
 			}
 			if (!available) {
-				disconnect(m_fullScreenButton, &QPushButton::clicked, m_videoWidget, &QVideoWidget::setFullScreen);
-				disconnect(m_videoWidget, &QVideoWidget::fullScreenChanged, m_fullScreenButton, &QPushButton::setChecked);
+				OPENMITTSU_DISCONNECT(m_fullScreenButton, clicked(), m_videoWidget, setFullScreen());
+				OPENMITTSU_DISCONNECT(m_videoWidget, fullScreenChanged(), m_fullScreenButton, setChecked());
 				m_videoWidget->setFullScreen(false);
 			} else {
-				connect(m_fullScreenButton, &QPushButton::clicked, m_videoWidget, &QVideoWidget::setFullScreen);
-				connect(m_videoWidget, &QVideoWidget::fullScreenChanged, m_fullScreenButton, &QPushButton::setChecked);
+				OPENMITTSU_CONNECT(m_fullScreenButton, clicked(), m_videoWidget, setFullScreen());
+				OPENMITTSU_CONNECT(m_videoWidget, fullScreenChanged(), m_fullScreenButton, setChecked());
 
 				if (m_fullScreenButton->isChecked())
 					m_videoWidget->setFullScreen(true);

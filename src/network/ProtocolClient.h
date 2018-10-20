@@ -42,6 +42,7 @@
 #include "src/messages/contact/ReceiptMessageContent.h"
 #include "src/messages/contact/UserTypingMessageContent.h"
 #include "src/messages/group/PreliminaryGroupMessage.h"
+#include "src/messages/group/GroupAudioMessageContent.h"
 #include "src/messages/group/GroupTextMessageContent.h"
 #include "src/messages/group/GroupImageMessageContent.h"
 #include "src/messages/group/GroupLocationMessageContent.h"
@@ -169,6 +170,7 @@ namespace openmittsu {
 			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ContactLocationMessageContent const> contactLocationMessageContent);
 			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ReceiptMessageContent const> receiptMessageContent);
 			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::UserTypingMessageContent const> userTypingMessageContent);
+			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupAudioMessageContent const> groupAudioMessageContent);
 			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupTextMessageContent const> groupTextMessageContent);
 			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupImageMessageContent const> groupImageMessageContent);
 			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupLocationMessageContent const> groupLocationMessageContent);

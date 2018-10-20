@@ -101,8 +101,8 @@ namespace openmittsu {
 			virtual void storeNewGroup(QVector<NewGroupData> const& newGroupData) override;
 			virtual void sendAllWaitingMessages(std::shared_ptr<openmittsu::dataproviders::SentMessageAcceptor> messageAcceptor) override;
 			// Contact Data
-			virtual openmittsu::database::ContactData getContactData(openmittsu::protocol::ContactId const& contact, bool fetchMessageCount) const override;
-			virtual openmittsu::database::ContactToContactDataMap getContactDataAll(bool fetchMessageCount) const override;
+			virtual ContactData getContactData(openmittsu::protocol::ContactId const& contact, bool fetchMessageCount) const override;
+			virtual ContactToContactDataMap getContactDataAll(bool fetchMessageCount) const override;
 			virtual openmittsu::crypto::PublicKey getContactPublicKey(openmittsu::protocol::ContactId const& identity) const override;
 			virtual int getContactCount() const override;
 			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::ContactId const& contact, std::size_t n) override;
@@ -115,8 +115,8 @@ namespace openmittsu {
 			virtual void setContactFeatureLevel(openmittsu::protocol::ContactId const& contact, openmittsu::protocol::FeatureLevel const& featureLevel) override;
 			virtual void setContactColor(openmittsu::protocol::ContactId const& contact, int color) override;
 			// Group Data
-			virtual openmittsu::database::GroupData getGroupData(openmittsu::protocol::GroupId const& group, bool withDescription) const override;
-			virtual openmittsu::database::GroupToGroupDataMap getGroupDataAll(bool withDescription) const override;
+			virtual GroupData getGroupData(openmittsu::protocol::GroupId const& group, bool withDescription) const override;
+			virtual GroupToGroupDataMap getGroupDataAll(bool withDescription) const override;
 			virtual int getGroupCount() const override;
 			virtual QSet<openmittsu::protocol::ContactId> getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const override;
 			virtual QVector<QString> getLastMessageUuids(openmittsu::protocol::GroupId const& group, std::size_t n) override;
@@ -125,9 +125,9 @@ namespace openmittsu {
 			virtual std::shared_ptr<openmittsu::backup::IdentityBackup> getBackup() const override;
 			virtual QSet<openmittsu::protocol::ContactId> getContactsRequiringFeatureLevelCheck(int maximalAgeInSeconds) const override;
 			virtual QSet<openmittsu::protocol::ContactId> getContactsRequiringAccountStatusCheck(int maximalAgeInSeconds) const override;
-			virtual void setContactAccountStatusBatch(openmittsu::database::ContactToAccountStatusMap const& status) override;
-			virtual void setContactFeatureLevelBatch(openmittsu::database::ContactToFeatureLevelMap const& featureLevels) override;
-			virtual openmittsu::database::GroupToTitleMap getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const override;
+			virtual void setContactAccountStatusBatch(ContactToAccountStatusMap const& status) override;
+			virtual void setContactFeatureLevelBatch(ContactToFeatureLevelMap const& featureLevels) override;
+			virtual GroupToTitleMap getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const override;
 			// Options
 			virtual openmittsu::database::OptionNameToValueMap getOptions() override;
 			virtual void setOptions(openmittsu::database::OptionNameToValueMap const& options) override;

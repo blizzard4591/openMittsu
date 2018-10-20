@@ -57,6 +57,8 @@
 #include <QComboBox>
 #include <QAudio>
 
+#include "src/utility/QObjectConnectionMacro.h"
+
 #if defined(QT_VERSION) && (QT_VERSION < QT_VERSION_CHECK(5, 8, 0))
 #include <qmath.h>
 #define LOG100 4.60517018599
@@ -69,23 +71,23 @@ namespace openmittsu {
 			m_playButton = new QToolButton(this);
 			m_playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
 
-			connect(m_playButton, &QAbstractButton::clicked, this, &PlayerControls::playClicked);
+			OPENMITTSU_CONNECT(m_playButton, clicked(), this, playClicked());
 
 			m_stopButton = new QToolButton(this);
 			m_stopButton->setIcon(style()->standardIcon(QStyle::SP_MediaStop));
 			m_stopButton->setEnabled(false);
 
-			connect(m_stopButton, &QAbstractButton::clicked, this, &PlayerControls::stop);
+			OPENMITTSU_CONNECT(m_stopButton, clicked(), this, stop());
 
 			m_muteButton = new QToolButton(this);
 			m_muteButton->setIcon(style()->standardIcon(QStyle::SP_MediaVolume));
 
-			connect(m_muteButton, &QAbstractButton::clicked, this, &PlayerControls::muteClicked);
+			OPENMITTSU_CONNECT(m_muteButton, clicked(), this, muteClicked());
 
 			m_volumeSlider = new QSlider(Qt::Horizontal, this);
 			m_volumeSlider->setRange(0, 100);
 
-			connect(m_volumeSlider, &QSlider::valueChanged, this, &PlayerControls::onVolumeSliderValueChanged);
+			OPENMITTSU_CONNECT(m_volumeSlider, valueChanged(), this, onVolumeSliderValueChanged());
 
 			QBoxLayout *layout = new QHBoxLayout;
 			layout->setMargin(0);

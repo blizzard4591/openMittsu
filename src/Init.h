@@ -55,13 +55,20 @@
 
 #define OPENMITTSU_REGISTER_TYPES() do { \
 	qRegisterMetaType<openmittsu::crypto::PublicKey>(); \
-	qRegisterMetaType<openmittsu::database::ContactData>(); \
-	qRegisterMetaType<openmittsu::database::DatabaseSeekResult>(); \
-	qRegisterMetaType<openmittsu::database::DatabaseOpenResult>(); \
-	qRegisterMetaType<openmittsu::database::DatabaseWrapperFactory>(); \
-	qRegisterMetaType<openmittsu::database::GroupData>(); \
-	qRegisterMetaType<openmittsu::database::NewContactData>(); \
-	qRegisterMetaType<openmittsu::database::NewGroupData>(); \
+	qRegisterMetaType<openmittsu::database::ContactData>("ContactData"); \
+	qRegisterMetaType<openmittsu::database::ContactData>("openmittsu::database::ContactData"); \
+	qRegisterMetaType<openmittsu::database::DatabaseSeekResult>("DatabaseSeekResult"); \
+	qRegisterMetaType<openmittsu::database::DatabaseSeekResult>("openmittsu::database::DatabaseSeekResult"); \
+	qRegisterMetaType<openmittsu::database::DatabaseOpenResult>("DatabaseOpenResult"); \
+	qRegisterMetaType<openmittsu::database::DatabaseOpenResult>("openmittsu::database::DatabaseOpenResult"); \
+	qRegisterMetaType<openmittsu::database::DatabaseWrapperFactory>("DatabaseWrapperFactory"); \
+	qRegisterMetaType<openmittsu::database::DatabaseWrapperFactory>("openmittsu::database::DatabaseWrapperFactory"); \
+	qRegisterMetaType<openmittsu::database::GroupData>("GroupData"); \
+	qRegisterMetaType<openmittsu::database::GroupData>("openmittsu::database::GroupData"); \
+	qRegisterMetaType<openmittsu::database::NewContactData>("NewContactData"); \
+	qRegisterMetaType<openmittsu::database::NewContactData>("openmittsu::database::NewContactData"); \
+	qRegisterMetaType<openmittsu::database::NewGroupData>("NewGroupData"); \
+	qRegisterMetaType<openmittsu::database::NewGroupData>("openmittsu::database::NewGroupData"); \
 	qRegisterMetaType<openmittsu::messages::FullMessageHeader>(); \
 	qRegisterMetaType<QSharedPointer<openmittsu::messages::FullMessageHeader const>>(); \
 	qRegisterMetaType<openmittsu::messages::contact::PreliminaryContactMessage>(); \

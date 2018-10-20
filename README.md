@@ -106,7 +106,7 @@ Find detailed steps for Linux and Windows systems below.
 	
 Prerequisites on Debian/Ubuntu: 
 ```
-apt-get install libqt5core5a libqt5gui5 libqt5multimedia5 libqt5multimedia5-plugins libqt5sql5 libqt5sql5-sqlite libqt5widgets5 qt5-qmake qtbase5-dev qtbase5-dev-tools qtmultimedia5-dev libqrencode-dev git g++ libssl-dev make cmake qtbase5-dev qtbase5-private-dev pkgconf
+apt-get install libqt5core5a libqt5gui5 libqt5multimedia5 libqt5multimedia5-plugins libqt5sql5 libqt5sql5-sqlite libqt5widgets5 qt5-qmake qtbase5-dev qtbase5-dev-tools qtmultimedia5-dev libqrencode-dev git g++ libssl-dev make cmake qtbase5-dev qtbase5-private-dev pkgconf gstreamer1.0-libav libavcodec-extra
 ```
 Important: If you are using Debian 9: To install a more recent version of `libsodium` (at least 1.0.12) and a fixed version of SqlCipher, you need to have the openMittsu repository in your APT configuration.
 To do this safely, add ```deb https://packages.openmittsu.de/apt/debian stretch main``` as described in the section on binaries.

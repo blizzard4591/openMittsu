@@ -29,8 +29,6 @@
 #include "src/messages/contact/ContactImageMessageContent.h"
 #include "src/messages/group/SpecializedGroupMessage.h"
 #include "src/messages/group/UnspecializedGroupMessage.h"
-#include "src/messages/group/GroupTextMessageContent.h"
-#include "src/messages/group/GroupImageMessageContent.h"
 #include "src/protocol/AuthenticationPacket.h"
 #include "src/protocol/ClientAcknowledgement.h"
 #include "src/crypto/NonceGenerator.h"
@@ -457,7 +455,9 @@ namespace openmittsu {
 					return;
 				}
 
-				if (dynamic_cast<openmittsu::messages::contact::ContactTextMessageContent const*>(cmc) != nullptr) {
+				if (dynamic_cast<openmittsu::messages::contact::ContactAudioMessageContent const*>(cmc) != nullptr) {
+					handleIncomingMessage(contactMessage->getMessageHeader(), std::shared_ptr<openmittsu::messages::contact::ContactAudioMessageContent const>(dynamic_cast<openmittsu::messages::contact::ContactAudioMessageContent const*>(cmc->clone())));
+				} else if (dynamic_cast<openmittsu::messages::contact::ContactTextMessageContent const*>(cmc) != nullptr) {
 					handleIncomingMessage(contactMessage->getMessageHeader(), std::shared_ptr<openmittsu::messages::contact::ContactTextMessageContent const>(dynamic_cast<openmittsu::messages::contact::ContactTextMessageContent const*>(cmc->clone())));
 				} else if (dynamic_cast<openmittsu::messages::contact::ContactImageMessageContent const*>(cmc) != nullptr) {
 					handleIncomingMessage(contactMessage->getMessageHeader(), std::shared_ptr<openmittsu::messages::contact::ContactImageMessageContent const>(dynamic_cast<openmittsu::messages::contact::ContactImageMessageContent const*>(cmc->clone())));
@@ -488,7 +488,9 @@ namespace openmittsu {
 					return;
 				}
 
-				if (dynamic_cast<openmittsu::messages::group::GroupTextMessageContent const*>(cmc) != nullptr) {
+				if (dynamic_cast<openmittsu::messages::group::GroupAudioMessageContent const*>(cmc) != nullptr) {
+					handleIncomingMessage(groupMessage->getMessageHeader(), std::shared_ptr<openmittsu::messages::group::GroupAudioMessageContent const>(dynamic_cast<openmittsu::messages::group::GroupAudioMessageContent const*>(cmc->clone())));
+				} else if (dynamic_cast<openmittsu::messages::group::GroupTextMessageContent const*>(cmc) != nullptr) {
 					handleIncomingMessage(groupMessage->getMessageHeader(), std::shared_ptr<openmittsu::messages::group::GroupTextMessageContent const>(dynamic_cast<openmittsu::messages::group::GroupTextMessageContent const*>(cmc->clone())));
 				} else if (dynamic_cast<openmittsu::messages::group::GroupImageMessageContent const*>(cmc) != nullptr) {
 					handleIncomingMessage(groupMessage->getMessageHeader(), std::shared_ptr<openmittsu::messages::group::GroupImageMessageContent const>(dynamic_cast<openmittsu::messages::group::GroupImageMessageContent const*>(cmc->clone())));
@@ -554,6 +556,11 @@ namespace openmittsu {
 		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ContactAudioMessageContent const> contactAudioMessageContent) {
 			LOGGER_DEBUG("Received an audio message from {}.", messageHeader.getSender().toString());
 			m_messageCenterWrapper->processReceivedContactMessageAudio(messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTime(), openmittsu::protocol::MessageTime::now(), contactAudioMessageContent->getAudioData(), contactAudioMessageContent->getLengthInSeconds());
+		}
+
+		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupAudioMessageContent const> groupAudioMessageContent) {
+			LOGGER_DEBUG("Received an audio message from {} to group {}.", messageHeader.getSender().toString(), groupAudioMessageContent->getGroupId().toString());
+			m_messageCenterWrapper->processReceivedGroupMessageAudio(groupAudioMessageContent->getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTime(), openmittsu::protocol::MessageTime::now(), groupAudioMessageContent->getAudioData(), groupAudioMessageContent->getLengthInSeconds());
 		}
 
 		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ContactTextMessageContent const> contactTextMessageContent) {
