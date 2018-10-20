@@ -19,7 +19,7 @@ namespace openmittsu {
 			explicit ContactAudioChatWidgetItem(openmittsu::dataproviders::BackedContactMessage const& message, QWidget* parent = nullptr);
 			virtual ~ContactAudioChatWidgetItem();
 
-			
+			virtual void setBackgroundColorAndPadding(QString const& cssColor, int padding) override;
 		public slots:
 			virtual void onMessageDataChanged() override;
 

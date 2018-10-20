@@ -87,9 +87,10 @@ namespace openmittsu {
 			void play(QByteArray const& mp4Data);
 			void addToPlaylist(const QList<QUrl> &urls);
 			void setCustomAudioRole(const QString &role);
-
 		signals:
 			void fullScreenChanged(bool fullScreen);
+		protected:
+			virtual void paintEvent(QPaintEvent* event) override;
 		private slots:
 			void durationChanged(qint64 duration);
 			void positionChanged(qint64 progress);

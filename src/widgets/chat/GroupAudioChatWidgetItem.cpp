@@ -30,6 +30,12 @@ namespace openmittsu {
 			delete m_lblCaption;
 		}
 
+		void GroupAudioChatWidgetItem::setBackgroundColorAndPadding(QString const& cssColor, int padding) {
+			GroupChatWidgetItem::setBackgroundColorAndPadding(cssColor, padding);
+
+			m_player->setStyleSheet(QStringLiteral("background-color:%1;padding:%2px;").arg(cssColor).arg(padding));
+		}
+
 		void GroupAudioChatWidgetItem::onMessageDataChanged() {
 			openmittsu::database::MediaFileItem const audio = m_groupMessage.getContentAsMediaFile();
 			if (audio.isAvailable()) {

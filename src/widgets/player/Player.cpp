@@ -163,6 +163,16 @@ namespace openmittsu {
 		}
 
 		Player::~Player() {
+			//
+		}
+
+		void Player::paintEvent(QPaintEvent* event) {
+			QStyleOption opt;
+			opt.init(this);
+			QPainter p(this);
+			style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+
+			QWidget::paintEvent(event);
 		}
 
 		bool Player::isPlayerAvailable() const {
@@ -176,7 +186,7 @@ namespace openmittsu {
 		}
 
 		void Player::setCustomAudioRole(const QString &role) {
-#if defined(QT_VERSION) && (QT_VERSION < QT_VERSION_CHECK(5, 11, 0))
+#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 11, 0))
 			m_player->setCustomAudioRole(role);
 #endif
 		}

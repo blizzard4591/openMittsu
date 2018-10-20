@@ -37,6 +37,12 @@ namespace openmittsu {
 			delete m_lblCaption;
 		}
 
+		void ContactAudioChatWidgetItem::setBackgroundColorAndPadding(QString const& cssColor, int padding) {
+			ContactChatWidgetItem::setBackgroundColorAndPadding(cssColor, padding);
+
+			m_player->setStyleSheet(QStringLiteral("background-color:%1;padding:%2px;").arg(cssColor).arg(padding));
+		}
+
 		void ContactAudioChatWidgetItem::onMessageDataChanged() {
 			openmittsu::database::MediaFileItem const audio = m_contactMessage.getContentAsMediaFile();
 			if (audio.isAvailable()) {

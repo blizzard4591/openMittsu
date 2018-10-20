@@ -53,6 +53,10 @@ namespace openmittsu {
 			//
 		}
 
+		void ChatWidgetItem::setBackgroundColorAndPadding(QString const& cssColor, int padding) {
+			this->setStyleSheet(QStringLiteral("background-color:%1;padding:%2px;").arg(cssColor).arg(padding));
+		}
+
 		void ChatWidgetItem::updateUiVisibilityAndEdgeRounding() {
 			QString upperStyleSheet(QStringLiteral("border-top-right-radius:5px;"));
 			QString lowerStyleSheet(QStringLiteral("border-bottom-right-radius:5px;"));

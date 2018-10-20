@@ -90,15 +90,11 @@ namespace openmittsu {
 			QDateTime compareTime = QDateTime::currentDateTime();
 
 			if (item->isMessageFromUs()) {
-				//QSpacerItem* spacerItem = new QSpacerItem(100, 1, QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
-				//hboxLayout->addItem(spacerItem);
 				hboxLayout->addWidget(item, 0, Qt::AlignRight);
-				item->setStyleSheet("background-color:#f7ffe8;padding:5px;");
+				item->setBackgroundColorAndPadding(QStringLiteral("#f7ffe8"), 5);
 			} else {
-				//QSpacerItem* spacerItem = new QSpacerItem(100, 1, QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
 				hboxLayout->addWidget(item, 0, Qt::AlignLeft);
-				//hboxLayout->addItem(spacerItem);
-				item->setStyleSheet("background-color:white;padding:5px;");
+				item->setBackgroundColorAndPadding(QStringLiteral("white"), 5);
 			}
 
 			int index = 0;

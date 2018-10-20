@@ -36,6 +36,8 @@ namespace openmittsu {
 			virtual bool isMessageFromUs() const;
 			virtual void setWasReadByUs();
 
+			virtual void setBackgroundColorAndPadding(QString const& cssColor, int padding);
+
 			bool operator <(ChatWidgetItem const& other) const;
 			bool operator <=(ChatWidgetItem const& other) const;
 		public slots:

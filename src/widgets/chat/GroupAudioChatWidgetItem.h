@@ -18,6 +18,8 @@ namespace openmittsu {
 		public:
 			explicit GroupAudioChatWidgetItem(openmittsu::dataproviders::BackedGroupMessage const& message, QWidget* parent = nullptr);
 			virtual ~GroupAudioChatWidgetItem();
+
+			virtual void setBackgroundColorAndPadding(QString const& cssColor, int padding) override;
 		public slots:
 			virtual void onMessageDataChanged() override;
 		protected:
