@@ -259,8 +259,8 @@ TEST_F(DatabaseTestFramework, contactMessages) {
 		ASSERT_TRUE(cursorD.next());
 		std::shared_ptr<openmittsu::dataproviders::messages::ContactMessage> imageMessage = cursorD.getMessage();
 		ASSERT_EQ(imageMessage->getContactId(), contactIdD);
-		ASSERT_TRUE(imageMessage->getContentAsImage().isAvailable());
-		ASSERT_EQ(imageMessage->getContentAsImage().getData(), imageData);
+		ASSERT_TRUE(imageMessage->getContentAsMediaFile().isAvailable());
+		ASSERT_EQ(imageMessage->getContentAsMediaFile().getData(), imageData);
 	}
 }
 
@@ -578,8 +578,8 @@ TEST_F(DatabaseTestFramework, groupMessages) {
 		ASSERT_TRUE(cursorD.next());
 		std::shared_ptr<openmittsu::dataproviders::messages::GroupMessage> imageMessage = cursorD.getMessage();
 		ASSERT_EQ(imageMessage->getGroupId(), groupC);
-		ASSERT_TRUE(imageMessage->getContentAsImage().isAvailable());
-		ASSERT_EQ(imageMessage->getContentAsImage().getData(), imageData);
+		ASSERT_TRUE(imageMessage->getContentAsMediaFile().isAvailable());
+		ASSERT_EQ(imageMessage->getContentAsMediaFile().getData(), imageData);
 	}
 }
 
