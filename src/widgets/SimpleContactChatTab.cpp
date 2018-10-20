@@ -7,6 +7,7 @@
 #include "src/utility/Logging.h"
 #include "src/utility/QObjectConnectionMacro.h"
 
+#include "src/widgets/chat/ContactAudioChatWidgetItem.h"
 #include "src/widgets/chat/ContactImageChatWidgetItem.h"
 #include "src/widgets/chat/ContactLocationChatWidgetItem.h"
 #include "src/widgets/chat/ContactStatusChatWidgetItem.h"
@@ -64,7 +65,7 @@ namespace openmittsu {
 			openmittsu::dataproviders::messages::ContactMessageType messageType = message.getMessageType();
 			switch (messageType) {
 				case openmittsu::dataproviders::messages::ContactMessageType::AUDIO:
-					LOGGER()->warn("Can not create audio message item in GUI, not supported yet.");
+					this->addChatWidgetItem(new ContactAudioChatWidgetItem(m_contact->getMessageByUuid(uuid)));
 					break;
 				case openmittsu::dataproviders::messages::ContactMessageType::IMAGE:
 					this->addChatWidgetItem(new ContactImageChatWidgetItem(m_contact->getMessageByUuid(uuid)));

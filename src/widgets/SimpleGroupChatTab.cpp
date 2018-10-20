@@ -8,6 +8,7 @@
 #include "src/utility/Logging.h"
 #include "src/utility/QObjectConnectionMacro.h"
 
+#include "src/widgets/chat/GroupAudioChatWidgetItem.h"
 #include "src/widgets/chat/GroupImageChatWidgetItem.h"
 #include "src/widgets/chat/GroupLocationChatWidgetItem.h"
 #include "src/widgets/chat/GroupStatusChatWidgetItem.h"
@@ -63,7 +64,7 @@ namespace openmittsu {
 			openmittsu::dataproviders::messages::GroupMessageType messageType = message.getMessageType();
 			switch (messageType) {
 				case openmittsu::dataproviders::messages::GroupMessageType::AUDIO:
-					LOGGER()->warn("Can not create audio message item in GUI, not supported yet.");
+					this->addChatWidgetItem(new GroupAudioChatWidgetItem(m_group->getMessageByUuid(uuid)));
 					break;
 				case openmittsu::dataproviders::messages::GroupMessageType::GROUP_CREATION:
 					this->addChatWidgetItem(new GroupStatusChatWidgetItem(m_group->getMessageByUuid(uuid)));
