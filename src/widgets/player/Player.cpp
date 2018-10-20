@@ -61,15 +61,12 @@
 #include <QMediaMetaData>
 #include <QtWidgets>
 
-#include <iostream>
-
 #include "src/utility/QObjectConnectionMacro.h"
 
 namespace openmittsu {
 	namespace widgets {
 
 		Player::Player(bool useVideoWidget, QWidget *parent) : QWidget(parent), m_useVideoWidget(useVideoWidget), m_tempFile(QStringLiteral("XXXXXX.mp4")) {
-			//! [create-objs]
 			m_player = new QMediaPlayer(this);
 			if (m_useVideoWidget) {
 				m_player->setAudioRole(QAudio::VideoRole);
@@ -80,19 +77,17 @@ namespace openmittsu {
 			// owned by PlaylistModel
 			m_playlist = new QMediaPlaylist();
 			m_player->setPlaylist(m_playlist);
-			//! [create-objs]
 
-			OPENMITTSU_CONNECT(m_player, durationChanged(), this, durationChanged());
-			OPENMITTSU_CONNECT(m_player, positionChanged(), this, positionChanged());
+			OPENMITTSU_CONNECT(m_player, durationChanged(qint64), this, durationChanged(qint64));
+			OPENMITTSU_CONNECT(m_player, positionChanged(qint64), this, positionChanged(qint64));
 			OPENMITTSU_CONNECT(m_player, metaDataChanged(), this, metaDataChanged());
-			OPENMITTSU_CONNECT(m_playlist, currentIndexChanged(), this, playlistPositionChanged());
-			OPENMITTSU_CONNECT(m_player, mediaStatusChanged(), this, statusChanged());
-			OPENMITTSU_CONNECT(m_player, bufferStatusChanged(), this, bufferingProgress());
-			OPENMITTSU_CONNECT(m_player, videoAvailableChanged(), this, videoAvailableChanged());
+			OPENMITTSU_CONNECT(m_playlist, currentIndexChanged(int), this, playlistPositionChanged(int));
+			OPENMITTSU_CONNECT(m_player, mediaStatusChanged(QMediaPlayer::MediaStatus), this, statusChanged(QMediaPlayer::MediaStatus));
+			OPENMITTSU_CONNECT(m_player, bufferStatusChanged(int), this, bufferingProgress(int));
+			OPENMITTSU_CONNECT(m_player, videoAvailableChanged(bool), this, videoAvailableChanged(bool));
 			OPENMITTSU_CONNECT(m_player, error(QMediaPlayer::Error), this, displayErrorMessage());
-			OPENMITTSU_CONNECT(m_player, stateChanged(), this, stateChanged());
+			OPENMITTSU_CONNECT(m_player, stateChanged(QMediaPlayer::State), this, stateChanged(QMediaPlayer::State));
 
-			//! [2]
 			if (m_useVideoWidget) {
 				m_videoWidget = new VideoWidget(this);
 				m_player->setVideoOutput(m_videoWidget);
@@ -100,13 +95,12 @@ namespace openmittsu {
 
 			m_playlistModel = new PlaylistModel(this);
 			m_playlistModel->setPlaylist(m_playlist);
-			//! [2]
 
 			m_slider = new QSlider(Qt::Horizontal, this);
 			m_slider->setRange(0, m_player->duration() / 1000);
 
 			m_labelDuration = new QLabel(this);
-			OPENMITTSU_CONNECT(m_slider, sliderMoved(), this, seek());
+			OPENMITTSU_CONNECT(m_slider, sliderMoved(int), this, seek(int));
 
 			PlayerControls *controls = new PlayerControls(this);
 			controls->setState(m_player->state());
@@ -116,15 +110,15 @@ namespace openmittsu {
 			OPENMITTSU_CONNECT(controls, play(), m_player, play());
 			OPENMITTSU_CONNECT(controls, pause(), m_player, pause());
 			OPENMITTSU_CONNECT(controls, stop(), m_player, stop());
-			OPENMITTSU_CONNECT(controls, changeVolume(), m_player, setVolume());
-			OPENMITTSU_CONNECT(controls, changeMuting(), m_player, setMuted());
+			OPENMITTSU_CONNECT(controls, changeVolume(int), m_player, setVolume(int));
+			OPENMITTSU_CONNECT(controls, changeMuting(bool), m_player, setMuted(bool));
 			if (m_useVideoWidget) {
 				OPENMITTSU_CONNECT(controls, stop(), m_videoWidget, update());
 			}
 
-			OPENMITTSU_CONNECT(m_player, stateChanged(), controls, setState());
-			OPENMITTSU_CONNECT(m_player, volumeChanged(), controls, setVolume());
-			OPENMITTSU_CONNECT(m_player, mutedChanged(), controls, setMuted());
+			OPENMITTSU_CONNECT(m_player, stateChanged(QMediaPlayer::State), controls, setState(QMediaPlayer::State));
+			OPENMITTSU_CONNECT(m_player, volumeChanged(int), controls, setVolume(int));
+			OPENMITTSU_CONNECT(m_player, mutedChanged(bool), controls, setMuted(bool));
 
 			if (m_useVideoWidget) {
 				m_fullScreenButton = new QPushButton(tr("FullScreen"), this);
@@ -154,16 +148,6 @@ namespace openmittsu {
 			hLayout->addWidget(m_labelDuration);
 			layout->addLayout(hLayout);
 			layout->addLayout(controlLayout);
-#if defined(Q_OS_QNX)
-			// On QNX, the main window doesn't have a title bar (or any other decorations).
-			// Create a status bar for the status information instead.
-			m_statusLabel = new QLabel;
-			m_statusBar = new QStatusBar;
-			m_statusBar->addPermanentWidget(m_statusLabel);
-			m_statusBar->setSizeGripEnabled(false); // Without mouse grabbing, it doesn't work very well.
-			layout->addWidget(m_statusBar);
-#endif
-
 			setLayout(layout);
 
 			if (!isPlayerAvailable()) {
@@ -327,12 +311,12 @@ namespace openmittsu {
 				return;
 			}
 			if (!available) {
-				OPENMITTSU_DISCONNECT(m_fullScreenButton, clicked(), m_videoWidget, setFullScreen());
-				OPENMITTSU_DISCONNECT(m_videoWidget, fullScreenChanged(), m_fullScreenButton, setChecked());
+				OPENMITTSU_DISCONNECT(m_fullScreenButton, clicked(bool), m_videoWidget, setFullScreen(bool));
+				OPENMITTSU_DISCONNECT(m_videoWidget, fullScreenChanged(bool), m_fullScreenButton, setChecked(bool));
 				m_videoWidget->setFullScreen(false);
 			} else {
-				OPENMITTSU_CONNECT(m_fullScreenButton, clicked(), m_videoWidget, setFullScreen());
-				OPENMITTSU_CONNECT(m_videoWidget, fullScreenChanged(), m_fullScreenButton, setChecked());
+				OPENMITTSU_CONNECT(m_fullScreenButton, clicked(bool), m_videoWidget, setFullScreen(bool));
+				OPENMITTSU_CONNECT(m_videoWidget, fullScreenChanged(bool), m_fullScreenButton, setChecked(bool));
 
 				if (m_fullScreenButton->isChecked())
 					m_videoWidget->setFullScreen(true);
@@ -342,29 +326,19 @@ namespace openmittsu {
 		void Player::setTrackInfo(const QString &info) {
 			m_trackInfo = info;
 
-			if (m_statusBar) {
-				m_statusBar->showMessage(m_trackInfo);
-				m_statusLabel->setText(m_statusInfo);
-			} else {
-				if (!m_statusInfo.isEmpty())
-					setWindowTitle(QString("%1 | %2").arg(m_trackInfo).arg(m_statusInfo));
-				else
-					setWindowTitle(m_trackInfo);
-			}
+			if (!m_statusInfo.isEmpty())
+				setWindowTitle(QString("%1 | %2").arg(m_trackInfo).arg(m_statusInfo));
+			else
+				setWindowTitle(m_trackInfo);
 		}
 
 		void Player::setStatusInfo(const QString &info) {
 			m_statusInfo = info;
 
-			if (m_statusBar) {
-				m_statusBar->showMessage(m_trackInfo);
-				m_statusLabel->setText(m_statusInfo);
-			} else {
-				if (!m_statusInfo.isEmpty())
-					setWindowTitle(QString("%1 | %2").arg(m_trackInfo).arg(m_statusInfo));
-				else
-					setWindowTitle(m_trackInfo);
-			}
+			if (!m_statusInfo.isEmpty())
+				setWindowTitle(QString("%1 | %2").arg(m_trackInfo).arg(m_statusInfo));
+			else
+				setWindowTitle(m_trackInfo);
 		}
 
 		void Player::displayErrorMessage() {

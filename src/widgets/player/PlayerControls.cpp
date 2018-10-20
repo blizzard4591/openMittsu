@@ -71,23 +71,23 @@ namespace openmittsu {
 			m_playButton = new QToolButton(this);
 			m_playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
 
-			OPENMITTSU_CONNECT(m_playButton, clicked(), this, playClicked());
+			OPENMITTSU_CONNECT(m_playButton, clicked(bool), this, playClicked());
 
 			m_stopButton = new QToolButton(this);
 			m_stopButton->setIcon(style()->standardIcon(QStyle::SP_MediaStop));
 			m_stopButton->setEnabled(false);
 
-			OPENMITTSU_CONNECT(m_stopButton, clicked(), this, stop());
+			OPENMITTSU_CONNECT(m_stopButton, clicked(bool), this, stopClicked());
 
 			m_muteButton = new QToolButton(this);
 			m_muteButton->setIcon(style()->standardIcon(QStyle::SP_MediaVolume));
 
-			OPENMITTSU_CONNECT(m_muteButton, clicked(), this, muteClicked());
+			OPENMITTSU_CONNECT(m_muteButton, clicked(bool), this, muteClicked());
 
 			m_volumeSlider = new QSlider(Qt::Horizontal, this);
 			m_volumeSlider->setRange(0, 100);
 
-			OPENMITTSU_CONNECT(m_volumeSlider, valueChanged(), this, onVolumeSliderValueChanged());
+			OPENMITTSU_CONNECT(m_volumeSlider, valueChanged(int), this, onVolumeSliderValueChanged());
 
 			QBoxLayout *layout = new QHBoxLayout;
 			layout->setMargin(0);
@@ -166,6 +166,10 @@ namespace openmittsu {
 					emit pause();
 					break;
 			}
+		}
+
+		void PlayerControls::stopClicked() {
+			emit stop();
 		}
 
 		void PlayerControls::muteClicked() {

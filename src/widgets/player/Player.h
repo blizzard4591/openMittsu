@@ -65,7 +65,6 @@ class QMediaPlayer;
 class QModelIndex;
 class QPushButton;
 class QSlider;
-class QStatusBar;
 class QVideoProbe;
 class QVideoWidget;
 class QAudioProbe;
@@ -123,8 +122,6 @@ namespace openmittsu {
 			QSlider *m_slider = nullptr;
 			QLabel *m_labelDuration = nullptr;
 			QPushButton *m_fullScreenButton = nullptr;
-			QLabel *m_statusLabel = nullptr;
-			QStatusBar *m_statusBar = nullptr;
 
 			QVideoProbe *m_videoProbe = nullptr;
 			QAudioProbe *m_audioProbe = nullptr;

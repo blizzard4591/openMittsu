@@ -86,6 +86,7 @@ namespace openmittsu {
 
 		private slots:
 			void playClicked();
+			void stopClicked();
 			void muteClicked();
 			void onVolumeSliderValueChanged();
 
