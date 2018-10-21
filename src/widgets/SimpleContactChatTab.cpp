@@ -12,6 +12,7 @@
 #include "src/widgets/chat/ContactLocationChatWidgetItem.h"
 #include "src/widgets/chat/ContactStatusChatWidgetItem.h"
 #include "src/widgets/chat/ContactTextChatWidgetItem.h"
+#include "src/widgets/chat/ContactVideoChatWidgetItem.h"
 
 namespace openmittsu {
 	namespace widgets {
@@ -80,7 +81,7 @@ namespace openmittsu {
 					this->addChatWidgetItem(new ContactTextChatWidgetItem(m_contact->getMessageByUuid(uuid)));
 					break;
 				case openmittsu::dataproviders::messages::ContactMessageType::VIDEO:
-					LOGGER()->warn("Can not create video message item in GUI, not supported yet.");
+					this->addChatWidgetItem(new ContactVideoChatWidgetItem(m_contact->getMessageByUuid(uuid)));
 					break;
 				default:
 					LOGGER()->error("Can not create message item in GUI, unhandled message type.");

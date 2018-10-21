@@ -2,6 +2,7 @@
 #define OPENMITTSU_DATABASE_MEDIAFILEITEM_H_
 
 #include <QByteArray>
+#include "src/database/MediaFileType.h"
 
 class QPixmap;
 
@@ -20,17 +21,19 @@ namespace openmittsu {
 			};
 
 			MediaFileItem() = default;
-			explicit MediaFileItem(QByteArray const& data);
-			explicit MediaFileItem(ItemStatus reasonOfUnavailablity);
+			explicit MediaFileItem(QByteArray const& data, MediaFileType const& type);
+			explicit MediaFileItem(ItemStatus reasonOfUnavailablity, MediaFileType const& type);
 
 			virtual ~MediaFileItem();
 
+			MediaFileType getFileType() const;
 			QByteArray const& getData() const;
 			bool isAvailable() const;
 			QPixmap getPixmapWithErrorMessage(int width, int height) const;
 		private:
 			QByteArray m_data;
 			ItemStatus m_status;
+			MediaFileType m_type;
 		};
 
 	}

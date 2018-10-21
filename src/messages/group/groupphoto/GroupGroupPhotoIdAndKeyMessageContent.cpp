@@ -1,9 +1,9 @@
-#include "src/messages/group/GroupGroupPhotoIdAndKeyMessageContent.h"
+#include "src/messages/group/groupphoto/GroupGroupPhotoIdAndKeyMessageContent.h"
 
 #include "src/utility/Endian.h"
 #include "src/exceptions/IllegalArgumentException.h"
 #include "src/messages/MessageContentRegistry.h"
-#include "src/messages/group/GroupEncryptedGroupPhotoAndKeyMessageContent.h"
+#include "src/messages/group/groupphoto/GroupEncryptedGroupPhotoAndKeyMessageContent.h"
 #include "src/protocol/ProtocolSpecs.h"
 #include "src/tasks/BlobDownloaderCallbackTask.h"
 #include "src/utility/ByteArrayConversions.h"

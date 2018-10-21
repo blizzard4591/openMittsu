@@ -1,7 +1,7 @@
-#include "src/messages/group/GroupImageMessageContent.h"
+#include "src/messages/group/image/GroupImageMessageContent.h"
 
 #include "src/exceptions/IllegalFunctionCallException.h"
-#include "src/messages/group/GroupEncryptedImageAndKeyMessageContent.h"
+#include "src/messages/group/image/GroupEncryptedImageAndKeyMessageContent.h"
 #include "src/crypto/FullCryptoBox.h"
 #include "src/crypto/Nonce.h"
 #include "src/tasks/KeyAndFixedNonceEncryptionCallbackTask.h"

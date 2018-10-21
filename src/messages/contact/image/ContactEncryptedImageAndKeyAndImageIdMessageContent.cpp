@@ -1,7 +1,7 @@
-#include "src/messages/contact/ContactEncryptedImageAndKeyAndImageIdMessageContent.h"
+#include "src/messages/contact/image/ContactEncryptedImageAndKeyAndImageIdMessageContent.h"
 
 #include "src/exceptions/IllegalFunctionCallException.h"
-#include "src/messages/contact/ContactEncryptedImageAndKeyMessageContent.h"
+#include "src/messages/contact/image/ContactEncryptedImageAndKeyMessageContent.h"
 #include "src/crypto/FullCryptoBox.h"
 #include "src/crypto/Nonce.h"
 #include "src/tasks/BlobDeleterCallbackTask.h"

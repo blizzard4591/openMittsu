@@ -35,20 +35,22 @@
 #include "src/messages/MessageWithPayload.h"
 #include "src/messages/contact/ContactMessage.h"
 #include "src/messages/contact/PreliminaryContactMessage.h"
-#include "src/messages/contact/ContactAudioMessageContent.h"
-#include "src/messages/contact/ContactImageMessageContent.h"
-#include "src/messages/contact/ContactTextMessageContent.h"
+#include "src/messages/contact/audio/ContactAudioMessageContent.h"
+#include "src/messages/contact/image/ContactImageMessageContent.h"
 #include "src/messages/contact/ContactLocationMessageContent.h"
+#include "src/messages/contact/ContactTextMessageContent.h"
+#include "src/messages/contact/video/ContactVideoMessageContent.h"
 #include "src/messages/contact/ReceiptMessageContent.h"
 #include "src/messages/contact/UserTypingMessageContent.h"
 #include "src/messages/group/PreliminaryGroupMessage.h"
-#include "src/messages/group/GroupAudioMessageContent.h"
-#include "src/messages/group/GroupTextMessageContent.h"
-#include "src/messages/group/GroupImageMessageContent.h"
+#include "src/messages/group/audio/GroupAudioMessageContent.h"
+#include "src/messages/group/file/GroupFileMessageContent.h"
+#include "src/messages/group/image/GroupImageMessageContent.h"
 #include "src/messages/group/GroupLocationMessageContent.h"
-#include "src/messages/group/GroupFileMessageContent.h"
+#include "src/messages/group/GroupTextMessageContent.h"
+#include "src/messages/group/video/GroupVideoMessageContent.h"
 #include "src/messages/group/GroupCreationMessageContent.h"
-#include "src/messages/group/GroupSetPhotoMessageContent.h"
+#include "src/messages/group/groupphoto/GroupSetPhotoMessageContent.h"
 #include "src/messages/group/GroupSetTitleMessageContent.h"
 #include "src/messages/group/GroupSyncMessageContent.h"
 #include "src/messages/group/GroupLeaveMessageContent.h"
@@ -165,16 +167,18 @@ namespace openmittsu {
 			void handleIncomingMessage(openmittsu::messages::MessageWithPayload const& messageWithPayload, openmittsu::messages::MessageWithEncryptedPayload const*const message);
 			void handleIncomingMessage(openmittsu::messages::Message const*const message, openmittsu::messages::MessageWithEncryptedPayload const*const messageWithEncryptedPayload);
 			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ContactAudioMessageContent const> contactAudioMessageContent);
-			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ContactTextMessageContent const> contactTextMessageContent);
 			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ContactImageMessageContent const> contactImageMessageContent);
 			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ContactLocationMessageContent const> contactLocationMessageContent);
+			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ContactTextMessageContent const> contactTextMessageContent);
+			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ContactVideoMessageContent const> contactVideoMessageContent);
 			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ReceiptMessageContent const> receiptMessageContent);
 			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::UserTypingMessageContent const> userTypingMessageContent);
 			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupAudioMessageContent const> groupAudioMessageContent);
-			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupTextMessageContent const> groupTextMessageContent);
+			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupFileMessageContent const> groupFileMessageContent);
 			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupImageMessageContent const> groupImageMessageContent);
 			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupLocationMessageContent const> groupLocationMessageContent);
-			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupFileMessageContent const> groupFileMessageContent);
+			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupTextMessageContent const> groupTextMessageContent);
+			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupVideoMessageContent const> groupVideoMessageContent);
 			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupCreationMessageContent const> groupCreationMessageContent, openmittsu::messages::MessageWithEncryptedPayload const*const messageWithEncryptedPayload);
 			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupSetPhotoMessageContent const> groupSetPhotoMessageContent);
 			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupSetTitleMessageContent const> groupSetTitleMessageContent);

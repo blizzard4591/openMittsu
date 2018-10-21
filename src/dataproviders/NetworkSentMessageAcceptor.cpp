@@ -58,6 +58,11 @@ namespace openmittsu {
 			send(preliminaryMessage);
 		}
 
+		void NetworkSentMessageAcceptor::processSentContactMessageVideo(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) {
+			openmittsu::messages::contact::PreliminaryContactMessage const preliminaryMessage = openmittsu::messages::PreliminaryMessageFactory::createPreliminaryContactVideoMessage(receiver, messageId, timeSent, video, coverImage, lengthInSeconds);
+			send(preliminaryMessage);
+		}
+
 		void NetworkSentMessageAcceptor::processSentContactMessageText(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, QString const& message) {
 			openmittsu::messages::contact::PreliminaryContactMessage const preliminaryMessage = openmittsu::messages::PreliminaryMessageFactory::createPreliminaryContactTextMessage(receiver, messageId, timeSent, message);
 			send(preliminaryMessage);
@@ -96,6 +101,11 @@ namespace openmittsu {
 
 		void NetworkSentMessageAcceptor::processSentGroupMessageAudio(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& targetGroupMembers, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, QByteArray const& audio, quint16 lengthInSeconds) {
 			openmittsu::messages::group::PreliminaryGroupMessage const preliminaryMessage = openmittsu::messages::PreliminaryMessageFactory::createPreliminaryGroupAudioMessage(group, messageId, timeSent, targetGroupMembers, audio, lengthInSeconds);
+			send(preliminaryMessage);
+		}
+
+		void NetworkSentMessageAcceptor::processSentGroupMessageVideo(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& targetGroupMembers, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) {
+			openmittsu::messages::group::PreliminaryGroupMessage const preliminaryMessage = openmittsu::messages::PreliminaryMessageFactory::createPreliminaryGroupVideoMessage(group, messageId, timeSent, targetGroupMembers, video, coverImage, lengthInSeconds);
 			send(preliminaryMessage);
 		}
 

@@ -13,6 +13,7 @@
 #include "src/widgets/chat/GroupLocationChatWidgetItem.h"
 #include "src/widgets/chat/GroupStatusChatWidgetItem.h"
 #include "src/widgets/chat/GroupTextChatWidgetItem.h"
+#include "src/widgets/chat/GroupVideoChatWidgetItem.h"
 
 namespace openmittsu {
 	namespace widgets {
@@ -91,7 +92,7 @@ namespace openmittsu {
 					this->addChatWidgetItem(new GroupTextChatWidgetItem(m_group->getMessageByUuid(uuid)));
 					break;
 				case openmittsu::dataproviders::messages::GroupMessageType::VIDEO:
-					LOGGER()->warn("Can not create video message item in GUI, not supported yet.");
+					this->addChatWidgetItem(new GroupVideoChatWidgetItem(m_group->getMessageByUuid(uuid)));
 					break;
 				default:
 					LOGGER()->error("Can not create message item in GUI, unhandled message type.");

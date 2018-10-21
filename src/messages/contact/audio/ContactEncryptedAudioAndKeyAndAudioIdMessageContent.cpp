@@ -1,7 +1,7 @@
-#include "src/messages/contact/ContactEncryptedAudioAndKeyAndAudioIdMessageContent.h"
+#include "src/messages/contact/audio/ContactEncryptedAudioAndKeyAndAudioIdMessageContent.h"
 
 #include "src/exceptions/IllegalFunctionCallException.h"
-#include "src/messages/contact/ContactEncryptedAudioAndKeyMessageContent.h"
+#include "src/messages/contact/audio/ContactEncryptedAudioAndKeyMessageContent.h"
 #include "src/crypto/FullCryptoBox.h"
 #include "src/crypto/EncryptionKey.h"
 #include "src/tasks/BlobDeleterCallbackTask.h"

@@ -1,8 +1,8 @@
-#include "src/messages/group/GroupEncryptedGroupPhotoAndKeyMessageContent.h"
+#include "src/messages/group/groupphoto/GroupEncryptedGroupPhotoAndKeyMessageContent.h"
 
 #include "src/exceptions/IllegalFunctionCallException.h"
-#include "src/messages/group/GroupGroupPhotoIdAndKeyMessageContent.h"
-#include "src/messages/group/GroupSetPhotoMessageContent.h"
+#include "src/messages/group/groupphoto/GroupGroupPhotoIdAndKeyMessageContent.h"
+#include "src/messages/group/groupphoto/GroupSetPhotoMessageContent.h"
 #include "src/crypto/FullCryptoBox.h"
 #include "src/crypto/Nonce.h"
 #include "src/crypto/FixedNonces.h"
@@ -39,7 +39,7 @@ namespace openmittsu {
 			}
 
 			openmittsu::tasks::CallbackTask* GroupEncryptedGroupPhotoAndKeyMessageContent::getPostReceiveCallbackTask(Message* message, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, std::shared_ptr<openmittsu::crypto::FullCryptoBox> const& cryptoBox) const {
-				openmittsu::crypto::Nonce const fixedImageNonce = openmittsu::crypto::FixedNonces::getFixedGroupImageNonce();
+				openmittsu::crypto::Nonce const fixedImageNonce = openmittsu::crypto::FixedNonces::getFixedNonce(1);
 				return new openmittsu::tasks::KeyAndFixedNonceDecryptionCallbackTask(cryptoBox, message, std::shared_ptr<openmittsu::acknowledgments::AcknowledgmentProcessor>(), encryptedImageData, encryptionKey, fixedImageNonce);
 			}
 

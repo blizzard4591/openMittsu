@@ -1,9 +1,9 @@
-#include "src/messages/contact/ContactImageIdAndKeyMessageContent.h"
+#include "src/messages/contact/image/ContactImageIdAndKeyMessageContent.h"
 
 #include "src/utility/Endian.h"
 #include "src/exceptions/IllegalArgumentException.h"
 #include "src/messages/MessageContentRegistry.h"
-#include "src/messages/contact/ContactEncryptedImageAndKeyAndImageIdMessageContent.h"
+#include "src/messages/contact/image/ContactEncryptedImageAndKeyAndImageIdMessageContent.h"
 #include "src/protocol/ProtocolSpecs.h"
 #include "src/tasks/BlobDownloaderCallbackTask.h"
 #include "src/utility/ByteArrayConversions.h"

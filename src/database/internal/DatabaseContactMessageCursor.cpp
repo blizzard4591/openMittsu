@@ -83,9 +83,9 @@ namespace openmittsu {
 
 				openmittsu::database::MediaFileItem mediaItem;
 				if ((contactMessageType == openmittsu::dataproviders::messages::ContactMessageType::AUDIO) || (contactMessageType == openmittsu::dataproviders::messages::ContactMessageType::FILE) || (contactMessageType == openmittsu::dataproviders::messages::ContactMessageType::IMAGE) || (contactMessageType == openmittsu::dataproviders::messages::ContactMessageType::VIDEO)) {
-					mediaItem = getDatabase()->getMediaItem(uuid);
+					mediaItem = getDatabase()->getMediaItem(uuid, MediaFileType::TYPE_STANDARD);
 				} else {
-					mediaItem = MediaFileItem(MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE);
+					mediaItem = MediaFileItem(MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE, MediaFileType::TYPE_STANDARD);
 				}
 
 				auto drcm = std::make_shared<DatabaseReadonlyContactMessage>(contact, messageId, isMessageFromUs, createdAt, sentAt, modifiedAt, isQueued, isSent, uuid, isRead, isSaved, messageState, receivedAt, seenAt, isStatusMessage, caption, contactMessageType, body, mediaItem);

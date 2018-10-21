@@ -54,6 +54,29 @@ namespace openmittsu {
 			return true;
 		}
 
+		bool SimpleMessageCenter::sendVideo(openmittsu::protocol::ContactId const& receiver, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) {
+			if (!this->m_storage.hasDatabase()) {
+				return false;
+			} else if (!this->m_storage.hasContact(receiver)) {
+				LOGGER()->warn("Trying to send video message to unknown contact {}", receiver.toString());
+				return false;
+			}
+
+			bool willQueue = true;
+			if ((this->m_networkSentMessageAcceptor == nullptr) || (!this->m_networkSentMessageAcceptor->isConnected())) {
+				willQueue = false;
+			}
+
+			openmittsu::protocol::MessageTime const sentTime = openmittsu::protocol::MessageTime::now();
+			openmittsu::protocol::MessageId const messageId = this->m_storage.storeSentContactMessageVideo(receiver, sentTime, willQueue, video, coverImage, lengthInSeconds);
+
+			if (willQueue) {
+				m_networkSentMessageAcceptor->processSentContactMessageVideo(receiver, messageId, sentTime, video, coverImage, lengthInSeconds);
+			}
+
+			return true;
+		}
+
 		bool SimpleMessageCenter::sendText(openmittsu::protocol::ContactId const& receiver, QString const& text) {
 			if (!this->m_storage.hasDatabase()) {
 				return false;
@@ -402,6 +425,29 @@ namespace openmittsu {
 			return true;
 		}
 
+		bool SimpleMessageCenter::sendVideo(openmittsu::protocol::GroupId const& group, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) {
+			if (!this->m_storage.hasDatabase()) {
+				return false;
+			} else if (!this->m_storage.hasGroup(group)) {
+				LOGGER()->warn("Trying to send video message to unknown group {}", group.toString());
+				return false;
+			}
+
+			bool willQueue = true;
+			if ((this->m_networkSentMessageAcceptor == nullptr) || (!this->m_networkSentMessageAcceptor->isConnected())) {
+				willQueue = false;
+			}
+
+			openmittsu::protocol::MessageTime const sentTime = openmittsu::protocol::MessageTime::now();
+			openmittsu::protocol::MessageId const messageId = this->m_storage.storeSentGroupMessageVideo(group, sentTime, willQueue, video, coverImage, lengthInSeconds);
+
+			if (willQueue) {
+				m_networkSentMessageAcceptor->processSentGroupMessageVideo(group, this->m_storage.getGroupMembers(group, true), messageId, sentTime, video, coverImage, lengthInSeconds);
+			}
+
+			return true;
+		}
+
 		bool SimpleMessageCenter::sendText(openmittsu::protocol::GroupId const& group, QString const& text) {
 			if (!this->m_storage.hasDatabase()) {
 				return false;
@@ -503,6 +549,24 @@ namespace openmittsu {
 
 			openTabForIncomingMessage(sender);
 			this->m_storage.storeReceivedContactMessageAudio(sender, messageId, timeSent, timeReceived, audio, lengthInSeconds);
+			if (this->m_networkSentMessageAcceptor != nullptr) {
+				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
+			}
+
+			sendReceipt(sender, messageId, openmittsu::messages::contact::ReceiptMessageContent::ReceiptType::RECEIVED);
+		}
+
+		void SimpleMessageCenter::processReceivedContactMessageVideo(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) {
+			if (!this->m_storage.hasDatabase()) {
+				LOGGER()->warn("We received a contact video message from sender {} with message ID #{} sent at {} with video {} and cover image {} that could not be saved as the storage system is not ready.", sender.toString(), messageId.toString(), timeSent.toString(), QString(video.toHex()).toStdString(), QString(coverImage.toHex()).toStdString());
+				return;
+			} else if (!this->m_storage.hasContact(sender)) {
+				LOGGER()->warn("We received a contact video message from sender {} with message ID #{} sent at {} with video {} and cover image {}, but we do not recognize the sender. Ignoring.", sender.toString(), messageId.toString(), timeSent.toString(), QString(video.toHex()).toStdString(), QString(coverImage.toHex()).toStdString());
+				return;
+			}
+
+			openTabForIncomingMessage(sender);
+			this->m_storage.storeReceivedContactMessageVideo(sender, messageId, timeSent, timeReceived, video, coverImage, lengthInSeconds);
 			if (this->m_networkSentMessageAcceptor != nullptr) {
 				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
 			}
@@ -674,12 +738,33 @@ namespace openmittsu {
 			}
 
 			if (!checkAndFixGroupMembership(group, sender)) {
-				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::AUDIO, audio));
+				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::AUDIO, audio, lengthInSeconds));
 				return;
 			}
 
 			openTabForIncomingMessage(group);
 			this->m_storage.storeReceivedGroupMessageAudio(group, sender, messageId, timeSent, timeReceived, audio, lengthInSeconds);
+			if (this->m_networkSentMessageAcceptor != nullptr) {
+				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
+			}
+		}
+
+		void SimpleMessageCenter::processReceivedGroupMessageVideo(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) {
+			if (!this->m_storage.hasDatabase()) {
+				LOGGER()->warn("We received a group video message from sender {} for group {} with message ID #{} sent at {} with video {} and cover image {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), QString(video.toHex()).toStdString(), QString(coverImage.toHex()).toStdString());
+				return;
+			} else if (!this->m_storage.hasContact(sender)) {
+				LOGGER()->warn("We received a group video message from sender {} for group {} with message ID #{} sent at {} with video {} and cover image {}, but we do not recognize the sender. Ignoring.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), QString(video.toHex()).toStdString(), QString(coverImage.toHex()).toStdString());
+				return;
+			}
+
+			if (!checkAndFixGroupMembership(group, sender)) {
+				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::VIDEO, video, coverImage, lengthInSeconds));
+				return;
+			}
+
+			openTabForIncomingMessage(group);
+			this->m_storage.storeReceivedGroupMessageVideo(group, sender, messageId, timeSent, timeReceived, video, coverImage, lengthInSeconds);
 			if (this->m_networkSentMessageAcceptor != nullptr) {
 				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
 			}

@@ -8,8 +8,10 @@
 #include "src/exceptions/InternalErrorException.h"
 #include "src/utility/Logging.h"
 
+#include <QDirIterator>
 #include <QUuid>
 #include <QSqlQuery>
+#include <QRegularExpression>
 
 #include <sodium.h>
 
@@ -25,14 +27,32 @@ namespace openmittsu {
 				//
 			}
 
-			QString ExternalMediaFileStorage::buildFilename(QString const& uuid) const {
-				return QStringLiteral("encMedia_1_").append(uuid);
+			void ExternalMediaFileStorage::upgradeMediaDatabase(int fromVersion) {
+				if (fromVersion < 2) {
+					// Move all files to follow new type filename scheme
+					QRegularExpression regex("^encMedia_1_([^_]+)$");
+					QDir dir(m_storagePath.absolutePath());
+					QDirIterator it(dir.absolutePath(), QDir::Files | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
+					while (it.hasNext()) {
+						it.next();
+						QRegularExpressionMatch match = regex.match(it.fileName());
+						if (match.hasMatch()) {
+							dir.rename(it.fileName(), QStringLiteral("encMedia_1_1_").append(match.captured(1)));
+						}
+					}
+					fromVersion = 2;
+				}
 			}
 
-			bool ExternalMediaFileStorage::hasMediaItem(QString const& uuid) const {
+			QString ExternalMediaFileStorage::buildFilename(QString const& uuid, MediaFileType const& fileType) const {
+				return QStringLiteral("encMedia_1_%1_").arg(MediaFileTypeHelper::toInt(fileType)).append(uuid);
+			}
+
+			bool ExternalMediaFileStorage::hasMediaItem(QString const& uuid, MediaFileType const& fileType) const {
 				QSqlQuery query(m_database->getQueryObject());
-				query.prepare(QStringLiteral("SELECT `uid` FROM `media` WHERE `uid` = :uuid"));
+				query.prepare(QStringLiteral("SELECT `uid` FROM `media` WHERE `uid` = :uuid AND `type` = :type"));
 				query.bindValue(QStringLiteral(":uuid"), QVariant(uuid));
+				query.bindValue(QStringLiteral(":type"), QVariant(MediaFileTypeHelper::toInt(fileType)));
 
 				if (query.exec() && query.isSelect()) {
 					return query.next();
@@ -45,10 +65,11 @@ namespace openmittsu {
 				return DatabaseUtilities::countQuery(m_database, QStringLiteral("media"));
 			}
 
-			MediaFileItem ExternalMediaFileStorage::getMediaItem(QString const& uuid) const {
+			MediaFileItem ExternalMediaFileStorage::getMediaItem(QString const& uuid, MediaFileType const& fileType) const {
 				QSqlQuery query(m_database->getQueryObject());
-				query.prepare(QStringLiteral("SELECT `uid`, `size`, `checksum`, `nonce`, `key` FROM `media` WHERE `uid` = :uuid"));
+				query.prepare(QStringLiteral("SELECT `uid`, `size`, `checksum`, `nonce`, `key` FROM `media` WHERE `uid` = :uuid AND `type` = :type"));
 				query.bindValue(QStringLiteral(":uuid"), QVariant(uuid));
+				query.bindValue(QStringLiteral(":type"), QVariant(MediaFileTypeHelper::toInt(fileType)));
 
 				if (query.exec() && query.isSelect() && query.next()) {
 					int const size = query.value(QStringLiteral("size")).toInt();
@@ -64,10 +85,10 @@ namespace openmittsu {
 						throw openmittsu::exceptions::InternalErrorException() << "Could not fetch media item for uuid \"" << uuid.toStdString() << "\". The key size is incorrect.";
 					}
 
-					QFile file(m_storagePath.filePath(buildFilename(uuid)));
+					QFile file(m_storagePath.filePath(buildFilename(uuid, fileType)));
 					if (!file.open(QFile::ReadOnly)) {
 						LOGGER()->warn("Could not fetch media item for uuid \"{}\". Could not open or read file.", uuid.toStdString());
-						return MediaFileItem(MediaFileItem::ItemStatus::UNAVAILABLE_EXTERNAL_FILE_DELETED);
+						return MediaFileItem(MediaFileItem::ItemStatus::UNAVAILABLE_EXTERNAL_FILE_DELETED, fileType);
 					}
 
 					QByteArray const data = file.readAll();
@@ -76,20 +97,20 @@ namespace openmittsu {
 					QByteArray const decryptedData = decrypt(data, key, nonce);
 					if (decryptedData.size() != size) {
 						LOGGER()->warn("Could not fetch media item for uuid \"{}\". File size {} Bytes does not match expected size of {} Bytes!", uuid.toStdString(), decryptedData.size(), size);
-						return MediaFileItem(MediaFileItem::ItemStatus::UNAVAILABLE_DECRYPTION_FAILED);
+						return MediaFileItem(MediaFileItem::ItemStatus::UNAVAILABLE_DECRYPTION_FAILED, fileType);
 					} else if (specifiedChecksum != openmittsu::crypto::Crc32::checksum(decryptedData)) {
 						LOGGER()->warn("Could not fetch media item for uuid \"{}\". The specified checksum {} did not match the checksum of the retrieved object {}.", uuid.toStdString(), openmittsu::crypto::Crc32::toString(specifiedChecksum).toStdString(), openmittsu::crypto::Crc32::toString(openmittsu::crypto::Crc32::checksum(decryptedData)).toStdString());
-						return MediaFileItem(MediaFileItem::ItemStatus::UNAVAILABLE_FILE_CORRUPTED);
+						return MediaFileItem(MediaFileItem::ItemStatus::UNAVAILABLE_FILE_CORRUPTED, fileType);
 					}
 
-					return MediaFileItem(decryptedData);
+					return MediaFileItem(decryptedData, fileType);
 				} else {
 					LOGGER()->warn("Could not execute media query for uuid \"{}\" table 'media'. Query error: {}", uuid.toStdString(), query.lastError().text().toStdString());
-					return MediaFileItem(MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE);
+					return MediaFileItem(MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE, fileType);
 				}
 			}
 
-			void ExternalMediaFileStorage::insertMediaItem(QString const& uuid, QByteArray const& data) {
+			void ExternalMediaFileStorage::insertMediaItem(QString const& uuid, QByteArray const& data, MediaFileType const& fileType) {
 				int const size = data.size();
 				uint32_t actualChecksum = openmittsu::crypto::Crc32::checksum(data);
 
@@ -98,7 +119,7 @@ namespace openmittsu {
 				QByteArray const encryptedData = encrypt(data, key, nonce);
 				int const encryptedSize = data.size() + cryptoGetHeaderSize();
 
-				QFile file(m_storagePath.filePath(buildFilename(uuid)));
+				QFile file(m_storagePath.filePath(buildFilename(uuid, fileType)));
 				if (!file.open(QFile::WriteOnly)) {
 					throw openmittsu::exceptions::InternalErrorException() << "Could not write media item for uuid \"" << uuid.toStdString() << "\". Could not open file for writing.";
 				}
@@ -110,8 +131,9 @@ namespace openmittsu {
 				file.close();
 
 				QSqlQuery queryMedia(m_database->getQueryObject());
-				queryMedia.prepare(QStringLiteral("INSERT INTO `media` (`uid`, `size`, `checksum`, `nonce`, `key`) VALUES (:uid, :size, :checksum, :nonce, :key);"));
+				queryMedia.prepare(QStringLiteral("INSERT INTO `media` (`uid`, `type`, `size`, `checksum`, `nonce`, `key`) VALUES (:uid, :type, :size, :checksum, :nonce, :key);"));
 				queryMedia.bindValue(QStringLiteral(":uid"), QVariant(uuid));
+				queryMedia.bindValue(QStringLiteral(":type"), QVariant(MediaFileTypeHelper::toInt(fileType)));
 				queryMedia.bindValue(QStringLiteral(":size"), QVariant(size));
 				queryMedia.bindValue(QStringLiteral(":checksum"), QVariant(actualChecksum));
 				queryMedia.bindValue(QStringLiteral(":nonce"), QVariant(QString(nonce.toHex())));
@@ -121,19 +143,13 @@ namespace openmittsu {
 				}
 			}
 
-			QString ExternalMediaFileStorage::insertMediaItem(QByteArray const& data) {
-				QString const uuid = m_database->generateUuid();
-				insertMediaItem(uuid, data);
-
-				return uuid;
-			}
-
-			void ExternalMediaFileStorage::removeMediaItem(QString const& uuid) {
-				QFile::remove(m_storagePath.filePath(buildFilename(uuid)));
+			void ExternalMediaFileStorage::removeMediaItem(QString const& uuid, MediaFileType const& fileType) {
+				QFile::remove(m_storagePath.filePath(buildFilename(uuid, fileType)));
 
 				QSqlQuery queryMedia(m_database->getQueryObject());
-				queryMedia.prepare(QStringLiteral("DELETE FROM `media` WHERE `uid` = :uuid;"));
+				queryMedia.prepare(QStringLiteral("DELETE FROM `media` WHERE `uid` = :uuid AND `type` = :type;"));
 				queryMedia.bindValue(QStringLiteral(":uuid"), QVariant(uuid));
+				queryMedia.bindValue(QStringLiteral(":type"), QVariant(MediaFileTypeHelper::toInt(fileType)));
 				if (!queryMedia.exec()) {
 					throw openmittsu::exceptions::InternalErrorException() << "Could not delete media data from table 'media'. Query error: " << queryMedia.lastError().text().toStdString();
 				}
@@ -195,7 +211,7 @@ namespace openmittsu {
 				auto it = items.constBegin();
 				auto end = items.constEnd();
 				for (; it != end; ++it) {
-					insertMediaItem(it->getUuid(), it->getData());
+					insertMediaItem(it->getUuid(), it->getData(), MediaFileType::TYPE_STANDARD);
 				}
 
 				if (!m_database->transactionCommit()) {
@@ -211,7 +227,7 @@ namespace openmittsu {
 				auto it = items.constBegin();
 				auto end = items.constEnd();
 				for (; it != end; ++it) {
-					insertMediaItem(it->getUuid(), it->getData());
+					insertMediaItem(it->getUuid(), it->getData(), MediaFileType::TYPE_STANDARD);
 				}
 
 				if (!m_database->transactionCommit()) {

@@ -78,9 +78,9 @@ namespace openmittsu {
 
 				openmittsu::database::MediaFileItem mediaItem;
 				if ((groupMessageType == openmittsu::dataproviders::messages::GroupMessageType::AUDIO) || (groupMessageType == openmittsu::dataproviders::messages::GroupMessageType::FILE) || (groupMessageType == openmittsu::dataproviders::messages::GroupMessageType::IMAGE) || (groupMessageType == openmittsu::dataproviders::messages::GroupMessageType::VIDEO)) {
-					mediaItem = getDatabase()->getMediaItem(uuid);
+					mediaItem = getDatabase()->getMediaItem(uuid, MediaFileType::TYPE_STANDARD);
 				} else {
-					mediaItem = MediaFileItem(MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE);
+					mediaItem = MediaFileItem(MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE, MediaFileType::TYPE_STANDARD);
 				}
 
 				auto drgm = std::make_shared<DatabaseReadonlyGroupMessage>(m_group, contact, messageId, isMessageFromUs, createdAt, sentAt, modifiedAt, isQueued, isSent, uuid, isRead, isSaved, messageState, receivedAt, seenAt, isStatusMessage, caption, groupMessageType, body, mediaItem);

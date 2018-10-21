@@ -1,7 +1,7 @@
-#include "src/messages/group/GroupSetPhotoMessageContent.h"
+#include "src/messages/group/groupphoto/GroupSetPhotoMessageContent.h"
 
 #include "src/exceptions/IllegalFunctionCallException.h"
-#include "src/messages/group/GroupEncryptedGroupPhotoAndKeyMessageContent.h"
+#include "src/messages/group/groupphoto/GroupEncryptedGroupPhotoAndKeyMessageContent.h"
 #include "src/crypto/FullCryptoBox.h"
 #include "src/crypto/FixedNonces.h"
 #include "src/crypto/Nonce.h"
@@ -29,7 +29,7 @@ namespace openmittsu {
 			}
 
 			openmittsu::tasks::CallbackTask* GroupSetPhotoMessageContent::getPreSendCallbackTask(Message* message, std::shared_ptr<openmittsu::acknowledgments::AcknowledgmentProcessor> const& acknowledgmentProcessor, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, std::shared_ptr<openmittsu::crypto::FullCryptoBox> const& cryptoBox) const {
-				openmittsu::crypto::Nonce const fixedImageNonce = openmittsu::crypto::FixedNonces::getFixedGroupImageNonce();
+				openmittsu::crypto::Nonce const fixedImageNonce = openmittsu::crypto::FixedNonces::getFixedNonce(1);
 				return new openmittsu::tasks::KeyAndFixedNonceEncryptionCallbackTask(cryptoBox, message, acknowledgmentProcessor, groupPhoto, fixedImageNonce);
 			}
 

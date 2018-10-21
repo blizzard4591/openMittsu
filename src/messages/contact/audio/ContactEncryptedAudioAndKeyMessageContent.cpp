@@ -1,8 +1,8 @@
-#include "src/messages/contact/ContactEncryptedAudioAndKeyMessageContent.h"
+#include "src/messages/contact/audio/ContactEncryptedAudioAndKeyMessageContent.h"
 
 #include "src/exceptions/IllegalFunctionCallException.h"
-#include "src/messages/contact/ContactAudioIdAndKeyMessageContent.h"
-#include "src/messages/contact/ContactAudioMessageContent.h"
+#include "src/messages/contact/audio/ContactAudioIdAndKeyMessageContent.h"
+#include "src/messages/contact/audio/ContactAudioMessageContent.h"
 #include "src/crypto/FullCryptoBox.h"
 #include "src/crypto/EncryptionKey.h"
 #include "src/crypto/Nonce.h"
@@ -40,7 +40,7 @@ namespace openmittsu {
 			}
 
 			openmittsu::tasks::CallbackTask* ContactEncryptedAudioAndKeyMessageContent::getPostReceiveCallbackTask(Message* message, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, std::shared_ptr<openmittsu::crypto::FullCryptoBox> const& cryptoBox) const {
-				openmittsu::crypto::Nonce const fixedNonce = openmittsu::crypto::FixedNonces::getFixedGroupImageNonce();
+				openmittsu::crypto::Nonce const fixedNonce = openmittsu::crypto::FixedNonces::getFixedNonce(1);
 				return new openmittsu::tasks::KeyAndFixedNonceDecryptionCallbackTask(cryptoBox, message, std::shared_ptr<openmittsu::acknowledgments::AcknowledgmentProcessor>(), m_encryptedData, m_encryptionKey, fixedNonce);
 			}
 

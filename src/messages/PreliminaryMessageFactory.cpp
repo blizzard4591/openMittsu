@@ -1,23 +1,25 @@
 #include "src/messages/PreliminaryMessageFactory.h"
 
-#include "src/messages/contact/ContactAudioMessageContent.h"
-#include "src/messages/contact/ContactTextMessageContent.h"
-#include "src/messages/contact/ContactImageMessageContent.h"
+#include "src/messages/contact/audio/ContactAudioMessageContent.h"
+#include "src/messages/contact/image/ContactImageMessageContent.h"
 #include "src/messages/contact/ContactLocationMessageContent.h"
+#include "src/messages/contact/ContactTextMessageContent.h"
+#include "src/messages/contact/video/ContactVideoMessageContent.h"
 #include "src/messages/contact/PreliminaryContactMessageHeader.h"
 #include "src/messages/contact/ReceiptMessageContent.h"
 #include "src/messages/contact/UserTypingMessageContent.h"
 
 #include "src/messages/group/PreliminaryGroupMessageHeader.h"
-#include "src/messages/group/GroupAudioMessageContent.h"
-#include "src/messages/group/GroupTextMessageContent.h"
-#include "src/messages/group/GroupImageMessageContent.h"
+#include "src/messages/group/audio/GroupAudioMessageContent.h"
+#include "src/messages/group/image/GroupImageMessageContent.h"
 #include "src/messages/group/GroupLocationMessageContent.h"
+#include "src/messages/group/GroupTextMessageContent.h"
+#include "src/messages/group/video/GroupVideoMessageContent.h"
 
 #include "src/messages/group/GroupCreationMessageContent.h"
 #include "src/messages/group/GroupLeaveMessageContent.h"
 #include "src/messages/group/GroupSyncMessageContent.h"
-#include "src/messages/group/GroupSetPhotoMessageContent.h"
+#include "src/messages/group/groupphoto/GroupSetPhotoMessageContent.h"
 #include "src/messages/group/GroupSetTitleMessageContent.h"
 
 #include "src/messages/MessageFlagsFactory.h"
@@ -39,6 +41,10 @@ namespace openmittsu {
 
 		contact::PreliminaryContactMessage PreliminaryMessageFactory::createPreliminaryContactAudioMessage(openmittsu::protocol::ContactId const& receiverId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QByteArray const& audioData, quint16 lengthInSeconds) {
 			return contact::PreliminaryContactMessage(new contact::PreliminaryContactMessageHeader(receiverId, messageId, time, MessageFlagsFactory::createContactMessageFlags()), new contact::ContactAudioMessageContent(audioData, lengthInSeconds));
+		}
+
+		contact::PreliminaryContactMessage PreliminaryMessageFactory::createPreliminaryContactVideoMessage(openmittsu::protocol::ContactId const& receiverId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QByteArray const& videoData, QByteArray const& coverImageData, quint16 lengthInSeconds) {
+			return contact::PreliminaryContactMessage(new contact::PreliminaryContactMessageHeader(receiverId, messageId, time, MessageFlagsFactory::createContactMessageFlags()), new contact::ContactVideoMessageContent(videoData, coverImageData, lengthInSeconds));
 		}
 
 		contact::PreliminaryContactMessage PreliminaryMessageFactory::createPreliminaryContactTextMessage(openmittsu::protocol::ContactId const& receiverId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QString const& text) {
@@ -67,6 +73,10 @@ namespace openmittsu {
 
 		group::PreliminaryGroupMessage PreliminaryMessageFactory::createPreliminaryGroupAudioMessage(openmittsu::protocol::GroupId const& groupId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QSet<openmittsu::protocol::ContactId> const& recipients, QByteArray const& audioData, quint16 lengthInSeconds) {
 			return group::PreliminaryGroupMessage(new group::PreliminaryGroupMessageHeader(groupId, messageId, time, MessageFlagsFactory::createGroupTextMessageFlags()), new group::GroupAudioMessageContent(groupId, audioData, lengthInSeconds), recipients);
+		}
+
+		group::PreliminaryGroupMessage PreliminaryMessageFactory::createPreliminaryGroupVideoMessage(openmittsu::protocol::GroupId const& groupId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QSet<openmittsu::protocol::ContactId> const& recipients, QByteArray const& videoData, QByteArray const& coverImageData, quint16 lengthInSeconds) {
+			return group::PreliminaryGroupMessage(new group::PreliminaryGroupMessageHeader(groupId, messageId, time, MessageFlagsFactory::createGroupTextMessageFlags()), new group::GroupVideoMessageContent(groupId, videoData, coverImageData, lengthInSeconds), recipients);
 		}
 
 		group::PreliminaryGroupMessage PreliminaryMessageFactory::createPreliminaryGroupTextMessage(openmittsu::protocol::GroupId const& groupId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QSet<openmittsu::protocol::ContactId> const& recipients, QString const& text) {

@@ -8,7 +8,7 @@ namespace openmittsu {
 
 		class FixedNonces {
 		public:
-			static Nonce getFixedGroupImageNonce();
+			static Nonce getFixedNonce(int index = 1);
 		};
 
 	}

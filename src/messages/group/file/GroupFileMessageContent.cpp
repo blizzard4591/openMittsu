@@ -1,4 +1,4 @@
-#include "src/messages/group/GroupFileMessageContent.h"
+#include "src/messages/group/file/GroupFileMessageContent.h"
 
 #include "src/messages/MessageContentRegistry.h"
 #include "src/protocol/GroupId.h"
@@ -30,13 +30,14 @@ namespace openmittsu {
 			}
 
 			MessageContent* GroupFileMessageContent::fromPacketPayload(FullMessageHeader const& messageHeader, QByteArray const& payload) const {
+				LOGGER_DEBUG("Received Group File with payload {}", QString(payload.toHex()).toStdString());
+
 				verifyPayloadMinSizeAndSignatureByte(PROTO_MESSAGE_SIGNATURE_GROUP_FILE, 1 + openmittsu::protocol::GroupId::getSizeOfGroupIdInBytes() + 1, payload);
 
 				openmittsu::protocol::GroupId const groupId(openmittsu::protocol::GroupId::fromData(payload.mid(1, openmittsu::protocol::GroupId::getSizeOfGroupIdInBytes())));
 
 				// TODO
 				QByteArray const data = (payload.mid(1 + openmittsu::protocol::GroupId::getSizeOfGroupIdInBytes()));
-				LOGGER_DEBUG("Received Group File with payload {}", QString(data.toHex()).toStdString());
 
 				return new GroupFileMessageContent(groupId);
 			}

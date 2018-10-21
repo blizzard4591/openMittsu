@@ -89,10 +89,10 @@ namespace openmittsu {
 			openmittsu::database::MediaFileItem DatabaseContactAndGroupDataProvider::getGroupImage(openmittsu::protocol::GroupId const& group) const {
 				QVariant const result = queryField(group, QStringLiteral("avatar_uuid"));
 				if (result.isNull() || result.toString().isEmpty()) {
-					return openmittsu::database::MediaFileItem(openmittsu::database::MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE);
+					return openmittsu::database::MediaFileItem(openmittsu::database::MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE, MediaFileType::TYPE_STANDARD);
 				}
 
-				return m_database->getMediaItem(result.toString());
+				return m_database->getMediaItem(result.toString(), MediaFileType::TYPE_STANDARD);
 			}
 
 			QSet<openmittsu::protocol::ContactId> DatabaseContactAndGroupDataProvider::getGroupMembers(openmittsu::protocol::GroupId const& group, bool excludeSelfContact) const {
@@ -192,10 +192,11 @@ namespace openmittsu {
 
 				QVariant const oldUuid = queryField(group, QStringLiteral("avatar_uuid"));
 				if (!oldUuid.isNull() && !oldUuid.toString().isEmpty()) {
-					m_database->removeMediaItem(oldUuid.toString());
+					m_database->removeMediaItem(oldUuid.toString(), MediaFileType::TYPE_STANDARD);
 				}
 
-				QString const uuid = m_database->insertMediaItem(newImage);
+				QString const uuid = m_database->generateUuid();
+				m_database->insertMediaItem(uuid, newImage, MediaFileType::TYPE_STANDARD);
 				setFields(group, { {QStringLiteral("avatar_uuid"), uuid} });
 
 				m_database->announceGroupChanged(group);
@@ -779,9 +780,9 @@ namespace openmittsu {
 				result.hasImage = !(avatar.isNull() || avatar.toString().isEmpty());
 
 				if (!result.hasImage) {
-					result.image = openmittsu::database::MediaFileItem(openmittsu::database::MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE);
+					result.image = openmittsu::database::MediaFileItem(openmittsu::database::MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE, MediaFileType::TYPE_STANDARD);
 				} else {
-					result.image = m_database->getMediaItem(avatar.toString());
+					result.image = m_database->getMediaItem(avatar.toString(), MediaFileType::TYPE_STANDARD);
 				}
 
 				result.isAwaitingSync = query.value(QStringLiteral("is_awaiting_sync")).toBool();
@@ -819,9 +820,9 @@ namespace openmittsu {
 					groupData.hasImage = !(avatar.isNull() || avatar.toString().isEmpty());
 
 					if (!groupData.hasImage) {
-						groupData.image = openmittsu::database::MediaFileItem(openmittsu::database::MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE);
+						groupData.image = openmittsu::database::MediaFileItem(openmittsu::database::MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE, MediaFileType::TYPE_STANDARD);
 					} else {
-						groupData.image = m_database->getMediaItem(avatar.toString());
+						groupData.image = m_database->getMediaItem(avatar.toString(), MediaFileType::TYPE_STANDARD);
 					}
 
 					groupData.isAwaitingSync = query.value(QStringLiteral("is_awaiting_sync")).toBool();

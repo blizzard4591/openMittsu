@@ -1,9 +1,9 @@
-#include "src/messages/contact/ContactAudioIdAndKeyMessageContent.h"
+#include "src/messages/contact/audio/ContactAudioIdAndKeyMessageContent.h"
 
 #include "src/utility/Endian.h"
 #include "src/exceptions/IllegalArgumentException.h"
 #include "src/messages/MessageContentRegistry.h"
-#include "src/messages/contact/ContactEncryptedAudioAndKeyAndAudioIdMessageContent.h"
+#include "src/messages/contact/audio/ContactEncryptedAudioAndKeyAndAudioIdMessageContent.h"
 #include "src/protocol/ProtocolSpecs.h"
 #include "src/tasks/BlobDownloaderCallbackTask.h"
 #include "src/utility/ByteArrayConversions.h"

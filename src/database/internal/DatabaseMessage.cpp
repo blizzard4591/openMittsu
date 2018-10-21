@@ -93,7 +93,7 @@ namespace openmittsu {
 			}
 
 			MediaFileItem DatabaseMessage::getMediaItem(QString const& uuid) const {
-				return m_database->getMediaItem(uuid);
+				return m_database->getMediaItem(uuid, MediaFileType::TYPE_STANDARD);
 			}
 
 			void DatabaseMessage::announceMessageChanged() {

@@ -20,9 +20,10 @@ namespace openmittsu {
 		public:
 			// Contact
 			static contact::PreliminaryContactMessage createPreliminaryContactAudioMessage(openmittsu::protocol::ContactId const& receiverId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QByteArray const& audioData, quint16 lengthInSeconds);
-			static contact::PreliminaryContactMessage createPreliminaryContactTextMessage(openmittsu::protocol::ContactId const& receiverId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QString const& text);
 			static contact::PreliminaryContactMessage createPreliminaryContactImageMessage(openmittsu::protocol::ContactId const& receiverId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QByteArray const& imageData);
 			static contact::PreliminaryContactMessage createPreliminaryContactLocationMessage(openmittsu::protocol::ContactId const& receiverId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, openmittsu::utility::Location const& location);
+			static contact::PreliminaryContactMessage createPreliminaryContactTextMessage(openmittsu::protocol::ContactId const& receiverId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QString const& text);
+			static contact::PreliminaryContactMessage createPreliminaryContactVideoMessage(openmittsu::protocol::ContactId const& receiverId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QByteArray const& videoData, QByteArray const& coverImageData, quint16 lengthInSeconds);
 
 			static contact::PreliminaryContactMessage createPreliminaryContactUserTypingStartedMessage(openmittsu::protocol::ContactId const& receiverId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time);
 			static contact::PreliminaryContactMessage createPreliminaryContactUserTypingStoppedMessage(openmittsu::protocol::ContactId const& receiverId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time);
@@ -31,9 +32,10 @@ namespace openmittsu {
 
 			// Groups
 			static group::PreliminaryGroupMessage createPreliminaryGroupAudioMessage(openmittsu::protocol::GroupId const& groupId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QSet<openmittsu::protocol::ContactId> const& recipients, QByteArray const& audioData, quint16 lengthInSeconds);
-			static group::PreliminaryGroupMessage createPreliminaryGroupTextMessage(openmittsu::protocol::GroupId const& groupId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QSet<openmittsu::protocol::ContactId> const& recipients, QString const& text);
 			static group::PreliminaryGroupMessage createPreliminaryGroupImageMessage(openmittsu::protocol::GroupId const& groupId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QSet<openmittsu::protocol::ContactId> const& recipients, QByteArray const& imageData);
 			static group::PreliminaryGroupMessage createPreliminaryGroupLocationMessage(openmittsu::protocol::GroupId const& groupId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QSet<openmittsu::protocol::ContactId> const& recipients, openmittsu::utility::Location const& location);
+			static group::PreliminaryGroupMessage createPreliminaryGroupTextMessage(openmittsu::protocol::GroupId const& groupId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QSet<openmittsu::protocol::ContactId> const& recipients, QString const& text);
+			static group::PreliminaryGroupMessage createPreliminaryGroupVideoMessage(openmittsu::protocol::GroupId const& groupId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QSet<openmittsu::protocol::ContactId> const& recipients, QByteArray const& videoData, QByteArray const& coverImageData, quint16 lengthInSeconds);
 
 			static group::PreliminaryGroupMessage createPreliminaryGroupSyncRequestMessage(openmittsu::protocol::GroupId const& groupId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time);
 			static group::PreliminaryGroupMessage createPreliminaryGroupCreationMessage(openmittsu::protocol::GroupId const& groupId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QSet<openmittsu::protocol::ContactId> const& recipients, QSet<openmittsu::protocol::ContactId> const& members);

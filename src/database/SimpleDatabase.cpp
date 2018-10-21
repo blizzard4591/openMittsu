@@ -237,6 +237,52 @@ namespace openmittsu {
 			}
 		}
 
+		QStringList SimpleDatabase::getUpdateStatementForTable(Tables const& table, int toVersion) {
+			QFile sqlFile;
+			switch (table) {
+				case Tables::ContactMessages:
+					sqlFile.setFileName(QStringLiteral(":/sql/UpdateContactMessagesToVersion%1.sql").arg(toVersion));
+					break;
+				case Tables::Contacts:
+					sqlFile.setFileName(QStringLiteral(":/sql/UpdateContactsToVersion%1.sql").arg(toVersion));
+					break;
+				case Tables::ControlMessages:
+					sqlFile.setFileName(QStringLiteral(":/sql/UpdateContactControlMessagesToVersion%1.sql").arg(toVersion));
+					break;
+				case Tables::GroupMessages:
+					sqlFile.setFileName(QStringLiteral(":/sql/UpdateGroupMessagesToVersion%1.sql").arg(toVersion));
+					break;
+				case Tables::FeatureLevels:
+					sqlFile.setFileName(QStringLiteral(":/sql/UpdateFeatureLevelsToVersion%1.sql").arg(toVersion));
+					break;
+				case Tables::Groups:
+					sqlFile.setFileName(QStringLiteral(":/sql/UpdateGroupsToVersion%1.sql").arg(toVersion));
+					break;
+				case Tables::Media:
+					sqlFile.setFileName(QStringLiteral(":/sql/UpdateMediaToVersion%1.sql").arg(toVersion));
+					break;
+				case Tables::Settings:
+					sqlFile.setFileName(QStringLiteral(":/sql/UpdateSettingsToVersion%1.sql").arg(toVersion));
+					break;
+				case Tables::TableVersions:
+					sqlFile.setFileName(QStringLiteral(":/sql/UpdateTableVersionsToVersion%1.sql").arg(toVersion));
+					break;
+				default:
+					throw openmittsu::exceptions::InternalErrorException() << "Unknown Table type given for fetching update statements from resources: " << static_cast<int>(table);
+			}
+
+			if (!sqlFile.exists() || !sqlFile.open(QFile::ReadOnly)) {
+				throw openmittsu::exceptions::InternalErrorException() << "Could not find or open the file \"" << sqlFile.fileName().toStdString() << "\" containg the update statements from resources: " << static_cast<int>(table);
+			} else {
+				QTextStream fileStream(&sqlFile);
+
+				QString result = fileStream.readAll();
+				sqlFile.close();
+
+				return result.split(QStringLiteral("__OPENMITTSU_QUERY_SEP__"), QString::SplitBehavior::SkipEmptyParts);
+			}
+		}
+
 		QString SimpleDatabase::getTableName(Tables const& table) {
 			switch (table) {
 				case Tables::ContactMessages:
@@ -357,7 +403,7 @@ namespace openmittsu {
 			int versionTableFeatureLevels = createTableIfMissingAndGetVersion(Tables::FeatureLevels, 1);
 			int versionTableGroups = createTableIfMissingAndGetVersion(Tables::Groups, 1);
 			int versionTableGroupMessages = createTableIfMissingAndGetVersion(Tables::GroupMessages, 1);
-			int versionTableMedia = createTableIfMissingAndGetVersion(Tables::Media, 1);
+			int versionTableMedia = createTableIfMissingAndGetVersion(Tables::Media, 2);
 			int versionTableSettings = createTableIfMissingAndGetVersion(Tables::Settings, 1);
 
 			if (versionTableVersions != 1) {
@@ -381,14 +427,35 @@ namespace openmittsu {
 			if (versionTableGroupMessages != 1) {
 				LOGGER()->warn("Table GroupMessages has version {} instead of {}.", versionTableGroupMessages, 1);
 			}
-			if (versionTableMedia != 1) {
-				LOGGER()->warn("Table Media has version {} instead of {}.", versionTableMedia, 1);
+			if (versionTableMedia != 2) {
+				LOGGER()->warn("Table Media has version {} instead of {}.", versionTableMedia, 2);
+
+				if (versionTableMedia == 1) {
+					// Update 1: Added `type` field to media table.
+					LOGGER()->info("Upgrading media database to file schema version 2...");
+					this->transactionStart();
+					QSqlQuery query(database);
+					QStringList updateQueries = getUpdateStatementForTable(Tables::Media, 2);
+					auto it = updateQueries.constBegin();
+					auto const end = updateQueries.constEnd();
+					for (; it != end; ++it) {
+						LOGGER_DEBUG("Running part of update query: {}", it->toStdString());
+						if (!query.exec(*it)) {
+							throw openmittsu::exceptions::InternalErrorException() << "Could not update table 'media' to version 2. Query error: " << query.lastError().text().toStdString();
+						}
+					}
+					setTableVersion(Tables::Media, 2);
+					m_mediaFileStorage.upgradeMediaDatabase(1);
+					this->transactionCommit();
+					LOGGER()->info("Upgrading media database to file schema version 2... Done.");
+				}
 			}
 			if (versionTableSettings != 1) {
 				LOGGER()->warn("Table Settings has version {} instead of {}.", versionTableSettings, 1);
 			}
 
-			// No updates neccessary as of yet.
+			// Updates:
+			// Update 1: Added `type` field to media table.
 		}
 
 		QString SimpleDatabase::generateUuid() const {
@@ -435,8 +502,20 @@ namespace openmittsu {
 				throw openmittsu::exceptions::InternalErrorException() << "Could not save contact audio message, the given contact " << receiver.toString() << " is unknown!";
 			}
 
-			QString const uuid = insertMediaItem(audio);
+			QString const uuid = generateUuid();
+			insertMediaItem(uuid, audio, MediaFileType::TYPE_STANDARD);
 			return internal::DatabaseContactMessage::insertContactMessageFromUs(this, receiver, uuid, timeCreated, ContactMessageType::AUDIO, QStringLiteral("[%1,true,\"\",\"\"]").arg(lengthInSeconds), isQueued, false, QStringLiteral(""));
+		}
+
+		openmittsu::protocol::MessageId SimpleDatabase::storeSentContactMessageVideo(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) {
+			if (!hasContact(receiver)) {
+				throw openmittsu::exceptions::InternalErrorException() << "Could not save contact video message, the given contact " << receiver.toString() << " is unknown!";
+			}
+
+			QString const uuid = generateUuid();
+			insertMediaItem(uuid, video, MediaFileType::TYPE_STANDARD);
+			insertMediaItem(uuid, coverImage, MediaFileType::TYPE_THUMBNAIL);
+			return internal::DatabaseContactMessage::insertContactMessageFromUs(this, receiver, uuid, timeCreated, ContactMessageType::VIDEO, QStringLiteral("[%1,true,\"\",\"\"]").arg(lengthInSeconds), isQueued, false, QStringLiteral(""));
 		}
 
 		openmittsu::protocol::MessageId SimpleDatabase::storeSentContactMessageText(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, QString const& message) {
@@ -448,7 +527,8 @@ namespace openmittsu {
 				throw openmittsu::exceptions::InternalErrorException() << "Could not save contact image message, the given contact " << receiver.toString() << " is unknown!";
 			}
 
-			QString const uuid = insertMediaItem(image);
+			QString const uuid = generateUuid();
+			insertMediaItem(uuid, image, MediaFileType::TYPE_STANDARD);
 			return internal::DatabaseContactMessage::insertContactMessageFromUs(this, receiver, uuid, timeCreated, ContactMessageType::IMAGE, QStringLiteral(""), isQueued, false, caption);
 		}
 
@@ -461,8 +541,20 @@ namespace openmittsu {
 				throw openmittsu::exceptions::InternalErrorException() << "Could not save group audio message, the given group " << group.toString() << " is unknown!";
 			}
 
-			QString const uuid = insertMediaItem(audio);
+			QString const uuid = generateUuid();
+			insertMediaItem(uuid, audio, MediaFileType::TYPE_STANDARD);
 			return internal::DatabaseGroupMessage::insertGroupMessageFromUs(this, group, uuid, timeCreated, GroupMessageType::AUDIO, QStringLiteral("[%1,true,\"\",\"\"]").arg(lengthInSeconds), isQueued, false, QStringLiteral(""));
+		}
+
+		openmittsu::protocol::MessageId SimpleDatabase::storeSentGroupMessageVideo(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) {
+			if (!hasGroup(group)) {
+				throw openmittsu::exceptions::InternalErrorException() << "Could not save group video message, the given group " << group.toString() << " is unknown!";
+			}
+
+			QString const uuid = generateUuid();
+			insertMediaItem(uuid, video, MediaFileType::TYPE_STANDARD);
+			insertMediaItem(uuid, coverImage, MediaFileType::TYPE_THUMBNAIL);
+			return internal::DatabaseGroupMessage::insertGroupMessageFromUs(this, group, uuid, timeCreated, GroupMessageType::VIDEO, QStringLiteral("[%1,true,\"\",\"\"]").arg(lengthInSeconds), isQueued, false, QStringLiteral(""));
 		}
 
 		openmittsu::protocol::MessageId SimpleDatabase::storeSentGroupMessageText(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, QString const& message) {
@@ -474,7 +566,8 @@ namespace openmittsu {
 				throw openmittsu::exceptions::InternalErrorException() << "Could not save group image message, the given group " << group.toString() << " is unknown!";
 			}
 
-			QString const uuid = insertMediaItem(image);
+			QString const uuid = generateUuid();
+			insertMediaItem(uuid, image, MediaFileType::TYPE_STANDARD);
 			return internal::DatabaseGroupMessage::insertGroupMessageFromUs(this, group, uuid, timeCreated, GroupMessageType::IMAGE, QStringLiteral(""), isQueued, false, caption);
 		}
 
@@ -509,8 +602,16 @@ namespace openmittsu {
 		}
 
 		void SimpleDatabase::storeReceivedContactMessageAudio(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& audio, quint16 lengthInSeconds) {
-			QString const uuid = insertMediaItem(audio);
+			QString const uuid = generateUuid();
+			insertMediaItem(uuid, audio, MediaFileType::TYPE_STANDARD);
 			internal::DatabaseContactMessage::insertContactMessageFromThem(this, sender, messageId, uuid, timeSent, timeReceived, ContactMessageType::AUDIO, QStringLiteral("[%1,true,\"\",\"\"]").arg(lengthInSeconds), false, QStringLiteral(""));
+		}
+
+		void SimpleDatabase::storeReceivedContactMessageVideo(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) {
+			QString const uuid = generateUuid();
+			insertMediaItem(uuid, video, MediaFileType::TYPE_STANDARD);
+			insertMediaItem(uuid, coverImage, MediaFileType::TYPE_THUMBNAIL);
+			internal::DatabaseContactMessage::insertContactMessageFromThem(this, sender, messageId, uuid, timeSent, timeReceived, ContactMessageType::VIDEO, QStringLiteral("[%1,true,\"\",\"\"]").arg(lengthInSeconds), false, QStringLiteral(""));
 		}
 
 		void SimpleDatabase::storeReceivedContactMessageText(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& message) {
@@ -518,7 +619,8 @@ namespace openmittsu {
 		}
 
 		void SimpleDatabase::storeReceivedContactMessageImage(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& image, QString const& caption) {
-			QString const uuid = insertMediaItem(image);
+			QString const uuid = generateUuid();
+			insertMediaItem(uuid, image, MediaFileType::TYPE_STANDARD);
 			internal::DatabaseContactMessage::insertContactMessageFromThem(this, sender, messageId, uuid, timeSent, timeReceived, ContactMessageType::IMAGE, QStringLiteral(""), false, caption);
 		}
 
@@ -583,8 +685,20 @@ namespace openmittsu {
 				throw openmittsu::exceptions::InternalErrorException() << "Could not save group audio message, the given group " << group.toString() << " is unknown!";
 			}
 
-			QString const uuid = insertMediaItem(audio);
+			QString const uuid = generateUuid();
+			insertMediaItem(uuid, audio, MediaFileType::TYPE_STANDARD);
 			internal::DatabaseGroupMessage::insertGroupMessageFromThem(this, group, sender, messageId, uuid, timeSent, timeReceived, GroupMessageType::AUDIO, QStringLiteral("[%1,true,\"\",\"\"]").arg(lengthInSeconds), false, QStringLiteral(""));
+		}
+
+		void SimpleDatabase::storeReceivedGroupMessageVideo(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) {
+			if (!hasGroup(group)) {
+				throw openmittsu::exceptions::InternalErrorException() << "Could not save group video message, the given group " << group.toString() << " is unknown!";
+			}
+
+			QString const uuid = generateUuid();
+			insertMediaItem(uuid, video, MediaFileType::TYPE_STANDARD);
+			insertMediaItem(uuid, coverImage, MediaFileType::TYPE_THUMBNAIL);
+			internal::DatabaseGroupMessage::insertGroupMessageFromThem(this, group, sender, messageId, uuid, timeSent, timeReceived, GroupMessageType::VIDEO, QStringLiteral("[%1,true,\"\",\"\"]").arg(lengthInSeconds), false, QStringLiteral(""));
 		}
 
 		void SimpleDatabase::storeReceivedGroupMessageText(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& message) {
@@ -596,7 +710,8 @@ namespace openmittsu {
 				throw openmittsu::exceptions::InternalErrorException() << "Could not save group image message, the given group " << group.toString() << " is unknown!";
 			}
 
-			QString const uuid = insertMediaItem(image);
+			QString const uuid = generateUuid();
+			insertMediaItem(uuid, image, MediaFileType::TYPE_STANDARD);
 			internal::DatabaseGroupMessage::insertGroupMessageFromThem(this, group, sender, messageId, uuid, timeSent, timeReceived, GroupMessageType::IMAGE, QStringLiteral(""), false, caption);
 		}
 
@@ -643,7 +758,8 @@ namespace openmittsu {
 			} else if (!(group.getOwner() == sender)) {
 				throw openmittsu::exceptions::InternalErrorException() << "The given group " << group.toString() << " is not owned by " << sender.toString() << ", can not set group image!";
 			} else {
-				QString const uuid = insertMediaItem(image);
+				QString const uuid = generateUuid();
+				insertMediaItem(uuid, image, MediaFileType::TYPE_STANDARD);
 				internal::DatabaseGroupMessage::insertGroupMessageFromThem(this, group, sender, messageId, uuid, timeSent, timeReceived, GroupMessageType::SET_IMAGE, QStringLiteral(""), true, QStringLiteral(""));
 				m_contactAndGroupDataProvider.setGroupImage(group, image);
 			}
@@ -803,7 +919,8 @@ namespace openmittsu {
 				m_contactAndGroupDataProvider.setGroupImage(group, image);
 			}
 
-			QString const uuid = insertMediaItem(image);
+			QString const uuid = generateUuid();
+			insertMediaItem(uuid, image, MediaFileType::TYPE_STANDARD);
 			return internal::DatabaseGroupMessage::insertGroupMessageFromUs(this, group, uuid, timeCreated, GroupMessageType::SET_IMAGE, QStringLiteral(""), isQueued, true, QStringLiteral(""));
 		}
 
@@ -993,16 +1110,16 @@ namespace openmittsu {
 			setOptionInternal(optionName, QString(optionValue.toHex()), false);
 		}
 
-		MediaFileItem SimpleDatabase::getMediaItem(QString const& uuid) const {
-			return m_mediaFileStorage.getMediaItem(uuid);
+		MediaFileItem SimpleDatabase::getMediaItem(QString const& uuid, MediaFileType const& fileType) const {
+			return m_mediaFileStorage.getMediaItem(uuid, fileType);
 		}
 
-		QString SimpleDatabase::insertMediaItem(QByteArray const& data) {
-			return m_mediaFileStorage.insertMediaItem(data);
+		void SimpleDatabase::insertMediaItem(QString const& uuid, QByteArray const& data, MediaFileType const& fileType) {
+			m_mediaFileStorage.insertMediaItem(uuid, data, fileType);
 		}
 
-		void SimpleDatabase::removeMediaItem(QString const& uuid) {
-			m_mediaFileStorage.removeMediaItem(uuid);
+		void SimpleDatabase::removeMediaItem(QString const& uuid, MediaFileType const& fileType) {
+			m_mediaFileStorage.removeMediaItem(uuid, fileType);
 		}
 
 		std::shared_ptr<openmittsu::backup::IdentityBackup> SimpleDatabase::getBackup() const {

@@ -8,6 +8,7 @@
 #include <QString>
 
 #include "src/database/MediaFileItem.h"
+#include "src/database/MediaFileType.h"
 
 namespace openmittsu {
 	namespace backup {
@@ -22,15 +23,17 @@ namespace openmittsu {
 			public:
 				virtual ~MediaFileStorage() {}
 
-				virtual bool hasMediaItem(QString const& uuid) const = 0;
+				virtual bool hasMediaItem(QString const& uuid, MediaFileType const& fileType) const = 0;
 				virtual int getMediaItemCount() const = 0;
 
-				virtual MediaFileItem getMediaItem(QString const& uuid) const = 0;
-				virtual QString insertMediaItem(QByteArray const& data) = 0;
-				virtual void removeMediaItem(QString const& uuid) = 0;
+				virtual MediaFileItem getMediaItem(QString const& uuid, MediaFileType const& fileType) const = 0;
+				virtual void insertMediaItem(QString const& uuid, QByteArray const& data, MediaFileType const& fileType) = 0;
+				virtual void removeMediaItem(QString const& uuid, MediaFileType const& fileType) = 0;
 
 				virtual void insertMediaItemsFromBackup(QList<openmittsu::backup::ContactMediaItemBackupObject> const& items) = 0;
 				virtual void insertMediaItemsFromBackup(QList<openmittsu::backup::GroupMediaItemBackupObject> const& items) = 0;
+
+				virtual void upgradeMediaDatabase(int fromVersion) = 0;
 			};
 
 		}

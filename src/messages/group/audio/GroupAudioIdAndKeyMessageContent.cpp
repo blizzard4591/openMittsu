@@ -1,9 +1,9 @@
-#include "src/messages/group/GroupAudioIdAndKeyMessageContent.h"
+#include "src/messages/group/audio/GroupAudioIdAndKeyMessageContent.h"
 
 #include "src/utility/Endian.h"
 #include "src/exceptions/IllegalArgumentException.h"
 #include "src/messages/MessageContentRegistry.h"
-#include "src/messages/group/GroupEncryptedAudioAndKeyMessageContent.h"
+#include "src/messages/group/audio/GroupEncryptedAudioAndKeyMessageContent.h"
 #include "src/protocol/ProtocolSpecs.h"
 #include "src/tasks/BlobDownloaderCallbackTask.h"
 #include "src/utility/ByteArrayConversions.h"

@@ -8,11 +8,11 @@
 namespace openmittsu {
 	namespace database {
 
-		MediaFileItem::MediaFileItem(QByteArray const& data) : m_data(data), m_status(ItemStatus::AVAILABLE) {
+		MediaFileItem::MediaFileItem(QByteArray const& data, MediaFileType const& type) : m_data(data), m_status(ItemStatus::AVAILABLE), m_type(type) {
 			//
 		}
 
-		MediaFileItem::MediaFileItem(ItemStatus reasonOfUnavailablity) : m_data(), m_status(reasonOfUnavailablity) {
+		MediaFileItem::MediaFileItem(ItemStatus reasonOfUnavailablity, MediaFileType const& type) : m_data(), m_status(reasonOfUnavailablity), m_type(type) {
 			//
 		}
 
@@ -29,6 +29,10 @@ namespace openmittsu {
 
 		bool MediaFileItem::isAvailable() const {
 			return m_status == ItemStatus::AVAILABLE;
+		}
+
+		MediaFileType MediaFileItem::getFileType() const {
+			return m_type;
 		}
 
 		QPixmap MediaFileItem::getPixmapWithErrorMessage(int width, int height) const {
