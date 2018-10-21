@@ -71,16 +71,16 @@ namespace openmittsu {
 				setFullScreen(false);
 				event->accept();
 			} else if (event->key() == Qt::Key_Enter && event->modifiers() & Qt::Key_Alt) {
-				setFullScreen(!isFullScreen());
-				event->accept();
+				//setFullScreen(!isFullScreen());
+				//event->accept();
 			} else {
 				QVideoWidget::keyPressEvent(event);
 			}
 		}
 
 		void VideoWidget::mouseDoubleClickEvent(QMouseEvent *event) {
-			setFullScreen(!isFullScreen());
-			event->accept();
+			//setFullScreen(!isFullScreen());
+			//event->accept();
 		}
 
 		void VideoWidget::mousePressEvent(QMouseEvent *event) {

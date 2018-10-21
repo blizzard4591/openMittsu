@@ -61,18 +61,25 @@
 #include <QMediaMetaData>
 #include <QtWidgets>
 
+#include <QDir>
+
 #include "src/utility/QObjectConnectionMacro.h"
+
+#include "ui_Player.h"
 
 namespace openmittsu {
 	namespace widgets {
 
-		Player::Player(bool useVideoWidget, QWidget *parent) : QWidget(parent), m_useVideoWidget(useVideoWidget), m_tempFile(QStringLiteral("XXXXXX.mp4")) {
+		Player::Player(bool useVideoWidget, QWidget *parent) : QWidget(parent), m_ui(new Ui::Player), m_useVideoWidget(useVideoWidget), m_tempFile(QDir::tempPath().append(QStringLiteral("openmittsu_player_temp_XXXXXX.mp4"))) {
+			m_ui->setupUi(this);
 			m_player = new QMediaPlayer(this);
+#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
 			if (m_useVideoWidget) {
 				m_player->setAudioRole(QAudio::VideoRole);
 			} else {
 				m_player->setAudioRole(QAudio::MusicRole);
 			}
+#endif
 
 			// owned by PlaylistModel
 			m_playlist = new QMediaPlaylist();
@@ -89,20 +96,26 @@ namespace openmittsu {
 			OPENMITTSU_CONNECT(m_player, stateChanged(QMediaPlayer::State), this, stateChanged(QMediaPlayer::State));
 
 			if (m_useVideoWidget) {
-				m_videoWidget = new VideoWidget(this);
+				m_videoWidget = m_ui->videoWidget;
 				m_player->setVideoOutput(m_videoWidget);
 			}
 
 			m_playlistModel = new PlaylistModel(this);
 			m_playlistModel->setPlaylist(m_playlist);
 
-			m_slider = new QSlider(Qt::Horizontal, this);
+			m_slider = m_ui->slider;
 			m_slider->setRange(0, m_player->duration() / 1000);
 
-			m_labelDuration = new QLabel(this);
+			m_labelDuration = m_ui->lblDuration;
+
+			// Pre-set duration
+			int minutes = m_player->duration() / 1000 / 60;
+			int seconds = (m_player->duration() / 1000) - (minutes * 60);
+			m_labelDuration->setText(QStringLiteral("0:00 / %1:%2").arg(minutes).arg(seconds, 2, 10, QChar('0')));
+
 			OPENMITTSU_CONNECT(m_slider, sliderMoved(int), this, seek(int));
 
-			PlayerControls *controls = new PlayerControls(this);
+			PlayerControls *controls = m_ui->playerControls;
 			controls->setState(m_player->state());
 			controls->setVolume(m_player->volume());
 			controls->setMuted(controls->isMuted());
@@ -121,34 +134,20 @@ namespace openmittsu {
 			OPENMITTSU_CONNECT(m_player, mutedChanged(bool), controls, setMuted(bool));
 
 			if (m_useVideoWidget) {
-				m_fullScreenButton = new QPushButton(tr("FullScreen"), this);
-				m_fullScreenButton->setCheckable(true);
+				//m_fullScreenButton = new QPushButton(tr("Fullscreen"), this);
+				//m_fullScreenButton->setCheckable(true);
 			}
 
-			QBoxLayout *displayLayout = nullptr;
-			if (m_useVideoWidget) {
-				displayLayout = new QHBoxLayout;
-				displayLayout->addWidget(m_videoWidget, 2);
+			QBoxLayout *displayLayout = m_ui->displayLayout;
+			if (!m_useVideoWidget) {
+				m_ui->videoWidget->hide();
 			}
 
-			QBoxLayout *controlLayout = new QHBoxLayout;
-			controlLayout->setMargin(0);
-			controlLayout->addWidget(controls);
+			QBoxLayout *controlLayout = m_ui->controlLayout;
 			if (m_useVideoWidget) {
 				controlLayout->addStretch(1);
-				controlLayout->addWidget(m_fullScreenButton);
+				//controlLayout->addWidget(m_fullScreenButton);
 			}
-
-			QBoxLayout *layout = new QVBoxLayout;
-			if (m_useVideoWidget) {
-				layout->addLayout(displayLayout);
-			}
-			QHBoxLayout *hLayout = new QHBoxLayout;
-			hLayout->addWidget(m_slider);
-			hLayout->addWidget(m_labelDuration);
-			layout->addLayout(hLayout);
-			layout->addLayout(controlLayout);
-			setLayout(layout);
 
 			if (!isPlayerAvailable()) {
 				QMessageBox::warning(this, tr("Service not available"),
@@ -291,7 +290,7 @@ namespace openmittsu {
 				}
 
 				QList<QUrl> urls;
-				QUrl url = QUrl::fromUserInput(m_tempFile.fileName(), QDir::currentPath(), QUrl::AssumeLocalFile);
+				QUrl url = QUrl::fromUserInput(m_tempFile.fileName(), QDir::currentPath());
 				urls.append(url);
 
 				this->addToPlaylist(urls);
@@ -320,6 +319,7 @@ namespace openmittsu {
 			if (!m_useVideoWidget) {
 				return;
 			}
+			/*
 			if (!available) {
 				OPENMITTSU_DISCONNECT(m_fullScreenButton, clicked(bool), m_videoWidget, setFullScreen(bool));
 				OPENMITTSU_DISCONNECT(m_videoWidget, fullScreenChanged(bool), m_fullScreenButton, setChecked(bool));
@@ -328,9 +328,12 @@ namespace openmittsu {
 				OPENMITTSU_CONNECT(m_fullScreenButton, clicked(bool), m_videoWidget, setFullScreen(bool));
 				OPENMITTSU_CONNECT(m_videoWidget, fullScreenChanged(bool), m_fullScreenButton, setChecked(bool));
 
-				if (m_fullScreenButton->isChecked())
+				if (m_fullScreenButton->isChecked()) {
 					m_videoWidget->setFullScreen(true);
+				}
 			}
+			*/
+			m_videoWidget->setFullScreen(true);
 		}
 
 		void Player::setTrackInfo(const QString &info) {

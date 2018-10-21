@@ -70,6 +70,10 @@ class QVideoWidget;
 class QAudioProbe;
 QT_END_NAMESPACE
 
+namespace Ui {
+	class Player;
+}
+
 namespace openmittsu {
 	namespace widgets {
 
@@ -114,6 +118,7 @@ namespace openmittsu {
 			void handleCursor(QMediaPlayer::MediaStatus status);
 			void updateDurationInfo(qint64 currentInfo);
 
+			Ui::Player* m_ui;
 			bool m_useVideoWidget;
 
 			QMediaPlayer *m_player = nullptr;
@@ -123,9 +128,6 @@ namespace openmittsu {
 			QSlider *m_slider = nullptr;
 			QLabel *m_labelDuration = nullptr;
 			QPushButton *m_fullScreenButton = nullptr;
-
-			QVideoProbe *m_videoProbe = nullptr;
-			QAudioProbe *m_audioProbe = nullptr;
 
 			PlaylistModel *m_playlistModel = nullptr;
 			QString m_trackInfo;
