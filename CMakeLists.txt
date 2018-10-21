@@ -684,7 +684,7 @@ else()
 endif()
 
 set(CPACK_PACKAGE_VERSION "${OPENMITTSU_CPP_VERSION_MAJOR}.${OPENMITTSU_CPP_VERSION_MINOR}.${OPENMITTSU_CPP_VERSION_PATCH}plus${OPENMITTSU_CPP_VERSION_COMMITS_AHEAD}")
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt5core5a, libqt5gui5, libqt5multimedia5, libqt5multimedia5-plugins, libqt5network5, libqt5sql5, libqt5sql5-sqlite, libqt5sql5-sqlcipher, libqt5widgets5, libsodium18 (>= 1.0.12), libqrencode3")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt5core5a, libqt5gui5, libqt5multimedia5, libqt5multimediawidgets5, libqt5multimedia5-plugins, libqt5network5, libqt5sql5, libqt5sql5-sqlite, libqt5sql5-sqlcipher, libqt5widgets5, libsodium23 (>= 1.0.12), libqrencode3, gstreamer1.0-libav, libavcodec-extra")
 set(CPACK_PACKAGE_CONTACT "Philipp Berger <packaging@openmittsu.de>")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Philipp Berger <packaging@openmittsu.de>")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A chat client for Threema-style chat networks")
