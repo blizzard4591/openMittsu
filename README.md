@@ -171,7 +171,7 @@ make # optionally add -j 4 for multi-threaded compilation with 4 threads
 	Use the solution provided in `vc15/` and build only the target `qrcodelib` in modes `Debug-Lib` and `Release-Lib`.
 	The basepath where `qrencode.h` is located will serve as the include directory `LIBQRENCODE_INCLUDE_DIR` and
 	we define `LIBQRENCODE_LIBRARY = optimized;C:\cpp\qrencode-win32\qrencode-win32\vc15\x64\Release-Lib\qrcodelib.lib;debug;C:\cpp\qrencode-win32\qrencode-win32\vc15\x64\Debug-Lib\qrcodelib.lib` (change pathes according to your layout!).
-4. Download and install the 8latest Qt version](https://www.qt.io/download-open-source/). Check that you select the right version for your version of Visual Studio, for example msvc-2017-x64 for Visual Studio 2017 and 64bit builds.
+4. Download and install the [latest Qt version](https://www.qt.io/download-open-source/). Check that you select the right version for your version of Visual Studio, for example msvc-2017-x64 for Visual Studio 2017 and 64bit builds.
 5. Open the `CMakeLists.txt` file in the root folder of openMittsu and look for `OPENMITTSU_CMAKE_SEARCH_PATH`.  
 	Edit the path to point to your Qt installation.
 6. Start CMake and point it to the openMittsu directory.
