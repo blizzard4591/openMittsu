@@ -16,23 +16,23 @@ namespace openmittsu {
 		}
 
 		MessageFlags MessageFlagsFactory::createContactMessageFlags() {
-			return MessageFlags(true, false, false, false, false);
+			return MessageFlags(true, false, false, false, false, false);
 		}
 
 		MessageFlags MessageFlagsFactory::createGroupTextMessageFlags() {
-			return MessageFlags(true, false, false, false, true);
+			return MessageFlags(true, false, false, false, true, false);
 		}
 
 		MessageFlags MessageFlagsFactory::createGroupControlMessageFlags() {
-			return MessageFlags(false, false, false, false, true);
+			return MessageFlags(false, false, false, false, true, false);
 		}
 
 		MessageFlags MessageFlagsFactory::createTypingStatusMessageFlags() {
-			return MessageFlags(false, true, true, false, false);
+			return MessageFlags(false, true, true, false, false, false);
 		}
 
 		MessageFlags MessageFlagsFactory::createReceiptMessageFlags() {
-			return MessageFlags(false, false, false, false, false);
+			return MessageFlags(false, false, false, false, false, false);
 		}
 
 	}
