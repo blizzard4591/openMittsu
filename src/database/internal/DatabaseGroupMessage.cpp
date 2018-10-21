@@ -255,7 +255,7 @@ namespace openmittsu {
 			QString DatabaseGroupMessage::getContentAsText() const {
 				GroupMessageType const messageType = getMessageType();
 				if ((messageType != GroupMessageType::TEXT) && (messageType != GroupMessageType::AUDIO) && (messageType != GroupMessageType::SET_IMAGE) && (messageType != GroupMessageType::SET_TITLE) && (messageType != GroupMessageType::GROUP_CREATION) && (messageType != GroupMessageType::LEAVE) && (messageType != GroupMessageType::SYNC_REQUEST)) {
-					throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as text because it has type " << GroupMessageTypeHelper::toString(messageType) << "!";
+					throw openmittsu::exceptions::InternalErrorException() << "Can not get content of group message for message ID \"" << getMessageId().toString() << "\" as text because it has type " << GroupMessageTypeHelper::toString(messageType) << "!";
 				}
 				return queryField(QStringLiteral("body")).toString();
 			}
@@ -263,7 +263,7 @@ namespace openmittsu {
 			openmittsu::utility::Location DatabaseGroupMessage::getContentAsLocation() const {
 				GroupMessageType const messageType = getMessageType();
 				if (messageType != GroupMessageType::LOCATION) {
-					throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as location because it has type " << GroupMessageTypeHelper::toString(messageType) << "!";
+					throw openmittsu::exceptions::InternalErrorException() << "Can not get content of group message for message ID \"" << getMessageId().toString() << "\" as location because it has type " << GroupMessageTypeHelper::toString(messageType) << "!";
 				}
 				return openmittsu::utility::Location::fromDatabaseString(queryField(QStringLiteral("body")).toString());
 			}
@@ -271,7 +271,7 @@ namespace openmittsu {
 			MediaFileItem DatabaseGroupMessage::getContentAsMediaFile() const {
 				GroupMessageType const messageType = getMessageType();
 				if ((messageType != GroupMessageType::IMAGE) && (messageType != GroupMessageType::AUDIO) && (messageType != GroupMessageType::FILE) && (messageType != GroupMessageType::VIDEO)) {
-					throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as media file because it has type " << GroupMessageTypeHelper::toString(messageType) << "!";
+					throw openmittsu::exceptions::InternalErrorException() << "Can not get content of group message for message ID \"" << getMessageId().toString() << "\" as media file because it has type " << GroupMessageTypeHelper::toString(messageType) << "!";
 				}
 				return getMediaItem(getUid());
 			}

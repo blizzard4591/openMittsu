@@ -101,8 +101,8 @@ namespace openmittsu {
 
 		QString const& DatabaseReadonlyGroupMessage::getContentAsText() const {
 			GroupMessageType const messageType = getMessageType();
-			if (messageType != GroupMessageType::TEXT) {
-				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as text because it has type " << GroupMessageTypeHelper::toString(messageType) << "!";
+			if ((messageType != GroupMessageType::TEXT) && (messageType != GroupMessageType::AUDIO) && (messageType != GroupMessageType::SET_IMAGE) && (messageType != GroupMessageType::SET_TITLE) && (messageType != GroupMessageType::GROUP_CREATION) && (messageType != GroupMessageType::LEAVE) && (messageType != GroupMessageType::SYNC_REQUEST)) {
+				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of readonly group message for message ID \"" << getMessageId().toString() << "\" as text because it has type " << GroupMessageTypeHelper::toString(messageType) << "!";
 			}
 			return m_body;
 		}
@@ -110,7 +110,7 @@ namespace openmittsu {
 		openmittsu::utility::Location DatabaseReadonlyGroupMessage::getContentAsLocation() const {
 			GroupMessageType const messageType = getMessageType();
 			if (messageType != GroupMessageType::LOCATION) {
-				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as location because it has type " << GroupMessageTypeHelper::toString(messageType) << "!";
+				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of readonly group message for message ID \"" << getMessageId().toString() << "\" as location because it has type " << GroupMessageTypeHelper::toString(messageType) << "!";
 			}
 			return openmittsu::utility::Location::fromDatabaseString(m_body);
 		}
@@ -118,7 +118,7 @@ namespace openmittsu {
 		MediaFileItem DatabaseReadonlyGroupMessage::getContentAsMediaFile() const {
 			GroupMessageType const messageType = getMessageType();
 			if ((messageType != GroupMessageType::IMAGE) && (messageType != GroupMessageType::AUDIO) && (messageType != GroupMessageType::FILE) && (messageType != GroupMessageType::VIDEO)) {
-				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as media file because it has type " << GroupMessageTypeHelper::toString(messageType) << "!";
+				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of readonly group message for message ID \"" << getMessageId().toString() << "\" as media file because it has type " << GroupMessageTypeHelper::toString(messageType) << "!";
 			}
 			return m_mediaItem;
 		}

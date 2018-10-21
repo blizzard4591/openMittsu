@@ -101,8 +101,8 @@ namespace openmittsu {
 
 		QString const& DatabaseReadonlyContactMessage::getContentAsText() const {
 			ContactMessageType const messageType = getMessageType();
-			if (messageType != ContactMessageType::TEXT) {
-				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as text because it has type " << ContactMessageTypeHelper::toString(messageType) << "!";
+			if ((messageType != ContactMessageType::TEXT) && (messageType != ContactMessageType::AUDIO)) {
+				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of readonly contact message for message ID \"" << getMessageId().toString() << "\" as text because it has type " << ContactMessageTypeHelper::toString(messageType) << "!";
 			}
 			return m_body;
 		}
@@ -110,7 +110,7 @@ namespace openmittsu {
 		openmittsu::utility::Location DatabaseReadonlyContactMessage::getContentAsLocation() const {
 			ContactMessageType const messageType = getMessageType();
 			if (messageType != ContactMessageType::LOCATION) {
-				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as location because it has type " << ContactMessageTypeHelper::toString(messageType) << "!";
+				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of readonly contact message for message ID \"" << getMessageId().toString() << "\" as location because it has type " << ContactMessageTypeHelper::toString(messageType) << "!";
 			}
 			return openmittsu::utility::Location::fromDatabaseString(m_body);
 		}
@@ -118,7 +118,7 @@ namespace openmittsu {
 		MediaFileItem DatabaseReadonlyContactMessage::getContentAsMediaFile() const {
 			ContactMessageType const messageType = getMessageType();
 			if ((messageType != ContactMessageType::IMAGE) && (messageType != ContactMessageType::AUDIO) && (messageType != ContactMessageType::FILE) && (messageType != ContactMessageType::VIDEO)) {
-				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of message for message ID \"" << getMessageId().toString() << "\" as media file because it has type " << ContactMessageTypeHelper::toString(messageType) << "!";
+				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of readonly contact message for message ID \"" << getMessageId().toString() << "\" as media file because it has type " << ContactMessageTypeHelper::toString(messageType) << "!";
 			}
 			return m_mediaItem;
 		}
