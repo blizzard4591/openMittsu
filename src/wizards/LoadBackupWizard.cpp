@@ -71,7 +71,7 @@ namespace openmittsu {
 
 						m_backupString = backupString;
 						m_backupPassword = passwordString;
-					} catch (openmittsu::exceptions::InvalidInputException& iie) {
+					} catch (openmittsu::exceptions::InvalidInputExceptionImpl& iie) {
 						back();
 						QMessageBox::warning(this, tr("Incorrect Password or Backup"), tr("Either the password is incorrect or you mistyped the Backup string!\nProblem: %1").arg(iie.what()));
 					}
@@ -101,7 +101,7 @@ namespace openmittsu {
 
 						m_backupString = backupString;
 						m_backupPassword = passwordString;
-					} catch (openmittsu::exceptions::InvalidInputException& iie) {
+					} catch (openmittsu::exceptions::InvalidInputExceptionImpl& iie) {
 						back();
 						QMessageBox::warning(this, tr("Incorrect Password or Backup"), tr("Either the password is incorrect or your backup is corrupted!\nProblem: %1").arg(iie.what()));
 					}

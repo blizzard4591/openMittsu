@@ -632,7 +632,7 @@ namespace openmittsu {
 			try {
 				internal::DatabaseContactMessage message(this, sender, referredMessageId);
 				message.setMessageState(UserMessageState::DELIVERED, timeSent);
-			} catch (openmittsu::exceptions::InternalErrorException& iee) {
+			} catch (openmittsu::exceptions::InternalErrorExceptionImpl& iee) {
 				LOGGER()->warn("Could not saved received \"received\" receipt: {}", iee.what());
 			}
 		}
@@ -641,7 +641,7 @@ namespace openmittsu {
 			try {
 				internal::DatabaseContactMessage message(this, sender, referredMessageId);
 				message.setMessageState(UserMessageState::READ, timeSent);
-			} catch (openmittsu::exceptions::InternalErrorException& iee) {
+			} catch (openmittsu::exceptions::InternalErrorExceptionImpl& iee) {
 				LOGGER()->warn("Could not saved received \"seen\" receipt: {}", iee.what());
 			}
 		}
@@ -650,7 +650,7 @@ namespace openmittsu {
 			try {
 				internal::DatabaseContactMessage message(this, sender, referredMessageId);
 				message.setMessageState(UserMessageState::USERACK, timeSent);
-			} catch (openmittsu::exceptions::InternalErrorException& iee) {
+			} catch (openmittsu::exceptions::InternalErrorExceptionImpl& iee) {
 				LOGGER()->warn("Could not saved received \"agree\" receipt: {}", iee.what());
 			}
 		}
@@ -659,7 +659,7 @@ namespace openmittsu {
 			try {
 				internal::DatabaseContactMessage message(this, sender, referredMessageId);
 				message.setMessageState(UserMessageState::USERDEC, timeSent);
-			} catch (openmittsu::exceptions::InternalErrorException& iee) {
+			} catch (openmittsu::exceptions::InternalErrorExceptionImpl& iee) {
 				LOGGER()->warn("Could not saved received \"disagree\" receipt: {}", iee.what());
 			}
 		}

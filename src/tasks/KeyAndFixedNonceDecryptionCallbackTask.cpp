@@ -39,7 +39,7 @@ namespace openmittsu {
 				m_decryptedData = m_cryptoBox->decryptFromFixedNonce(m_encryptedData, m_encryptionKey, m_nonce);
 
 				finishedWithNoError();
-			} catch (openmittsu::exceptions::CryptoException& cryptoException) {
+			} catch (openmittsu::exceptions::CryptoExceptionImpl& cryptoException) {
 				finishedWithError(-1, QString(cryptoException.what()));
 			}
 		}

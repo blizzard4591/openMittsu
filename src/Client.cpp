@@ -981,7 +981,7 @@ void Client::menuContactAddOnClick() {
 
 					QMessageBox::information(this, "Contact added", QString("Contact successfully added!\nIdentity: %1\nPublic Key: %2\n").arg(contactId.toQString()).arg(ir.getFetchedPublicKey().toQString()));
 				}
-			} catch (openmittsu::exceptions::ProtocolErrorException& pee) {
+			} catch (openmittsu::exceptions::ProtocolErrorExceptionImpl& pee) {
 				QMessageBox::warning(this, "Could not add Contact", QString("Error while downloading public-key from identity servers: %1\nNo Contact has been added.").arg(pee.what()));
 			}
 		}

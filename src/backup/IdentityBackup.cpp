@@ -78,7 +78,7 @@ namespace openmittsu {
 				if (decodedBase32.size() != BACKUP_DECODED_BYTES) {
 					return true;
 				}
-			} catch (openmittsu::exceptions::InvalidInputException&) {
+			} catch (openmittsu::exceptions::InvalidInputExceptionImpl&) {
 				return true;
 			}
 

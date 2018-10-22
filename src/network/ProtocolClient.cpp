@@ -435,7 +435,7 @@ namespace openmittsu {
 				std::shared_ptr<openmittsu::messages::Message> messageSharedPtr = openmittsu::messages::IncomingMessagesParser::parseMessageWithPayloadToMessage(messageWithPayload);
 				openmittsu::messages::Message const* messagePtr = messageSharedPtr.get();
 				handleIncomingMessage(messagePtr, message);
-			} catch (openmittsu::exceptions::ProtocolErrorException& pee) {
+			} catch (openmittsu::exceptions::ProtocolErrorExceptionImpl& pee) {
 				LOGGER()->warn("Encountered an error while parsing payload of received message from {} with ID {}: {}\nThe payload was: {}", messageWithPayload.getMessageHeader().getSender().toString(), messageWithPayload.getMessageHeader().getMessageId().toString(), pee.what(), QString(messageWithPayload.getPayload().toHex()).toStdString());
 			} catch (std::exception& e) {
 				LOGGER()->critical("Unknown error while parsing payload of received message from {} with ID {}: {}", messageWithPayload.getMessageHeader().getSender().toString(), messageWithPayload.getMessageHeader().getMessageId().toString(), e.what());

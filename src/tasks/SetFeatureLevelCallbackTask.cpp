@@ -78,7 +78,7 @@ namespace openmittsu {
 					std::pair<openmittsu::crypto::Nonce, QByteArray> cryptoResult;
 					try {
 						cryptoResult = m_cryptoBox.encrypt(token, pubKey);
-					} catch (openmittsu::exceptions::CryptoException const& ce) {
+					} catch (openmittsu::exceptions::CryptoExceptionImpl const& ce) {
 						finishedWithError(-3, QString("Could not encrypt token for API request: ").append(ce.what()));
 					}
 

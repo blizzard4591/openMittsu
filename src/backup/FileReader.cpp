@@ -53,7 +53,7 @@ namespace openmittsu {
 					try {
 						SimpleCsvLineSplitter const splittedLines = SimpleCsvLineSplitter::split(m_headerOffsets.size(), line);
 						return T::fromBackupMatch(m_filename, m_headerOffsets, splittedLines);
-					} catch (openmittsu::exceptions::InsufficientInputException&) {
+					} catch (openmittsu::exceptions::InsufficientInputExceptionImpl&) {
 						continue;
 					}
 				} else {

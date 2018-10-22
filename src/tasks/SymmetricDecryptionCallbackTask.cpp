@@ -38,7 +38,7 @@ namespace openmittsu {
 				m_decryptedData = m_cryptoBox->decrypt(m_encryptedData, m_nonce, m_symmetricKeyPartner);
 
 				finishedWithNoError();
-			} catch (openmittsu::exceptions::CryptoException& cryptoException) {
+			} catch (openmittsu::exceptions::CryptoExceptionImpl& cryptoException) {
 				finishedWithError(-1, QString(cryptoException.what()));
 			}
 		}

@@ -30,12 +30,12 @@ namespace openmittsu {
 
 					return 2;
 				}
-			} catch (openmittsu::exceptions::InvalidPasswordOrDatabaseException&) {
+			} catch (openmittsu::exceptions::InvalidPasswordOrDatabaseExceptionImpl&) {
 				//result.failureReason = DatabaseOpenFailureReason::FREASON_INVALID_PASSWORD;
 				//result.success = false;
 
 				return 1;
-			} catch (openmittsu::exceptions::InternalErrorException&) {
+			} catch (openmittsu::exceptions::InternalErrorExceptionImpl&) {
 				//result.failureReason = DatabaseOpenFailureReason::FREASON_OTHER;
 				//result.success = false;
 

@@ -41,7 +41,7 @@ namespace openmittsu {
 				m_encryptedData = result.second;
 
 				finishedWithNoError();
-			} catch (openmittsu::exceptions::CryptoException& cryptoException) {
+			} catch (openmittsu::exceptions::CryptoExceptionImpl& cryptoException) {
 				finishedWithError(-1, QString(cryptoException.what()));
 			}
 		}
