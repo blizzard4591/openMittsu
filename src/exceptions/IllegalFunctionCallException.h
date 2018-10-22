@@ -4,6 +4,7 @@
 #include "src/exceptions/BaseException.h"
 #include "src/exceptions/ExceptionMacros.h"
 
-OPENMITTSU_NEW_EXCEPTION(IllegalFunctionCallException)
+OPENMITTSU_NEW_EXCEPTION(IllegalFunctionCallExceptionImpl)
+#define IllegalFunctionCallException() IllegalFunctionCallExceptionImpl(__FILE__, __LINE__)
 
 #endif /* OPENMITTSU_EXCEPTIONS_ILLEGALFUNCTIONCALLEXCEPTION_H_ */

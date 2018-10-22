@@ -4,6 +4,7 @@
 #include "src/exceptions/BaseException.h"
 #include "src/exceptions/ExceptionMacros.h"
 
-OPENMITTSU_NEW_EXCEPTION(InvalidPasswordOrDatabaseException)
+OPENMITTSU_NEW_EXCEPTION(InvalidPasswordOrDatabaseExceptionImpl)
+#define InvalidPasswordOrDatabaseException() InvalidPasswordOrDatabaseExceptionImpl(__FILE__, __LINE__)
  
 #endif /* OPENMITTSU_EXCEPTIONS_INVALIDPASSWORDORDATABASEEXCEPTION_H_ */

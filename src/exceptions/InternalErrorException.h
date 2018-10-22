@@ -4,6 +4,7 @@
 #include "src/exceptions/BaseException.h"
 #include "src/exceptions/ExceptionMacros.h"
 
-OPENMITTSU_NEW_EXCEPTION(InternalErrorException)
+OPENMITTSU_NEW_EXCEPTION(InternalErrorExceptionImpl)
+#define InternalErrorException() InternalErrorExceptionImpl(__FILE__, __LINE__)
  
 #endif /* OPENMITTSU_EXCEPTIONS_INTERNALERROREXCEPTION_H_ */

@@ -3,15 +3,16 @@
 namespace openmittsu {
 	namespace exceptions {
 
-		BaseException::BaseException() : std::exception() {
-			// Intentionally left empty.
+		BaseException::BaseException(char const* file, int line) : std::exception() {
+			stream << file << ":" << line << ": ";
 		}
 
 		BaseException::BaseException(BaseException const& other) : std::exception(other), stream(other.stream.str()) {
 			// Intentionally left empty.
 		}
 
-		BaseException::BaseException(char const* cstr) {
+		BaseException::BaseException(char const* file, int line, char const* cstr) {
+			stream << file << ":" << line << ": ";
 			stream << cstr;
 		}
 

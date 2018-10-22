@@ -17,7 +17,7 @@ namespace openmittsu {
 			/*!
 			* Creates a base exception without a message.
 			*/
-			BaseException();
+			BaseException(char const* file, int line);
 
 			/*!
 			* Creates a base expression from the given exception.
@@ -29,7 +29,7 @@ namespace openmittsu {
 			/*!
 			* Adds the given string to the message of this exception.
 			*/
-			BaseException(char const* cstr);
+			BaseException(char const* file, int line, char const* cstr);
 
 			/*!
 			* Declare a destructor to counter the "looser throw specificator" error
@@ -56,6 +56,8 @@ namespace openmittsu {
 		private:
 			// storage for the string backing the C string returned by what()
 			mutable std::string errorString;
+
+			BaseException() = delete;
 		};
 
 	}

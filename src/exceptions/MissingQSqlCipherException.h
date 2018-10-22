@@ -4,6 +4,7 @@
 #include "src/exceptions/BaseException.h"
 #include "src/exceptions/ExceptionMacros.h"
 
-OPENMITTSU_NEW_EXCEPTION(MissingQSqlCipherException)
+OPENMITTSU_NEW_EXCEPTION(MissingQSqlCipherExceptionImpl)
+#define MissingQSqlCipherException() MissingQSqlCipherExceptionImpl(__FILE__, __LINE__)
 
 #endif /* OPENMITTSU_EXCEPTIONS_MISSINGQSQLCIPHEREXCEPTION_H_ */

@@ -9,9 +9,9 @@
 namespace exceptions { \
 class exception_name : public BaseException { \
 public: \
-exception_name() : BaseException() { \
+exception_name(char const* file, int line) : BaseException(file, line) { \
 } \
-exception_name(char const* cstr) : BaseException(cstr) { \
+exception_name(char const* file, int line, char const* cstr) : BaseException(file, line, cstr) { \
 } \
 exception_name(exception_name const& cp) : BaseException(cp) { \
 } \
