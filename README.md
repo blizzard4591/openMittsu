@@ -10,7 +10,7 @@ openMittsu is governed by the GNU GPL v2.0 license, but includes works from diff
  - [CMake](https://cmake.org/)
  - [Qt 5](https://www.qt.io/)
  - [LibSodium >= 1.0.12](https://download.libsodium.org/doc/)
- - [LibQrEncode](https://fukuchi.org/works/qrencode/) or [LibQrEncode-win32](https://code.google.com/p/qrencode-win32/)
+ - [LibQrEncode](https://fukuchi.org/works/qrencode/) or [LibQrEncode-win32](https://github.com/blizzard4591/qrencode-win32)
  - [LibSqlCipher >= 3.4.1](https://github.com/blizzard4591/sqlcipher)
  - [QSqlCipher](https://github.com/blizzard4591/qt5-sqlcipher)
  
@@ -19,6 +19,7 @@ Currently, the application has been built and tested on:
  - Windows 7 using Visual Studio 2017
  - Windows 10 using Visual Studio 2017
  - Debian 9 using GCC 6.3 (AMD64)
+ - Debian 9 using GCC 6.3 (i386)
  - Debian 9 using GCC 6.3 (PPC)
  
 Other platforms should work with no or minimal changes.
@@ -26,10 +27,12 @@ Other platforms should work with no or minimal changes.
 ## Binaries
 Currently we only provide binaries for  the following platforms:
  - [Windows 32bit (x86) and 64bit (x64)](https://downloads.openmittsu.de/) – Scroll down to find the latest build. Do not forget to install the Visual Studio Redistributable (`vcredist_x64.exe`).
- - Debian 9 amd64 using our APT repository:
+ - Linux-bases systems using an [AppImage](https://appimage.org/): Download from [BinTray](https://bintray.com/blizzard4591/OpenMittsu/download_file?file_path=OpenMittsu-Nightly-Linux-x86_64.AppImage). 
+	Do not forget to update the AppImage every now and then!
+ - Debian 9 (on amd64, i386 and armhf) using our APT repository:
 
 	1. First, add the GPG key for the repository:
-		```wget -O - https://packages.openmittsu.de/openmittsu.packages.gpg.key|apt-key add -```
+		```wget -O - https://packages.openmittsu.de/openmittsu.packages.gpg.key | sudo apt-key add -```
 	2. Now, add the repository. As root or using sudo, create a file called "openmittsu.list" in `/etc/apt/sources.list.d/` with the following contents:
 		```deb https://packages.openmittsu.de/apt/debian stretch main```
 	3. You can now install (or update) openMittsu using:
