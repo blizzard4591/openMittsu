@@ -14,7 +14,7 @@
 namespace openmittsu {
 	namespace widgets {
 
-		GroupVideoChatWidgetItem::GroupVideoChatWidgetItem(openmittsu::dataproviders::BackedGroupMessage const& message, QWidget* parent) : GroupChatWidgetItem(message, parent), m_lblCaption(new QLabel()) {
+		GroupVideoChatWidgetItem::GroupVideoChatWidgetItem(openmittsu::dataproviders::BackedGroupMessage const& message, QWidget* parent) : GroupMediaChatWidgetItem(message, parent), m_lblCaption(new QLabel()) {
 			if (message.getMessageType() != openmittsu::dataproviders::messages::GroupMessageType::VIDEO) {
 				throw openmittsu::exceptions::InternalErrorException() << "Can not handle message with type " << openmittsu::dataproviders::messages::GroupMessageTypeHelper::toString(message.getMessageType()) << ".";
 			}
@@ -57,6 +57,19 @@ namespace openmittsu {
 				clipboard->setMimeData(mimeData);
 			} else {
 				clipboard->clear();
+			}
+		}
+
+		QString GroupVideoChatWidgetItem::getFileExtension() const {
+			return QStringLiteral("mp4");
+		}
+
+		bool GroupVideoChatWidgetItem::saveMediaToFile(QString const& filename) const {
+			openmittsu::database::MediaFileItem const video = m_groupMessage.getContentAsMediaFile();
+			if (video.isAvailable()) {
+				return MediaChatWidgetItem::saveMediaToFile(filename, video.getData());
+			} else {
+				return false;
 			}
 		}
 

@@ -21,7 +21,7 @@
 namespace openmittsu {
 	namespace widgets {
 
-		ContactVideoChatWidgetItem::ContactVideoChatWidgetItem(openmittsu::dataproviders::BackedContactMessage const& message, QWidget* parent) : ContactChatWidgetItem(message, parent), m_lblCaption(new QLabel()) {
+		ContactVideoChatWidgetItem::ContactVideoChatWidgetItem(openmittsu::dataproviders::BackedContactMessage const& message, QWidget* parent) : ContactMediaChatWidgetItem(message, parent), m_lblCaption(new QLabel()) {
 			if (message.getMessageType() != openmittsu::dataproviders::messages::ContactMessageType::VIDEO) {
 				throw openmittsu::exceptions::InternalErrorException() << "Can not handle message with type " << openmittsu::dataproviders::messages::ContactMessageTypeHelper::toString(message.getMessageType()) << ".";
 			}
@@ -57,13 +57,26 @@ namespace openmittsu {
 
 		void ContactVideoChatWidgetItem::copyToClipboard() {
 			QClipboard *clipboard = QApplication::clipboard();
-			openmittsu::database::MediaFileItem const audio = m_contactMessage.getContentAsMediaFile();
-			if (audio.isAvailable()) {
+			openmittsu::database::MediaFileItem const video = m_contactMessage.getContentAsMediaFile();
+			if (video.isAvailable()) {
 				QMimeData* mimeData = new QMimeData();
-				mimeData->setData(QStringLiteral("video/mp4"), audio.getData());
+				mimeData->setData(QStringLiteral("video/mp4"), video.getData());
 				clipboard->setMimeData(mimeData);
 			} else {
 				clipboard->clear();
+			}
+		}
+
+		QString ContactVideoChatWidgetItem::getFileExtension() const {
+			return QStringLiteral("mp4");
+		}
+
+		bool ContactVideoChatWidgetItem::saveMediaToFile(QString const& filename) const {
+			openmittsu::database::MediaFileItem const video = m_contactMessage.getContentAsMediaFile();
+			if (video.isAvailable()) {
+				return MediaChatWidgetItem::saveMediaToFile(filename, video.getData());
+			} else {
+				return false;
 			}
 		}
 

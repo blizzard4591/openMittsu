@@ -6,14 +6,14 @@
 #include "src/dataproviders/BackedContact.h"
 #include "src/dataproviders/BackedContactMessage.h"
 
-#include "src/widgets/chat/ContactChatWidgetItem.h"
+#include "src/widgets/chat/ContactMediaChatWidgetItem.h"
 
 #include "src/widgets/player/Player.h"
 
 namespace openmittsu {
 	namespace widgets {
 
-		class ContactAudioChatWidgetItem : public ContactChatWidgetItem {
+		class ContactAudioChatWidgetItem : public ContactMediaChatWidgetItem {
 			Q_OBJECT
 		public:
 			explicit ContactAudioChatWidgetItem(openmittsu::dataproviders::BackedContactMessage const& message, QWidget* parent = nullptr);
@@ -25,6 +25,9 @@ namespace openmittsu {
 
 		protected:
 			virtual void copyToClipboard() override;
+
+			virtual QString getFileExtension() const override;
+			virtual bool saveMediaToFile(QString const& filename) const override;
 		private:
 			Player* m_player;
 			QLabel* m_lblCaption;

@@ -21,7 +21,7 @@
 namespace openmittsu {
 	namespace widgets {
 
-		ContactAudioChatWidgetItem::ContactAudioChatWidgetItem(openmittsu::dataproviders::BackedContactMessage const& message, QWidget* parent) : ContactChatWidgetItem(message, parent), m_lblCaption(new QLabel()) {
+		ContactAudioChatWidgetItem::ContactAudioChatWidgetItem(openmittsu::dataproviders::BackedContactMessage const& message, QWidget* parent) : ContactMediaChatWidgetItem(message, parent), m_lblCaption(new QLabel()) {
 			if (message.getMessageType() != openmittsu::dataproviders::messages::ContactMessageType::AUDIO) {
 				throw openmittsu::exceptions::InternalErrorException() << "Can not handle message with type " << openmittsu::dataproviders::messages::ContactMessageTypeHelper::toString(message.getMessageType()) << ".";
 			}
@@ -64,6 +64,19 @@ namespace openmittsu {
 				clipboard->setMimeData(mimeData);
 			} else {
 				clipboard->clear();
+			}
+		}
+
+		QString ContactAudioChatWidgetItem::getFileExtension() const {
+			return QStringLiteral("mp4");
+		}
+
+		bool ContactAudioChatWidgetItem::saveMediaToFile(QString const& filename) const {
+			openmittsu::database::MediaFileItem const audio = m_contactMessage.getContentAsMediaFile();
+			if (audio.isAvailable()) {
+				return MediaChatWidgetItem::saveMediaToFile(filename, audio.getData());
+			} else {
+				return false;
 			}
 		}
 

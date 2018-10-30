@@ -14,7 +14,7 @@
 namespace openmittsu {
 	namespace widgets {
 
-		GroupAudioChatWidgetItem::GroupAudioChatWidgetItem(openmittsu::dataproviders::BackedGroupMessage const& message, QWidget* parent) : GroupChatWidgetItem(message, parent), m_lblCaption(new QLabel()) {
+		GroupAudioChatWidgetItem::GroupAudioChatWidgetItem(openmittsu::dataproviders::BackedGroupMessage const& message, QWidget* parent) : GroupMediaChatWidgetItem(message, parent), m_lblCaption(new QLabel()) {
 			if (message.getMessageType() != openmittsu::dataproviders::messages::GroupMessageType::AUDIO) {
 				throw openmittsu::exceptions::InternalErrorException() << "Can not handle message with type " << openmittsu::dataproviders::messages::GroupMessageTypeHelper::toString(message.getMessageType()) << ".";
 			}
@@ -57,6 +57,19 @@ namespace openmittsu {
 				clipboard->setMimeData(mimeData);
 			} else {
 				clipboard->clear();
+			}
+		}
+
+		QString GroupAudioChatWidgetItem::getFileExtension() const {
+			return QStringLiteral("mp4");
+		}
+
+		bool GroupAudioChatWidgetItem::saveMediaToFile(QString const& filename) const {
+			openmittsu::database::MediaFileItem const audio = m_groupMessage.getContentAsMediaFile();
+			if (audio.isAvailable()) {
+				return MediaChatWidgetItem::saveMediaToFile(filename, audio.getData());
+			} else {
+				return false;
 			}
 		}
 
