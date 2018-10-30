@@ -5,12 +5,14 @@
 #include "src/protocol/ProtocolSpecs.h"
 #include "src/utility/Logging.h"
 
+#include <memory>
+
 namespace openmittsu {
 	namespace messages {
 		namespace group {
 
 			// Register this MessageContent with the MessageContentRegistry
-			bool GroupFileMessageContent::registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_GROUP_FILE, new TypedMessageContentFactory<GroupFileMessageContent>());
+			bool GroupFileMessageContent::registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_GROUP_FILE, std::make_shared<TypedMessageContentFactory<GroupFileMessageContent>>());
 
 
 			GroupFileMessageContent::GroupFileMessageContent() : GroupMessageContent(openmittsu::protocol::GroupId(0, 0)) {

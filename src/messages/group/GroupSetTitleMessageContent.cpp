@@ -5,12 +5,14 @@
 #include "src/protocol/ProtocolSpecs.h"
 #include "src/utility/ByteArrayConversions.h"
 
+#include <memory>
+
 namespace openmittsu {
 	namespace messages {
 		namespace group {
 
 			// Register this MessageContent with the MessageContentRegistry
-			bool GroupSetTitleMessageContent::registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_GROUP_TITLE, new TypedMessageContentFactory<GroupSetTitleMessageContent>());
+			bool GroupSetTitleMessageContent::registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_GROUP_TITLE, std::make_shared<TypedMessageContentFactory<GroupSetTitleMessageContent>>());
 
 
 			GroupSetTitleMessageContent::GroupSetTitleMessageContent() : GroupMessageContent(openmittsu::protocol::GroupId(0, 0)), title() {

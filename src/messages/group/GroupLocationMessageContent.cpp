@@ -7,12 +7,14 @@
 
 #include <QStringList>
 
+#include <memory>
+
 namespace openmittsu {
 	namespace messages {
 		namespace group {
 
 			// Register this MessageContent with the MessageContentRegistry
-			bool GroupLocationMessageContent::registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_GROUP_LOCATION, new TypedMessageContentFactory<GroupLocationMessageContent>());
+			bool GroupLocationMessageContent::registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_GROUP_LOCATION, std::make_shared<TypedMessageContentFactory<GroupLocationMessageContent>>());
 
 
 			GroupLocationMessageContent::GroupLocationMessageContent() : GroupMessageContent(openmittsu::protocol::GroupId(0, 0)), latitude(0.0), longitude(0.0), height(0.0), description() {

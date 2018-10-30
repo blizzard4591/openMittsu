@@ -9,12 +9,14 @@
 #include "src/utility/ByteArrayConversions.h"
 #include "src/utility/Logging.h"
 
+#include <memory>
+
 namespace openmittsu {
 	namespace messages {
 		namespace contact {
 
 			// Register this MessageContent with the MessageContentRegistry
-			bool ContactAudioIdAndKeyMessageContent::m_registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_CONTACT_AUDIO, new TypedMessageContentFactory<ContactAudioIdAndKeyMessageContent>());
+			bool ContactAudioIdAndKeyMessageContent::m_registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_CONTACT_AUDIO, std::make_shared<TypedMessageContentFactory<ContactAudioIdAndKeyMessageContent>>());
 
 			ContactAudioIdAndKeyMessageContent::ContactAudioIdAndKeyMessageContent() : m_blobId(), m_encryptionKey(), m_lengthInSeconds(0), m_sizeInBytes(0) {
 				// Only accessible and used by the MessageContentFactory.

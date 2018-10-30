@@ -7,12 +7,14 @@
 
 #include <QStringList>
 
+#include <memory>
+
 namespace openmittsu {
 	namespace messages {
 		namespace contact {
 
 			// Register this MessageContent with the MessageContentRegistry
-			bool ContactLocationMessageContent::registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_CONTACT_LOCATION, new TypedMessageContentFactory<ContactLocationMessageContent>());
+			bool ContactLocationMessageContent::registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_CONTACT_LOCATION, std::make_shared<TypedMessageContentFactory<ContactLocationMessageContent>>());
 
 
 			ContactLocationMessageContent::ContactLocationMessageContent() : ContactMessageContent(), latitude(0.0), longitude(0.0), height(0.0), description() {

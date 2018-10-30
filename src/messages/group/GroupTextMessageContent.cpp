@@ -4,12 +4,14 @@
 #include "src/protocol/GroupId.h"
 #include "src/protocol/ProtocolSpecs.h"
 
+#include <memory>
+
 namespace openmittsu {
 	namespace messages {
 		namespace group {
 
 			// Register this MessageContent with the MessageContentRegistry
-			bool GroupTextMessageContent::registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_GROUP_TEXT, new TypedMessageContentFactory<GroupTextMessageContent>());
+			bool GroupTextMessageContent::registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_GROUP_TEXT, std::make_shared<TypedMessageContentFactory<GroupTextMessageContent>>());
 
 
 			GroupTextMessageContent::GroupTextMessageContent() : GroupMessageContent(openmittsu::protocol::GroupId(0, 0)), text() {

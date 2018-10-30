@@ -9,12 +9,14 @@
 #include "src/utility/ByteArrayConversions.h"
 #include "src/utility/Logging.h"
 
+#include <memory>
+
 namespace openmittsu {
 	namespace messages {
 		namespace contact {
 
 			// Register this MessageContent with the MessageContentRegistry
-			bool ContactImageIdAndKeyMessageContent::registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_CONTACT_PICTURE, new TypedMessageContentFactory<ContactImageIdAndKeyMessageContent>());
+			bool ContactImageIdAndKeyMessageContent::registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_CONTACT_PICTURE, std::make_shared<TypedMessageContentFactory<ContactImageIdAndKeyMessageContent>>());
 
 			ContactImageIdAndKeyMessageContent::ContactImageIdAndKeyMessageContent() : imageId(), imageNonce(), sizeInBytes(0) {
 				// Only accessible and used by the MessageContentFactory.
