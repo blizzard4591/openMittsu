@@ -3,12 +3,14 @@
 #include "src/messages/MessageContentRegistry.h"
 #include "src/protocol/ProtocolSpecs.h"
 
+#include <memory>
+
 namespace openmittsu {
 	namespace messages {
 		namespace contact {
 
 			// Register this MessageContent with the MessageContentRegistry
-			bool ContactTextMessageContent::registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_CONTACT_TEXT, new TypedMessageContentFactory<ContactTextMessageContent>());
+			bool ContactTextMessageContent::registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_CONTACT_TEXT, std::make_shared<TypedMessageContentFactory<ContactTextMessageContent>>());
 
 			ContactTextMessageContent::ContactTextMessageContent() : ContactMessageContent(), text() {
 				// Only accessible and used by the MessageContentFactory.

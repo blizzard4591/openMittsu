@@ -6,14 +6,14 @@
 #include "src/dataproviders/BackedGroup.h"
 #include "src/dataproviders/BackedGroupMessage.h"
 
-#include "src/widgets/chat/GroupChatWidgetItem.h"
+#include "src/widgets/chat/GroupMediaChatWidgetItem.h"
 
 #include "src/widgets/player/Player.h"
 
 namespace openmittsu {
 	namespace widgets {
 
-		class GroupVideoChatWidgetItem : public GroupChatWidgetItem {
+		class GroupVideoChatWidgetItem : public GroupMediaChatWidgetItem {
 			Q_OBJECT
 		public:
 			explicit GroupVideoChatWidgetItem(openmittsu::dataproviders::BackedGroupMessage const& message, QWidget* parent = nullptr);
@@ -24,6 +24,9 @@ namespace openmittsu {
 			virtual void onMessageDataChanged() override;
 		protected:
 			virtual void copyToClipboard() override;
+
+			virtual QString getFileExtension() const override;
+			virtual bool saveMediaToFile(QString const& filename) const override;
 		private:
 			Player* m_player;
 			QLabel* m_lblCaption;

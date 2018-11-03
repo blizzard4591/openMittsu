@@ -23,7 +23,7 @@ namespace openmittsu {
 
 			char const signatureByte = messageWithPayload.getPayload().at(0);
 
-			MessageContentFactory* messageContentFactory = messageContentRegistry.getMessageContentFactoryForSignatureByte(signatureByte);
+			std::shared_ptr<MessageContentFactory> messageContentFactory = messageContentRegistry.getMessageContentFactoryForSignatureByte(signatureByte);
 			if (messageContentFactory == nullptr) {
 				throw openmittsu::exceptions::ProtocolErrorException() << "Could not match message payload with signature byte 0x" << openmittsu::utility::HexChar(signatureByte) << " to any existing MessageContents. Payload: " << QString(messageWithPayload.getPayload().toHex()).toStdString();
 			}

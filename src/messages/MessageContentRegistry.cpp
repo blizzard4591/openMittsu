@@ -13,7 +13,7 @@ namespace openmittsu {
 			throw;
 		}
 
-		bool MessageContentRegistry::registerContent(char signatureByte, MessageContentFactory* messageContentFactory) {
+		bool MessageContentRegistry::registerContent(char signatureByte, std::shared_ptr<MessageContentFactory> const& messageContentFactory) {
 			mutex.lock();
 			mappings.insert(std::make_pair(signatureByte, messageContentFactory));
 			mutex.unlock();
@@ -21,9 +21,9 @@ namespace openmittsu {
 			return true;
 		}
 
-		MessageContentFactory* MessageContentRegistry::getMessageContentFactoryForSignatureByte(char signatureByte) {
+		std::shared_ptr<MessageContentFactory> MessageContentRegistry::getMessageContentFactoryForSignatureByte(char signatureByte) {
 			mutex.lock();
-			MessageContentFactory* result = nullptr;
+			std::shared_ptr<MessageContentFactory> result = nullptr;
 			if (mappings.find(signatureByte) != mappings.cend()) {
 				result = mappings.find(signatureByte)->second;
 			}

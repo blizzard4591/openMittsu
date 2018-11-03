@@ -5,12 +5,14 @@
 #include "src/protocol/ProtocolSpecs.h"
 #include "src/utility/HexChar.h"
 
+#include <memory>
+
 namespace openmittsu {
 	namespace messages {
 		namespace contact {
 
 			// Register this MessageContent with the MessageContentRegistry
-			bool UserTypingMessageContent::registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_TYPINGNOTIFICATION, new TypedMessageContentFactory<UserTypingMessageContent>());
+			bool UserTypingMessageContent::registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_TYPINGNOTIFICATION, std::make_shared<TypedMessageContentFactory<UserTypingMessageContent>>());
 
 
 			UserTypingMessageContent::UserTypingMessageContent() : ContactMessageContent(), isTyping(false) {

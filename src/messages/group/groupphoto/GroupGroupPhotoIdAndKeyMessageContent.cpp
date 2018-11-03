@@ -9,12 +9,14 @@
 #include "src/utility/ByteArrayConversions.h"
 #include "src/utility/Logging.h"
 
+#include <memory>
+
 namespace openmittsu {
 	namespace messages {
 		namespace group {
 
 			// Register this MessageContent with the MessageContentRegistry
-			bool GroupGroupPhotoIdAndKeyMessageContent::registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_GROUP_PHOTO, new TypedMessageContentFactory<GroupGroupPhotoIdAndKeyMessageContent>());
+			bool GroupGroupPhotoIdAndKeyMessageContent::registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_GROUP_PHOTO, std::make_shared<TypedMessageContentFactory<GroupGroupPhotoIdAndKeyMessageContent>>());
 
 			GroupGroupPhotoIdAndKeyMessageContent::GroupGroupPhotoIdAndKeyMessageContent() : GroupMessageContent(openmittsu::protocol::GroupId(0, 0)), imageId(), encryptionKey(QByteArray(openmittsu::crypto::EncryptionKey::getSizeOfEncryptionKeyInBytes(), 0x00)), sizeInBytes(0) {
 				// Only accessible and used by the MessageContentFactory.

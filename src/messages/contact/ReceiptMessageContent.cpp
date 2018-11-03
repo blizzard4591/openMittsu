@@ -7,12 +7,14 @@
 #include "src/protocol/ProtocolSpecs.h"
 #include "src/utility/HexChar.h"
 
+#include <memory>
+
 namespace openmittsu {
 	namespace messages {
 		namespace contact {
 
 			// Register this MessageContent with the MessageContentRegistry
-			bool ReceiptMessageContent::registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_RECEIPT, new TypedMessageContentFactory<ReceiptMessageContent>());
+			bool ReceiptMessageContent::registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_RECEIPT, std::make_shared<TypedMessageContentFactory<ReceiptMessageContent>>());
 
 
 			ReceiptMessageContent::ReceiptMessageContent() : ContactMessageContent(), messageIds(), receiptType(ReceiptType::RECEIVED) {

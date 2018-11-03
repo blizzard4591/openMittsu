@@ -5,12 +5,14 @@
 #include "src/protocol/ProtocolSpecs.h"
 #include "src/utility/ByteArrayConversions.h"
 
+#include <memory>
+
 namespace openmittsu {
 	namespace messages {
 		namespace group {
 
 			// Register this MessageContent with the MessageContentRegistry
-			bool GroupLeaveMessageContent::registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_GROUP_LEAVE, new TypedMessageContentFactory<GroupLeaveMessageContent>());
+			bool GroupLeaveMessageContent::registrationResult = MessageContentRegistry::getInstance().registerContent(PROTO_MESSAGE_SIGNATURE_GROUP_LEAVE, std::make_shared<TypedMessageContentFactory<GroupLeaveMessageContent>>());
 
 
 			GroupLeaveMessageContent::GroupLeaveMessageContent() : GroupMessageContent(openmittsu::protocol::GroupId(0, 0)), leavingContactId(0) {

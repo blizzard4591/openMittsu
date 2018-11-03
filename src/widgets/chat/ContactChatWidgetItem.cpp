@@ -37,35 +37,35 @@ namespace openmittsu {
 			openmittsu::dataproviders::messages::UserMessageState const messageState = m_contactMessage.getMessageState();
 
 			if (!sendTime.isNull()) {
-				actionSend = new QAction(QString("Sent: %1").arg(sendTime.getTime().toString(QStringLiteral("HH:mm:ss, on dd.MM.yyyy"))), &listMessagesContextMenu);
+				actionSend = new QAction(tr("Sent: %1").arg(sendTime.getTime().toString(QStringLiteral("HH:mm:ss, on dd.MM.yyyy"))), &listMessagesContextMenu);
 			} else {
-				actionSend = new QAction(QString("Sent: -unknown-"), &listMessagesContextMenu);
+				actionSend = new QAction(tr("Sent: -unknown-"), &listMessagesContextMenu);
 			}
 			listMessagesContextMenu.addAction(actionSend);
 			if (!receivedTime.isNull()) {
-				actionReceived = new QAction(QString("Received: %1").arg(receivedTime.getTime().toString(QStringLiteral("HH:mm:ss, on dd.MM.yyyy"))), &listMessagesContextMenu);
+				actionReceived = new QAction(tr("Received: %1").arg(receivedTime.getTime().toString(QStringLiteral("HH:mm:ss, on dd.MM.yyyy"))), &listMessagesContextMenu);
 			} else {
-				actionReceived = new QAction(QString("Received: -unknown-"), &listMessagesContextMenu);
+				actionReceived = new QAction(tr("Received: -unknown-"), &listMessagesContextMenu);
 			}
 			listMessagesContextMenu.addAction(actionReceived);
 			if (!seenTime.isNull()) {
-				actionSeen = new QAction(QString("Seen: %1").arg(seenTime.getTime().toString(QStringLiteral("HH:mm:ss, on dd.MM.yyyy"))), &listMessagesContextMenu);
+				actionSeen = new QAction(tr("Seen: %1").arg(seenTime.getTime().toString(QStringLiteral("HH:mm:ss, on dd.MM.yyyy"))), &listMessagesContextMenu);
 			} else {
-				actionSeen = new QAction(QString("Seen: -unknown-"), &listMessagesContextMenu);
+				actionSeen = new QAction(tr("Seen: -unknown-"), &listMessagesContextMenu);
 			}
 			listMessagesContextMenu.addAction(actionSeen);
 
 
 			if (messageState == openmittsu::dataproviders::messages::UserMessageState::USERACK) {
-				actionAgree = new QAction(QString("Agreed: %1").arg(modifiedTime.getTime().toString(QStringLiteral("HH:mm:ss, on dd.MM.yyyy"))), &listMessagesContextMenu);
+				actionAgree = new QAction(tr("Agreed: %1").arg(modifiedTime.getTime().toString(QStringLiteral("HH:mm:ss, on dd.MM.yyyy"))), &listMessagesContextMenu);
 			} else if (messageState == openmittsu::dataproviders::messages::UserMessageState::USERDEC) {
-				actionAgree = new QAction(QString("Disagreed: %1").arg(modifiedTime.getTime().toString(QStringLiteral("HH:mm:ss, on dd.MM.yyyy"))), &listMessagesContextMenu);
+				actionAgree = new QAction(tr("Disagreed: %1").arg(modifiedTime.getTime().toString(QStringLiteral("HH:mm:ss, on dd.MM.yyyy"))), &listMessagesContextMenu);
 			} else {
 				actionAgree = new QAction(tr("Not agreed/disagreed"), &listMessagesContextMenu);
 			}
 			listMessagesContextMenu.addAction(actionAgree);
 
-			actionMessageId = new QAction(QString("Message ID: #%1").arg(m_contactMessage.getMessageId().toQString()), &listMessagesContextMenu);
+			actionMessageId = new QAction(tr("Message ID: #%1").arg(m_contactMessage.getMessageId().toQString()), &listMessagesContextMenu);
 			listMessagesContextMenu.addAction(actionMessageId);
 
 			actionCopy = new QAction(tr("Copy to Clipboard"), &listMessagesContextMenu);

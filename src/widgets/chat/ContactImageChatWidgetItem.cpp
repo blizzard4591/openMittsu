@@ -15,7 +15,7 @@
 namespace openmittsu {
 	namespace widgets {
 
-		ContactImageChatWidgetItem::ContactImageChatWidgetItem(openmittsu::dataproviders::BackedContactMessage const& message, QWidget* parent) : ContactChatWidgetItem(message, parent), m_lblImage(new openmittsu::widgets::ClickAwareLabel()), m_lblCaption(new QLabel()) {
+		ContactImageChatWidgetItem::ContactImageChatWidgetItem(openmittsu::dataproviders::BackedContactMessage const& message, QWidget* parent) : ContactMediaChatWidgetItem(message, parent), m_lblImage(new openmittsu::widgets::ClickAwareLabel()), m_lblCaption(new QLabel()) {
 			if (message.getMessageType() != openmittsu::dataproviders::messages::ContactMessageType::IMAGE) {
 				throw openmittsu::exceptions::InternalErrorException() << "Can not handle message with type " << openmittsu::dataproviders::messages::ContactMessageTypeHelper::toString(message.getMessageType()) << ".";
 			}
@@ -65,6 +65,19 @@ namespace openmittsu {
 				clipboard->setPixmap(pixmap);
 			} else {
 				clipboard->setPixmap(image.getPixmapWithErrorMessage(500, 500));
+			}
+		}
+
+		QString ContactImageChatWidgetItem::getFileExtension() const {
+			return QStringLiteral("jpg");
+		}
+
+		bool ContactImageChatWidgetItem::saveMediaToFile(QString const& filename) const {
+			openmittsu::database::MediaFileItem const image = m_contactMessage.getContentAsMediaFile();
+			if (image.isAvailable()) {
+				return MediaChatWidgetItem::saveMediaToFile(filename, image.getData());
+			} else {
+				return false;
 			}
 		}
 

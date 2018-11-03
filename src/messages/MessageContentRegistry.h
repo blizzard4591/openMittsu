@@ -2,6 +2,7 @@
 #define OPENMITTSU_MESSAGES_MESSAGECONTENTREGISTRY_H_
 
 #include <unordered_map>
+#include <memory>
 #include <mutex>
 
 namespace openmittsu {
@@ -10,14 +11,14 @@ namespace openmittsu {
 
 		class MessageContentRegistry {
 		public:
-			bool registerContent(char signatureByte, MessageContentFactory* messageContentFactory);
+			bool registerContent(char signatureByte, std::shared_ptr<MessageContentFactory> const& messageContentFactory);
 
-			MessageContentFactory* getMessageContentFactoryForSignatureByte(char signatureByte);
+			std::shared_ptr<MessageContentFactory> getMessageContentFactoryForSignatureByte(char signatureByte);
 
 			static MessageContentRegistry& getInstance();
 		private:
 			std::mutex mutex;
-			std::unordered_map<char, MessageContentFactory*> mappings;
+			std::unordered_map<char, std::shared_ptr<MessageContentFactory>> mappings;
 
 			MessageContentRegistry();
 			MessageContentRegistry(MessageContentRegistry const& other);

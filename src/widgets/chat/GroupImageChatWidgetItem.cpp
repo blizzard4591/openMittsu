@@ -13,7 +13,7 @@
 namespace openmittsu {
 	namespace widgets {
 
-		GroupImageChatWidgetItem::GroupImageChatWidgetItem(openmittsu::dataproviders::BackedGroupMessage const& message, QWidget* parent) : GroupChatWidgetItem(message, parent), m_lblImage(new openmittsu::widgets::ClickAwareLabel()), m_lblCaption(new QLabel()) {
+		GroupImageChatWidgetItem::GroupImageChatWidgetItem(openmittsu::dataproviders::BackedGroupMessage const& message, QWidget* parent) : GroupMediaChatWidgetItem(message, parent), m_lblImage(new openmittsu::widgets::ClickAwareLabel()), m_lblCaption(new QLabel()) {
 			if (message.getMessageType() != openmittsu::dataproviders::messages::GroupMessageType::IMAGE) {
 				throw openmittsu::exceptions::InternalErrorException() << "Can not handle message with type " << openmittsu::dataproviders::messages::GroupMessageTypeHelper::toString(message.getMessageType()) << ".";
 			}
@@ -63,6 +63,19 @@ namespace openmittsu {
 				clipboard->setPixmap(pixmap);
 			} else {
 				clipboard->setPixmap(image.getPixmapWithErrorMessage(500, 500));
+			}
+		}
+
+		QString GroupImageChatWidgetItem::getFileExtension() const {
+			return QStringLiteral("jpg");
+		}
+
+		bool GroupImageChatWidgetItem::saveMediaToFile(QString const& filename) const {
+			openmittsu::database::MediaFileItem const image = m_groupMessage.getContentAsMediaFile();
+			if (image.isAvailable()) {
+				return MediaChatWidgetItem::saveMediaToFile(filename, image.getData());
+			} else {
+				return false;
 			}
 		}
 
