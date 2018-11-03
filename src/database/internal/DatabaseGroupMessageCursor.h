@@ -26,12 +26,18 @@ namespace openmittsu {
 				virtual openmittsu::protocol::GroupId const& getGroupId() const override;
 				virtual std::shared_ptr<openmittsu::dataproviders::messages::GroupMessage> getMessage() const override;
 				virtual std::shared_ptr<DatabaseReadonlyGroupMessage> getReadonlyMessage() const;
+
+				static void deleteMessagesByAge(InternalDatabaseInterface* database, openmittsu::protocol::GroupId const& group, bool olderThanOrNewerThan, openmittsu::protocol::MessageTime const& timePoint);
+				static void deleteMessagesByCount(InternalDatabaseInterface* database, openmittsu::protocol::GroupId const& group, bool oldestOrNewest, int count);
 			protected:
 				virtual QString getWhereString() const override;
 				virtual void bindWhereStringValues(QSqlQuery& query) const override;
 				virtual QString getTableName() const override;
+				virtual QString getMessageTypeField() const override;
 			private:
 				openmittsu::protocol::GroupId const m_group;
+
+				static void deletionHelper(InternalDatabaseInterface* database, openmittsu::protocol::GroupId const& group, QString const& whereAndOrderQueryPart);
 			};
 
 		}

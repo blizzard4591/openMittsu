@@ -1,8 +1,9 @@
 #include "src/widgets/chat/ContactChatWidgetItem.h"
 
-#include <QMenu>
 #include <QAction>
 #include <QClipboard>
+#include <QMenu>
+#include <QMessageBox>
 
 #include "src/utility/QObjectConnectionMacro.h"
 
@@ -27,6 +28,7 @@ namespace openmittsu {
 			QAction* actionAgree = nullptr;
 			QAction* actionMessageId = nullptr;
 			QAction* actionCopy = nullptr;
+			QAction* actionDelete = nullptr;
 
 			openmittsu::protocol::MessageTime const sendTime = m_contactMessage.getSentAt();
 			openmittsu::protocol::MessageTime const receivedTime = m_contactMessage.getReceivedAt();
@@ -59,15 +61,18 @@ namespace openmittsu {
 			} else if (messageState == openmittsu::dataproviders::messages::UserMessageState::USERDEC) {
 				actionAgree = new QAction(QString("Disagreed: %1").arg(modifiedTime.getTime().toString(QStringLiteral("HH:mm:ss, on dd.MM.yyyy"))), &listMessagesContextMenu);
 			} else {
-				actionAgree = new QAction(QString("Not agreed/disagreed"), &listMessagesContextMenu);
+				actionAgree = new QAction(tr("Not agreed/disagreed"), &listMessagesContextMenu);
 			}
 			listMessagesContextMenu.addAction(actionAgree);
 
 			actionMessageId = new QAction(QString("Message ID: #%1").arg(m_contactMessage.getMessageId().toQString()), &listMessagesContextMenu);
 			listMessagesContextMenu.addAction(actionMessageId);
 
-			actionCopy = new QAction(QString("Copy to Clipboard"), &listMessagesContextMenu);
+			actionCopy = new QAction(tr("Copy to Clipboard"), &listMessagesContextMenu);
 			listMessagesContextMenu.addAction(actionCopy);
+
+			actionDelete = new QAction(tr("Delete Message"), &listMessagesContextMenu);
+			listMessagesContextMenu.addAction(actionDelete);
 
 			appendCustomContextMenuEntries(pos, listMessagesContextMenu);
 
@@ -84,6 +89,11 @@ namespace openmittsu {
 						//
 					} else if (selectedItem == actionCopy) {
 						copyToClipboard();
+					} else if (selectedItem == actionDelete) {
+						auto const button = QMessageBox::question(this, tr("Delete selected message?"), tr("Are you sure you want to delete this message?"));
+						if (button == QMessageBox::Yes) {
+							m_contactMessage.deleteMessage();
+						}
 					}
 				}
 			}

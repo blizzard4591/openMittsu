@@ -175,6 +175,14 @@ namespace openmittsu {
 			virtual void setContactFeatureLevelBatch(ContactToFeatureLevelMap const& featureLevels) = 0;
 			virtual GroupToTitleMap getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const = 0;
 
+			// Deleting Messages
+			virtual void deleteContactMessageByUuid(openmittsu::protocol::ContactId const& contact, QString const& uuid) = 0;
+			virtual void deleteContactMessagesByAge(openmittsu::protocol::ContactId const& contact, bool olderThanOrNewerThan, openmittsu::protocol::MessageTime const& timePoint) = 0;
+			virtual void deleteContactMessagesByCount(openmittsu::protocol::ContactId const& contact, bool oldestOrNewest, int count) = 0;
+			virtual void deleteGroupMessageByUuid(openmittsu::protocol::GroupId const& group, QString const& uuid) = 0;
+			virtual void deleteGroupMessagesByAge(openmittsu::protocol::GroupId const& group, bool olderThanOrNewerThan, openmittsu::protocol::MessageTime const& timePoint) = 0;
+			virtual void deleteGroupMessagesByCount(openmittsu::protocol::GroupId const& group, bool oldestOrNewest, int count) = 0;
+
 			// Options
 			virtual openmittsu::database::OptionNameToValueMap getOptions() = 0;
 			virtual void setOptions(openmittsu::database::OptionNameToValueMap const& options) = 0;
@@ -186,6 +194,7 @@ namespace openmittsu {
 			void receivedNewContactMessage(openmittsu::protocol::ContactId const& identity);
 			void receivedNewGroupMessage(openmittsu::protocol::GroupId const& group);
 			void messageChanged(QString const& uuid);
+			void messageDeleted(QString const& uuid);
 			void haveQueuedMessages();
 			void contactStartedTyping(openmittsu::protocol::ContactId const& identity);
 			void contactStoppedTyping(openmittsu::protocol::ContactId const& identity);

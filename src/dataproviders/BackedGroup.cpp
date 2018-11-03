@@ -103,5 +103,17 @@ namespace openmittsu {
 			return *m_database.getGroupMessage(m_groupId, uuid);
 		}
 
+		void BackedGroup::deleteMessageByUuid(QString const& uuid) {
+			m_database.deleteGroupMessageByUuid(m_groupId, uuid);
+		}
+
+		void BackedGroup::deleteMessagesByAge(bool olderThanOrNewerThan, openmittsu::protocol::MessageTime const& timePoint) {
+			m_database.deleteGroupMessagesByAge(m_groupId, olderThanOrNewerThan, timePoint);
+		}
+
+		void BackedGroup::deleteMessagesByCount(bool oldestOrNewest, int count) {
+			m_database.deleteGroupMessagesByCount(m_groupId, oldestOrNewest, count);
+		}
+
 	}
 }

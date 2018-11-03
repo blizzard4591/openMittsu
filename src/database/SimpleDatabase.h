@@ -217,7 +217,16 @@ namespace openmittsu {
 			//virtual void storeNewGroup(openmittsu::protocol::GroupId const& groupId, QString const& name, openmittsu::protocol::MessageTime const& createdAt, QSet<openmittsu::protocol::ContactId> const& members, bool isDeleted, bool isAwaitingSync);
 			virtual void storeNewGroup(QVector<NewGroupData> const& newGroupData) override;
 
+			// Deleting Messages
+			virtual void deleteContactMessageByUuid(openmittsu::protocol::ContactId const& contact, QString const& uuid) override;
+			virtual void deleteContactMessagesByAge(openmittsu::protocol::ContactId const& contact, bool olderThanOrNewerThan, openmittsu::protocol::MessageTime const& timePoint) override;
+			virtual void deleteContactMessagesByCount(openmittsu::protocol::ContactId const& contact, bool oldestOrNewest, int count) override;
+			virtual void deleteGroupMessageByUuid(openmittsu::protocol::GroupId const& group, QString const& uuid) override;
+			virtual void deleteGroupMessagesByAge(openmittsu::protocol::GroupId const& group, bool olderThanOrNewerThan, openmittsu::protocol::MessageTime const& timePoint) override;
+			virtual void deleteGroupMessagesByCount(openmittsu::protocol::GroupId const& group, bool oldestOrNewest, int count) override;
+
 			virtual void announceMessageChanged(QString const& uuid) override;
+			virtual void announceMessageDeleted(QString const& uuid) override;
 			virtual void announceContactChanged(openmittsu::protocol::ContactId const& contact) override;
 			virtual void announceGroupChanged(openmittsu::protocol::GroupId const& group) override;
 			virtual void announceNewMessage(openmittsu::protocol::ContactId const& contact, QString const& messageUuid) override;
@@ -234,6 +243,7 @@ namespace openmittsu {
 			virtual MediaFileItem getMediaItem(QString const& uuid, MediaFileType const& fileType) const override;
 			virtual void insertMediaItem(QString const& uuid, QByteArray const& data, MediaFileType const& fileType) override;
 			virtual void removeMediaItem(QString const& uuid, MediaFileType const& fileType) override;
+			virtual void removeAllMediaItems(QString const& uuid) override;
 		private:
 			QSqlDatabase database;
 			QString const m_driverNameCrypto;

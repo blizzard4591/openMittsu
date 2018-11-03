@@ -583,6 +583,257 @@ TEST_F(DatabaseTestFramework, groupMessages) {
 	}
 }
 
+//void deleteMessageByUuid(QString const& uuid);
+TEST_F(DatabaseTestFramework, contactMessageDeletionByUuid) {
+	QHash<QString, ContactMessageInfo> messages;
+	openmittsu::protocol::ContactId contactA(0);
+	openmittsu::protocol::ContactId contactB(0);
+	setupContactsAndMessages(messages, contactA, contactB, 100);
+
+	bool found = false;
+	auto it = messages.constBegin();
+	auto const end = messages.constEnd();
+	for (; it != end; ++it) {
+		if ((it.value().messageTime == 50) && (it.value().contact == contactA)) {
+			ASSERT_FALSE(found);
+			found = true;
+			db->deleteContactMessageByUuid(contactA, it.key());
+		}
+	}
+	ASSERT_TRUE(found);
+
+	openmittsu::database::internal::DatabaseContactMessageCursor cursorA = db->getMessageCursor(contactA);
+	openmittsu::database::internal::DatabaseContactMessageCursor cursorB = db->getMessageCursor(contactB);
+	it = messages.constBegin();
+	for (; it != end; ++it) {
+		if (it.value().contact == contactA) {
+			if (it.value().messageTime == 50) {
+				ASSERT_FALSE(cursorA.seekByUuid(it.key()));
+			} else {
+				ASSERT_TRUE(cursorA.seekByUuid(it.key()));
+			}
+		} else {
+			ASSERT_TRUE(cursorB.seekByUuid(it.key()));
+		}
+	}
+}
+
+TEST_F(DatabaseTestFramework, groupMessageDeletionByUuid) {
+	QHash<QString, GroupMessageInfo> messages;
+	openmittsu::protocol::GroupId groupA(0, 0);
+	openmittsu::protocol::GroupId groupB(0, 0);
+	setupGroupsAndMessages(messages, groupA, groupB, 100);
+
+	bool found = false;
+	auto it = messages.constBegin();
+	auto const end = messages.constEnd();
+	for (; it != end; ++it) {
+		if ((it.value().messageTime == 50) && (it.value().group == groupA)) {
+			ASSERT_FALSE(found);
+			found = true;
+			db->deleteGroupMessageByUuid(groupA, it.key());
+		}
+	}
+	ASSERT_TRUE(found);
+
+	openmittsu::database::internal::DatabaseGroupMessageCursor cursorA = db->getMessageCursor(groupA);
+	openmittsu::database::internal::DatabaseGroupMessageCursor cursorB = db->getMessageCursor(groupB);
+	it = messages.constBegin();
+	for (; it != end; ++it) {
+		if (it.value().group == groupA) {
+			if (it.value().messageTime == 50) {
+				ASSERT_FALSE(cursorA.seekByUuid(it.key()));
+			} else {
+				ASSERT_TRUE(cursorA.seekByUuid(it.key()));
+			}
+		} else {
+			ASSERT_TRUE(cursorB.seekByUuid(it.key()));
+		}
+	}
+}
+
+// void deleteMessagesByAge(bool olderThanOrNewerThan, qint64 age);
+TEST_F(DatabaseTestFramework, contactMessageDeletionByAge) {
+	QHash<QString, ContactMessageInfo> messages;
+	openmittsu::protocol::ContactId contactA(0);
+	openmittsu::protocol::ContactId contactB(0);
+	setupContactsAndMessages(messages, contactA, contactB, 100);
+
+	db->deleteContactMessagesByAge(contactA, true, openmittsu::protocol::MessageTime::fromDatabase(25));
+	{
+		openmittsu::database::internal::DatabaseContactMessageCursor cursorA = db->getMessageCursor(contactA);
+		openmittsu::database::internal::DatabaseContactMessageCursor cursorB = db->getMessageCursor(contactB);
+		auto it = messages.constBegin();
+		auto const end = messages.constEnd();
+		for (; it != end; ++it) {
+			if (it.value().contact == contactA) {
+				if (it.value().messageTime <= 25) {
+					ASSERT_FALSE(cursorA.seekByUuid(it.key()));
+				} else {
+					ASSERT_TRUE(cursorA.seekByUuid(it.key()));
+				}
+			} else {
+				ASSERT_TRUE(cursorB.seekByUuid(it.key()));
+			}
+		}
+	}
+
+	db->deleteContactMessagesByAge(contactA, false, openmittsu::protocol::MessageTime::fromDatabase(75));
+	{
+		openmittsu::database::internal::DatabaseContactMessageCursor cursorA = db->getMessageCursor(contactA);
+		openmittsu::database::internal::DatabaseContactMessageCursor cursorB = db->getMessageCursor(contactB);
+		auto it = messages.constBegin();
+		auto const end = messages.constEnd();
+		for (; it != end; ++it) {
+			if (it.value().contact == contactA) {
+				if ((it.value().messageTime <= 25) || (it.value().messageTime >= 75)) {
+					ASSERT_FALSE(cursorA.seekByUuid(it.key()));
+				} else {
+					ASSERT_TRUE(cursorA.seekByUuid(it.key()));
+				}
+			} else {
+				ASSERT_TRUE(cursorB.seekByUuid(it.key()));
+			}
+		}
+	}
+}
+
+TEST_F(DatabaseTestFramework, groupMessageDeletionByAge) {
+	QHash<QString, GroupMessageInfo> messages;
+	openmittsu::protocol::GroupId groupA(0, 0);
+	openmittsu::protocol::GroupId groupB(0, 0);
+	setupGroupsAndMessages(messages, groupA, groupB, 100);
+
+	db->deleteGroupMessagesByAge(groupA, true, openmittsu::protocol::MessageTime::fromDatabase(25));
+	{
+		openmittsu::database::internal::DatabaseGroupMessageCursor cursorA = db->getMessageCursor(groupA);
+		openmittsu::database::internal::DatabaseGroupMessageCursor cursorB = db->getMessageCursor(groupB);
+		auto it = messages.constBegin();
+		auto const end = messages.constEnd();
+		for (; it != end; ++it) {
+			if (it.value().group == groupA) {
+				if (it.value().messageTime <= 25) {
+					ASSERT_FALSE(cursorA.seekByUuid(it.key()));
+				} else {
+					ASSERT_TRUE(cursorA.seekByUuid(it.key()));
+				}
+			} else {
+				ASSERT_TRUE(cursorB.seekByUuid(it.key()));
+			}
+		}
+	}
+
+	db->deleteGroupMessagesByAge(groupA, false, openmittsu::protocol::MessageTime::fromDatabase(75));
+	{
+		openmittsu::database::internal::DatabaseGroupMessageCursor cursorA = db->getMessageCursor(groupA);
+		openmittsu::database::internal::DatabaseGroupMessageCursor cursorB = db->getMessageCursor(groupB);
+		auto it = messages.constBegin();
+		auto const end = messages.constEnd();
+		for (; it != end; ++it) {
+			if (it.value().group == groupA) {
+				if ((it.value().messageTime <= 25) || (it.value().messageTime >= 75)) {
+					ASSERT_FALSE(cursorA.seekByUuid(it.key()));
+				} else {
+					ASSERT_TRUE(cursorA.seekByUuid(it.key()));
+				}
+			} else {
+				ASSERT_TRUE(cursorB.seekByUuid(it.key()));
+			}
+		}
+	}
+}
+
+//void deleteMessagesByCount(bool oldestOrNewest, int count);
+TEST_F(DatabaseTestFramework, contactMessageDeletionByCount) {
+	QHash<QString, ContactMessageInfo> messages;
+	openmittsu::protocol::ContactId contactA(0);
+	openmittsu::protocol::ContactId contactB(0);
+	setupContactsAndMessages(messages, contactA, contactB, 100);
+
+	db->deleteContactMessagesByCount(contactA, true, 25);
+	{
+		openmittsu::database::internal::DatabaseContactMessageCursor cursorA = db->getMessageCursor(contactA);
+		openmittsu::database::internal::DatabaseContactMessageCursor cursorB = db->getMessageCursor(contactB);
+		auto it = messages.constBegin();
+		auto const end = messages.constEnd();
+		for (; it != end; ++it) {
+			if (it.value().contact == contactA) {
+				if (it.value().messageTime <= 25) {
+					ASSERT_FALSE(cursorA.seekByUuid(it.key()));
+				} else {
+					ASSERT_TRUE(cursorA.seekByUuid(it.key()));
+				}
+			} else {
+				ASSERT_TRUE(cursorB.seekByUuid(it.key()));
+			}
+		}
+	}
+
+	db->deleteContactMessagesByCount(contactA, false, 25);
+	{
+		openmittsu::database::internal::DatabaseContactMessageCursor cursorA = db->getMessageCursor(contactA);
+		openmittsu::database::internal::DatabaseContactMessageCursor cursorB = db->getMessageCursor(contactB);
+		auto it = messages.constBegin();
+		auto const end = messages.constEnd();
+		for (; it != end; ++it) {
+			if (it.value().contact == contactA) {
+				if ((it.value().messageTime <= 25) || (it.value().messageTime > 75)) {
+					ASSERT_FALSE(cursorA.seekByUuid(it.key()));
+				} else {
+					ASSERT_TRUE(cursorA.seekByUuid(it.key()));
+				}
+			} else {
+				ASSERT_TRUE(cursorB.seekByUuid(it.key()));
+			}
+		}
+	}
+}
+
+TEST_F(DatabaseTestFramework, groupMessageDeletionByCount) {
+	QHash<QString, GroupMessageInfo> messages;
+	openmittsu::protocol::GroupId groupA(0, 0);
+	openmittsu::protocol::GroupId groupB(0, 0);
+	setupGroupsAndMessages(messages, groupA, groupB, 100);
+
+	db->deleteGroupMessagesByCount(groupA, true, 25);
+	{
+		openmittsu::database::internal::DatabaseGroupMessageCursor cursorA = db->getMessageCursor(groupA);
+		openmittsu::database::internal::DatabaseGroupMessageCursor cursorB = db->getMessageCursor(groupB);
+		auto it = messages.constBegin();
+		auto const end = messages.constEnd();
+		for (; it != end; ++it) {
+			if (it.value().group == groupA) {
+				if (it.value().messageTime <= 25) {
+					ASSERT_FALSE(cursorA.seekByUuid(it.key()));
+				} else {
+					ASSERT_TRUE(cursorA.seekByUuid(it.key()));
+				}
+			} else {
+				ASSERT_TRUE(cursorB.seekByUuid(it.key()));
+			}
+		}
+	}
+
+	db->deleteGroupMessagesByCount(groupA, false, 25);
+	{
+		openmittsu::database::internal::DatabaseGroupMessageCursor cursorA = db->getMessageCursor(groupA);
+		openmittsu::database::internal::DatabaseGroupMessageCursor cursorB = db->getMessageCursor(groupB);
+		auto it = messages.constBegin();
+		auto const end = messages.constEnd();
+		for (; it != end; ++it) {
+			if (it.value().group == groupA) {
+				if ((it.value().messageTime <= 25) || (it.value().messageTime > 75)) {
+					ASSERT_FALSE(cursorA.seekByUuid(it.key()));
+				} else {
+					ASSERT_TRUE(cursorA.seekByUuid(it.key()));
+				}
+			} else {
+				ASSERT_TRUE(cursorB.seekByUuid(it.key()));
+			}
+		}
+	}
+}
+
 TEST_F(DatabaseTestFramework, settings) {
 	QString const optionNameA = QStringLiteral("optionNameA");
 	QString const optionValueA = QStringLiteral("12.345");

@@ -56,6 +56,10 @@ namespace openmittsu {
 			bool sendTextMessage(QString const& text);
 			bool sendImageMessage(QByteArray const& image, QString const& caption);
 			bool sendLocationMessage(openmittsu::utility::Location const& location);
+
+			virtual void deleteMessageByUuid(QString const& uuid) override;
+			virtual void deleteMessagesByAge(bool olderThanOrNewerThan, openmittsu::protocol::MessageTime const& timePoint) override;
+			virtual void deleteMessagesByCount(bool oldestOrNewest, int count) override;
 		signals:
 			void groupDataChanged();
 			void newMessageAvailable(QString const& uuid);

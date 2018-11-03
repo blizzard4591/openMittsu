@@ -49,6 +49,7 @@ namespace openmittsu {
 			QString const& getCaption() const;
 
 			virtual void setIsSeen() = 0;
+			virtual void deleteMessage();
 
 			bool operator <(BackedMessage const& other) const;
 			bool operator <=(BackedMessage const& other) const;

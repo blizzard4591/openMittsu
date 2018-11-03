@@ -12,7 +12,7 @@ namespace openmittsu {
 
 			using namespace openmittsu::dataproviders::messages;
 
-			DatabaseMessageCursor::DatabaseMessageCursor(InternalDatabaseInterface* database) : m_database(database), m_messageId(0), m_isMessageIdValid(false) {
+			DatabaseMessageCursor::DatabaseMessageCursor(InternalDatabaseInterface* database) : m_database(database), m_messageId(0), m_isMessageIdValid(false), m_messageType() {
 				//
 			}
 
@@ -34,7 +34,10 @@ namespace openmittsu {
 
 			bool DatabaseMessageCursor::seek(openmittsu::protocol::MessageId const& messageId) {
 				QSqlQuery query(m_database->getQueryObject());
-				query.prepare(QStringLiteral("SELECT `apiid`, `uid`, `sort_by` FROM `%1` WHERE %2 AND `apiid` = :apiid;").arg(getTableName()).arg(getWhereString()));
+				QString const queryString = QStringLiteral("SELECT `apiid`, `uid`, `sort_by`, `%3` AS `messageType` FROM `%1` WHERE %2 AND `apiid` = :apiid;").arg(getTableName()).arg(getWhereString()).arg(getMessageTypeField());
+				if (!query.prepare(queryString)) {
+					throw openmittsu::exceptions::InternalErrorException() << "Could not prepare message seek query. SQL error: " << query.lastError().text().toStdString();
+				}
 				query.bindValue(QStringLiteral(":apiid"), QVariant(messageId.toQString()));
 				bindWhereStringValues(query);
 
@@ -47,6 +50,7 @@ namespace openmittsu {
 					m_messageId = openmittsu::protocol::MessageId(query.value(QStringLiteral("apiid")).toString());
 					m_uid = query.value(QStringLiteral("uid")).toString();
 					m_sortByValue = query.value(QStringLiteral("sort_by")).toLongLong();
+					m_messageType = query.value(QStringLiteral("messageType")).toString();
 					return true;
 				} else {
 					m_isMessageIdValid = false;
@@ -56,7 +60,10 @@ namespace openmittsu {
 
 			bool DatabaseMessageCursor::seekByUuid(QString const& uuid) {
 				QSqlQuery query(m_database->getQueryObject());
-				query.prepare(QStringLiteral("SELECT `apiid`, `uid`, `sort_by` FROM `%1` WHERE %2 AND `uid` = :uid;").arg(getTableName()).arg(getWhereString()));
+				QString const queryString = QStringLiteral("SELECT `apiid`, `uid`, `sort_by`, `%3` AS `messageType` FROM `%1` WHERE %2 AND `uid` = :uid;").arg(getTableName()).arg(getWhereString()).arg(getMessageTypeField());
+				if (!query.prepare(queryString)) {
+					throw openmittsu::exceptions::InternalErrorException() << "Could not prepare message seekByUuid query. SQL error: " << query.lastError().text().toStdString();
+				}
 				query.bindValue(QStringLiteral(":uid"), QVariant(uuid));
 				bindWhereStringValues(query);
 
@@ -69,6 +76,7 @@ namespace openmittsu {
 					m_messageId = openmittsu::protocol::MessageId(query.value(QStringLiteral("apiid")).toString());
 					m_uid = query.value(QStringLiteral("uid")).toString();
 					m_sortByValue = query.value(QStringLiteral("sort_by")).toLongLong();
+					m_messageType = query.value(QStringLiteral("messageType")).toString();
 					return true;
 				} else {
 					m_isMessageIdValid = false;
@@ -94,7 +102,7 @@ namespace openmittsu {
 #if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)) && (QT_VERSION < QT_VERSION_CHECK(5, 10, 1))
 				// Check in two steps to mitigate a cool bug in the query engine.
 				QSqlQuery query(m_database->getQueryObject());
-				query.prepare(QStringLiteral("SELECT `apiid`, `uid`, `sort_by` FROM `%1` WHERE (%2) AND (((`sort_by` = :sortByValue) AND (`uid` %3 :uid))) ORDER BY `sort_by` %4, `uid` %4 LIMIT 1;").arg(getTableName()).arg(getWhereString()).arg(sortOrderSign).arg(sortOrder));
+				query.prepare(QStringLiteral("SELECT `apiid`, `uid`, `sort_by`, `%5` AS `messageType` FROM `%1` WHERE (%2) AND (((`sort_by` = :sortByValue) AND (`uid` %3 :uid))) ORDER BY `sort_by` %4, `uid` %4 LIMIT 1;").arg(getTableName()).arg(getWhereString()).arg(sortOrderSign).arg(sortOrder).arg(getMessageTypeField()));
 				bindWhereStringValues(query);
 				query.bindValue(QStringLiteral(":sortByValue"), QVariant(m_sortByValue));
 				query.bindValue(QStringLiteral(":uid"), QVariant(m_uid));
@@ -108,9 +116,10 @@ namespace openmittsu {
 					m_messageId = openmittsu::protocol::MessageId(query.value(QStringLiteral("apiid")).toString());
 					m_uid = query.value(QStringLiteral("uid")).toString();
 					m_sortByValue = query.value(QStringLiteral("sort_by")).toLongLong();
+					m_messageType = query.value(QStringLiteral("messageType")).toString();
 					return true;
 				} else {
-					query.prepare(QStringLiteral("SELECT `apiid`, `uid`, `sort_by` FROM `%1` WHERE (%2) AND ((`sort_by` %3 :sortByValue)) ORDER BY `sort_by` %4, `uid` %4 LIMIT 1;").arg(getTableName()).arg(getWhereString()).arg(sortOrderSign).arg(sortOrder));
+					query.prepare(QStringLiteral("SELECT `apiid`, `uid`, `sort_by`, `%5` AS `messageType` FROM `%1` WHERE (%2) AND ((`sort_by` %3 :sortByValue)) ORDER BY `sort_by` %4, `uid` %4 LIMIT 1;").arg(getTableName()).arg(getWhereString()).arg(sortOrderSign).arg(sortOrder).arg(getMessageTypeField()));
 					bindWhereStringValues(query);
 					query.bindValue(QStringLiteral(":sortByValue"), QVariant(m_sortByValue));
 
@@ -123,6 +132,7 @@ namespace openmittsu {
 						m_messageId = openmittsu::protocol::MessageId(query.value(QStringLiteral("apiid")).toString());
 						m_uid = query.value(QStringLiteral("uid")).toString();
 						m_sortByValue = query.value(QStringLiteral("sort_by")).toLongLong();
+						m_messageType = query.value(QStringLiteral("messageType")).toString();
 						return true;
 					} else {
 						return false;
@@ -130,7 +140,7 @@ namespace openmittsu {
 				}
 #else
 				QSqlQuery query(m_database->getQueryObject());
-				query.prepare(QStringLiteral("SELECT `apiid`, `uid`, `sort_by` FROM `%1` WHERE %2 AND ((`sort_by` %3 :sortByValue) OR ((`sort_by` = :sortByValue) AND (`uid` %3 :uid))) ORDER BY `sort_by` %4, `uid` %4 LIMIT 1;").arg(getTableName()).arg(getWhereString()).arg(sortOrderSign).arg(sortOrder));
+				query.prepare(QStringLiteral("SELECT `apiid`, `uid`, `sort_by`, `%5` AS `messageType` FROM `%1` WHERE %2 AND ((`sort_by` %3 :sortByValue) OR ((`sort_by` = :sortByValue) AND (`uid` %3 :uid))) ORDER BY `sort_by` %4, `uid` %4 LIMIT 1;").arg(getTableName()).arg(getWhereString()).arg(sortOrderSign).arg(sortOrder).arg(getMessageTypeField()));
 				bindWhereStringValues(query);
 				query.bindValue(QStringLiteral(":sortByValue"), QVariant(m_sortByValue));
 				query.bindValue(QStringLiteral(":uid"), QVariant(m_uid));
@@ -144,6 +154,7 @@ namespace openmittsu {
 					m_messageId = openmittsu::protocol::MessageId(query.value(QStringLiteral("apiid")).toString());
 					m_uid = query.value(QStringLiteral("uid")).toString();
 					m_sortByValue = query.value(QStringLiteral("sort_by")).toLongLong();
+					m_messageType = query.value(QStringLiteral("messageType")).toString();
 					return true;
 				} else {
 					return false;
@@ -160,7 +171,10 @@ namespace openmittsu {
 				}
 
 				QSqlQuery query(m_database->getQueryObject());
-				query.prepare(QStringLiteral("SELECT `apiid`, `uid`, `sort_by` FROM `%1` WHERE %2 ORDER BY `sort_by` %3, `uid` %3 LIMIT 1;").arg(getTableName()).arg(getWhereString()).arg(sortOrder));
+				QString const queryString = QStringLiteral("SELECT `apiid`, `uid`, `sort_by`, `%4` AS `messageType` FROM `%1` WHERE %2 ORDER BY `sort_by` %3, `uid` %3 LIMIT 1;").arg(getTableName()).arg(getWhereString()).arg(sortOrder).arg(getMessageTypeField());
+				if (!query.prepare(queryString)) {
+					throw openmittsu::exceptions::InternalErrorException() << "Could not prepare message firstOrLastMessageId query. SQL error: " << query.lastError().text().toStdString();
+				}
 				bindWhereStringValues(query);
 
 				if (!query.exec() || !query.isSelect()) {
@@ -172,6 +186,7 @@ namespace openmittsu {
 					m_messageId = openmittsu::protocol::MessageId(query.value(QStringLiteral("apiid")).toString());
 					m_uid = query.value(QStringLiteral("uid")).toString();
 					m_sortByValue = query.value(QStringLiteral("sort_by")).toLongLong();
+					m_messageType = query.value(QStringLiteral("messageType")).toString();
 					return true;
 				} else {
 					return false;
@@ -194,6 +209,26 @@ namespace openmittsu {
 				}
 
 				return result;
+			}
+
+			void DatabaseMessageCursor::deleteMessage(bool doAnnounce) {
+				if (!m_isMessageIdValid) {
+					throw openmittsu::exceptions::InternalErrorException() << "Could not execute message deletion query for invalid message!";
+				}
+
+				getDatabase()->removeAllMediaItems(getMessageUuid());
+
+				QSqlQuery query(getDatabase()->getQueryObject());
+				query.prepare(QStringLiteral("DELETE FROM `%1` WHERE %2 AND `uid` = :uid;").arg(getTableName()).arg(getWhereString()));
+				bindWhereStringValues(query);
+				query.bindValue(QStringLiteral(":uid"), QVariant(getMessageUuid()));
+				if (!query.exec()) {
+					throw openmittsu::exceptions::InternalErrorException() << "Could not execute message deletion query for table " << getTableName().toStdString() << ". Query error: " << query.lastError().text().toStdString();
+				}
+				if (doAnnounce) {
+					getDatabase()->announceMessageDeleted(getMessageUuid());
+				}
+				m_isMessageIdValid = false;
 			}
 
 			bool DatabaseMessageCursor::next() {

@@ -155,6 +155,18 @@ namespace openmittsu {
 				}
 			}
 
+			void ExternalMediaFileStorage::removeAllMediaItems(QString const& uuid) {
+				QFile::remove(m_storagePath.filePath(buildFilename(uuid, MediaFileType::TYPE_STANDARD)));
+				QFile::remove(m_storagePath.filePath(buildFilename(uuid, MediaFileType::TYPE_THUMBNAIL)));
+
+				QSqlQuery queryMedia(m_database->getQueryObject());
+				queryMedia.prepare(QStringLiteral("DELETE FROM `media` WHERE `uid` = :uuid;"));
+				queryMedia.bindValue(QStringLiteral(":uuid"), QVariant(uuid));
+				if (!queryMedia.exec()) {
+					throw openmittsu::exceptions::InternalErrorException() << "Could not delete media data from table 'media'. Query error: " << queryMedia.lastError().text().toStdString();
+				}
+			}
+
 			int ExternalMediaFileStorage::cryptoGetNonceSize() const {
 				return crypto_aead_xchacha20poly1305_ietf_NPUBBYTES;
 			}

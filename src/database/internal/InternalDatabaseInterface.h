@@ -31,6 +31,7 @@ namespace openmittsu {
 
 				// Announces
 				virtual void announceMessageChanged(QString const& uuid) = 0;
+				virtual void announceMessageDeleted(QString const& uuid) = 0;
 				virtual void announceContactChanged(openmittsu::protocol::ContactId const& contact) = 0;
 				virtual void announceGroupChanged(openmittsu::protocol::GroupId const& group) = 0;
 				virtual void announceNewMessage(openmittsu::protocol::ContactId const& contact, QString const& messageUuid) = 0;
@@ -45,6 +46,7 @@ namespace openmittsu {
 				// Media Items
 				virtual MediaFileItem getMediaItem(QString const& uuid, MediaFileType const& fileType) const = 0;
 				virtual void removeMediaItem(QString const& uuid, MediaFileType const& fileType) = 0;
+				virtual void removeAllMediaItems(QString const& uuid) = 0;
 				virtual void insertMediaItem(QString const& uuid, QByteArray const& data, MediaFileType const& fileType) = 0;
 			};
 

@@ -26,6 +26,7 @@ namespace openmittsu {
 				virtual openmittsu::protocol::MessageId const& getMessageId() const = 0;
 				virtual QString const& getMessageUuid() const = 0;
 				virtual QVector<QString> getLastMessages(std::size_t n) const = 0;
+				virtual void deleteMessage(bool doAnnounce) = 0;
 			};
 
 		}

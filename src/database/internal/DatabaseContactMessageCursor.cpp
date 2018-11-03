@@ -107,6 +107,78 @@ namespace openmittsu {
 				return QStringLiteral("contact_messages");
 			}
 
+			QString DatabaseContactMessageCursor::getMessageTypeField() const {
+				return QStringLiteral("contact_message_type");
+			}
+
+			void DatabaseContactMessageCursor::deleteMessagesByAge(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, bool olderThanOrNewerThan, openmittsu::protocol::MessageTime const& timePoint) {
+				QString whereAndOrderPart(QStringLiteral("AND `sort_by` %1 %2 ORDER BY `sort_by` %3"));
+				if (olderThanOrNewerThan) {
+					whereAndOrderPart = whereAndOrderPart.arg(QStringLiteral("<=")).arg(timePoint.getMessageTimeMSecs()).arg(QStringLiteral("ASC"));
+				} else {
+					whereAndOrderPart = whereAndOrderPart.arg(QStringLiteral(">=")).arg(timePoint.getMessageTimeMSecs()).arg(QStringLiteral("DESC"));
+				}
+
+				deletionHelper(database, contact, whereAndOrderPart);
+			}
+			
+			void DatabaseContactMessageCursor::deleteMessagesByCount(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, bool oldestOrNewest, int count) {
+				QString whereAndOrderPart(QStringLiteral("ORDER BY `sort_by` %1 LIMIT %2"));
+				if (oldestOrNewest) {
+					whereAndOrderPart = whereAndOrderPart.arg(QStringLiteral("ASC")).arg(count);
+				} else {
+					whereAndOrderPart = whereAndOrderPart.arg(QStringLiteral("DESC")).arg(count);
+				}
+
+				deletionHelper(database, contact, whereAndOrderPart);
+			}
+
+			void DatabaseContactMessageCursor::deletionHelper(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, QString const& whereAndOrderQueryPart) {
+				database->transactionStart();
+				QVector<QString> uuids;
+				QString const selectQuery = QStringLiteral("SELECT `uid` FROM `contact_messages` WHERE `identity` = :identity %1").arg(whereAndOrderQueryPart);
+				{
+					QSqlQuery query(database->getQueryObject());
+					if (!query.prepare(selectQuery)) {
+						throw openmittsu::exceptions::InternalErrorException() << "Could not prepare contact message enumeration query. SQL error: " << query.lastError().text().toStdString();
+					}
+					query.bindValue(QStringLiteral(":identity"), QVariant(contact.toQString()));
+					if (!query.exec() || !query.isSelect()) {
+						throw openmittsu::exceptions::InternalErrorException() << "Could not execute contact message enumeration query for table contact_messages. Query error: " << query.lastError().text().toStdString();
+					}
+
+					while (query.next()) {
+						QString const uuid(query.value(QStringLiteral("uid")).toString());
+						uuids.append(uuid);
+					}
+				}
+				{
+					QSqlQuery query(database->getQueryObject());
+					QString const deleteQuery = QStringLiteral("DELETE FROM `contact_messages` WHERE `uid` in (%1)").arg(selectQuery);
+					if (!query.prepare(deleteQuery)) {
+						throw openmittsu::exceptions::InternalErrorException() << "Could not prepare contact message mass deletion query. SQL error: " << query.lastError().text().toStdString();
+					}
+					query.bindValue(QStringLiteral(":identity"), QVariant(contact.toQString()));
+					if (!query.exec()) {
+						throw openmittsu::exceptions::InternalErrorException() << "Could not execute contact message mass deletion query for table contact_messages. Query error: " << query.lastError().text().toStdString();
+					}
+					
+				}
+				{
+					auto it = uuids.constBegin();
+					auto const end = uuids.constEnd();
+					for (; it != end; ++it) {
+						database->removeAllMediaItems(*it);
+					}
+				}
+				database->transactionCommit();
+
+				auto it = uuids.constBegin();
+				auto const end = uuids.constEnd();
+				for (; it != end; ++it) {
+					database->announceMessageDeleted(*it);
+				}
+			}
 		}
 	}
 }

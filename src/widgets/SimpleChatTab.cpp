@@ -22,6 +22,8 @@
 
 #include "src/protocol/TextLengthLimiter.h"
 
+#include "src/widgets/chat/DeleteMessagesDialog.h"
+
 #include "ui_simplechattab.h"
 
 namespace openmittsu {
@@ -94,9 +96,11 @@ namespace openmittsu {
 
 			QAction* actionLoad25 = new QAction(tr("Load 25 more messages"), &menu);
 			QAction* actionLoadN = new QAction(tr("Load N more messages..."), &menu);
+			QAction* actionDeleteMessages = new QAction(tr("Delete messages..."), &menu);
 
 			menu.addAction(actionLoad25);
 			menu.addAction(actionLoadN);
+			menu.addAction(actionDeleteMessages);
 
 			// Check Cursor Position:
 			// If the cursor is on the button, display the menu there, if not, display the menu on the right side of the button (approx. 0.8 * width).
@@ -125,6 +129,29 @@ namespace openmittsu {
 							this->onNewMessage(messageUuid);
 						}
 					}
+				} else if (selectedItem == actionDeleteMessages) {
+					bool ok = false;
+					openmittsu::dialogs::DeleteMessagesDialog dialog(this);
+					dialog.show();
+					int const result = dialog.exec();
+					if (result == 1) {
+						auto const selectedTab = dialog.getSelectedTab();
+						if (selectedTab == openmittsu::dialogs::DeleteMessagesDialog::SelectedTab::TAB_BY_AGE) {
+							int const ageInSeconds = dialog.getTabByAgeAge();
+							qint64 const ageInMSecs = ageInSeconds * 1000;
+							qint64 const nowInMSecs = openmittsu::protocol::MessageTime::now().getMessageTimeMSecs();
+							openmittsu::protocol::MessageTime timePoint = openmittsu::protocol::MessageTime::fromDatabase(nowInMSecs - ageInMSecs);
+							getMessageSource().deleteMessagesByAge(dialog.getTabByAgeIsOlderThan(), timePoint);
+						} else if (selectedTab == openmittsu::dialogs::DeleteMessagesDialog::SelectedTab::TAB_BY_COUNT) {
+							getMessageSource().deleteMessagesByCount(dialog.getTabByCountIsOldest(), dialog.getTabByCountCount());
+						} else if (selectedTab == openmittsu::dialogs::DeleteMessagesDialog::SelectedTab::TAB_BY_DATE) {
+							getMessageSource().deleteMessagesByAge(dialog.getTabByAgeIsOlderThan(), openmittsu::protocol::MessageTime(dialog.getTabByDateDateTime()));
+						} else {
+							throw openmittsu::exceptions::InternalErrorException() << "Unhandled selected tab type: " << static_cast<int>(selectedTab);
+						}
+					}
+					
+					LOGGER_DEBUG("Result was: {}", result);
 				}
 			}
 		}

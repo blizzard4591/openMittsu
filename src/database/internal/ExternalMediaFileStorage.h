@@ -20,6 +20,7 @@ namespace openmittsu {
 				virtual MediaFileItem getMediaItem(QString const& uuid, MediaFileType const& fileType) const override;
 				virtual void insertMediaItem(QString const& uuid, QByteArray const& data, MediaFileType const& fileType) override;
 				virtual void removeMediaItem(QString const& uuid, MediaFileType const& fileType) override;
+				virtual void removeAllMediaItems(QString const& uuid) override;
 
 				virtual void insertMediaItemsFromBackup(QList<openmittsu::backup::ContactMediaItemBackupObject> const& items) override;
 				virtual void insertMediaItemsFromBackup(QList<openmittsu::backup::GroupMediaItemBackupObject> const& items) override;

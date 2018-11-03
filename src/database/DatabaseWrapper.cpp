@@ -41,6 +41,7 @@ namespace openmittsu {
 				OPENMITTSU_CONNECT_QUEUED(ptr.get(), receivedNewContactMessage(openmittsu::protocol::ContactId const&), this, onDatabaseReceivedNewContactMessage(openmittsu::protocol::ContactId const&));
 				OPENMITTSU_CONNECT_QUEUED(ptr.get(), receivedNewGroupMessage(openmittsu::protocol::GroupId const&), this, onDatabaseReceivedNewGroupMessage(openmittsu::protocol::GroupId const&));
 				OPENMITTSU_CONNECT_QUEUED(ptr.get(), messageChanged(QString const&), this, onDatabaseMessageChanged(QString const&));
+				OPENMITTSU_CONNECT_QUEUED(ptr.get(), messageDeleted(QString const&), this, onDatabaseMessageDeleted(QString const&));
 				OPENMITTSU_CONNECT_QUEUED(ptr.get(), haveQueuedMessages(), this, onDatabaseHaveQueuedMessages());
 				OPENMITTSU_CONNECT_QUEUED(ptr.get(), contactStartedTyping(openmittsu::protocol::ContactId const&), this, onDatabaseContactStartedTyping(openmittsu::protocol::ContactId const&));
 				OPENMITTSU_CONNECT_QUEUED(ptr.get(), contactStoppedTyping(openmittsu::protocol::ContactId const&), this, onDatabaseContactStoppedTyping(openmittsu::protocol::ContactId const&));
@@ -83,6 +84,10 @@ namespace openmittsu {
 		
 		void DatabaseWrapper::onDatabaseMessageChanged(QString const& uuid) {
 			emit messageChanged(uuid);
+		}
+
+		void DatabaseWrapper::onDatabaseMessageDeleted(QString const& uuid) {
+			emit messageDeleted(uuid);
 		}
 		
 		void DatabaseWrapper::onDatabaseHaveQueuedMessages() {
@@ -431,6 +436,30 @@ namespace openmittsu {
 
 		GroupToTitleMap DatabaseWrapper::getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getKnownGroupsContainingMember, GroupToTitleMap, Q_ARG(openmittsu::protocol::ContactId const&, identity));
+		}
+
+		void DatabaseWrapper::deleteContactMessageByUuid(openmittsu::protocol::ContactId const& contact, QString const& uuid) {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(deleteContactMessageByUuid, Q_ARG(openmittsu::protocol::ContactId const&, contact), Q_ARG(QString const&, uuid));
+		}
+
+		void DatabaseWrapper::deleteContactMessagesByAge(openmittsu::protocol::ContactId const& contact, bool olderThanOrNewerThan, openmittsu::protocol::MessageTime const& timePoint) {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(deleteContactMessagesByAge, Q_ARG(openmittsu::protocol::ContactId const&, contact), Q_ARG(bool, olderThanOrNewerThan), Q_ARG(openmittsu::protocol::MessageTime const&, timePoint));
+		}
+
+		void DatabaseWrapper::deleteContactMessagesByCount(openmittsu::protocol::ContactId const& contact, bool oldestOrNewest, int count) {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(deleteContactMessagesByCount, Q_ARG(openmittsu::protocol::ContactId const&, contact), Q_ARG(bool, oldestOrNewest), Q_ARG(int, count));
+		}
+
+		void DatabaseWrapper::deleteGroupMessageByUuid(openmittsu::protocol::GroupId const& group, QString const& uuid) {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(deleteGroupMessageByUuid, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(QString const&, uuid));
+		}
+
+		void DatabaseWrapper::deleteGroupMessagesByAge(openmittsu::protocol::GroupId const& group, bool olderThanOrNewerThan, openmittsu::protocol::MessageTime const& timePoint) {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(deleteGroupMessagesByAge, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(bool, olderThanOrNewerThan), Q_ARG(openmittsu::protocol::MessageTime const&, timePoint));
+		}
+
+		void DatabaseWrapper::deleteGroupMessagesByCount(openmittsu::protocol::GroupId const& group, bool oldestOrNewest, int count) {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(deleteGroupMessagesByCount, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(bool, oldestOrNewest), Q_ARG(int, count));
 		}
 
 		openmittsu::database::OptionNameToValueMap DatabaseWrapper::getOptions() {

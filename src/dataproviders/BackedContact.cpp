@@ -125,5 +125,17 @@ namespace openmittsu {
 			return *m_database.getContactMessage(m_contactId, uuid);
 		}
 
+		void BackedContact::deleteMessageByUuid(QString const& uuid) {
+			m_database.deleteContactMessageByUuid(m_contactId, uuid);
+		}
+
+		void BackedContact::deleteMessagesByAge(bool olderThanOrNewerThan, openmittsu::protocol::MessageTime const& timePoint) {
+			m_database.deleteContactMessagesByAge(m_contactId, olderThanOrNewerThan, timePoint);
+		}
+		
+		void BackedContact::deleteMessagesByCount(bool oldestOrNewest, int count) {
+			m_database.deleteContactMessagesByCount(m_contactId, oldestOrNewest, count);
+		}
+
 	}
 }

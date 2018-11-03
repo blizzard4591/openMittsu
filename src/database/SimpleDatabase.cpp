@@ -1122,6 +1122,10 @@ namespace openmittsu {
 			m_mediaFileStorage.removeMediaItem(uuid, fileType);
 		}
 
+		void SimpleDatabase::removeAllMediaItems(QString const& uuid) {
+			m_mediaFileStorage.removeAllMediaItems(uuid);
+		}
+
 		std::shared_ptr<openmittsu::backup::IdentityBackup> SimpleDatabase::getBackup() const {
 			return std::make_shared<openmittsu::backup::IdentityBackup>(*m_identityBackup);
 		}
@@ -1283,9 +1287,40 @@ namespace openmittsu {
 			return internal::DatabaseGroupMessageCursor(this, group);
 		}
 
+		void SimpleDatabase::deleteContactMessageByUuid(openmittsu::protocol::ContactId const& contact, QString const& uuid) {
+			internal::DatabaseContactMessageCursor cursor(this, contact, uuid);
+			cursor.deleteMessage(true);
+		}
+		
+		void SimpleDatabase::deleteContactMessagesByAge(openmittsu::protocol::ContactId const& contact, bool olderThanOrNewerThan, openmittsu::protocol::MessageTime const& timePoint) {
+			internal::DatabaseContactMessageCursor::deleteMessagesByAge(this, contact, olderThanOrNewerThan, timePoint);
+		}
+		
+		void SimpleDatabase::deleteContactMessagesByCount(openmittsu::protocol::ContactId const& contact, bool oldestOrNewest, int count) {
+			internal::DatabaseContactMessageCursor::deleteMessagesByCount(this, contact, oldestOrNewest, count);
+		}
+
+		void SimpleDatabase::deleteGroupMessageByUuid(openmittsu::protocol::GroupId const& group, QString const& uuid) {
+			internal::DatabaseGroupMessageCursor cursor(this, group, uuid);
+			cursor.deleteMessage(true);
+		}
+
+		void SimpleDatabase::deleteGroupMessagesByAge(openmittsu::protocol::GroupId const& group, bool olderThanOrNewerThan, openmittsu::protocol::MessageTime const& timePoint) {
+			internal::DatabaseGroupMessageCursor::deleteMessagesByAge(this, group, olderThanOrNewerThan, timePoint);
+		}
+
+		void SimpleDatabase::deleteGroupMessagesByCount(openmittsu::protocol::GroupId const& group, bool oldestOrNewest, int count) {
+			internal::DatabaseGroupMessageCursor::deleteMessagesByCount(this, group, oldestOrNewest, count);
+		}
+
 		void SimpleDatabase::announceMessageChanged(QString const& uuid) {
 			LOGGER_DEBUG("Database: Announcing messageChanged() for UUID {}.", uuid.toStdString());
 			emit messageChanged(uuid);
+		}
+
+		void SimpleDatabase::announceMessageDeleted(QString const& uuid) {
+			LOGGER_DEBUG("Database: Announcing messageDeleted() for UUID {}.", uuid.toStdString());
+			emit messageDeleted(uuid);
 		}
 
 		void SimpleDatabase::announceContactChanged(openmittsu::protocol::ContactId const& contact) {

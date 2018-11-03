@@ -34,18 +34,21 @@ namespace openmittsu {
 				virtual openmittsu::protocol::MessageId const& getMessageId() const override;
 				virtual QString const& getMessageUuid() const override;
 				virtual QVector<QString> getLastMessages(std::size_t n) const override;
+				virtual void deleteMessage(bool doAnnounce) override;
 			protected:
 				InternalDatabaseInterface* getDatabase() const;
 
 				virtual QString getWhereString() const = 0;
 				virtual void bindWhereStringValues(QSqlQuery& query) const = 0;
 				virtual QString getTableName() const = 0;
+				virtual QString getMessageTypeField() const = 0;
 			private:
 				InternalDatabaseInterface* const m_database;
 				openmittsu::protocol::MessageId m_messageId;
 				bool m_isMessageIdValid;
 				qint64 m_sortByValue;
 				QString m_uid;
+				QString m_messageType;
 
 				bool getFollowingMessageId(bool ascending);
 				bool getFirstOrLastMessageId(bool first);

@@ -24,12 +24,18 @@ namespace openmittsu {
 				virtual openmittsu::protocol::ContactId const& getContactId() const override;
 				virtual std::shared_ptr<openmittsu::dataproviders::messages::ContactMessage> getMessage() const override;
 				virtual std::shared_ptr<DatabaseReadonlyContactMessage> getReadonlyMessage() const;
+
+				static void deleteMessagesByAge(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, bool olderThanOrNewerThan, openmittsu::protocol::MessageTime const& timePoint);
+				static void deleteMessagesByCount(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, bool oldestOrNewest, int count);
 			protected:
 				virtual QString getWhereString() const override;
 				virtual void bindWhereStringValues(QSqlQuery& query) const override;
 				virtual QString getTableName() const override;
+				virtual QString getMessageTypeField() const override;
 			private:
 				openmittsu::protocol::ContactId const m_contact;
+
+				static void deletionHelper(InternalDatabaseInterface* database, openmittsu::protocol::ContactId const& contact, QString const& whereAndOrderQueryPart);
 			};
 
 		}

@@ -1,8 +1,8 @@
-#include "GroupChatWidgetItem.h"
+#include "src/widgets/chat/GroupChatWidgetItem.h"
 
-#include <QMenu>
 #include <QAction>
 #include <QClipboard>
+#include <QMessageBox>
 
 #include "src/utility/QObjectConnectionMacro.h"
 
@@ -26,6 +26,7 @@ namespace openmittsu {
 			QAction* actionSeen = nullptr;
 			QAction* actionMessageId = nullptr;
 			QAction* actionCopy = nullptr;
+			QAction* actionDelete = nullptr;
 
 			openmittsu::protocol::MessageTime const sendTime = m_groupMessage.getSentAt();
 			openmittsu::protocol::MessageTime const receivedTime = m_groupMessage.getReceivedAt();
@@ -56,6 +57,9 @@ namespace openmittsu {
 			actionCopy = new QAction(QString("Copy to Clipboard"), &listMessagesContextMenu);
 			listMessagesContextMenu.addAction(actionCopy);
 
+			actionDelete = new QAction(tr("Delete Message"), &listMessagesContextMenu);
+			listMessagesContextMenu.addAction(actionDelete);
+
 			appendCustomContextMenuEntries(pos, listMessagesContextMenu);
 
 			QAction* selectedItem = listMessagesContextMenu.exec(globalPos);
@@ -69,6 +73,11 @@ namespace openmittsu {
 						//
 					} else if (selectedItem == actionCopy) {
 						copyToClipboard();
+					} else if (selectedItem == actionDelete) {
+						auto const button = QMessageBox::question(this, tr("Delete selected message?"), tr("Are you sure you want to delete this message?"));
+						if (button == QMessageBox::Yes) {
+							m_groupMessage.deleteMessage();
+						}
 					}
 				}
 			}

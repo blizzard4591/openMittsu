@@ -29,6 +29,7 @@ namespace openmittsu {
 			void onDatabaseReceivedNewContactMessage(openmittsu::protocol::ContactId const& identity);
 			void onDatabaseReceivedNewGroupMessage(openmittsu::protocol::GroupId const& group);
 			void onDatabaseMessageChanged(QString const& uuid);
+			void onDatabaseMessageDeleted(QString const& uuid);
 			void onDatabaseHaveQueuedMessages();
 			void onDatabaseContactStartedTyping(openmittsu::protocol::ContactId const& identity);
 			void onDatabaseContactStoppedTyping(openmittsu::protocol::ContactId const& identity);
@@ -132,6 +133,13 @@ namespace openmittsu {
 			virtual void setContactAccountStatusBatch(ContactToAccountStatusMap const& status) override;
 			virtual void setContactFeatureLevelBatch(ContactToFeatureLevelMap const& featureLevels) override;
 			virtual GroupToTitleMap getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const override;
+			// Deleting Messages
+			virtual void deleteContactMessageByUuid(openmittsu::protocol::ContactId const& contact, QString const& uuid) override;
+			virtual void deleteContactMessagesByAge(openmittsu::protocol::ContactId const& contact, bool olderThanOrNewerThan, openmittsu::protocol::MessageTime const& timePoint) override;
+			virtual void deleteContactMessagesByCount(openmittsu::protocol::ContactId const& contact, bool oldestOrNewest, int count) override;
+			virtual void deleteGroupMessageByUuid(openmittsu::protocol::GroupId const& group, QString const& uuid) override;
+			virtual void deleteGroupMessagesByAge(openmittsu::protocol::GroupId const& group, bool olderThanOrNewerThan, openmittsu::protocol::MessageTime const& timePoint) override;
+			virtual void deleteGroupMessagesByCount(openmittsu::protocol::GroupId const& group, bool oldestOrNewest, int count) override;
 			// Options
 			virtual openmittsu::database::OptionNameToValueMap getOptions() override;
 			virtual void setOptions(openmittsu::database::OptionNameToValueMap const& options) override;

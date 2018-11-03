@@ -63,6 +63,10 @@ namespace openmittsu {
 			bool sendLocationMessage(openmittsu::utility::Location const& location);
 
 			void sendTypingNotification(bool typingStopped);
+
+			virtual void deleteMessageByUuid(QString const& uuid) override;
+			virtual void deleteMessagesByAge(bool olderThanOrNewerThan, openmittsu::protocol::MessageTime const& timePoint) override;
+			virtual void deleteMessagesByCount(bool oldestOrNewest, int count) override;
 		signals:
 			void contactDataChanged();
 			void contactStartedTyping();

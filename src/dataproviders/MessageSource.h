@@ -6,6 +6,8 @@
 
 #include <cstdint>
 
+#include "src/protocol/MessageTime.h"
+
 namespace openmittsu {
 	namespace dataproviders {
 
@@ -15,6 +17,9 @@ namespace openmittsu {
 
 			virtual QVector<QString> getLastMessageUuids(std::size_t n) = 0;
 			virtual int getMessageCount() const = 0;
+			virtual void deleteMessageByUuid(QString const& uuid) = 0;
+			virtual void deleteMessagesByAge(bool olderThanOrNewerThan, openmittsu::protocol::MessageTime const& timePoint) = 0;
+			virtual void deleteMessagesByCount(bool oldestOrNewest, int count) = 0;
 		};
 
 	}

@@ -118,5 +118,9 @@ namespace openmittsu {
 			}
 		}
 
+		void BackedMessage::deleteMessage() {
+			m_contact->deleteMessageByUuid(m_uuid);
+		}
+
 	}
 }
