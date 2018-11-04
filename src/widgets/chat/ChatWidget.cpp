@@ -164,7 +164,15 @@ namespace openmittsu {
 				OPENMITTSU_DISCONNECT(item, messageDeleted(ChatWidgetItem*), this, onItemMessageDeleted(ChatWidgetItem*));
 				QHBoxLayout* layout = it.value();
 				m_topLayout->removeItem(layout);
+#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
 				m_items.removeAll(item);
+#else
+				for (int i = m_items.size() - 1; i >= 0; --i) {
+					if (m_items.at(i) == item) {
+						m_items.remove(i);
+					}
+				}
+#endif
 
 				delete item;
 				delete layout;
