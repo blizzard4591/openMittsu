@@ -29,4 +29,10 @@
 #	error Could not detect Operating System
 #endif
 
+namespace openmittsu {
+	namespace utility {
+		//
+	}
+}
+
 #endif // OPENMITTSU_UTILITY_OSDETECTION_H_

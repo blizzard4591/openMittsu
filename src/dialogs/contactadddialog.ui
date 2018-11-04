@@ -22,7 +22,7 @@
     </widget>
    </item>
    <item row="0" column="1">
-    <widget class="UpperCaseLineEdit" name="edtIdentity"/>
+    <widget class="openmittsu::widgets::UpperCaseLineEdit" name="edtIdentity"/>
    </item>
    <item row="1" column="0">
     <widget class="QLabel" name="lblNickname">
@@ -48,7 +48,7 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>UpperCaseLineEdit</class>
+   <class>openmittsu::widgets::UpperCaseLineEdit</class>
    <extends>QLineEdit</extends>
    <header>widgets/UpperCaseLineEdit.h</header>
   </customwidget>

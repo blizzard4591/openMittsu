@@ -10,17 +10,23 @@
 
 #include "src/protocol/GroupId.h"
 
-class GroupListWidgetItem : public QListWidgetItem {
-public:
-	virtual ~GroupListWidgetItem() {}
-	GroupListWidgetItem(openmittsu::protocol::GroupId const& group, bool sortById, const QString& text, QListWidget* parent = nullptr, int type = Type);
-	
-	openmittsu::protocol::GroupId const& getGroupId() const;
+namespace openmittsu {
+	namespace widgets {
 
-	virtual bool operator<(QListWidgetItem const& other) const override;
-private:
-	openmittsu::protocol::GroupId const m_groupId;
-	bool const m_sortById;
-};
+		class GroupListWidgetItem : public QListWidgetItem {
+		public:
+			virtual ~GroupListWidgetItem() {}
+			GroupListWidgetItem(openmittsu::protocol::GroupId const& group, bool sortById, const QString& text, QListWidget* parent = nullptr, int type = Type);
+
+			openmittsu::protocol::GroupId const& getGroupId() const;
+
+			virtual bool operator<(QListWidgetItem const& other) const override;
+		private:
+			openmittsu::protocol::GroupId const m_groupId;
+			bool const m_sortById;
+		};
+
+	}
+}
 
 #endif // OPENMITTSU_WIDGETS_GROUPLISTWIDGETITEM_H_

@@ -14,7 +14,7 @@ namespace openmittsu {
 		MessageFlags::MessageFlags(char messageFlags) : m_pushMessage(byteToBool(messageFlags, 0)), m_noQueuing(byteToBool(messageFlags, 1)), m_noAckExpected(byteToBool(messageFlags, 2)), m_messageHasAlreadyBeenDelivered(byteToBool(messageFlags, 3)), m_groupMessage(byteToBool(messageFlags, 4)), m_callMessage(byteToBool(messageFlags, 5)) {
 			// Check if only the lowest 6 bits are used, if at all.
 			if ((messageFlags & (~0x3F)) != 0x00) {
-				throw openmittsu::exceptions::IllegalArgumentException() << "Unknown Message Flag Bits are set: " << ByteArrayToHexString::charToHexString(messageFlags).toStdString();
+				throw openmittsu::exceptions::IllegalArgumentException() << "Unknown Message Flag Bits are set: " << openmittsu::utility::ByteArrayToHexString::charToHexString(messageFlags).toStdString();
 			}
 		}
 

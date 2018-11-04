@@ -25,7 +25,7 @@ namespace openmittsu {
 			auto const end = m_knownIdentities.constEnd();
 
 			for (; it != end; ++it) {
-				ContactListWidgetItem* clwi = new ContactListWidgetItem(it.key(), false, it->nickName);
+				openmittsu::widgets::ContactListWidgetItem* clwi = new openmittsu::widgets::ContactListWidgetItem(it.key(), false, it->nickName);
 				m_ui->listWidget->addItem(clwi);
 			}
 			m_ui->listWidget->clearSelection();
@@ -47,7 +47,7 @@ namespace openmittsu {
 
 			QSet<openmittsu::protocol::ContactId> groupMembers;
 			for (; it != end; ++it) {
-				ContactListWidgetItem* clwi = dynamic_cast<ContactListWidgetItem*>(*it);
+				openmittsu::widgets::ContactListWidgetItem* clwi = dynamic_cast<openmittsu::widgets::ContactListWidgetItem*>(*it);
 				groupMembers.insert(clwi->getContactId());
 			}
 

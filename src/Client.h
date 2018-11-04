@@ -14,7 +14,7 @@
 #include <memory>
 
 #include "ui_main.h"
-#include "network/ProtocolClient.h"
+#include "src/network/ProtocolClient.h"
 
 #include "src/updater/Updater.h"
 

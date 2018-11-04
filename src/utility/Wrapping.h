@@ -117,3 +117,9 @@ if (!QMetaObject::invokeMethod(ptr.get(), STRINGIFY(funcName), Qt::BlockingQueue
  \
 return returnVal; \
 } while (false)
+
+namespace openmittsu {
+	namespace utility {
+		//
+	}
+}

@@ -454,11 +454,11 @@ void Client::contactRegistryOnIdentitiesChanged() {
 			if (contactId == selfIdentity) {
 				continue;
 			}
-			ContactListWidgetItem* clwi = nullptr;
+			openmittsu::widgets::ContactListWidgetItem* clwi = nullptr;
 			if (it->nickName.isNull() || it->nickName.isEmpty()) {
-				clwi = new ContactListWidgetItem(contactId, false, contactId.toQString());
+				clwi = new openmittsu::widgets::ContactListWidgetItem(contactId, false, contactId.toQString());
 			} else {
-				clwi = new ContactListWidgetItem(contactId, false, it->nickName);
+				clwi = new openmittsu::widgets::ContactListWidgetItem(contactId, false, it->nickName);
 			}
 			openmittsu::protocol::AccountStatus const status = it->accountStatus;
 			if (status == openmittsu::protocol::AccountStatus::STATUS_INACTIVE) {
@@ -487,7 +487,7 @@ void Client::contactRegistryOnIdentitiesChanged() {
 
 		for (; itGroups != endGroups; ++itGroups) {
 			openmittsu::protocol::GroupId const groupId = itGroups.key();
-			GroupListWidgetItem* glwi = new GroupListWidgetItem(groupId, false, itGroups->title);
+			openmittsu::widgets::GroupListWidgetItem* glwi = new openmittsu::widgets::GroupListWidgetItem(groupId, false, itGroups->title);
 
 			bool inserted = false;
 			for (int i = 0; i < m_ui.listGroups->count(); ++i) {
@@ -631,7 +631,7 @@ void Client::listContactsOnDoubleClick(QListWidgetItem* item) {
 		return;
 	}
 
-	ContactListWidgetItem* clwi = dynamic_cast<ContactListWidgetItem*>(item);
+	openmittsu::widgets::ContactListWidgetItem* clwi = dynamic_cast<openmittsu::widgets::ContactListWidgetItem*>(item);
 	if (clwi != nullptr) {
 		openmittsu::protocol::ContactId const contactId = clwi->getContactId();
 		if (!m_tabController->hasTab(contactId)) {
@@ -650,7 +650,7 @@ void Client::listGroupsOnDoubleClick(QListWidgetItem* item) {
 		return;
 	}
 
-	GroupListWidgetItem* glwi = dynamic_cast<GroupListWidgetItem*>(item);
+	openmittsu::widgets::GroupListWidgetItem* glwi = dynamic_cast<openmittsu::widgets::GroupListWidgetItem*>(item);
 	if (glwi != nullptr) {
 		openmittsu::protocol::GroupId const groupId = glwi->getGroupId();
 		if (!m_tabController->hasTab(groupId)) {
@@ -670,7 +670,7 @@ void Client::listContactsOnContextMenu(QPoint const& pos) {
 	}
 	QPoint globalPos = m_ui.listContacts->viewport()->mapToGlobal(pos);
 	QListWidgetItem* listItem = m_ui.listContacts->itemAt(pos);
-	ContactListWidgetItem* clwi = dynamic_cast<ContactListWidgetItem*>(listItem);
+	openmittsu::widgets::ContactListWidgetItem* clwi = dynamic_cast<openmittsu::widgets::ContactListWidgetItem*>(listItem);
 
 	if (clwi != nullptr) {
 		QMenu listContactsContextMenu;
@@ -779,7 +779,7 @@ void Client::listGroupsOnContextMenu(QPoint const& pos) {
 
 	QPoint globalPos = m_ui.listGroups->viewport()->mapToGlobal(pos);
 	QListWidgetItem* listItem = m_ui.listGroups->itemAt(pos);
-	GroupListWidgetItem* glwi = dynamic_cast<GroupListWidgetItem*>(listItem);
+	openmittsu::widgets::GroupListWidgetItem* glwi = dynamic_cast<openmittsu::widgets::GroupListWidgetItem*>(listItem);
 
 	if (glwi != nullptr) {
 		QMenu listGroupsContextMenu;

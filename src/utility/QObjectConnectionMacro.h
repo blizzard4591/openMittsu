@@ -29,4 +29,10 @@
 	} \
 } while (false)
 
+namespace openmittsu {
+	namespace utility {
+		//
+	}
+}
+
 #endif // OPENMITTSU_UTILITY_QOBJECTCONNECTIONMACRO_H_

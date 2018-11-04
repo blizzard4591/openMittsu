@@ -22,7 +22,7 @@
     </widget>
    </item>
    <item row="0" column="1">
-    <widget class="UpperCaseLineEdit" name="edtIdBackupBackupString"/>
+    <widget class="openmittsu::widgets::UpperCaseLineEdit" name="edtIdBackupBackupString"/>
    </item>
    <item row="1" column="0">
     <widget class="QLabel" name="lblPassword">
@@ -53,7 +53,7 @@ It can be generated in the App via Menu -&gt; My Backups -&gt; ID Backup -&gt; B
  </widget>
  <customwidgets>
   <customwidget>
-   <class>UpperCaseLineEdit</class>
+   <class>openmittsu::widgets::UpperCaseLineEdit</class>
    <extends>QLineEdit</extends>
    <header>widgets/UpperCaseLineEdit.h</header>
   </customwidget>
