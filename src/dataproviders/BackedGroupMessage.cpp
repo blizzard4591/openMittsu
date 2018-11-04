@@ -2,7 +2,7 @@
 
 #include "src/utility/QObjectConnectionMacro.h"
 
-#include "MessageCenter.h"
+#include "src/dataproviders/MessageCenter.h"
 #include "src/database/Database.h"
 
 namespace openmittsu {

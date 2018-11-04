@@ -16,10 +16,10 @@ namespace openmittsu {
 			Q_OBJECT
 		public:
 			explicit ShowIdentityAndPublicKeyDialog(openmittsu::protocol::ContactId const& selfContactId, openmittsu::crypto::PublicKey const& selfPublicKey, QWidget* parent = nullptr);
-			~ShowIdentityAndPublicKeyDialog();
+			virtual ~ShowIdentityAndPublicKeyDialog();
 
 		private:
-			Ui::ShowIdentityAndPublicKeyDialog *ui;
+			Ui::ShowIdentityAndPublicKeyDialog* ui;
 		};
 	}
 }

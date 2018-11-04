@@ -1,6 +1,6 @@
 #include "src/messages/MessageContentRegistry.h"
 
-#include "MessageContentFactory.h"
+#include "src/messages/MessageContentFactory.h"
 
 namespace openmittsu {
 	namespace messages {

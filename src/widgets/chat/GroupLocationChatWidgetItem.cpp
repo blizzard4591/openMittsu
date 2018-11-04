@@ -1,4 +1,4 @@
-#include "GroupLocationChatWidgetItem.h"
+#include "src/widgets/chat/GroupLocationChatWidgetItem.h"
 
 #include <QMenu>
 #include <QAction>

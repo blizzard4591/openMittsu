@@ -10,7 +10,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include "Client.h"
+#include "src/Client.h"
 #include "src/network/ServerConfiguration.h"
 
 #include "ui_main.h"
@@ -24,6 +24,7 @@
 #include "src/dialogs/ContactAddDialog.h"
 #include "src/dialogs/ContactEditDialog.h"
 #include "src/dialogs/FingerprintDialog.h"
+#include "src/dialogs/LicenseDialog.h"
 #include "src/dialogs/OptionsDialog.h"
 #include "src/dialogs/UpdaterDialog.h"
 
@@ -32,7 +33,6 @@
 #include "src/widgets/SimpleTabController.h"
 #include "src/widgets/ContactListWidgetItem.h"
 #include "src/widgets/GroupListWidgetItem.h"
-#include "src/widgets/LicenseDialog.h"
 
 #include "src/utility/Logging.h"
 #include "src/utility/MakeUnique.h"
@@ -747,7 +747,7 @@ void Client::listContactsOnContextMenu(QPoint const& pos) {
 				QString const pubKey = contactData.publicKey.toQString();
 				QString const nickname = contactData.nickName;
 
-				ContactEditDialog contactEditDialog(id, pubKey, nickname, this);
+				openmittsu::dialogs::ContactEditDialog contactEditDialog(id, pubKey, nickname, this);
 					
 				int result = contactEditDialog.exec();
 
@@ -899,8 +899,8 @@ void Client::menuFileExitOnClick() {
 }
 
 void Client::menuAboutLicenseOnClick() {
-	LicenseDialog* licenseDialog = new LicenseDialog(this);
-	licenseDialog->exec();
+	openmittsu::dialogs::LicenseDialog licenseDialog(this);
+	licenseDialog.exec();
 }
 
 void Client::menuAboutAboutOnClick() {
@@ -949,7 +949,7 @@ void Client::menuContactAddOnClick() {
 		return;
 	}
 
-	ContactAddDialog contactAddDialog(this);
+	openmittsu::dialogs::ContactAddDialog contactAddDialog(this);
 	int result = contactAddDialog.exec();
 
 	if (result == QDialog::DialogCode::Accepted) {

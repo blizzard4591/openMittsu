@@ -1,23 +1,29 @@
-#include "ContactAddDialog.h"
+#include "src/dialogs/ContactAddDialog.h"
 #include "ui_contactadddialog.h"
 
 #include <QRegularExpression>
 
-ContactAddDialog::ContactAddDialog(QWidget *parent) : QDialog(parent), ui(new Ui::ContactAddDialog) {
-    ui->setupUi(this);
+namespace openmittsu {
+	namespace dialogs {
 
-	identityValidator = new QRegularExpressionValidator(QRegularExpression(QStringLiteral("[a-zA-Z0-9*][a-zA-Z0-9]{7}")), ui->edtIdentity);
-	ui->edtIdentity->setValidator(identityValidator);
-}
+		ContactAddDialog::ContactAddDialog(QWidget *parent) : QDialog(parent), ui(new Ui::ContactAddDialog) {
+			ui->setupUi(this);
 
-ContactAddDialog::~ContactAddDialog() {
-    delete ui;
-}
+			identityValidator = new QRegularExpressionValidator(QRegularExpression(QStringLiteral("[a-zA-Z0-9*][a-zA-Z0-9]{7}")), ui->edtIdentity);
+			ui->edtIdentity->setValidator(identityValidator);
+		}
 
-QString ContactAddDialog::getIdentity() const {
-	return ui->edtIdentity->text().toUpper();
-}
+		ContactAddDialog::~ContactAddDialog() {
+			delete ui;
+		}
 
-QString ContactAddDialog::getNickname() const {
-	return ui->edtNickname->text();
+		QString ContactAddDialog::getIdentity() const {
+			return ui->edtIdentity->text().toUpper();
+		}
+
+		QString ContactAddDialog::getNickname() const {
+			return ui->edtNickname->text();
+		}
+
+	}
 }

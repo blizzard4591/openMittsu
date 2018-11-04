@@ -15,7 +15,7 @@ exception_name(char const* file, int line, char const* cstr) : BaseException(fil
 } \
 exception_name(exception_name const& cp) : BaseException(cp) { \
 } \
-~exception_name() throw() { \
+virtual ~exception_name() throw() { \
 } \
 template<typename T> \
 exception_name& operator<<(T const& var) { \

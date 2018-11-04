@@ -1,4 +1,4 @@
-#include "UpperCaseLineEdit.h"
+#include "src/widgets/UpperCaseLineEdit.h"
 
 #include "src/utility/Logging.h"
 #include "src/utility/QObjectConnectionMacro.h"

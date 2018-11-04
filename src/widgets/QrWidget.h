@@ -4,13 +4,11 @@
 #include <QWidget>
 #include <QString>
 
-class QrWidget : public QWidget
-{
-    Q_OBJECT
-
+class QrWidget : public QWidget {
+	Q_OBJECT
 public:
-    explicit QrWidget(QWidget *parent = 0);
-    ~QrWidget();
+	explicit QrWidget(QWidget* parent = nullptr);
+	virtual ~QrWidget();
 
 	void setQrDataString(QString const& newDataString);
 protected:

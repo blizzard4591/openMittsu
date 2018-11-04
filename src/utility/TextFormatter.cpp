@@ -1,4 +1,4 @@
-#include "utility/TextFormatter.h"
+#include "src/utility/TextFormatter.h"
 
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>

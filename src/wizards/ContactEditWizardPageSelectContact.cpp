@@ -1,4 +1,4 @@
-#include "ContactEditWizardPageSelectContact.h"
+#include "src/wizards/ContactEditWizardPageSelectContact.h"
 #include "ui_contacteditwizardpageselectcontact.h"
 
 #include "src/exceptions/InternalErrorException.h"

@@ -1,7 +1,7 @@
 #ifndef OPENMITTSU_WIDGETS_CONTACTCHATWIDGETITEM_H_
 #define OPENMITTSU_WIDGETS_CONTACTCHATWIDGETITEM_H_
 
-#include "ChatWidgetItem.h"
+#include "src/widgets/chat/ChatWidgetItem.h"
 
 #include <memory>
 

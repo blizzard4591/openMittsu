@@ -8,18 +8,23 @@ namespace Ui {
 class ContactAddDialog;
 }
 
-class ContactAddDialog : public QDialog {
-    Q_OBJECT
+namespace openmittsu {
+	namespace dialogs {
 
-public:
-    explicit ContactAddDialog(QWidget *parent = 0);
-    ~ContactAddDialog();
+		class ContactAddDialog : public QDialog {
+			Q_OBJECT
+		public:
+			explicit ContactAddDialog(QWidget* parent = nullptr);
+			virtual ~ContactAddDialog();
 
-	QString getIdentity() const;
-	QString getNickname() const;
-private:
-    Ui::ContactAddDialog *ui;
-	QRegularExpressionValidator* identityValidator;
-};
+			QString getIdentity() const;
+			QString getNickname() const;
+		private:
+			Ui::ContactAddDialog* ui;
+			QRegularExpressionValidator* identityValidator;
+		};
+
+	}
+}
 
 #endif // OPENMITTSU_DIALOGS_CONTACTADDDIALOG_H_

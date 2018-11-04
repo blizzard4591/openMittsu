@@ -1,4 +1,4 @@
-#include "PixmapLabel.h"
+#include "src/widgets/PixmapLabel.h"
 
 #include "src/utility/Logging.h"
 

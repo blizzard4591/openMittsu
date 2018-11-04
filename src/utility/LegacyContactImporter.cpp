@@ -1,9 +1,9 @@
 #include "src/utility/LegacyContactImporter.h"
 
-#include "exceptions/IllegalArgumentException.h"
-#include "exceptions/InternalErrorException.h"
-#include "utility/Logging.h"
-#include "utility/QObjectConnectionMacro.h"
+#include "src/exceptions/IllegalArgumentException.h"
+#include "src/exceptions/InternalErrorException.h"
+#include "src/utility/Logging.h"
+#include "src/utility/QObjectConnectionMacro.h"
 
 #include <QFile>
 #include <QSet>

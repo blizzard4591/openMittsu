@@ -1,7 +1,7 @@
 #ifndef OPENMITTSU_WIDGETS_CHAT_CONTACTAUDIOCHATWIDGETITEM_H_
 #define OPENMITTSU_WIDGETS_CHAT_CONTACTAUDIOCHATWIDGETITEM_H_
 
-#include "ChatWidgetItem.h"
+#include "src/widgets/chat/ChatWidgetItem.h"
 
 #include "src/dataproviders/BackedContact.h"
 #include "src/dataproviders/BackedContactMessage.h"

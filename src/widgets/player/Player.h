@@ -84,7 +84,7 @@ namespace openmittsu {
 
 		public:
 			explicit Player(bool useVideoWidget, QWidget *parent = nullptr);
-			~Player();
+			virtual ~Player();
 
 			bool isPlayerAvailable() const;
 

@@ -1,4 +1,4 @@
-#include "GroupStatusChatWidgetItem.h"
+#include "src/widgets/chat/GroupStatusChatWidgetItem.h"
 
 #include <QMenu>
 #include <QAction>

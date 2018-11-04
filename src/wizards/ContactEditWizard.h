@@ -5,8 +5,8 @@
 
 #include <memory>
 
-#include "ContactEditWizardPageSelectContact.h"
-#include "ContactEditWizardPageDone.h"
+#include "src/wizards/ContactEditWizardPageSelectContact.h"
+#include "src/wizards/ContactEditWizardPageDone.h"
 
 #include "src/dataproviders/ContactDataProvider.h"
 

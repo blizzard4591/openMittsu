@@ -3,8 +3,6 @@
 #include "src/dataproviders/BackedContactMessage.h"
 #include "src/utility/QObjectConnectionMacro.h"
 
-#include "MessageCenter.h"
-
 #include "src/dataproviders/MessageCenter.h"
 
 namespace openmittsu {

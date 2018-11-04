@@ -11,7 +11,7 @@
 #	include "qrencode.h"
 #endif
 
-QrWidget::QrWidget(QWidget *parent) : QWidget(parent), data("-EMPTY-"), qrCodeImageData(nullptr), qrCodeImageWidth(0) {
+QrWidget::QrWidget(QWidget* parent) : QWidget(parent), data("-EMPTY-"), qrCodeImageData(nullptr), qrCodeImageWidth(0) {
     //
 }
 

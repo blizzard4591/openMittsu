@@ -1,5 +1,5 @@
-#include "Init.h"
-#include "Client.h"
+#include "src/Init.h"
+#include "src/Client.h"
 
 #include "src/ExceptionHandlingApplication.h"
 #include "src/utility/Version.h"

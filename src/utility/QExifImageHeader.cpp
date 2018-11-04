@@ -20,7 +20,7 @@
 **
 **
 ****************************************************************************/
-#include "QExifImageHeader.h"
+#include "src/utility/QExifImageHeader.h"
 
 #include <QFile>
 #include <QImage>

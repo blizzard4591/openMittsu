@@ -8,16 +8,21 @@ namespace Ui {
 class ContactEditDialog;
 }
 
-class ContactEditDialog : public QDialog {
-    Q_OBJECT
+namespace openmittsu {
+	namespace dialogs {
 
-public:
-    explicit ContactEditDialog(QString const& identity, QString const& pubKey, QString const& nickname, QWidget *parent = nullptr);
-    ~ContactEditDialog();
+		class ContactEditDialog : public QDialog {
+			Q_OBJECT
+		public:
+			explicit ContactEditDialog(QString const& identity, QString const& pubKey, QString const& nickname, QWidget* parent = nullptr);
+			virtual ~ContactEditDialog();
 
-	QString getNickname() const;
-private:
-    Ui::ContactEditDialog *ui;
-};
+			QString getNickname() const;
+		private:
+			Ui::ContactEditDialog* ui;
+		};
+
+	}
+}
 
 #endif // OPENMITTSU_DIALOGS_CONTACTEDITDIALOG_H_

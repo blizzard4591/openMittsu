@@ -1,4 +1,4 @@
-#include "EmojiSelector.h"
+#include "src/widgets/EmojiSelector.h"
 #include "ui_EmojiSelector.h"
 
 #include "src/utility/QObjectConnectionMacro.h"

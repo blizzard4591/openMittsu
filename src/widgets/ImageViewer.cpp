@@ -1,4 +1,4 @@
-#include "ImageViewer.h"
+#include "src/widgets/ImageViewer.h"
 #include "ui_ImageViewer.h"
 
 #include <QtWidgets>

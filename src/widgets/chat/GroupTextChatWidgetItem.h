@@ -1,7 +1,7 @@
 #ifndef OPENMITTSU_WIDGETS_CHAT_GROUPTEXTCHATWIDGETITEM_H_
 #define OPENMITTSU_WIDGETS_CHAT_GROUPTEXTCHATWIDGETITEM_H_
 
-#include "ChatWidgetItem.h"
+#include "src/widgets/chat/ChatWidgetItem.h"
 
 #include "src/dataproviders/BackedGroup.h"
 #include "src/dataproviders/BackedGroupMessage.h"

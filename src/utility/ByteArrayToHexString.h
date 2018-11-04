@@ -19,7 +19,7 @@ public:
 	}
 private:
 	ByteArrayToHexString() {}
-	~ByteArrayToHexString() {}
+	virtual ~ByteArrayToHexString() {}
 };
 
 #endif // OPENMITTSU_UTILITY_BYTEARRAYTOHEXSTRING_H_

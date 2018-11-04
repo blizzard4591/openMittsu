@@ -1,4 +1,4 @@
-#include "GroupTextChatWidgetItem.h"
+#include "src/widgets/chat/GroupTextChatWidgetItem.h"
 #include "ui_chatwidgetitem.h"
 
 #include <QMenu>
