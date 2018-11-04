@@ -37,6 +37,7 @@ namespace openmittsu {
 				OPENMITTSU_CONNECT_QUEUED(ptr.get(), newUnreadMessageAvailableContact(openmittsu::protocol::ContactId const&), this, onNewUnreadMessageAvailableContact(openmittsu::protocol::ContactId const&));
 				OPENMITTSU_CONNECT_QUEUED(ptr.get(), newUnreadMessageAvailableGroup(openmittsu::protocol::GroupId const&), this, onNewUnreadMessageAvailableGroup(openmittsu::protocol::GroupId const&));
 				OPENMITTSU_CONNECT_QUEUED(ptr.get(), messageChanged(QString const&), this, onMessageChanged(QString const&));
+				OPENMITTSU_CONNECT_QUEUED(ptr.get(), messageDeleted(QString const&), this, onMessageDeleted(QString const&));
 			}
 		}
 
@@ -50,6 +51,10 @@ namespace openmittsu {
 		
 		void MessageCenterWrapper::onMessageChanged(QString const& uuid) {
 			emit messageChanged(uuid);
+		}
+
+		void MessageCenterWrapper::onMessageDeleted(QString const& uuid) {
+			emit messageDeleted(uuid);
 		}
 
 		bool MessageCenterWrapper::sendAudio(openmittsu::protocol::ContactId const& receiver, QByteArray const& audio, quint16 lengthInSeconds) {

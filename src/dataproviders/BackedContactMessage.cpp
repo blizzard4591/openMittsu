@@ -9,10 +9,12 @@ namespace openmittsu {
 
 		BackedContactMessage::BackedContactMessage(openmittsu::database::DatabaseReadonlyContactMessage const& message, std::shared_ptr<BackedContact> const& sender, openmittsu::dataproviders::MessageCenterWrapper const& messageCenter) : BackedMessage(message.getUid(), sender, message.isMessageFromUs(), message.getMessageId()), m_message(message), m_messageCenter(messageCenter) {
 			OPENMITTSU_CONNECT_QUEUED(&m_messageCenter, messageChanged(QString const&), this, onMessageChanged(QString const&));
+			OPENMITTSU_CONNECT_QUEUED(&m_messageCenter, messageDeleted(QString const&), this, onMessageDeleted(QString const&));
 		}
 
 		BackedContactMessage::BackedContactMessage(BackedContactMessage const& other) : BackedMessage(other), m_message(other.m_message), m_messageCenter(other.m_messageCenter) {
 			OPENMITTSU_CONNECT_QUEUED(&m_messageCenter, messageChanged(QString const&), this, onMessageChanged(QString const&));
+			OPENMITTSU_CONNECT_QUEUED(&m_messageCenter, messageDeleted(QString const&), this, onMessageDeleted(QString const&));
 		}
 
 		BackedContactMessage::~BackedContactMessage() {
@@ -36,7 +38,9 @@ namespace openmittsu {
 		}
 
 		void BackedContactMessage::loadCache() {
-			m_message = m_contact->fetchMessageByUuid(m_uuid);
+			if (!m_isDeleted) {
+				m_message = m_contact->fetchMessageByUuid(m_uuid);
+			}
 		}
 
 		messages::ContactMessageType BackedContactMessage::getMessageType() const {

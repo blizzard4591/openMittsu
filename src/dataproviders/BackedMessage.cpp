@@ -9,11 +9,11 @@
 namespace openmittsu {
 	namespace dataproviders {
 
-		BackedMessage::BackedMessage(QString const& uuid, std::shared_ptr<BackedContact> const& sender, bool isMessageFromUs, openmittsu::protocol::MessageId const& messageId) : m_uuid(uuid), m_contact(sender), m_isMessageFromUs(isMessageFromUs) {
+		BackedMessage::BackedMessage(QString const& uuid, std::shared_ptr<BackedContact> const& sender, bool isMessageFromUs, openmittsu::protocol::MessageId const& messageId) : m_uuid(uuid), m_contact(sender), m_isMessageFromUs(isMessageFromUs), m_isDeleted(false) {
 			//
 		}
 
-		BackedMessage::BackedMessage(BackedMessage const& other) : m_uuid(other.m_uuid), m_contact(other.m_contact), m_isMessageFromUs(other.m_isMessageFromUs) {
+		BackedMessage::BackedMessage(BackedMessage const& other) : m_uuid(other.m_uuid), m_contact(other.m_contact), m_isMessageFromUs(other.m_isMessageFromUs), m_isDeleted(other.m_isDeleted) {
 			//
 		}
 
@@ -118,8 +118,19 @@ namespace openmittsu {
 			}
 		}
 
+		void BackedMessage::onMessageDeleted(QString const& uuid) {
+			if (m_uuid == uuid) {
+				LOGGER_DEBUG("BackedMessage: Announcing messageDeleted() for UUID {}.", uuid.toStdString());
+				m_isDeleted = true;
+				
+				emit messageDeleted();
+			}
+		}
+
 		void BackedMessage::deleteMessage() {
 			m_contact->deleteMessageByUuid(m_uuid);
+
+			m_isDeleted = true;
 		}
 
 	}

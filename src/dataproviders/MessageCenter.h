@@ -28,6 +28,7 @@ namespace openmittsu {
 			void newUnreadMessageAvailableContact(openmittsu::protocol::ContactId const& contact);
 			void newUnreadMessageAvailableGroup(openmittsu::protocol::GroupId const& group);
 			void messageChanged(QString const& uuid);
+			void messageDeleted(QString const& uuid);
 		public slots:
 			virtual bool sendAudio(openmittsu::protocol::ContactId const& receiver, QByteArray const& audio, quint16 lengthInSeconds) = 0;
 			virtual bool sendImage(openmittsu::protocol::ContactId const& receiver, QByteArray const& image, QString const& caption) = 0;

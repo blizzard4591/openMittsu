@@ -1,6 +1,8 @@
 #ifndef OPENMITTSU_WIDGETS_CHAT_CHATWIDGET_H_
 #define OPENMITTSU_WIDGETS_CHAT_CHATWIDGET_H_
 
+#include <QBoxLayout>
+#include <QHash>
 #include <QScrollArea>
 #include <QTimer>
 #include <QVBoxLayout>
@@ -25,6 +27,7 @@ namespace openmittsu {
 		public slots:
 			void scrollToBottom();
 			void setIsActive(bool isActive);
+			void onItemMessageDeleted(ChatWidgetItem* item);
 		signals:
 			void hasUnreadMessages();
 		protected:
@@ -33,6 +36,7 @@ namespace openmittsu {
 			Ui::ChatWidget* m_ui;
 			QVBoxLayout* m_topLayout;
 			QVector<ChatWidgetItem*> m_items;
+			QHash<ChatWidgetItem*, QHBoxLayout*> m_itemToLayoutMap;
 			bool m_isActive;
 
 			// Unread messages

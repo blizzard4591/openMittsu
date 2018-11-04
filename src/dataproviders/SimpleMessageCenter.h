@@ -98,6 +98,7 @@ namespace openmittsu {
 			void resendGroupSetup(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& recipients);
 
 			void databaseOnMessageChanged(QString const& uuid);
+			void databaseOnMessageDeleted(QString const& uuid);
 			void tryResendingMessagesToNetwork();
 		private:
 			openmittsu::options::OptionReader m_optionReader;

@@ -86,6 +86,7 @@ namespace openmittsu {
 		}
 
 		void ChatWidget::addItem(ChatWidgetItem* item) {
+			OPENMITTSU_CONNECT(item, messageDeleted(ChatWidgetItem*), this, onItemMessageDeleted(ChatWidgetItem*));
 			QHBoxLayout* hboxLayout = new QHBoxLayout();
 			QDateTime compareTime = QDateTime::currentDateTime();
 
@@ -107,6 +108,7 @@ namespace openmittsu {
 
 			m_topLayout->insertLayout(index, hboxLayout);
 			m_items.insert(index, item);
+			m_itemToLayoutMap.insert(item, hboxLayout);
 
 			this->update();
 			informAllOfSize();
@@ -153,6 +155,23 @@ namespace openmittsu {
 
 			if (!m_hasUnreadMessage) {
 				m_unreadMessagesTimer.stop();
+			}
+		}
+
+		void ChatWidget::onItemMessageDeleted(ChatWidgetItem* item) {
+			auto it = m_itemToLayoutMap.find(item);
+			if (it != m_itemToLayoutMap.end()) {
+				OPENMITTSU_DISCONNECT(item, messageDeleted(ChatWidgetItem*), this, onItemMessageDeleted(ChatWidgetItem*));
+				QHBoxLayout* layout = it.value();
+				m_topLayout->removeItem(layout);
+				m_items.removeAll(item);
+
+				delete item;
+				delete layout;
+
+				this->update();
+				informAllOfSize();
+				this->updateGeometry();
 			}
 		}
 

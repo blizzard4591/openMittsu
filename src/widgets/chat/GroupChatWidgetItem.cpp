@@ -11,6 +11,7 @@ namespace openmittsu {
 
 		GroupChatWidgetItem::GroupChatWidgetItem(openmittsu::dataproviders::BackedGroupMessage const& message, QWidget* parent) : ChatWidgetItem(message.getContact(), message.isMessageFromUs(), parent), m_groupMessage(message) {
 			OPENMITTSU_CONNECT(&m_groupMessage, messageDataChanged(), this, onMessageDataChanged());
+			OPENMITTSU_CONNECT(&m_groupMessage, messageDeleted(), this, onMessageDeleted());
 		}
 
 		GroupChatWidgetItem::~GroupChatWidgetItem() {

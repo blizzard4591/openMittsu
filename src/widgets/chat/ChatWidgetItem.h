@@ -40,10 +40,13 @@ namespace openmittsu {
 
 			bool operator <(ChatWidgetItem const& other) const;
 			bool operator <=(ChatWidgetItem const& other) const;
+		signals:
+			void messageDeleted(ChatWidgetItem* item);
 		public slots:
 			virtual void showContextMenu(const QPoint& pos) = 0;
 			virtual void onContactDataChanged();
 			virtual void onMessageDataChanged();
+			virtual void onMessageDeleted();
 			virtual void setOptimalSizeHint(int width);
 		protected:
 			void addWidget(QWidget* widget);

@@ -12,6 +12,7 @@ namespace openmittsu {
 
 		ContactChatWidgetItem::ContactChatWidgetItem(openmittsu::dataproviders::BackedContactMessage const& message, QWidget* parent) : ChatWidgetItem(message.getContact(), message.isMessageFromUs(), parent), m_contactMessage(message) {
 			OPENMITTSU_CONNECT(&m_contactMessage, messageDataChanged(), this, onMessageDataChanged());
+			OPENMITTSU_CONNECT(&m_contactMessage, messageDeleted(), this, onMessageDeleted());
 		}
 
 		ContactChatWidgetItem::~ContactChatWidgetItem() {

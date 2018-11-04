@@ -151,7 +151,7 @@ namespace openmittsu {
 						}
 					}
 					
-					LOGGER_DEBUG("Result was: {}", result);
+					LOGGER_DEBUG("Result of message deletion dialog was: {}", result);
 				}
 			}
 		}

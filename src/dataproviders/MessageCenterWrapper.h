@@ -67,6 +67,7 @@ namespace openmittsu {
 			void onNewUnreadMessageAvailableContact(openmittsu::protocol::ContactId const& contact);
 			void onNewUnreadMessageAvailableGroup(openmittsu::protocol::GroupId const& group);
 			void onMessageChanged(QString const& uuid);
+			void onMessageDeleted(QString const& uuid);
 		private:
 			MessageCenterPointerAuthority const* m_messageCenterPointerAuthority;
 			std::weak_ptr<MessageCenter> m_messageCenter;

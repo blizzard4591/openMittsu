@@ -20,6 +20,7 @@ namespace openmittsu {
 
 		SimpleMessageCenter::SimpleMessageCenter(openmittsu::database::DatabaseWrapperFactory const& databaseWrapperFactory) : MessageCenter(), m_optionReader(databaseWrapperFactory.getDatabaseWrapper()), m_networkSentMessageAcceptor(nullptr), m_storage(databaseWrapperFactory.getDatabaseWrapper()) {
 			OPENMITTSU_CONNECT(&m_storage, messageChanged(QString const&), this, databaseOnMessageChanged(QString const&));
+			OPENMITTSU_CONNECT(&m_storage, messageDeleted(QString const&), this, databaseOnMessageDeleted(QString const&));
 			OPENMITTSU_CONNECT(&m_storage, haveQueuedMessages(), this, tryResendingMessagesToNetwork());
 		}
 
@@ -29,6 +30,10 @@ namespace openmittsu {
 
 		void SimpleMessageCenter::databaseOnMessageChanged(QString const& uuid) {
 			emit messageChanged(uuid);
+		}
+
+		void SimpleMessageCenter::databaseOnMessageDeleted(QString const& uuid) {
+			emit messageDeleted(uuid);
 		}
 
 		bool SimpleMessageCenter::sendAudio(openmittsu::protocol::ContactId const& receiver, QByteArray const& audio, quint16 lengthInSeconds) {

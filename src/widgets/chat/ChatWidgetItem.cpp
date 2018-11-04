@@ -195,6 +195,10 @@ namespace openmittsu {
 			setStatusLine(buildStatusLine());
 		}
 
+		void ChatWidgetItem::onMessageDeleted() {
+			emit messageDeleted(this);
+		}
+
 		void ChatWidgetItem::onContactDataChanged() {
 			if (!m_isMessageFromUs) {
 				setFromLabel(buildFromLabel());

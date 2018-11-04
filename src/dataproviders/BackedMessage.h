@@ -55,8 +55,10 @@ namespace openmittsu {
 			bool operator <=(BackedMessage const& other) const;
 		public slots:
 			void onMessageChanged(QString const& uuid);
+			void onMessageDeleted(QString const& uuid);
 		signals:
 			void messageDataChanged();
+			void messageDeleted();
 		protected:
 			virtual void loadCache() = 0;
 			virtual messages::ReadonlyUserMessage const& getMessage() const = 0;
@@ -64,6 +66,8 @@ namespace openmittsu {
 			QString const m_uuid;
 			std::shared_ptr<BackedContact> const m_contact;
 			bool const m_isMessageFromUs;
+
+			bool m_isDeleted;
 		};
 
 	}
