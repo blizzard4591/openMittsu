@@ -10,6 +10,12 @@
     <height>174</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -67,8 +73,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>764</width>
-            <height>146</height>
+            <width>747</width>
+            <height>166</height>
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout">
@@ -589,8 +595,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>764</width>
-            <height>146</height>
+            <width>747</width>
+            <height>166</height>
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayoutObjects2">
