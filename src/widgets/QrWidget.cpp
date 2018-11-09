@@ -20,7 +20,7 @@ namespace openmittsu {
 
 		QrWidget::~QrWidget() {
 			if (qrCodeImageData != nullptr) {
-				delete qrCodeImageData;
+				delete[] qrCodeImageData;
 				qrCodeImageData = nullptr;
 				qrCodeImageWidth = 0;
 			}
@@ -60,7 +60,7 @@ namespace openmittsu {
 			qrCodeImageWidth = newWidth;
 
 			if (newData != nullptr) {
-				delete newData;
+				delete[] newData;
 			}
 
 			update();
