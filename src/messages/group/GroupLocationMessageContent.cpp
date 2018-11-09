@@ -64,12 +64,16 @@ namespace openmittsu {
 				QByteArray const remainingPayload(payload.mid(1 + openmittsu::protocol::GroupId::getSizeOfGroupIdInBytes()));
 
 				int const positionOfNewLine = remainingPayload.indexOf('\n');
-				if (positionOfNewLine == -1) {
-					throw openmittsu::exceptions::ProtocolErrorException() << "Could not split payload of a GroupLocationMessage, it does not contain the 0x0A LF splitter.";
-				}
+				QString positions;
+				QString descriptionText;
 
-				QString const positions = QString::fromUtf8(remainingPayload.left(positionOfNewLine));
-				QString const descriptionText = QString::fromUtf8(remainingPayload.mid(positionOfNewLine + 1));
+				if (positionOfNewLine == -1) {
+					positions = QString::fromUtf8(remainingPayload);
+					descriptionText = QStringLiteral("");
+				} else {
+					positions = QString::fromUtf8(remainingPayload.left(positionOfNewLine));
+					descriptionText = QString::fromUtf8(remainingPayload.mid(positionOfNewLine + 1));
+				}
 
 				QStringList splitPositions = positions.split(',', QString::SkipEmptyParts);
 				if (splitPositions.size() != 3) {

@@ -62,13 +62,18 @@ namespace openmittsu {
 				QByteArray const remainingPayload(payload.mid(1));
 
 				int const positionOfNewLine = remainingPayload.indexOf('\n');
+				QString positions;
+				QString descriptionText;
+
 				if (positionOfNewLine == -1) {
-					throw openmittsu::exceptions::ProtocolErrorException() << "Could not split payload of a ContactLocationMessageContent, it does not contain the 0x0A LF splitter.";
+					positions = QString::fromUtf8(remainingPayload);
+					descriptionText = QStringLiteral("");
+				} else {
+					positions = QString::fromUtf8(remainingPayload.left(positionOfNewLine));
+					descriptionText = QString::fromUtf8(remainingPayload.mid(positionOfNewLine + 1));
 				}
 
-				QString const positions = QString::fromUtf8(remainingPayload.left(positionOfNewLine));
-				QString const descriptionText = QString::fromUtf8(remainingPayload.mid(positionOfNewLine + 1));
-
+				
 				QStringList splitPositions = positions.split(',', QString::SkipEmptyParts);
 				if (splitPositions.size() != 3) {
 					throw openmittsu::exceptions::ProtocolErrorException() << "Could not split payload of a ContactLocationMessageContent, it contains " << splitPositions.size() << " instead of 3 positions. Input String: " << positions.toStdString();
