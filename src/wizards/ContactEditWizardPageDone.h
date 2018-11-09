@@ -3,8 +3,10 @@
 
 #include <QWizardPage>
 
+#include <memory>
+
 namespace Ui {
-class ContactEditWizardPageDone;
+	class ContactEditWizardPageDone;
 }
 
 namespace openmittsu {
@@ -18,7 +20,7 @@ namespace openmittsu {
 
 			virtual void initializePage();
 		private:
-			Ui::ContactEditWizardPageDone* m_ui;
+			std::unique_ptr<Ui::ContactEditWizardPageDone> m_ui;
 		};
 
 	}

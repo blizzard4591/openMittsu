@@ -8,10 +8,12 @@
 #include <QVBoxLayout>
 #include <QVector>
 
+#include <memory>
+
 #include "src/widgets/chat/ChatWidgetItem.h"
 
 namespace Ui {
-class ChatWidget;
+	class ChatWidget;
 }
 
 namespace openmittsu {
@@ -33,7 +35,7 @@ namespace openmittsu {
 		protected:
 			virtual void resizeEvent(QResizeEvent* event) override;
 		private:
-			Ui::ChatWidget* m_ui;
+			std::unique_ptr<Ui::ChatWidget> m_ui;
 			QVBoxLayout* m_topLayout;
 			QVector<ChatWidgetItem*> m_items;
 			QHash<ChatWidgetItem*, QHBoxLayout*> m_itemToLayoutMap;

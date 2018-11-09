@@ -1,20 +1,23 @@
 #include "src/wizards/LoadBackupWizardPageSelectBackupType.h"
 #include "ui_LoadBackupWizardPageSelectBackupType.h"
 
-#include "src/wizards/LoadBackupWizard.h"
 #include "src/exceptions/IllegalArgumentException.h"
+
+#include "src/utility/MakeUnique.h"
 #include "src/utility/QObjectConnectionMacro.h"
+
+#include "src/wizards/LoadBackupWizard.h"
 
 namespace openmittsu {
 	namespace wizards {
 
-		LoadBackupWizardPageSelectBackupType::LoadBackupWizardPageSelectBackupType(QWidget* parent) : QWizardPage(parent), m_ui(new Ui::LoadBackupWizardPageSelectBackupType) {
+		LoadBackupWizardPageSelectBackupType::LoadBackupWizardPageSelectBackupType(QWidget* parent) : QWizardPage(parent), m_ui(std::make_unique<Ui::LoadBackupWizardPageSelectBackupType>()) {
 			m_ui->setupUi(this);
 			OPENMITTSU_CONNECT(m_ui->buttonGroup, buttonToggled(int, bool), this, radioButtonsToggled());
 		}
 
 		LoadBackupWizardPageSelectBackupType::~LoadBackupWizardPageSelectBackupType() {
-			delete m_ui;
+			//
 		}
 
 		void LoadBackupWizardPageSelectBackupType::radioButtonsToggled() {

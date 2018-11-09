@@ -4,8 +4,10 @@
 #include <QDialog>
 #include <QRegularExpressionValidator>
 
+#include <memory>
+
 namespace Ui {
-class ContactAddDialog;
+	class ContactAddDialog;
 }
 
 namespace openmittsu {
@@ -20,8 +22,8 @@ namespace openmittsu {
 			QString getIdentity() const;
 			QString getNickname() const;
 		private:
-			Ui::ContactAddDialog* ui;
-			QRegularExpressionValidator* identityValidator;
+			std::unique_ptr<Ui::ContactAddDialog> m_ui;
+			QRegularExpressionValidator* m_identityValidator;
 		};
 
 	}

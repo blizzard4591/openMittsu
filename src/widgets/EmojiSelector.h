@@ -1,9 +1,12 @@
 #ifndef OPENMITTSU_WIDGETS_EMOJISELECTOR_H_
 #define OPENMITTSU_WIDGETS_EMOJISELECTOR_H_
+
 #include <QWidget>
 
+#include <memory>
+
 namespace Ui {
-class EmojiSelector;
+	class EmojiSelector;
 }
 
 namespace openmittsu {
@@ -19,7 +22,7 @@ namespace openmittsu {
 		private slots:
 			void labelTextDoubleClicked(QString const& selectedText);
 		private:
-			Ui::EmojiSelector* m_ui;
+			std::unique_ptr<Ui::EmojiSelector> m_ui;
 		};
 
 	}

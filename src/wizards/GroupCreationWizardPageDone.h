@@ -3,6 +3,8 @@
 
 #include <QWizardPage>
 
+#include <memory>
+
 namespace Ui {
 	class GroupCreationWizardPageDone;
 }
@@ -16,7 +18,7 @@ namespace openmittsu {
 			virtual ~GroupCreationWizardPageDone();
 
 		private:
-			Ui::GroupCreationWizardPageDone *m_ui;
+			std::unique_ptr<Ui::GroupCreationWizardPageDone> m_ui;
 		};
 	}
 }

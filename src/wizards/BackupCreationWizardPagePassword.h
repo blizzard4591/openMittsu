@@ -4,8 +4,10 @@
 #include <QWizardPage>
 #include <QRegExpValidator>
 
+#include <memory>
+
 namespace Ui {
-class BackupCreationWizardPagePassword;
+	class BackupCreationWizardPagePassword;
 }
 
 namespace openmittsu {
@@ -19,7 +21,7 @@ namespace openmittsu {
 
 			//bool isComplete() const override;
 		private:
-			Ui::BackupCreationWizardPagePassword* m_ui;
+			std::unique_ptr<Ui::BackupCreationWizardPagePassword> m_ui;
 			QRegExpValidator* m_passwordValidator;
 		};
 

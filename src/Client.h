@@ -5,6 +5,7 @@
 #include <QDir>
 #include <QFile>
 #include <QHash>
+#include <QListWidgetItem>
 #include <QMainWindow>
 #include <QSettings>
 #include <QString>
@@ -13,11 +14,6 @@
 
 #include <memory>
 
-#include "ui_main.h"
-#include "src/network/ProtocolClient.h"
-
-#include "src/updater/Updater.h"
-
 #include "src/database/Database.h"
 #include "src/database/DatabasePointerAuthority.h"
 #include "src/database/DatabaseWrapper.h"
@@ -25,15 +21,24 @@
 #include "src/dataproviders/MessageCenterPointerAuthority.h"
 #include "src/dataproviders/MessageCenterWrapper.h"
 
-#include "src/utility/ThreadContainer.h"
-
 #include "src/dataproviders/KeyRegistry.h"
-#include "src/widgets/TabController.h"
 
-#include "src/utility/AudioNotification.h"
-#include "src/tasks/CallbackTask.h"
+#include "src/network/ProtocolClient.h"
 
 #include "src/options/OptionMaster.h"
+
+#include "src/tasks/CallbackTask.h"
+
+#include "src/updater/Updater.h"
+
+#include "src/utility/AudioNotification.h"
+#include "src/utility/ThreadContainer.h"
+
+#include "src/widgets/TabController.h"
+
+namespace Ui {
+	class MainWindow;
+}
 
 class Client : public QMainWindow {
 	Q_OBJECT
@@ -98,7 +103,7 @@ public slots:
 protected:
 	virtual void closeEvent(QCloseEvent* event) override;
 private:
-	Ui::MainWindow m_ui;
+	std::unique_ptr<Ui::MainWindow> m_ui;
 	std::shared_ptr<openmittsu::network::ProtocolClient> m_protocolClient;
 	QThread m_protocolClientThread;
 	QTimer m_connectionTimer;

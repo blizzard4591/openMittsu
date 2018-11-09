@@ -7,7 +7,9 @@
 #include <QPoint>
 #include <QStringList>
 #include <QMutex>
+
 #include <cstdint>
+#include <memory>
 
 #include "src/dataproviders/MessageSource.h"
 #include "src/messages/contact/ReceiptMessageContent.h"
@@ -18,7 +20,7 @@
 #include "src/widgets/chat/ChatWidgetItem.h"
 
 namespace Ui {
-class SimpleChatTab;
+	class SimpleChatTab;
 }
 
 namespace openmittsu {
@@ -68,7 +70,7 @@ namespace openmittsu {
 			virtual bool canUserAgree() const = 0;
 			void addChatWidgetItem(ChatWidgetItem* item);
 
-			Ui::SimpleChatTab* m_ui;
+			std::unique_ptr<Ui::SimpleChatTab> m_ui;
 			QSet<QString> m_knownUuids;
 			QMutex m_knownUuidsMutex;
 		private:

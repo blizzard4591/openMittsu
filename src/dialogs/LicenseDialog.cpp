@@ -4,15 +4,17 @@
 #include <QIcon>
 #include <QSize>
 
+#include "src/utility/MakeUnique.h"
+
 namespace openmittsu {
 	namespace dialogs {
 
-		LicenseDialog::LicenseDialog(QWidget* parent) : QDialog(parent), ui(new Ui::LicenseDialog) {
-			ui->setupUi(this);
+		LicenseDialog::LicenseDialog(QWidget* parent) : QDialog(parent), m_ui(std::make_unique<Ui::LicenseDialog>()) {
+			m_ui->setupUi(this);
 
 			QIcon icon = this->windowIcon();
 			QSize size = icon.actualSize(QSize(64, 64));
-			ui->lblIcon->setPixmap(icon.pixmap(size));
+			m_ui->lblIcon->setPixmap(icon.pixmap(size));
 
 			QString const licenseText = QString("<h2>OpenMittsu</h2><br><br>")
 				.append(tr("An open source chat client for Threema-style end-to-end encrypted chat networks."))
@@ -41,11 +43,11 @@ namespace openmittsu {
 				.append(QStringLiteral("</li><li>"))
 				.append(tr("SpdLog (<a href=\"https://github.com/gabime/spdlog\">https://github.com/gabime/spdlog</a>). Licensed under the The MIT License (MIT). Copyright(c) 2015 Gabi Melman. Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files(the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and / or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software."))
 				.append(QStringLiteral("</li></ul><br><br>"));
-			ui->lblLicenseText->setText(licenseText);
+			m_ui->lblLicenseText->setText(licenseText);
 		}
 
 		LicenseDialog::~LicenseDialog() {
-			delete ui;
+			//
 		}
 
 	}

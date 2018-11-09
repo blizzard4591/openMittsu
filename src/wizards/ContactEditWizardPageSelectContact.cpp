@@ -3,10 +3,12 @@
 
 #include "src/exceptions/InternalErrorException.h"
 
+#include "src/utility/MakeUnique.h"
+
 namespace openmittsu {
 	namespace wizards {
 
-		ContactEditWizardPageSelectContact::ContactEditWizardPageSelectContact(std::shared_ptr<openmittsu::dataproviders::ContactDataProvider> const& contactDataProvider, QWidget* parent) : QWizardPage(parent), m_ui(new Ui::ContactEditWizardPageSelectContact), m_contactDataProvider(contactDataProvider) {
+		ContactEditWizardPageSelectContact::ContactEditWizardPageSelectContact(std::shared_ptr<openmittsu::dataproviders::ContactDataProvider> const& contactDataProvider, QWidget* parent) : QWizardPage(parent), m_ui(std::make_unique<Ui::ContactEditWizardPageSelectContact>()), m_contactDataProvider(contactDataProvider) {
 			m_ui->setupUi(this);
 
 			/*nameValidator = new QRegExpValidator(QRegExp(".+", Qt::CaseInsensitive, QRegExp::RegExp2), ui->edtName);
@@ -42,7 +44,7 @@ namespace openmittsu {
 		}
 
 		ContactEditWizardPageSelectContact::~ContactEditWizardPageSelectContact() {
-			delete m_ui;
+			//
 		}
 
 		bool ContactEditWizardPageSelectContact::isComplete() const {

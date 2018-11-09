@@ -5,6 +5,7 @@
 #include <QUrl>
 
 #include "src/utility/Logging.h"
+#include "src/utility/MakeUnique.h"
 #include "src/utility/QObjectConnectionMacro.h"
 #include "src/utility/Version.h"
 
@@ -12,7 +13,7 @@ namespace openmittsu {
 	namespace dialogs {
 
 		UpdaterDialog::UpdaterDialog(int versionMajor, int versionMinor, int versionPatch, int commitsSinceTag, QString const& gitHash, QString const& channel, QString const& link, QWidget* parent)
-			: QDialog(parent), m_ui(new Ui::UpdaterDialog), m_link(link) {
+			: QDialog(parent), m_ui(std::make_unique<Ui::UpdaterDialog>()), m_link(link) {
 			m_ui->setupUi(this);
 
 			m_ui->edtYourVersion->setText(QString::fromStdString(openmittsu::utility::Version::versionWithTagString()));
@@ -30,7 +31,7 @@ namespace openmittsu {
 		}
 
 		UpdaterDialog::~UpdaterDialog() {
-			delete m_ui;
+			//
 		}
 
 		void UpdaterDialog::btnLinkOnClick() {

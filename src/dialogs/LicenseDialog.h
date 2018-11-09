@@ -3,6 +3,8 @@
 
 #include <QDialog>
 
+#include <memory>
+
 namespace Ui {
 	class LicenseDialog;
 }
@@ -17,7 +19,7 @@ namespace openmittsu {
 			virtual ~LicenseDialog();
 
 		private:
-			Ui::LicenseDialog* ui;
+			std::unique_ptr<Ui::LicenseDialog> m_ui;
 		};
 
 	}

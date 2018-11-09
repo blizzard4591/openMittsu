@@ -8,12 +8,13 @@
 #include <QResizeEvent>
 #include <QTimer>
 
+#include "src/utility/MakeUnique.h"
 #include "src/utility/QObjectConnectionMacro.h"
 
 namespace openmittsu {
 	namespace widgets {
 
-		ChatWidget::ChatWidget(QWidget* parent) : QScrollArea(parent), m_ui(new Ui::ChatWidget), m_topLayout(nullptr), m_items(), m_isActive(false), m_hasUnreadMessage(false), m_unreadMessagesTimer(this) {
+		ChatWidget::ChatWidget(QWidget* parent) : QScrollArea(parent), m_ui(std::make_unique<Ui::ChatWidget>()), m_topLayout(nullptr), m_items(), m_isActive(false), m_hasUnreadMessage(false), m_unreadMessagesTimer(this) {
 			m_ui->setupUi(this);
 
 			OPENMITTSU_CONNECT(&m_unreadMessagesTimer, timeout(), this, onUnreadMessagesTimerExpired());
@@ -47,7 +48,7 @@ namespace openmittsu {
 		}
 
 		ChatWidget::~ChatWidget() {
-			delete m_ui;
+			//
 		}
 
 		void ChatWidget::scrollToBottom() {

@@ -1,15 +1,18 @@
 #include "src/wizards/GroupCreationWizardPageInfo.h"
 #include "ui_groupcreationwizardpageinfo.h"
 
-#include "src/widgets/ContactListWidgetItem.h"
+#include <QMessageBox>
+
 #include "src/exceptions/InternalErrorException.h"
+
+#include "src/utility/MakeUnique.h"
 #include "src/utility/QObjectConnectionMacro.h"
 
-#include <QMessageBox>
+#include "src/widgets/ContactListWidgetItem.h"
 
 namespace openmittsu {
 	namespace wizards {
-		GroupCreationWizardPageInfo::GroupCreationWizardPageInfo(QHash<openmittsu::protocol::ContactId, openmittsu::database::ContactData> const& knownIdentitiesWithNicknamesExcludingSelfContactId, std::unique_ptr<openmittsu::dataproviders::GroupCreationProcessor> groupCreationProcessor, QWidget* parent) : QWizardPage(parent), m_ui(new Ui::GroupCreationWizardPageInfo), m_knownIdentities(knownIdentitiesWithNicknamesExcludingSelfContactId), m_groupCreationProcessor(std::move(groupCreationProcessor)) {
+		GroupCreationWizardPageInfo::GroupCreationWizardPageInfo(QHash<openmittsu::protocol::ContactId, openmittsu::database::ContactData> const& knownIdentitiesWithNicknamesExcludingSelfContactId, std::unique_ptr<openmittsu::dataproviders::GroupCreationProcessor> groupCreationProcessor, QWidget* parent) : QWizardPage(parent), m_ui(std::make_unique<Ui::GroupCreationWizardPageInfo>()), m_knownIdentities(knownIdentitiesWithNicknamesExcludingSelfContactId), m_groupCreationProcessor(std::move(groupCreationProcessor)) {
 			m_ui->setupUi(this);
 
 			m_nameValidator = new QRegExpValidator(QRegExp(".+", Qt::CaseInsensitive, QRegExp::RegExp2), m_ui->edtName);
@@ -36,7 +39,8 @@ namespace openmittsu {
 		}
 
 		GroupCreationWizardPageInfo::~GroupCreationWizardPageInfo() {
-			delete m_ui;
+			// Ownership is with m_ui->edtName
+			m_nameValidator = nullptr;
 		}
 
 		bool GroupCreationWizardPageInfo::validatePage() {

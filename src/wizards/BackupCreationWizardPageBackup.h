@@ -2,10 +2,13 @@
 #define OPENMITTSU_WIZARDS_BACKUPCREATIONWIZARDPAGEBACKUP_H_
 
 #include <QWizardPage>
+
+#include <memory>
+
 #include "src/backup/IdentityBackup.h"
 
 namespace Ui {
-class BackupCreationWizardPageBackup;
+	class BackupCreationWizardPageBackup;
 }
 
 namespace openmittsu {
@@ -19,7 +22,7 @@ namespace openmittsu {
 			//bool isComplete() const override;
 			virtual void initializePage() override;
 		private:
-			Ui::BackupCreationWizardPageBackup* ui;
+			std::unique_ptr<Ui::BackupCreationWizardPageBackup> m_ui;
 			openmittsu::backup::IdentityBackup const m_identityBackup;
 		};
 	}

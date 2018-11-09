@@ -1,23 +1,25 @@
 #include "src/wizards/BackupCreationWizardPageBackup.h"
 #include "ui_backupcreationwizardpagebackup.h"
 
+#include "src/utility/MakeUnique.h"
+
 namespace openmittsu {
 	namespace wizards {
-		BackupCreationWizardPageBackup::BackupCreationWizardPageBackup(openmittsu::backup::IdentityBackup const& identityBackup, QWidget* parent) : QWizardPage(parent), ui(new Ui::BackupCreationWizardPageBackup), m_identityBackup(identityBackup) {
-			ui->setupUi(this);
+		BackupCreationWizardPageBackup::BackupCreationWizardPageBackup(openmittsu::backup::IdentityBackup const& identityBackup, QWidget* parent) : QWizardPage(parent), m_ui(std::unique_ptr<Ui::BackupCreationWizardPageBackup>()), m_identityBackup(identityBackup) {
+			m_ui->setupUi(this);
 
-			registerField("edtBackupString*", ui->edtBackupString);
+			registerField("edtBackupString*", m_ui->edtBackupString);
 		}
 
 		BackupCreationWizardPageBackup::~BackupCreationWizardPageBackup() {
-			delete ui;
+			//
 		}
 
 		void BackupCreationWizardPageBackup::initializePage() {
 			QString const password = field("edtPassword").toString();
 			QString const backup = m_identityBackup.toBackupString(password);
-			ui->edtBackupString->setText(backup.toUpper());
-			ui->edtBackupString->selectAll();
+			m_ui->edtBackupString->setText(backup.toUpper());
+			m_ui->edtBackupString->selectAll();
 		}
 	}
 }

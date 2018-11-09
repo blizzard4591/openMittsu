@@ -4,6 +4,8 @@
 #include <QSet>
 #include <QWizard>
 
+#include <memory>
+
 #include "src/database/ContactData.h"
 #include "src/protocol/ContactId.h"
 
@@ -11,7 +13,7 @@
 #include "src/wizards/GroupCreationWizardPageDone.h"
 
 namespace Ui {
-class GroupCreationWizard;
+	class GroupCreationWizard;
 }
 
 namespace openmittsu {
@@ -24,9 +26,9 @@ namespace openmittsu {
 		public slots:
 			void pageNextOnClick(int pageId);
 		private:
-			Ui::GroupCreationWizard *ui;
-			GroupCreationWizardPageInfo* groupCreationWizardPageInfo;
-			GroupCreationWizardPageDone* groupCreationWizardPageDone;
+			std::unique_ptr<Ui::GroupCreationWizard> m_ui;
+			GroupCreationWizardPageInfo* m_groupCreationWizardPageInfo;
+			GroupCreationWizardPageDone* m_groupCreationWizardPageDone;
 		};
 	}
 }

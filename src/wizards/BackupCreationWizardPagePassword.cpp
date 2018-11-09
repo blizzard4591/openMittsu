@@ -3,10 +3,12 @@
 
 #include <QRegExp>
 
+#include "src/utility/MakeUnique.h"
+
 namespace openmittsu {
 	namespace wizards {
 
-		BackupCreationWizardPagePassword::BackupCreationWizardPagePassword(QWidget *parent) : QWizardPage(parent), m_ui(new Ui::BackupCreationWizardPagePassword) {
+		BackupCreationWizardPagePassword::BackupCreationWizardPagePassword(QWidget *parent) : QWizardPage(parent), m_ui(std::make_unique<Ui::BackupCreationWizardPagePassword>()) {
 			m_ui->setupUi(this);
 
 			// At least one character
@@ -18,7 +20,6 @@ namespace openmittsu {
 		}
 
 		BackupCreationWizardPagePassword::~BackupCreationWizardPagePassword() {
-			delete m_ui;
 			// Ownership is with ui->edtPassword
 			m_passwordValidator = nullptr;
 		}

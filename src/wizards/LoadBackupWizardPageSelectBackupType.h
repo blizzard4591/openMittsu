@@ -3,8 +3,10 @@
 
 #include <QWizardPage>
 
+#include <memory>
+
 namespace Ui {
-class LoadBackupWizardPageSelectBackupType;
+	class LoadBackupWizardPageSelectBackupType;
 }
 
 namespace openmittsu {
@@ -29,7 +31,7 @@ namespace openmittsu {
 		private slots:
 			void radioButtonsToggled();
 		private:
-			Ui::LoadBackupWizardPageSelectBackupType* m_ui;
+			std::unique_ptr<Ui::LoadBackupWizardPageSelectBackupType> m_ui;
 		};
 
 	}

@@ -1,12 +1,13 @@
 #include "src/widgets/EmojiSelector.h"
 #include "ui_EmojiSelector.h"
 
+#include "src/utility/MakeUnique.h"
 #include "src/utility/QObjectConnectionMacro.h"
 
 namespace openmittsu {
 	namespace widgets {
 
-		EmojiSelector::EmojiSelector(QWidget* parent) : QWidget(parent), m_ui(new Ui::EmojiSelector) {
+		EmojiSelector::EmojiSelector(QWidget* parent) : QWidget(parent), m_ui(std::make_unique<Ui::EmojiSelector>()) {
 			m_ui->setupUi(this);
 
 			OPENMITTSU_CONNECT(m_ui->labelActivity, doubleClickSelectedText(QString const&), this, labelTextDoubleClicked(QString const&));
@@ -21,7 +22,7 @@ namespace openmittsu {
 		}
 
 		EmojiSelector::~EmojiSelector() {
-			delete m_ui;
+			//
 		}
 
 		void EmojiSelector::labelTextDoubleClicked(QString const& selectedText) {

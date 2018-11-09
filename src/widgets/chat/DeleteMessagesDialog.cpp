@@ -2,17 +2,19 @@
 #include "ui_DeleteMessagesDialog.h"
 
 #include "src/exceptions/InternalErrorException.h"
+
 #include "src/utility/Logging.h"
+#include "src/utility/MakeUnique.h"
 
 namespace openmittsu {
 	namespace dialogs {
 
-		DeleteMessagesDialog::DeleteMessagesDialog(QWidget* parent) : QDialog(parent), m_ui(new Ui::DeleteMessagesDialog) {
+		DeleteMessagesDialog::DeleteMessagesDialog(QWidget* parent) : QDialog(parent), m_ui(std::make_unique<Ui::DeleteMessagesDialog>()) {
 			m_ui->setupUi(this);
 		}
 
 		DeleteMessagesDialog::~DeleteMessagesDialog() {
-			delete m_ui;
+			//
 		}
 
 		DeleteMessagesDialog::SelectedTab DeleteMessagesDialog::getSelectedTab() const {

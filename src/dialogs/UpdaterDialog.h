@@ -4,8 +4,10 @@
 #include <QDialog>
 #include <QString>
 
+#include <memory>
+
 namespace Ui {
-class UpdaterDialog;
+	class UpdaterDialog;
 }
 
 namespace openmittsu {
@@ -21,7 +23,7 @@ namespace openmittsu {
 		public slots:
 			void btnLinkOnClick();
 		private:
-			Ui::UpdaterDialog* m_ui;
+			std::unique_ptr<Ui::UpdaterDialog> m_ui;
 			QString const m_link;
 		};
 

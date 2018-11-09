@@ -6,8 +6,10 @@
 #include "src/protocol/ContactId.h"
 #include "src/crypto/PublicKey.h"
 
+#include <memory>
+
 namespace Ui {
-class FingerprintDialog;
+	class FingerprintDialog;
 }
 
 namespace openmittsu {
@@ -19,7 +21,7 @@ namespace openmittsu {
 			virtual ~FingerprintDialog();
 
 		private:
-			Ui::FingerprintDialog* ui;
+			std::unique_ptr<Ui::FingerprintDialog> m_ui;
 		};
 	}
 }

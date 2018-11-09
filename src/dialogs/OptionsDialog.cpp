@@ -9,11 +9,12 @@
 
 #include "src/exceptions/InternalErrorException.h"
 #include "src/utility/Logging.h"
+#include "src/utility/MakeUnique.h"
 
 namespace openmittsu {
 	namespace dialogs {
 
-		OptionsDialog::OptionsDialog(std::shared_ptr<openmittsu::options::OptionMaster> const& optionMaster, QWidget* parent) : QDialog(parent), m_ui(new Ui::OptionsDialog), m_optionMaster(optionMaster) {
+		OptionsDialog::OptionsDialog(std::shared_ptr<openmittsu::options::OptionMaster> const& optionMaster, QWidget* parent) : QDialog(parent), m_ui(std::make_unique<Ui::OptionsDialog>()), m_optionMaster(optionMaster) {
 			m_ui->setupUi(this);
 
 			int nWidth = 300;
@@ -91,7 +92,7 @@ namespace openmittsu {
 		}
 
 		OptionsDialog::~OptionsDialog() {
-			delete m_ui;
+			//
 		}
 
 		void OptionsDialog::saveOptions() {

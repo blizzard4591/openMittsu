@@ -11,7 +11,7 @@
 #include "src/dataproviders/ContactDataProvider.h"
 
 namespace Ui {
-class ContactEditWizard;
+	class ContactEditWizard;
 }
 
 namespace openmittsu {
@@ -25,7 +25,7 @@ namespace openmittsu {
 		public slots:
 			void pageNextOnClick(int pageId);
 		private:
-			Ui::ContactEditWizard* m_ui;
+			std::unique_ptr<Ui::ContactEditWizard> m_ui;
 			std::shared_ptr<openmittsu::dataproviders::ContactDataProvider> const m_contactDataProvider;
 			
 

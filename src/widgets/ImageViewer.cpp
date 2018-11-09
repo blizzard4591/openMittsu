@@ -12,12 +12,13 @@
 typedef QList<QByteArray> QByteArrayList;
 #endif
 
+#include "src/utility/MakeUnique.h"
 #include "src/utility/QObjectConnectionMacro.h"
 
 namespace openmittsu {
 	namespace widgets {
 
-		ImageViewer::ImageViewer(QImage const& img) : m_ui(new Ui::ImageViewerWindow), m_image(img), m_scaleFactor(1.0) {
+		ImageViewer::ImageViewer(QImage const& img) : m_ui(std::make_unique<Ui::ImageViewerWindow>()), m_image(img), m_scaleFactor(1.0) {
 			m_ui->setupUi(this);
 
 			this->setAttribute(Qt::WA_DeleteOnClose, true);
@@ -47,7 +48,7 @@ namespace openmittsu {
 		}
 
 		ImageViewer::~ImageViewer() {
-			delete m_ui;
+			//
 		}
 
 		bool ImageViewer::saveFile(QString const& fileName) {

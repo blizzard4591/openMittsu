@@ -11,38 +11,25 @@
 #include <iomanip>
 
 #include "src/Client.h"
-#include "src/network/ServerConfiguration.h"
 
-#include "ui_main.h"
+#include "src/backup/BackupReader.h"
 
-#include "src/wizards/BackupCreationWizard.h"
-#include "src/wizards/GroupCreationWizard.h"
-#include "src/wizards/LoadBackupWizard.h"
-#include "src/wizards/FirstUseWizard.h"
+#include "src/crypto/FullCryptoBox.h"
 
-#include "src/dialogs/ShowIdentityAndPublicKeyDialog.h"
+#include "src/database/SimpleDatabase.h"
+
+#include "src/dataproviders/BackedContactAndGroupPool.h"
+#include "src/dataproviders/KeyRegistry.h"
+#include "src/dataproviders/MessageCenter.h"
+#include "src/dataproviders/SimpleGroupCreationProcessor.h"
+
 #include "src/dialogs/ContactAddDialog.h"
 #include "src/dialogs/ContactEditDialog.h"
 #include "src/dialogs/FingerprintDialog.h"
 #include "src/dialogs/LicenseDialog.h"
 #include "src/dialogs/OptionsDialog.h"
+#include "src/dialogs/ShowIdentityAndPublicKeyDialog.h"
 #include "src/dialogs/UpdaterDialog.h"
-
-#include "src/widgets/SimpleContactChatTab.h"
-#include "src/widgets/SimpleGroupChatTab.h"
-#include "src/widgets/SimpleTabController.h"
-#include "src/widgets/ContactListWidgetItem.h"
-#include "src/widgets/GroupListWidgetItem.h"
-
-#include "src/utility/Logging.h"
-#include "src/utility/MakeUnique.h"
-#include "src/utility/Version.h"
-#include "src/utility/QObjectConnectionMacro.h"
-#include "src/utility/ThreadDeleter.h"
-#include "src/utility/LegacyContactImporter.h"
-#include "src/backup/BackupReader.h"
-
-#include "src/backup/BackupReader.h"
 
 #include "src/exceptions/InternalErrorException.h"
 #include "src/exceptions/IllegalArgumentException.h"
@@ -50,27 +37,41 @@
 #include "src/exceptions/InvalidPasswordOrDatabaseException.h"
 #include "src/exceptions/ProtocolErrorException.h"
 
+#include "src/network/ServerConfiguration.h"
+
+#include "src/protocol/ContactId.h"
+#include "src/protocol/GroupId.h"
+#include "src/protocol/GroupRegistry.h"
+
+#include "src/utility/LegacyContactImporter.h"
+#include "src/utility/Logging.h"
+#include "src/utility/MakeUnique.h"
+#include "src/utility/QObjectConnectionMacro.h"
+#include "src/utility/ThreadDeleter.h"
+#include "src/utility/Version.h"
+
 #include "src/tasks/IdentityReceiverCallbackTask.h"
 #include "src/tasks/CheckFeatureLevelCallbackTask.h"
 #include "src/tasks/CheckContactActivityStatusCallbackTask.h"
 #include "src/tasks/SetFeatureLevelCallbackTask.h"
 
-#include "src/protocol/ContactId.h"
-#include "src/protocol/GroupId.h"
+#include "src/widgets/SimpleContactChatTab.h"
+#include "src/widgets/SimpleGroupChatTab.h"
+#include "src/widgets/SimpleTabController.h"
+#include "src/widgets/ContactListWidgetItem.h"
+#include "src/widgets/GroupListWidgetItem.h"
 
-#include "src/crypto/FullCryptoBox.h"
-#include "src/dataproviders/KeyRegistry.h"
-#include "src/protocol/GroupRegistry.h"
+#include "src/wizards/BackupCreationWizard.h"
+#include "src/wizards/GroupCreationWizard.h"
+#include "src/wizards/LoadBackupWizard.h"
+#include "src/wizards/FirstUseWizard.h"
 
-#include "src/database/SimpleDatabase.h"
-
-#include "src/dataproviders/MessageCenter.h"
-#include "src/dataproviders/SimpleGroupCreationProcessor.h"
-#include "src/dataproviders/BackedContactAndGroupPool.h"
 #include "Config.h"
 
+#include "ui_main.h"
+
 Client::Client(QWidget* parent) : QMainWindow(parent), 
-	m_ui(), 
+	m_ui(std::make_unique<Ui::MainWindow>()),
 	m_protocolClient(nullptr), m_protocolClientThread(this), m_connectionTimer(this),
 	m_updater(),
 	m_connectionState(ConnectionState::STATE_DISCONNECTED),
@@ -86,9 +87,9 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 	m_audioNotifier(std::make_shared<openmittsu::utility::AudioNotification>()) 
 
 {
-	m_ui.setupUi(this);
+	m_ui->setupUi(this);
 
-	m_tabController = std::make_shared<openmittsu::widgets::SimpleTabController>(m_ui.tabWidget);
+	m_tabController = std::make_shared<openmittsu::widgets::SimpleTabController>(m_ui->tabWidget);
 
 	bool messageCenterCreationSuccess = false;
 	if ((!QMetaObject::invokeMethod(m_messageCenterThread.getQObjectPtr(), "createMessageCenter", Qt::BlockingQueuedConnection, Q_RETURN_ARG(bool, messageCenterCreationSuccess), Q_ARG(openmittsu::database::DatabaseWrapperFactory const&, m_databasePointerAuthority.getDatabaseWrapperFactory()))) || (!messageCenterCreationSuccess)) {
@@ -150,36 +151,36 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 		}
 	}
 
-	OPENMITTSU_CONNECT(m_ui.btnConnect, clicked(), this, btnConnectOnClick());
-	OPENMITTSU_CONNECT(m_ui.btnOpenDatabase, clicked(), this, btnOpenDatabaseOnClick());
+	OPENMITTSU_CONNECT(m_ui->btnConnect, clicked(), this, btnConnectOnClick());
+	OPENMITTSU_CONNECT(m_ui->btnOpenDatabase, clicked(), this, btnOpenDatabaseOnClick());
 
-	m_ui.listContacts->setContextMenuPolicy(Qt::CustomContextMenu);
-	m_ui.listGroups->setContextMenuPolicy(Qt::CustomContextMenu);
-	OPENMITTSU_CONNECT(m_ui.listContacts, itemDoubleClicked(QListWidgetItem*), this, listContactsOnDoubleClick(QListWidgetItem*));
-	OPENMITTSU_CONNECT(m_ui.listContacts, customContextMenuRequested(const QPoint&), this, listContactsOnContextMenu(const QPoint&));
-	OPENMITTSU_CONNECT(m_ui.listGroups, itemDoubleClicked(QListWidgetItem*), this, listGroupsOnDoubleClick(QListWidgetItem*));
-	OPENMITTSU_CONNECT(m_ui.listGroups, customContextMenuRequested(const QPoint&), this, listGroupsOnContextMenu(const QPoint&));
+	m_ui->listContacts->setContextMenuPolicy(Qt::CustomContextMenu);
+	m_ui->listGroups->setContextMenuPolicy(Qt::CustomContextMenu);
+	OPENMITTSU_CONNECT(m_ui->listContacts, itemDoubleClicked(QListWidgetItem*), this, listContactsOnDoubleClick(QListWidgetItem*));
+	OPENMITTSU_CONNECT(m_ui->listContacts, customContextMenuRequested(const QPoint&), this, listContactsOnContextMenu(const QPoint&));
+	OPENMITTSU_CONNECT(m_ui->listGroups, itemDoubleClicked(QListWidgetItem*), this, listGroupsOnDoubleClick(QListWidgetItem*));
+	OPENMITTSU_CONNECT(m_ui->listGroups, customContextMenuRequested(const QPoint&), this, listGroupsOnContextMenu(const QPoint&));
 
 	// Menus
-	OPENMITTSU_CONNECT(m_ui.actionLicense, triggered(), this, menuAboutLicenseOnClick());
-	OPENMITTSU_CONNECT(m_ui.actionAbout, triggered(), this, menuAboutAboutOnClick());
-	OPENMITTSU_CONNECT(m_ui.actionAbout_Qt, triggered(), this, menuAboutAboutQtOnClick());
-	OPENMITTSU_CONNECT(m_ui.actionAdd_a_Contact, triggered(), this, menuContactAddOnClick());
-	OPENMITTSU_CONNECT(m_ui.actionDelete_a_Contact, triggered(), this, menuContactDeleteOnClick());
-	OPENMITTSU_CONNECT(m_ui.actionEdit_a_Contact, triggered(), this, menuContactEditOnClick());
-	OPENMITTSU_CONNECT(m_ui.actionSave_to_file, triggered(), this, menuContactSaveToFileOnClick());
-	OPENMITTSU_CONNECT(m_ui.actionAdd_Group, triggered(), this, menuGroupAddOnClick());
-	OPENMITTSU_CONNECT(m_ui.actionEdit_Group, triggered(), this, menuGroupEditOnClick());
-	OPENMITTSU_CONNECT(m_ui.actionLeave_Group, triggered(), this, menuGroupLeaveOnClick());
-	OPENMITTSU_CONNECT(m_ui.actionCreate_Backup, triggered(), this, menuIdentityCreateBackupOnClick());
-	OPENMITTSU_CONNECT(m_ui.actionLoad_Backup, triggered(), this, menuIdentityLoadBackupOnClick());
-	OPENMITTSU_CONNECT(m_ui.actionShow_Fingerprint, triggered(), this, menuIdentityShowFingerprintOnClick());
-	OPENMITTSU_CONNECT(m_ui.actionShow_Public_Key, triggered(), this, menuIdentityShowPublicKeyOnClick());
-	OPENMITTSU_CONNECT(m_ui.actionImport_legacy_contacts_and_groups, triggered(), this, menuDatabaseImportLegacyContactsAndGroupsOnClick());
-	OPENMITTSU_CONNECT(m_ui.actionStatistics, triggered(), this, menuAboutStatisticsOnClick());
-	OPENMITTSU_CONNECT(m_ui.actionOptions, triggered(), this, menuFileOptionsOnClick());
-	OPENMITTSU_CONNECT(m_ui.actionShow_First_Use_Wizard, triggered(), this, menuFileShowFirstUseWizardOnClick());
-	OPENMITTSU_CONNECT(m_ui.actionExit, triggered(), this, menuFileExitOnClick());
+	OPENMITTSU_CONNECT(m_ui->actionLicense, triggered(), this, menuAboutLicenseOnClick());
+	OPENMITTSU_CONNECT(m_ui->actionAbout, triggered(), this, menuAboutAboutOnClick());
+	OPENMITTSU_CONNECT(m_ui->actionAbout_Qt, triggered(), this, menuAboutAboutQtOnClick());
+	OPENMITTSU_CONNECT(m_ui->actionAdd_a_Contact, triggered(), this, menuContactAddOnClick());
+	OPENMITTSU_CONNECT(m_ui->actionDelete_a_Contact, triggered(), this, menuContactDeleteOnClick());
+	OPENMITTSU_CONNECT(m_ui->actionEdit_a_Contact, triggered(), this, menuContactEditOnClick());
+	OPENMITTSU_CONNECT(m_ui->actionSave_to_file, triggered(), this, menuContactSaveToFileOnClick());
+	OPENMITTSU_CONNECT(m_ui->actionAdd_Group, triggered(), this, menuGroupAddOnClick());
+	OPENMITTSU_CONNECT(m_ui->actionEdit_Group, triggered(), this, menuGroupEditOnClick());
+	OPENMITTSU_CONNECT(m_ui->actionLeave_Group, triggered(), this, menuGroupLeaveOnClick());
+	OPENMITTSU_CONNECT(m_ui->actionCreate_Backup, triggered(), this, menuIdentityCreateBackupOnClick());
+	OPENMITTSU_CONNECT(m_ui->actionLoad_Backup, triggered(), this, menuIdentityLoadBackupOnClick());
+	OPENMITTSU_CONNECT(m_ui->actionShow_Fingerprint, triggered(), this, menuIdentityShowFingerprintOnClick());
+	OPENMITTSU_CONNECT(m_ui->actionShow_Public_Key, triggered(), this, menuIdentityShowPublicKeyOnClick());
+	OPENMITTSU_CONNECT(m_ui->actionImport_legacy_contacts_and_groups, triggered(), this, menuDatabaseImportLegacyContactsAndGroupsOnClick());
+	OPENMITTSU_CONNECT(m_ui->actionStatistics, triggered(), this, menuAboutStatisticsOnClick());
+	OPENMITTSU_CONNECT(m_ui->actionOptions, triggered(), this, menuFileOptionsOnClick());
+	OPENMITTSU_CONNECT(m_ui->actionShow_First_Use_Wizard, triggered(), this, menuFileShowFirstUseWizardOnClick());
+	OPENMITTSU_CONNECT(m_ui->actionExit, triggered(), this, menuFileExitOnClick());
 
 	m_protocolClientThread.start();
 	OPENMITTSU_CONNECT(&m_protocolClientThread, finished(), this, threadFinished());
@@ -327,7 +328,7 @@ void Client::updaterFoundNewVersion(int versionMajor, int versionMinor, int vers
 }
 
 void Client::updateDatabaseInfo(QString const& currentFileName) {
-	m_ui.lblDatabase->setText(currentFileName);
+	m_ui->lblDatabase->setText(currentFileName);
 	if (m_databaseThread.getWorker().hasDatabase()) {
 		if (!m_databaseWrapper.hasDatabase()) {
 			LOGGER_DEBUG("Database was set, but wrapper does not announce so.");
@@ -344,17 +345,17 @@ void Client::btnConnectOnClick() {
 			return;
 		}
 
-		m_ui.btnConnect->setEnabled(false);
-		m_ui.btnConnect->setText(tr("Connecting..."));
+		m_ui->btnConnect->setEnabled(false);
+		m_ui->btnConnect->setText(tr("Connecting..."));
 
 		setupProtocolClient();
 		QTimer::singleShot(0, m_protocolClient.get(), SLOT(connectToServer()));
 	} else if (m_connectionState == ConnectionState::STATE_CONNECTING) {
 		// No click should be possible in this state
-		m_ui.btnConnect->setEnabled(false);
+		m_ui->btnConnect->setEnabled(false);
 	} else if (m_connectionState == ConnectionState::STATE_CONNECTED) {
-		m_ui.btnConnect->setEnabled(false);
-		m_ui.btnConnect->setText(tr("Disconnecting..."));
+		m_ui->btnConnect->setEnabled(false);
+		m_ui->btnConnect->setText(tr("Disconnecting..."));
 		QTimer::singleShot(0, m_protocolClient.get(), SLOT(disconnectFromServer()));
 	}
 }
@@ -440,8 +441,8 @@ void Client::openDatabaseFile(QString const& fileName) {
 
 void Client::contactRegistryOnIdentitiesChanged() {
 	LOGGER_DEBUG("Updating contacts list on IdentitiesChanged() signal.");
-	m_ui.listContacts->clear();
-	m_ui.listGroups->clear();
+	m_ui->listContacts->clear();
+	m_ui->listGroups->clear();
 	
 	if (m_databaseWrapper.hasDatabase()) {
 		QHash<openmittsu::protocol::ContactId, openmittsu::database::ContactData> knownIdentities = m_databaseWrapper.getContactDataAll(false);
@@ -468,15 +469,15 @@ void Client::contactRegistryOnIdentitiesChanged() {
 			}
 
 			bool inserted = false;
-			for (int i = 0; i < m_ui.listContacts->count(); ++i) {
-				if (*clwi < *m_ui.listContacts->item(i)) {
-					m_ui.listContacts->insertItem(i, clwi);
+			for (int i = 0; i < m_ui->listContacts->count(); ++i) {
+				if (*clwi < *m_ui->listContacts->item(i)) {
+					m_ui->listContacts->insertItem(i, clwi);
 					inserted = true;
 					break;
 				}
 			}
 			if (!inserted) {
-				m_ui.listContacts->addItem(clwi);
+				m_ui->listContacts->addItem(clwi);
 			}
 		}
 
@@ -490,15 +491,15 @@ void Client::contactRegistryOnIdentitiesChanged() {
 			openmittsu::widgets::GroupListWidgetItem* glwi = new openmittsu::widgets::GroupListWidgetItem(groupId, false, itGroups->title);
 
 			bool inserted = false;
-			for (int i = 0; i < m_ui.listGroups->count(); ++i) {
-				if (*glwi < *m_ui.listGroups->item(i)) {
-					m_ui.listGroups->insertItem(i, glwi);
+			for (int i = 0; i < m_ui->listGroups->count(); ++i) {
+				if (*glwi < *m_ui->listGroups->item(i)) {
+					m_ui->listGroups->insertItem(i, glwi);
 					inserted = true;
 					break;
 				}
 			}
 			if (!inserted) {
-				m_ui.listGroups->addItem(glwi);
+				m_ui->listGroups->addItem(glwi);
 			}
 		}
 	}
@@ -570,16 +571,16 @@ void Client::onDatabaseGroupChanged(openmittsu::protocol::GroupId const& group) 
 void Client::protocolClientOnReadyConnect() {
 	LOGGER_DEBUG("In Client: protocolClientOnReadyConnect()");
 	m_connectionState = ConnectionState::STATE_DISCONNECTED;
-	m_ui.btnConnect->setText("Connect");
-	m_ui.btnConnect->setEnabled(true);
+	m_ui->btnConnect->setText("Connect");
+	m_ui->btnConnect->setEnabled(true);
 	uiFocusOnOverviewTab();
 }
 
 void Client::protocolClientOnLostConnection() {
 	LOGGER_DEBUG("In Client: protocolClientOnLostConnection()");
 	m_connectionState = ConnectionState::STATE_DISCONNECTED;
-	m_ui.btnConnect->setText("Connect");
-	m_ui.btnConnect->setEnabled(true);
+	m_ui->btnConnect->setText("Connect");
+	m_ui->btnConnect->setEnabled(true);
 	uiFocusOnOverviewTab();
 }
 
@@ -593,8 +594,8 @@ void Client::protocolClientOnConnectToFinished(int errCode, QString message) {
 	uiFocusOnOverviewTab();
 	if (errCode == 0) {
 		m_connectionState = ConnectionState::STATE_CONNECTED;
-		m_ui.btnConnect->setText(tr("Disconnect"));
-		m_ui.btnConnect->setEnabled(true);
+		m_ui->btnConnect->setText(tr("Disconnect"));
+		m_ui->btnConnect->setEnabled(true);
 
 		// Start checking feature levels and statuses of contacts
 		if (m_databaseThread.getWorker().hasDatabase()) {
@@ -617,13 +618,13 @@ void Client::protocolClientOnConnectToFinished(int errCode, QString message) {
 		m_connectionState = ConnectionState::STATE_DISCONNECTED;
 		LOGGER()->warn("Could not connect to server. The error was: {}", message.toStdString());
 		QMessageBox::warning(this, "Connection Error", QString("Could not connect to server.\nThe error was: %1").arg(message));
-		m_ui.btnConnect->setText(tr("Connect"));
-		m_ui.btnConnect->setEnabled(true);
+		m_ui->btnConnect->setText(tr("Connect"));
+		m_ui->btnConnect->setEnabled(true);
 	}
 }
 
 void Client::uiFocusOnOverviewTab() {
-	m_ui.tabWidget->setCurrentWidget(m_ui.tabOverview);
+	m_ui->tabWidget->setCurrentWidget(m_ui->tabOverview);
 }
 
 void Client::listContactsOnDoubleClick(QListWidgetItem* item) {
@@ -668,8 +669,8 @@ void Client::listContactsOnContextMenu(QPoint const& pos) {
 	if ((!m_databaseWrapper.hasDatabase()) || (!m_messageCenterWrapper.hasMessageCenter()) || (m_tabController == nullptr)) {
 		return;
 	}
-	QPoint globalPos = m_ui.listContacts->viewport()->mapToGlobal(pos);
-	QListWidgetItem* listItem = m_ui.listContacts->itemAt(pos);
+	QPoint globalPos = m_ui->listContacts->viewport()->mapToGlobal(pos);
+	QListWidgetItem* listItem = m_ui->listContacts->itemAt(pos);
 	openmittsu::widgets::ContactListWidgetItem* clwi = dynamic_cast<openmittsu::widgets::ContactListWidgetItem*>(listItem);
 
 	if (clwi != nullptr) {
@@ -777,8 +778,8 @@ void Client::listGroupsOnContextMenu(QPoint const& pos) {
 		return;
 	}
 
-	QPoint globalPos = m_ui.listGroups->viewport()->mapToGlobal(pos);
-	QListWidgetItem* listItem = m_ui.listGroups->itemAt(pos);
+	QPoint globalPos = m_ui->listGroups->viewport()->mapToGlobal(pos);
+	QListWidgetItem* listItem = m_ui->listGroups->itemAt(pos);
 	openmittsu::widgets::GroupListWidgetItem* glwi = dynamic_cast<openmittsu::widgets::GroupListWidgetItem*>(listItem);
 
 	if (glwi != nullptr) {
@@ -1122,10 +1123,10 @@ void Client::connectionTimerOnTimer() {
 		QDateTime const now = QDateTime::currentDateTime();
 		quint64 const seconds = m_protocolClient->getConnectedSince().secsTo(now);
 
-		m_ui.lblStatus->setText(text.arg(formatDuration(seconds)));
+		m_ui->lblStatus->setText(text.arg(formatDuration(seconds)));
 	} else {
 		QString const text(QStringLiteral("Not connected"));
-		m_ui.lblStatus->setText(text);
+		m_ui->lblStatus->setText(text);
 	}
 }
 

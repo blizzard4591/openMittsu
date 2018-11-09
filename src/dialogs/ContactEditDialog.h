@@ -4,8 +4,10 @@
 #include <QDialog>
 #include <QString>
 
+#include <memory>
+
 namespace Ui {
-class ContactEditDialog;
+	class ContactEditDialog;
 }
 
 namespace openmittsu {
@@ -19,7 +21,7 @@ namespace openmittsu {
 
 			QString getNickname() const;
 		private:
-			Ui::ContactEditDialog* ui;
+			std::unique_ptr<Ui::ContactEditDialog> m_ui;
 		};
 
 	}

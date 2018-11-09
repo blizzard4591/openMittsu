@@ -17,10 +17,12 @@
 
 #include "src/exceptions/InternalErrorException.h"
 #include "src/exceptions/NotConnectedException.h"
-#include "src/utility/Logging.h"
-#include "src/utility/QObjectConnectionMacro.h"
 
 #include "src/protocol/TextLengthLimiter.h"
+
+#include "src/utility/Logging.h"
+#include "src/utility/MakeUnique.h"
+#include "src/utility/QObjectConnectionMacro.h"
 
 #include "src/widgets/chat/DeleteMessagesDialog.h"
 
@@ -29,7 +31,7 @@
 namespace openmittsu {
 	namespace widgets {
 
-		SimpleChatTab::SimpleChatTab(QWidget* parent) : ChatTab(parent), m_ui(new Ui::SimpleChatTab), m_isTyping(false) {
+		SimpleChatTab::SimpleChatTab(QWidget* parent) : ChatTab(parent), m_ui(std::make_unique<Ui::SimpleChatTab>()), m_isTyping(false) {
 			m_ui->setupUi(this);
 
 			OPENMITTSU_CONNECT(m_ui->edtInput, textChanged(), this, edtInputOnTextEdited());
@@ -49,7 +51,6 @@ namespace openmittsu {
 
 		SimpleChatTab::~SimpleChatTab() {
 			//
-			delete m_ui;
 		}
 
 		void SimpleChatTab::onChatWidgetHasUnreadMessages() {
@@ -130,7 +131,6 @@ namespace openmittsu {
 						}
 					}
 				} else if (selectedItem == actionDeleteMessages) {
-					bool ok = false;
 					openmittsu::dialogs::DeleteMessagesDialog dialog(this);
 					dialog.show();
 					int const result = dialog.exec();

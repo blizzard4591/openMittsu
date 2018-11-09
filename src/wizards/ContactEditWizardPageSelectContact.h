@@ -27,7 +27,7 @@ namespace openmittsu {
 		public slots:
 			void onListWidgetItemSelectionChanged();
 		private:
-			Ui::ContactEditWizardPageSelectContact* m_ui;
+			std::unique_ptr<Ui::ContactEditWizardPageSelectContact> m_ui;
 			std::shared_ptr<openmittsu::dataproviders::ContactDataProvider> const m_contactDataProvider;
 
 			QRegExpValidator* m_nameValidator;

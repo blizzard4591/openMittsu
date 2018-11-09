@@ -58,6 +58,8 @@
 #include <QString>
 #include <QTemporaryFile>
 
+#include <memory>
+
 QT_BEGIN_NAMESPACE
 class QAbstractItemView;
 class QLabel;
@@ -81,7 +83,6 @@ namespace openmittsu {
 
 		class Player : public QWidget {
 			Q_OBJECT
-
 		public:
 			explicit Player(bool useVideoWidget, QWidget *parent = nullptr);
 			virtual ~Player();
@@ -118,7 +119,7 @@ namespace openmittsu {
 			void handleCursor(QMediaPlayer::MediaStatus status);
 			void updateDurationInfo(qint64 currentInfo);
 
-			Ui::Player* m_ui;
+			std::unique_ptr<Ui::Player> m_ui;
 			bool m_useVideoWidget;
 
 			QMediaPlayer *m_player = nullptr;

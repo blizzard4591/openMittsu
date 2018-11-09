@@ -3,8 +3,10 @@
 
 #include <QWizardPage>
 
+#include <memory>
+
 namespace Ui {
-class LoadBackupWizardPageDone;
+	class LoadBackupWizardPageDone;
 }
 
 namespace openmittsu {
@@ -17,7 +19,7 @@ namespace openmittsu {
 			virtual ~LoadBackupWizardPageDone();
 
 		private:
-			Ui::LoadBackupWizardPageDone* m_ui;
+			std::unique_ptr<Ui::LoadBackupWizardPageDone> m_ui;
 		};
 
 	}

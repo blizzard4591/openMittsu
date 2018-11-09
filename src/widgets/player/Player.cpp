@@ -64,6 +64,7 @@
 #include <QDir>
 
 #include "src/utility/Logging.h"
+#include "src/utility/MakeUnique.h"
 #include "src/utility/QObjectConnectionMacro.h"
 
 #include "ui_Player.h"
@@ -71,7 +72,7 @@
 namespace openmittsu {
 	namespace widgets {
 
-		Player::Player(bool useVideoWidget, QWidget *parent) : QWidget(parent), m_ui(new Ui::Player), m_useVideoWidget(useVideoWidget), m_tempFile(QDir::tempPath().append(QStringLiteral("/openmittsu_player_temp_XXXXXX.mp4"))) {
+		Player::Player(bool useVideoWidget, QWidget *parent) : QWidget(parent), m_ui(std::make_unique<Ui::Player>()), m_useVideoWidget(useVideoWidget), m_tempFile(QDir::tempPath().append(QStringLiteral("/openmittsu_player_temp_XXXXXX.mp4"))) {
 			m_ui->setupUi(this);
 			m_player = new QMediaPlayer(this);
 #if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
@@ -139,7 +140,6 @@ namespace openmittsu {
 				//m_fullScreenButton->setCheckable(true);
 			}
 
-			QBoxLayout *displayLayout = m_ui->displayLayout;
 			if (!m_useVideoWidget) {
 				m_ui->videoWidget->hide();
 			}

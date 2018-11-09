@@ -11,7 +11,7 @@
 #include <memory>
 
 namespace Ui {
-class DeleteMessagesDialog;
+	class DeleteMessagesDialog;
 }
 
 namespace openmittsu {
@@ -19,7 +19,6 @@ namespace openmittsu {
 
 		class DeleteMessagesDialog : public QDialog {
 			Q_OBJECT
-
 		public:
 			explicit DeleteMessagesDialog(QWidget* parent = nullptr);
 			virtual ~DeleteMessagesDialog();
@@ -46,7 +45,7 @@ namespace openmittsu {
 		public slots:
 			virtual void accept() override;
 		private:
-			Ui::DeleteMessagesDialog* m_ui;
+			std::unique_ptr<Ui::DeleteMessagesDialog> m_ui;
 		};
 
 	}

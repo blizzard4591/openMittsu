@@ -11,6 +11,7 @@
 #include <QPixmap>
 
 #include <cstdint>
+#include <memory>
 
 #include "src/protocol/ContactId.h"
 #include "src/protocol/MessageId.h"
@@ -73,7 +74,7 @@ namespace openmittsu {
 			std::shared_ptr<openmittsu::dataproviders::BackedContact> m_contact;
 		private:
 			QSize m_sizeHint;
-			Ui::ChatWidgetItem* m_ui;
+			std::unique_ptr<Ui::ChatWidgetItem> m_ui;
 			bool const m_isMessageFromUs;
 			QVector<QWidget*> m_registeredWidgets;
 

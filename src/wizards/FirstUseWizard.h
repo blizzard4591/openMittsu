@@ -5,7 +5,7 @@
 #include <memory>
 
 namespace Ui {
-class FirstUseWizard;
+	class FirstUseWizard;
 }
 
 namespace openmittsu {

@@ -6,6 +6,8 @@
 #include <QScrollBar>
 #include <QString>
 
+#include <memory>
+
 namespace Ui {
 	class ImageViewerWindow;
 }
@@ -27,7 +29,7 @@ namespace openmittsu {
 			void actionNormalSizeOnClick();
 			void actionFitToWindowOnChange();
 		private:
-			Ui::ImageViewerWindow* m_ui;
+			std::unique_ptr<Ui::ImageViewerWindow> m_ui;
 
 			bool saveFile(QString const& fileName);
 			void scaleImage(double factor);

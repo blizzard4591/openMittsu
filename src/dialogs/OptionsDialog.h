@@ -13,7 +13,7 @@
 #include "src/options/OptionMaster.h"
 
 namespace Ui {
-class OptionsDialog;
+	class OptionsDialog;
 }
 
 namespace openmittsu {
@@ -28,7 +28,7 @@ namespace openmittsu {
 		public slots:
 			virtual void accept() override;
 		private:
-			Ui::OptionsDialog* m_ui;
+			std::unique_ptr<Ui::OptionsDialog> m_ui;
 			std::shared_ptr<openmittsu::options::OptionMaster> const m_optionMaster;
 
 			struct OptionWidget {

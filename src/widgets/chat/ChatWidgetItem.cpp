@@ -2,6 +2,7 @@
 
 #include "src/exceptions/InternalErrorException.h"
 #include "src/utility/Logging.h"
+#include "src/utility/MakeUnique.h"
 #include "src/utility/TextFormatter.h"
 #include "src/utility/QObjectConnectionMacro.h"
 
@@ -14,7 +15,7 @@
 namespace openmittsu {
 	namespace widgets {
 
-		ChatWidgetItem::ChatWidgetItem(std::shared_ptr<openmittsu::dataproviders::BackedContact> const& contact, bool isMessageFromUs, QWidget* parent) : QWidget(parent), m_contact(contact), m_sizeHint(60, 400), m_ui(new Ui::ChatWidgetItem), m_isMessageFromUs(isMessageFromUs), m_hasUserPic(false), m_hasFromLine(!isMessageFromUs) {
+		ChatWidgetItem::ChatWidgetItem(std::shared_ptr<openmittsu::dataproviders::BackedContact> const& contact, bool isMessageFromUs, QWidget* parent) : QWidget(parent), m_contact(contact), m_sizeHint(60, 400), m_ui(std::make_unique<Ui::ChatWidgetItem>()), m_isMessageFromUs(isMessageFromUs), m_hasUserPic(false), m_hasFromLine(!isMessageFromUs) {
 			m_ui->setupUi(this);
 
 			OPENMITTSU_CONNECT(m_contact.get(), contactDataChanged(), this, onContactDataChanged());

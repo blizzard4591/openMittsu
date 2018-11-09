@@ -3,6 +3,8 @@
 
 #include <QWizard>
 
+#include <memory>
+
 #include "src/backup/IdentityBackup.h"
 #include "src/wizards/BackupCreationWizardPageBackup.h"
 #include "src/wizards/BackupCreationWizardPagePassword.h"
@@ -21,10 +23,10 @@ namespace openmittsu {
 		public slots:
 			void pageNextOnClick(int pageId);
 		private:
-			Ui::BackupCreationWizard* ui;
+			std::unique_ptr<Ui::BackupCreationWizard> m_ui;
 
-			BackupCreationWizardPagePassword* backupCreationWizardPagePassword;
-			BackupCreationWizardPageBackup* backupCreationWizardPageBackup;
+			BackupCreationWizardPagePassword* m_backupCreationWizardPagePassword;
+			BackupCreationWizardPageBackup* m_backupCreationWizardPageBackup;
 		};
 	}
 }

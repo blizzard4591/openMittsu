@@ -3,11 +3,13 @@
 
 #include <QDialog>
 
+#include <memory>
+
 #include "src/protocol/ContactId.h"
 #include "src/crypto/PublicKey.h"
 
 namespace Ui {
-class ShowIdentityAndPublicKeyDialog;
+	class ShowIdentityAndPublicKeyDialog;
 }
 
 namespace openmittsu {
@@ -19,7 +21,7 @@ namespace openmittsu {
 			virtual ~ShowIdentityAndPublicKeyDialog();
 
 		private:
-			Ui::ShowIdentityAndPublicKeyDialog* ui;
+			std::unique_ptr<Ui::ShowIdentityAndPublicKeyDialog> m_ui;
 		};
 	}
 }
