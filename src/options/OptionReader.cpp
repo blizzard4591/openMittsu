@@ -40,6 +40,8 @@ namespace openmittsu {
 			m_databaseCache.clear();
 			if (m_database.hasDatabase()) {
 				m_databaseCache = m_database.getOptions();
+
+				ensureOptionsExist();
 			}
 		}
 
@@ -201,7 +203,7 @@ namespace openmittsu {
 
 			if (optionStorage == OptionStorage::STORAGE_DATABASE) {
 				if (!m_database.hasDatabase()) {
-					LOGGER_DEBUG("Returned default value for database option {} das database is not available.", optionName.toStdString());
+					LOGGER_DEBUG("Returned default value for database option {} as database is not available.", optionName.toStdString());
 					return m_optionToOptionContainerMap.constFind(option)->defaultValue.toBool();
 				}
 
