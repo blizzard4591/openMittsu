@@ -10,6 +10,8 @@
 #include <QSqlError>
 #include <QTimer>
 
+#include <memory>
+
 #include "src/protocol/ContactId.h"
 #include "src/protocol/AccountStatus.h"
 #include "src/protocol/ContactIdVerificationStatus.h"

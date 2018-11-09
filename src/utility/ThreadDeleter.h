@@ -1,6 +1,7 @@
 #ifndef OPENMITTSU_UTILITY_THREADDELETER_H_
 #define OPENMITTSU_UTILITY_THREADDELETER_H_
 
+#include <memory>
 #include <type_traits>
 
 #include <QThread>

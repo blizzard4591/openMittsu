@@ -5,7 +5,7 @@
 
 namespace openmittsu {
 	namespace wizards {
-		BackupCreationWizardPageBackup::BackupCreationWizardPageBackup(openmittsu::backup::IdentityBackup const& identityBackup, QWidget* parent) : QWizardPage(parent), m_ui(std::unique_ptr<Ui::BackupCreationWizardPageBackup>()), m_identityBackup(identityBackup) {
+		BackupCreationWizardPageBackup::BackupCreationWizardPageBackup(openmittsu::backup::IdentityBackup const& identityBackup, QWidget* parent) : QWizardPage(parent), m_ui(std::make_unique<Ui::BackupCreationWizardPageBackup>()), m_identityBackup(identityBackup) {
 			m_ui->setupUi(this);
 
 			registerField("edtBackupString*", m_ui->edtBackupString);

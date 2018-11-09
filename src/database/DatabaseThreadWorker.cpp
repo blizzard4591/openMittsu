@@ -4,7 +4,6 @@
 #include "src/exceptions/InternalErrorException.h"
 #include "src/exceptions/InvalidPasswordOrDatabaseException.h"
 #include "src/utility/Logging.h"
-#include "src/utility/MakeUnique.h"
 #include "src/utility/QObjectConnectionMacro.h"
 
 namespace openmittsu {

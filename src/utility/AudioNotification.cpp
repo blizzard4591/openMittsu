@@ -1,6 +1,7 @@
 #include "src/utility/AudioNotification.h"
 
 #include "src/exceptions/InternalErrorException.h"
+#include "src/utility/MakeUnique.h"
 #include "src/utility/QObjectConnectionMacro.h"
 #include "src/utility/Logging.h"
 

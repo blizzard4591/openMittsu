@@ -3,7 +3,6 @@
 #include "src/exceptions/InternalErrorException.h"
 #include "src/database/Database.h"
 #include "src/utility/Logging.h"
-#include "src/utility/MakeUnique.h"
 #include "src/utility/QObjectConnectionMacro.h"
 
 #include <QByteArray>

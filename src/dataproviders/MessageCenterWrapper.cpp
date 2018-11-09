@@ -2,7 +2,6 @@
 
 #include "src/exceptions/InternalErrorException.h"
 #include "src/utility/Logging.h"
-#include "src/utility/MakeUnique.h"
 #include "src/utility/QObjectConnectionMacro.h"
 #include "src/utility/Wrapping.h"
 

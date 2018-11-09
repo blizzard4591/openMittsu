@@ -3,6 +3,7 @@
 
 #include "src/exceptions/IllegalArgumentException.h"
 #include "src/exceptions/InternalErrorException.h"
+#include "src/utility/MakeUnique.h"
 #include "src/utility/QObjectConnectionMacro.h"
 #include "src/wizards/LoadBackupWizard.h"
 
