@@ -56,7 +56,7 @@ namespace openmittsu {
 			Q_OBJECT
 			Q_INTERFACES(openmittsu::database::Database)
 		public:
-			explicit SimpleDatabase(QString const& filename, QString const& password, QDir const& mediaStorageLocation);
+			explicit SimpleDatabase(QString const& filename, QString const& password, QDir const& mediaStorageLocation, bool useCompatibilityToVersionThree);
 			explicit SimpleDatabase(QString const& filename, openmittsu::protocol::ContactId const& selfContact, openmittsu::crypto::KeyPair const& selfLongTermKeyPair, QString const& password, QDir const& mediaStorageLocation);
 			virtual ~SimpleDatabase();
 
@@ -291,8 +291,11 @@ namespace openmittsu {
 			void setOptionInternal(QString const& optionName, QString const& optionValue, bool isInternalOption = false);
 			void setBackup(openmittsu::protocol::ContactId selfId, openmittsu::crypto::KeyPair key);
 			void setupQueueTimer();
+			void setCompatibilityMode(bool activate);
 			void setKey(QString const& password);
 			void updateCachedIdentityBackup();
+			bool isDatabaseFileReadableAndValid();
+			QString getSqlCipherVersion();
 		private slots:
 			void onQueueTimeoutTimerFire();
 		};

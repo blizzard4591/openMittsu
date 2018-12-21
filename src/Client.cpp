@@ -372,7 +372,7 @@ bool Client::validateDatabaseFile(QString const& databaseFileName, QString const
 			return false;
 		}
 		
-		openmittsu::database::SimpleDatabase db(databaseFileName, password, folder);
+		openmittsu::database::SimpleDatabase db(databaseFileName, password, folder, false);
 		return true;
 	} catch (openmittsu::exceptions::BaseException& iex) {
 		if (!quiet) {
@@ -408,17 +408,30 @@ void Client::openDatabaseFile(QString const& fileName) {
 
 			int databaseOpenSuccess = -1;
 
-			if (!QMetaObject::invokeMethod(m_databaseThread.getQObjectPtr(), "openDatabase", Qt::BlockingQueuedConnection, Q_RETURN_ARG(int, databaseOpenSuccess), Q_ARG(QString const&, fileName), Q_ARG(QString const&, password), Q_ARG(QDir const&, location))) {
-				throw openmittsu::exceptions::InternalErrorException() << "Could not create Database, terminating.";
+			if (!QMetaObject::invokeMethod(m_databaseThread.getQObjectPtr(), "openDatabase", Qt::BlockingQueuedConnection, Q_RETURN_ARG(int, databaseOpenSuccess), Q_ARG(QString const&, fileName), Q_ARG(QString const&, password), Q_ARG(QDir const&, location), Q_ARG(bool, false))) {
+				throw openmittsu::exceptions::InternalErrorException() << "Could not invoke Database open, terminating.";
 			} else if (databaseOpenSuccess != 0) {
 				if (databaseOpenSuccess == 1) {
-					QMessageBox::information(this, tr("Invalid password"), tr("The entered database password was invalid."));
+					// Try compat options
+					if (!QMetaObject::invokeMethod(m_databaseThread.getQObjectPtr(), "openDatabase", Qt::BlockingQueuedConnection, Q_RETURN_ARG(int, databaseOpenSuccess), Q_ARG(QString const&, fileName), Q_ARG(QString const&, password), Q_ARG(QDir const&, location), Q_ARG(bool, true))) {
+						throw openmittsu::exceptions::InternalErrorException() << "Could not invoke Database open, terminating.";
+					} else if (databaseOpenSuccess != 0) {
+						if (databaseOpenSuccess == 1) {
+							QMessageBox::information(this, tr("Invalid password"), tr("The entered database password was invalid."));
+						} else {
+							LOGGER_DEBUG("Removing key \"FILEPATH_DATABASE\" from stored settings as the file is not valid.");
+							m_optionMaster->setOption(openmittsu::options::Options::FILEPATH_DATABASE, "");
+							break;
+						}
+					}
 				} else {
 					LOGGER_DEBUG("Removing key \"FILEPATH_DATABASE\" from stored settings as the file is not valid.");
 					m_optionMaster->setOption(openmittsu::options::Options::FILEPATH_DATABASE, "");
 					break;
 				}
-			} else {
+			} 
+			
+			if (databaseOpenSuccess == 0) {
 				this->m_optionMaster->setOption(openmittsu::options::Options::FILEPATH_DATABASE, fileName);
 				m_databasePointerAuthority.setDatabase(m_databaseThread.getWorker().getDatabase());
 				

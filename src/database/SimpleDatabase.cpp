@@ -28,7 +28,7 @@ namespace openmittsu {
 
 		using namespace openmittsu::dataproviders::messages;
 
-		SimpleDatabase::SimpleDatabase(QString const& filename, QString const& password, QDir const& mediaStorageLocation) : Database(), database(), m_driverNameCrypto("QSQLCIPHER"), m_driverNameStandard("QSQLITE"), m_connectionName("openMittsuDatabaseConnection"), m_password(password), m_selfContact(0), m_selfLongTermKeyPair(), m_identityBackup(), m_contactAndGroupDataProvider(this, this), m_mediaFileStorage(mediaStorageLocation, this) {
+		SimpleDatabase::SimpleDatabase(QString const& filename, QString const& password, QDir const& mediaStorageLocation, bool useCompatibilityToVersionThree) : Database(), database(), m_driverNameCrypto("QSQLCIPHER"), m_driverNameStandard("QSQLITE"), m_connectionName(QStringLiteral("openMittsuDatabaseConnection%1").arg(QDateTime::currentMSecsSinceEpoch())), m_password(password), m_selfContact(0), m_selfLongTermKeyPair(), m_identityBackup(), m_contactAndGroupDataProvider(this, this), m_mediaFileStorage(mediaStorageLocation, this) {
 			if (!(QSqlDatabase::isDriverAvailable(m_driverNameCrypto) || QSqlDatabase::isDriverAvailable(m_driverNameStandard))) {
 				throw openmittsu::exceptions::InternalErrorException() << "Neither the SQL driver " << m_driverNameCrypto.toStdString() << " nor the driver " << m_driverNameStandard.toStdString() << " are available. Available are: " << QSqlDatabase::drivers().join(", ").toStdString();
 			}
@@ -56,16 +56,24 @@ namespace openmittsu {
 				throw openmittsu::exceptions::InternalErrorException() << "Could not open database file, open failed.";
 			}
 
-			setKey(m_password);
+			if (m_usingCryptoDb) {
+				QString const sqlCipherVersion = getSqlCipherVersion();
+				LOGGER()->info("SQLCipher Version reported as '{}'", sqlCipherVersion.toStdString());
+			}
 
-			QStringList const tables = database.tables(QSql::AllTables);
-			if (!tables.contains(QStringLiteral("sqlite_master"))) {
-				throw openmittsu::exceptions::InvalidPasswordOrDatabaseException() << "SQLITE master table does not exist, invalid database or incorrect password.";
-			} else {
-				QSqlQuery query(database);
-				if (!query.exec(QStringLiteral("SELECT `type`, `name`, `sql`, `tbl_name` FROM `sqlite_master`"))) {
-					throw openmittsu::exceptions::InvalidPasswordOrDatabaseException() << "SQLITE master table not readable, invalid database or incorrect password.";
+			setKey(m_password);
+			if (m_usingCryptoDb && useCompatibilityToVersionThree) {
+				QString const sqlCipherVersion = getSqlCipherVersion();
+				if (!sqlCipherVersion.startsWith('3')) {
+					setCompatibilityMode(true);
+					LOGGER_DEBUG("Trying to open database file with backwards compatiblity flags for version 3!");
+				} else {
+					LOGGER()->info("SQLCipher Version 3 detected, ignoring request for opening database with compatiblity flags.");
 				}
+			}
+
+			if (!isDatabaseFileReadableAndValid()) {
+				throw openmittsu::exceptions::InvalidPasswordOrDatabaseException() << "SQLITE master table does not exist or not readable, invalid database or incorrect password.";
 			}
 
 			createOrUpdateTables();
@@ -109,7 +117,19 @@ namespace openmittsu {
 				throw openmittsu::exceptions::InternalErrorException() << "Could not open database file, open failed.";
 			}
 
+			bool useCompatMode = false;
+			if (m_usingCryptoDb) {
+				QString const sqlCipherVersion = getSqlCipherVersion();
+				LOGGER()->info("SQLCipher Version reported as '{}'", sqlCipherVersion.toStdString());
+				if (!sqlCipherVersion.startsWith('3')) {
+					useCompatMode = true;
+				}
+			}
+
 			setKey(m_password);
+			if (useCompatMode) {
+				setCompatibilityMode(true);
+			}
 
 			QStringList const tables = database.tables(QSql::AllTables);
 			if (!tables.contains(QStringLiteral("sqlite_master"))) {
@@ -136,6 +156,71 @@ namespace openmittsu {
 			if (database.isOpen()) {
 				database.close();
 				database.removeDatabase(m_connectionName);
+			}
+		}
+
+		QString SimpleDatabase::getSqlCipherVersion() {
+			if (m_usingCryptoDb) {
+				QSqlQuery query(database);
+				if (!query.exec(QStringLiteral("PRAGMA cipher_version"))) {
+					throw openmittsu::exceptions::InternalErrorException() << "Could not query SQLCipher! Error was: " << query.lastError().text().toStdString();
+				} else {
+					if (query.isSelect()) {
+						query.next();
+						return query.value(QStringLiteral("cipher_version")).toString();
+					} else {
+						throw openmittsu::exceptions::InternalErrorException() << "Could not query SQLCipher version! Response was not selectable?!";
+					}
+				}
+			} else {
+				throw openmittsu::exceptions::InternalErrorException() << "SQLCipher version string requested, but we are not using the crypto interface!";
+			}
+		}
+
+		bool SimpleDatabase::isDatabaseFileReadableAndValid() {
+			QStringList const tables = database.tables(QSql::AllTables);
+			if (!tables.contains(QStringLiteral("sqlite_master"))) {
+				return false;
+			} else {
+				QSqlQuery query(database);
+				if (!query.exec(QStringLiteral("SELECT `type`, `name`, `sql`, `tbl_name` FROM `sqlite_master`"))) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		void SimpleDatabase::setCompatibilityMode(bool activate) {
+			if (m_usingCryptoDb) {
+				QSqlQuery query(database);
+
+				if (activate) {
+					if (!query.exec(QStringLiteral("PRAGMA cipher_page_size = 1024;"))) {
+						LOGGER()->error("Could not set SqlCipher PRAGMA 1 for compatibility with old format! Error was: {}", query.lastError().text().toStdString());
+					}
+					if (!query.exec(QStringLiteral("PRAGMA kdf_iter = 64000;"))) {
+						LOGGER()->error("Could not set SqlCipher PRAGMA 2 for compatibility with old format! Error was: {}", query.lastError().text().toStdString());
+					}
+					if (!query.exec(QStringLiteral("PRAGMA cipher_hmac_algorithm = HMAC_SHA1;"))) {
+						LOGGER()->error("Could not set SqlCipher PRAGMA 3 for compatibility with old format! Error was: {}", query.lastError().text().toStdString());
+					}
+					if (!query.exec(QStringLiteral("PRAGMA cipher_kdf_algorithm = PBKDF2_HMAC_SHA1;"))) {
+						LOGGER()->error("Could not set SqlCipher PRAGMA 4 for compatibility with old format! Error was: {}", query.lastError().text().toStdString());
+					}
+				} else {
+					if (!query.exec(QStringLiteral("PRAGMA cipher_page_size = 4096;"))) {
+						LOGGER()->error("Could not unset SqlCipher PRAGMA 1 for compatibility with old format! Error was: {}", query.lastError().text().toStdString());
+					}
+					if (!query.exec(QStringLiteral("PRAGMA kdf_iter = 256000;"))) {
+						LOGGER()->error("Could not unset SqlCipher PRAGMA 2 for compatibility with old format! Error was: {}", query.lastError().text().toStdString());
+					}
+					if (!query.exec(QStringLiteral("PRAGMA cipher_hmac_algorithm = HMAC_SHA512;"))) {
+						LOGGER()->error("Could not unset SqlCipher PRAGMA 3 for compatibility with old format! Error was: {}", query.lastError().text().toStdString());
+					}
+					if (!query.exec(QStringLiteral("PRAGMA cipher_kdf_algorithm = PBKDF2_HMAC_SHA512;"))) {
+						LOGGER()->error("Could not unset SqlCipher PRAGMA 4 for compatibility with old format! Error was: {}", query.lastError().text().toStdString());
+					}
+				}
 			}
 		}
 

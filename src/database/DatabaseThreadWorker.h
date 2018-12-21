@@ -32,7 +32,7 @@ namespace openmittsu {
 		public:
 			virtual ~DatabaseThreadWorker();
 		public slots:
-			int openDatabase(QString const& filename, QString const& password, QDir const& mediaStorageLocation);
+			int openDatabase(QString const& filename, QString const& password, QDir const& mediaStorageLocation, bool useCompatibilityToVersionThree);
 			bool createDatabase(QString const& filename, openmittsu::protocol::ContactId const& selfContact, openmittsu::crypto::KeyPair const& selfLongTermKeyPair, QString const& password, QDir const& mediaStorageLocation);
 
 			bool hasDatabase() const;
