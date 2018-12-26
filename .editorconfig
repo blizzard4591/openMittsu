@@ -1,0 +1,10 @@
+; This file is for unifying the coding style for different editors and IDEs.
+; More information at http://EditorConfig.org
+
+root = true
+
+[*.{cpp,h,c}]
+charset = utf-8
+indent_style = tab
+tab_width = 4
+insert_final_newline = true
