@@ -50,6 +50,8 @@
 #include "src/utility/ThreadDeleter.h"
 #include "src/utility/Version.h"
 
+#include "src/tasks/SafeConfigCallbackTask.h"
+#include "src/tasks/SafeFetchCallbackTask.h"
 #include "src/tasks/IdentityReceiverCallbackTask.h"
 #include "src/tasks/CheckFeatureLevelCallbackTask.h"
 #include "src/tasks/CheckContactActivityStatusCallbackTask.h"
@@ -457,6 +459,24 @@ void Client::updateDatabaseInfo(QString const& currentFileName) {
 }
 
 void Client::btnConnectOnClick() {
+	openmittsu::protocol::ContactId const contactId(QString("ID"));
+	QString const password = "PW";
+	openmittsu::tasks::SafeFetchCallbackTask ir(m_serverConfiguration, QString(), contactId, password);
+	//openmittsu::tasks::SafeConfigCallbackTask ir(m_serverConfiguration, QString(), contactId, password);
+
+	QEventLoop eventLoop;
+	OPENMITTSU_CONNECT(&ir, finished(openmittsu::tasks::CallbackTask*), &eventLoop, quit());
+	ir.start();
+	eventLoop.exec();
+
+	if (!ir.hasFinished() || !ir.hasFinishedSuccessfully()) {
+		QMessageBox::warning(this, "Could not fetch Safe Backup", QString("Error while fetching Safe Backup from servers: %1").arg(ir.getErrorMessage()));
+	} else {
+		QMessageBox::information(this, "Fetched Safe Backup", QString("Result: %1\n").arg(""));
+	}
+	return;
+
+
 	if (m_connectionState == ConnectionState::STATE_DISCONNECTED) {
 		if ((m_serverConfiguration == nullptr) || (!m_databaseWrapper.hasDatabase())) {
 			QMessageBox::warning(this, "Can not connect", "Please choose a valid database file first.");

@@ -8,6 +8,7 @@
 #include "src/crypto/EncryptionKey.h"
 #include "src/crypto/Nonce.h"
 #include "src/crypto/NonceGenerator.h"
+#include "src/crypto/SafeMasterKey.h"
 #include "src/dataproviders/KeyRegistry.h"
 #include "src/crypto/PublicKey.h"
 #include "src/crypto/KeyPair.h"

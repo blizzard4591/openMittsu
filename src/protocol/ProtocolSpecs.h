@@ -101,6 +101,11 @@ constexpr auto BACKUP_DECODED_BYTES                             = (BACKUP_SALT_B
 constexpr auto BACKUP_ENCRYPTION_KEY_BYTES                      = (32);
 constexpr auto BACKUP_KEY_PBKDF_ITERATIONS                      = (100000);
 
+#define SAFE_BACKUP_ID_BYTES (32)
+#define SAFE_ENCRYPTION_KEY_BYTES (32)
+#define SAFE_MASTER_KEY_BYTES (SAFE_BACKUP_ID_BYTES + SAFE_ENCRYPTION_KEY_BYTES)
+#define SAFE_NONCE_BYTES (crypto_box_NONCEBYTES)
+
 namespace openmittsu {
 	namespace protocol {
 		//

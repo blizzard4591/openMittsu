@@ -129,5 +129,5 @@ else()
 	endif()
  
 	find_package_handle_standard_args(Libsodium FOUND_VAR Libsodium_FOUND REQUIRED_VARS Libsodium_LIBRARIES Libsodium_INCLUDE_DIRS)
-	mark_as_advanced(Libsodium_INCLUDE_DIRS Libsodium_LIBRARIES)
+	# mark_as_advanced(Libsodium_INCLUDE_DIRS Libsodium_LIBRARIES)
 endif()

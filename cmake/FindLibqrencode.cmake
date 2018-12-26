@@ -80,5 +80,5 @@ else()
 	endif()
  
 	find_package_handle_standard_args(Libqrencode FOUND_VAR Libqrencode_FOUND REQUIRED_VARS Libqrencode_LIBRARIES Libqrencode_INCLUDE_DIRS)
-	mark_as_advanced(Libqrencode_INCLUDE_DIRS Libqrencode_LIBRARIES)
+	# mark_as_advanced(Libqrencode_INCLUDE_DIRS Libqrencode_LIBRARIES)
 endif()

@@ -33,7 +33,12 @@ namespace openmittsu {
 			QString getApiServerFetchPrivateInformationForIdUrl() const;
 			QString getApiServerMatchMobileNumbersAndEmailsToContactsUrl() const;
 
-	
+			QString const& getSafeServerHost() const;
+			QString const& getSafeServerAgent() const;
+			QString const& getSafeServerCertificateAsBase64() const;
+			QString getSafeServerConfigUrl() const;
+			QString getSafeServerBackupUrl() const;
+			
 			QString const& getBlobServerRequestDownloadUrl() const;
 			QString const& getBlobServerRequestDownloadFinishedUrl() const;
 			QString const& getBlobServerRequestUploadUrl() const;
@@ -55,6 +60,10 @@ namespace openmittsu {
 			QString const blobServerRequestUploadUrl;
 			QString const blobServerRequestAgent;
 			QString const blobServerCertificate;
+
+			QString const safeServerHost;
+			QString const safeServerAgent;
+			QString const safeServerCertificate;
 
 			QString const& getApiServerHost() const;
 		};
