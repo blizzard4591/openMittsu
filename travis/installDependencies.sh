@@ -11,6 +11,7 @@ if [ $TRAVIS_OS_NAME = linux ]; then
 	# Current GCC
 	sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 	# CMake
+	wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | sudo apt-key add -
 	sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ xenial main'
 	
 	if [ -n "${QT_PPA}" ]
