@@ -8,7 +8,7 @@ branches:
   - master
   - travisTesting
 sudo: required
-dist: trusty
+dist: xenial
 language: cpp
 
 # Enable caching
@@ -34,14 +34,14 @@ matrix:
     - os: osx
       compiler: clang
       env: DEPLOY_APPIMAGE=true
-    # Ubuntu 14.04 + GCC 4.8 + Qt 5.2
+    # Ubuntu 16.04 + GCC 4.8 + Qt 5.5.1
     - os: linux
       compiler: gcc
       env: DEPLOY_APPIMAGE=false QT_BASE="trusty"
-    # Ubuntu 14.04 + Clang + Qt from PPA (https://launchpad.net/~beineri) + AppImage deployment
+    # Ubuntu 16.04 + Clang + Qt from PPA (https://launchpad.net/~beineri) + AppImage deployment
     - os: linux
       compiler: clang
-      env: DEPLOY_APPIMAGE=true QT_BASE="qt510" QT_PPA="ppa:beineri/opt-qt-5.10.1-trusty"
+      env: DEPLOY_APPIMAGE=true QT_BASE="qt512" QT_PPA="ppa:beineri/opt-qt-5.12.3-xenial"
 
 after_failure:
   - find build -iname '*err*.log' -type f -print -exec cat {} \;
