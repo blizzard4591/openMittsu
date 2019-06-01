@@ -179,6 +179,9 @@ elseif(MSVC)
 	
 	# Because Google is not merging the fix
 	add_definitions(/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
+	
+	# Enable Multi-Processor Compilation by default
+	add_definitions(/MP)
 else(CLANG)
 	set(OPENMITTSU_COMPILED_BY "Clang (LLVM)")
 	# As CLANG is not set as a variable, we need to set it in case we have not matched another compiler.
