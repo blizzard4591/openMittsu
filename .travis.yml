@@ -34,10 +34,10 @@ matrix:
     - os: osx
       compiler: clang
       env: DEPLOY_APPIMAGE=true
-    # Ubuntu 16.04 + GCC 4.8 + Qt 5.5.1
+    # Ubuntu 16.04 + GCC 5.3.1 + Qt 5.5.1
     - os: linux
       compiler: gcc
-      env: DEPLOY_APPIMAGE=false QT_BASE="trusty"
+      env: DEPLOY_APPIMAGE=false QT_BASE="xenial"
     # Ubuntu 16.04 + Clang + Qt from PPA (https://launchpad.net/~beineri) + AppImage deployment
     - os: linux
       compiler: clang

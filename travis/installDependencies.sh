@@ -23,9 +23,12 @@ if [ $TRAVIS_OS_NAME = linux ]; then
 
 	# TclSH: Required by SqlCipher
 	# Mesa: Provides GL/gl.h for openMittsu
-	sudo apt-get install -yq  libqrencode-dev git g++ libssl-dev make cmake3 pkgconf libsodium-dev zlib1g zlib1g-dev openssl tclsh tcl-dev mesa-common-dev
-	sudo apt-get install -yq g++-8
-	sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 90
+	sudo apt-get install -yq libqrencode-dev git g++ libssl-dev make cmake3 pkgconf libsodium-dev zlib1g zlib1g-dev openssl tclsh tcl-dev mesa-common-dev
+	sudo apt-get install -yq g++-9
+	sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 90
+
+	sudo apt-cache policy libsodium-dev
+	sudo apt-cache policy libsodium23
 
 	which $CC
 	which $CXX
