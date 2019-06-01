@@ -16,8 +16,8 @@ openMittsu is governed by the GNU GPL v2.0 license, but includes works from diff
  
 ## Supported Platforms
 Currently, the application has been built and tested on:
- - Windows 7 using Visual Studio 2017
- - Windows 10 using Visual Studio 2017
+ - Windows 7 using Visual Studio 2019
+ - Windows 10 using Visual Studio 2019
  - Debian 9 using GCC 6.3 (AMD64)
  - Debian 9 using GCC 6.3 (i386)
  - Debian 9 using GCC 6.3 (PPC)
@@ -84,7 +84,7 @@ Find detailed steps for Linux and Windows systems below.
     
     Adding support for encrypted databases using `sqlcipher`: This is where it gets messy. You need the Qt5 private development headers (```apt-get install qtbase5-dev qtbase5-private-dev```) and libsqlcipher (```apt-get install libsqlcipher0 libsqlcipher-dev```).
 	
-    You need to make sure that you are using the latest version of `libsqlcipher` (at this time 3.4.1) – if not, you will get `SEGMENTATION FAULTS`. Debian Stretch currently still ships version 3.2.0, which is **too old**! This version still links against OpenSSL 1.0.x, which is incompatible with the version of OpenSSL linked by Qt.
+    You need to make sure that you are using the latest version of `libsqlcipher` (at this time 3.4.1) – if not, you will get `SEGMENTATION FAULTS`. Older versions still links against OpenSSL 1.0.x, which is incompatible with the version of OpenSSL linked by Qt. The issue has been fixed in Debian 9 since version `3.2.0-2+deb9u1`.
     
 	A (patched) version of `libsqlcipher` which also builds under Windows (build using ```nmake -f Makefile.msc```, adapt paths in Makefile.msc to Windows SDK on variable TCC and RCC, adapt paths to OpenSSL binaries (use [these non-light installers](https://slproweb.com/products/Win32OpenSSL.html)) at all locations referencing OpenSSL) [is available here](https://github.com/blizzard4591/sqlcipher).
     
@@ -164,7 +164,7 @@ make # optionally add -j 4 for multi-threaded compilation with 4 threads
 2. [Download the latest version of `libsodium`](https://download.libsodium.org/libsodium/releases/)  
 	Either pick the sources and compile them yourself, or use the provided binaries for MSVC in the -msvc.zip packages.
 	Assuming you use the precompiled version and extracted them to `C:\cpp\libsodium-1.0.xx-msvc`, where xx is the most recent version, the values for CMake later on will be:  
-		`LIBSODIUM_LIBRARIES = optimized;C:\cpp\libsodium-1.0.xx-msvc\x64\Release\v141\static\libsodium.lib;debug;C:\cpp\libsodium-1.0.xx-msvc\x64\Debug\v141\static\libsodium.lib` and 
+		`LIBSODIUM_LIBRARIES = optimized;C:\cpp\libsodium-1.0.xx-msvc\x64\Release\v142\static\libsodium.lib;debug;C:\cpp\libsodium-1.0.xx-msvc\x64\Debug\v142\static\libsodium.lib` and 
 		`LIBSODIUM_INCLUDE_DIRS = C:\cpp\libsodium-1.0.xx-msvc\include`.
 3. Clone and build the [`qrencode library`](https://github.com/blizzard4591/qrencode-win32)  
 	Use the solution provided in `vc15/` and build only the target `qrcodelib` in modes `Debug-Lib` and `Release-Lib`.
