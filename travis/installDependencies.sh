@@ -10,6 +10,9 @@ if [ $TRAVIS_OS_NAME = linux ]; then
 	sudo add-apt-repository ppa:ondrej/php -y
 	# Current GCC
 	sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+	# CMake
+	sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ xenial main'
+	
 	if [ -n "${QT_PPA}" ]
 	then
 		sudo add-apt-repository "${QT_PPA}" -y
@@ -23,7 +26,7 @@ if [ $TRAVIS_OS_NAME = linux ]; then
 
 	# TclSH: Required by SqlCipher
 	# Mesa: Provides GL/gl.h for openMittsu
-	sudo apt-get install -yq libqrencode-dev git g++ libssl-dev make cmake3 pkgconf libsodium-dev zlib1g zlib1g-dev openssl tclsh tcl-dev mesa-common-dev
+	sudo apt-get install -yq libqrencode-dev git g++ libssl-dev make cmake pkgconf libsodium-dev zlib1g zlib1g-dev openssl tclsh tcl-dev mesa-common-dev
 	sudo apt-get install -yq g++-9
 	sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 90
 
