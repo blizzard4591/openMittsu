@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<svg xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://web.resource.org/cc/" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:svg="http://www.w3.org/2000/svg" id="svg7106" height="68.2pt" width="105.4pt" version="1.0">
+  <defs id="defs3">
+    <linearGradient id="linearGradient6907">
+      <stop id="stop6909" stop-color="#dce7ec" offset="0"/>
+      <stop id="stop6911" stop-color="#839297" offset="1"/>
+    </linearGradient>
+    <linearGradient id="linearGradient2430" y2="464.74" xlink:href="#linearGradient6907" gradientUnits="userSpaceOnUse" x2="643.6" gradientTransform="matrix(1.584 0 0 .65820 -949.68 -214.87)" y1="390.14" x1="643.6"/>
+    <linearGradient id="linearGradient2433" y2="262.23" xlink:href="#linearGradient6907" gradientUnits="userSpaceOnUse" x2="1147.2" gradientTransform="matrix(.91198 0 0 1.1432 -949.68 -214.87)" y1="198.9" x1="1147.2"/>
+    <linearGradient id="linearGradient2436" y2="255.52" xlink:href="#linearGradient6907" gradientUnits="userSpaceOnUse" x2="1076.7" gradientTransform="matrix(.91198 0 0 1.1432 -949.68 -215)" y1="202.02" x1="1076.7"/>
+    <radialGradient id="radialGradient2442" gradientUnits="userSpaceOnUse" cy="316.91" cx="792.81" gradientTransform="matrix(1.2839 0 0 .81206 -949.68 -215)" r="91.468">
+      <stop id="stop6945" stop-color="#fff" offset="0"/>
+      <stop id="stop6947" stop-color="#585858" offset="1"/>
+    </radialGradient>
+  </defs>
+  <rect id="rect7145" stroke-linejoin="round" style="color:#000000" height="74.625" width="117.98" stroke="#616b6d" y="5.0391" x="6.596" stroke-width="4.1216" fill="url(#radialGradient2442)"/>
+  <path id="path7153" stroke-linejoin="round" style="color:#000000" d="m6.596 5.1135v68.86l0.0318 5.616 58.966-37.238-58.934-37.238-0.064-0.0005z" stroke="#000" stroke-width="4.1216" fill="url(#linearGradient2436)"/>
+  <path id="path7155" stroke-linejoin="round" style="color:#000000" d="m124.58 5.2371v68.86l-0.03 5.616-58.968-37.238 58.938-37.238 0.06 0.0001z" stroke="#000" stroke-width="4.1216" fill="url(#linearGradient2433)"/>
+  <path id="path7157" stroke-linejoin="round" style="color:#000000" d="m48.88 39.635l-42.246 40.014-0.0323 0.128h118l-0.07-0.128-42.242-40.014c-10.685-10.12-22.43-10.398-33.408 0z" stroke="#000" stroke-width="4.1216" fill="url(#linearGradient2430)"/>
+  <path id="path7143" stroke-linejoin="round" style="color:#000000" d="m48.853 41.146l-42.199-35.885-0.032-0.1145h117.87l-0.07 0.1144-42.197 35.885c-10.672 9.075-22.405 9.324-33.37 0z" stroke="#000" stroke-width="4.1216" fill="#c6d2d7"/>
+  <metadata>
+    <rdf:RDF>
+      <cc:Work>
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+        <cc:license rdf:resource="http://creativecommons.org/licenses/publicdomain/"/>
+        <dc:publisher>
+          <cc:Agent rdf:about="http://openclipart.org/">
+            <dc:title>Openclipart</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <dc:title>schmitz Closed envelope</dc:title>
+        <dc:date>2006-12-26T00:00:00</dc:date>
+        <dc:description>clip art, clipart, envelope, mail, sign, symbol, </dc:description>
+        <dc:source>http://openclipart.org/detail/3593/-by--3593</dc:source>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>c_schmitz</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:subject>
+          <rdf:Bag>
+            <rdf:li>clip art</rdf:li>
+            <rdf:li>clipart</rdf:li>
+            <rdf:li>envelope</rdf:li>
+            <rdf:li>mail</rdf:li>
+            <rdf:li>sign</rdf:li>
+            <rdf:li>symbol</rdf:li>
+          </rdf:Bag>
+        </dc:subject>
+      </cc:Work>
+      <cc:License rdf:about="http://creativecommons.org/licenses/publicdomain/">
+        <cc:permits rdf:resource="http://creativecommons.org/ns#Reproduction"/>
+        <cc:permits rdf:resource="http://creativecommons.org/ns#Distribution"/>
+        <cc:permits rdf:resource="http://creativecommons.org/ns#DerivativeWorks"/>
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+</svg>
