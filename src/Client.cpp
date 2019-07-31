@@ -84,10 +84,27 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 	m_databaseThread(),
 	m_databasePointerAuthority(),
 	m_databaseWrapper(&m_databasePointerAuthority),
-	m_audioNotifier(std::make_shared<openmittsu::utility::AudioNotification>()) 
-
+	m_audioNotifier(std::make_shared<openmittsu::utility::AudioNotification>()),
+	m_optionTryEmptyPassword(false),
+	m_optionAutoConnect(false),
+	m_optionMinimize(false)
 {
 	m_ui->setupUi(this);
+
+	// Parse commandline options
+
+
+	QHash<QString, bool*> knownOptions = { {"--openmittsu-nopassword", &m_optionTryEmptyPassword }, {"--openmittsu-autoconnect", &m_optionAutoConnect}, {"--openmittsu-minimize", &m_optionMinimize} };
+	QStringList arguments = QCoreApplication::arguments();
+	for (QString const& arg : arguments) {
+		auto const it = knownOptions.constFind(arg.toLower());
+		if (it != knownOptions.constEnd()) {
+			// Found option
+			bool* option = it.value();
+			*option = true;
+		}
+	}
+
 
 	m_tabController = std::make_shared<openmittsu::widgets::SimpleTabController>(m_ui->tabWidget);
 
@@ -217,6 +234,16 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 	// Restore Window location and size
 	restoreGeometry(m_optionMaster->getOptionAsQByteArray(openmittsu::options::Options::BINARY_MAINWINDOW_GEOMETRY));
 	restoreState(m_optionMaster->getOptionAsQByteArray(openmittsu::options::Options::BINARY_MAINWINDOW_STATE));
+
+	// Autoconnect if asked to
+	if (m_optionAutoConnect) {
+		QTimer::singleShot(0, this, SLOT(btnConnectOnClick()));
+	}
+
+	// Minimize if asked to
+	if (m_optionMinimize) {
+		this->showMinimized();
+	}
 }
 
 Client::~Client() {
@@ -397,10 +424,16 @@ void Client::openDatabaseFile(QString const& fileName) {
 
 	QString password;
 	while (true) {
+		QString password;
 		bool ok = false;
-		QString password = QInputDialog::getText(this, tr("Database password"), tr("Please enter the database password for file \"%1\":").arg(fileName), QLineEdit::Password, QString(), &ok);
-		if (password.isNull()) {
-			password = QString("");
+		if (m_optionTryEmptyPassword) {
+			password = "";
+			ok = true;
+		} else {
+			password = QInputDialog::getText(this, tr("Database password"), tr("Please enter the database password for file \"%1\":").arg(fileName), QLineEdit::Password, QString(), &ok);
+			if (password.isNull()) {
+				password = QString("");
+			}
 		}
 		if (ok) {
 			QDir location(fileName);
@@ -417,7 +450,12 @@ void Client::openDatabaseFile(QString const& fileName) {
 						throw openmittsu::exceptions::InternalErrorException() << "Could not invoke Database open, terminating.";
 					} else if (databaseOpenSuccess != 0) {
 						if (databaseOpenSuccess == 1) {
-							QMessageBox::information(this, tr("Invalid password"), tr("The entered database password was invalid."));
+							if (m_optionTryEmptyPassword) {
+								QMessageBox::information(this, tr("Invalid password"), tr("Tried the empty password for opening the database (commandline option set), but it was rejected."));
+								m_optionTryEmptyPassword = false;
+							} else {
+								QMessageBox::information(this, tr("Invalid password"), tr("The entered database password was invalid."));
+							}
 						} else {
 							LOGGER_DEBUG("Removing key \"FILEPATH_DATABASE\" from stored settings as the file is not valid.");
 							m_optionMaster->setOption(openmittsu::options::Options::FILEPATH_DATABASE, "");

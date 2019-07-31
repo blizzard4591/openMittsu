@@ -134,6 +134,11 @@ private:
 
 	std::shared_ptr<openmittsu::utility::AudioNotification> m_audioNotifier;
 
+	// Commandline options
+	bool m_optionTryEmptyPassword;
+	bool m_optionAutoConnect;
+	bool m_optionMinimize;
+
 	void openDatabaseFile(QString const& fileName);
 	bool validateDatabaseFile(QString const& databaseFileName, QString const& password, bool quiet = false);
 	void updateDatabaseInfo(QString const& currentFileName);
