@@ -76,6 +76,8 @@ private slots:
 
 	// Updater
 	void updaterFoundNewVersion(int versionMajor, int versionMinor, int versionPatch, int commitsSinceTag, QString gitHash, QString channel, QString link);
+
+	void delayedStartup();
 public slots:
 	void contactRegistryOnIdentitiesChanged();
 	void connectionTimerOnTimer();

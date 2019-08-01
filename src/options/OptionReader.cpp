@@ -29,6 +29,10 @@ namespace openmittsu {
 			//
 		}
 
+		void OptionReader::forceInitialization() {
+			onDatabaseUpdated();
+		}
+
 		void OptionReader::onDatabaseOptionsChanged() {
 			m_databaseCache.clear();
 			if (m_database.hasDatabase()) {
@@ -79,6 +83,7 @@ namespace openmittsu {
 			target->registerOption(OptionGroups::GROUP_GENERAL, Options::BOOLEAN_TRUST_OTHERS, QStringLiteral("options/trustOthers"), tr("Accept messages from users whose group membership has not (yet) been confirmed"), false, OptionTypes::TYPE_BOOL, OptionStorage::STORAGE_DATABASE);
 			target->registerOption(OptionGroups::GROUP_GENERAL, Options::BOOLEAN_UPDATE_FEATURE_LEVEL, QStringLiteral("options/updateFeatureLevel"), tr("Increase identity feature level to software feature level if possible"), true, OptionTypes::TYPE_BOOL, OptionStorage::STORAGE_DATABASE);
 			target->registerOption(OptionGroups::GROUP_GENERAL, Options::FILEPATH_DATABASE, QStringLiteral("options/database/databaseFile"), tr("Main database file path"), "", OptionTypes::TYPE_FILEPATH, OptionStorage::STORAGE_SIMPLE);
+			target->registerOption(OptionGroups::GROUP_GENERAL, Options::BOOLEAN_IGNORE_LEGACY_CONTACTS_DATABASE, QStringLiteral("options/ignoreLegacyContactsDatabase"), tr("Ignore still configured legacy contact database files (relevant when still using old versions in parallel)"), false, OptionTypes::TYPE_BOOL, OptionStorage::STORAGE_DATABASE);
 			target->registerOption(OptionGroups::GROUP_INTERNAL, Options::BINARY_MAINWINDOW_GEOMETRY, QStringLiteral("options/internal/clientMainWindowGeometry"), "", QByteArray(), OptionTypes::TYPE_BINARY, OptionStorage::STORAGE_SIMPLE);
 			target->registerOption(OptionGroups::GROUP_INTERNAL, Options::BINARY_MAINWINDOW_STATE, QStringLiteral("options/internal/clientMainWindowState"), "", QByteArray(), OptionTypes::TYPE_BINARY, OptionStorage::STORAGE_SIMPLE);
 			target->registerOption(OptionGroups::GROUP_INTERNAL, Options::FILEPATH_LEGACY_CONTACTS_DATABASE, QStringLiteral("options/database/contactsFile"), "", "", OptionTypes::TYPE_FILEPATH, OptionStorage::STORAGE_SIMPLE);

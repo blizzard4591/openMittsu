@@ -36,6 +36,8 @@ namespace openmittsu {
 
 			void registerOptions();
 			static void registerOptions(OptionRegister* target, QHash<OptionGroups, QString>& groupsToName);
+
+			void forceInitialization();
 		protected:
 			virtual bool registerOption(OptionGroups const& optionGroup, Options const& option, QString const& optionName, QString const& optionDescription, QVariant const& defaultValue, OptionTypes const& optionType, OptionStorage const& optionStorage) override;
 			static QSettings* getSettings();

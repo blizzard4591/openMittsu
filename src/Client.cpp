@@ -70,25 +70,24 @@
 
 #include "ui_main.h"
 
-Client::Client(QWidget* parent) : QMainWindow(parent), 
-	m_ui(std::make_unique<Ui::MainWindow>()),
-	m_protocolClient(nullptr), m_protocolClientThread(this), m_connectionTimer(this),
-	m_updater(),
-	m_connectionState(ConnectionState::STATE_DISCONNECTED),
-	m_tabController(nullptr),
-	m_messageCenterThread(),
-	m_messageCenterPointerAuthority(),
-	m_messageCenterWrapper(&m_messageCenterPointerAuthority),
-	m_serverConfiguration(std::make_shared<openmittsu::network::ServerConfiguration>()),
-	m_optionMaster(nullptr),
-	m_databaseThread(),
-	m_databasePointerAuthority(),
-	m_databaseWrapper(&m_databasePointerAuthority),
-	m_audioNotifier(std::make_shared<openmittsu::utility::AudioNotification>()),
-	m_optionTryEmptyPassword(false),
-	m_optionAutoConnect(false),
-	m_optionMinimize(false)
-{
+Client::Client(QWidget* parent) : QMainWindow(parent),
+m_ui(std::make_unique<Ui::MainWindow>()),
+m_protocolClient(nullptr), m_protocolClientThread(this), m_connectionTimer(this),
+m_updater(),
+m_connectionState(ConnectionState::STATE_DISCONNECTED),
+m_tabController(nullptr),
+m_messageCenterThread(),
+m_messageCenterPointerAuthority(),
+m_messageCenterWrapper(&m_messageCenterPointerAuthority),
+m_serverConfiguration(std::make_shared<openmittsu::network::ServerConfiguration>()),
+m_optionMaster(nullptr),
+m_databaseThread(),
+m_databasePointerAuthority(),
+m_databaseWrapper(&m_databasePointerAuthority),
+m_audioNotifier(std::make_shared<openmittsu::utility::AudioNotification>()),
+m_optionTryEmptyPassword(false),
+m_optionAutoConnect(false),
+m_optionMinimize(false) {
 	m_ui->setupUi(this);
 
 	// Parse commandline options
@@ -148,25 +147,6 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 
 	// Load stored settings
 	this->m_optionMaster = std::make_shared<openmittsu::options::OptionMaster>(m_databaseWrapper);
-	QString const databaseFile = m_optionMaster->getOptionAsQString(openmittsu::options::Options::FILEPATH_DATABASE);
-	QString const legacyClientConfiguration = m_optionMaster->getOptionAsQString(openmittsu::options::Options::FILEPATH_LEGACY_CLIENT_CONFIGURATION);
-	bool showFirstUseWizard = false;
-	bool showFromBackupWizard = false;
-
-	if (!databaseFile.isEmpty()) {
-		if (!QFile::exists(databaseFile)) {
-			LOGGER_DEBUG("Removing key \"FILEPATH_DATABASE\" from stored settings as the file is not valid.");
-			m_optionMaster->setOption(openmittsu::options::Options::FILEPATH_DATABASE, "");
-		} else {
-			openDatabaseFile(databaseFile);
-		}
-	} else {
-		if (!legacyClientConfiguration.isEmpty() && QFile::exists(legacyClientConfiguration)) {
-			showFromBackupWizard = true;
-		} else {
-			showFirstUseWizard = true;
-		}
-	}
 
 	OPENMITTSU_CONNECT(m_ui->btnConnect, clicked(), this, btnConnectOnClick());
 	OPENMITTSU_CONNECT(m_ui->btnOpenDatabase, clicked(), this, btnOpenDatabaseOnClick());
@@ -208,6 +188,43 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 	QTimer::singleShot(0, &m_updater, SLOT(start()));
 #endif
 
+	QTimer::singleShot(0, this, SLOT(delayedStartup()));
+}
+
+Client::~Client() {
+	if (m_protocolClient != nullptr) {
+		m_protocolClient = nullptr;
+	}
+
+	if (m_protocolClientThread.isRunning()) {
+		m_protocolClientThread.quit();
+	}
+	while (!m_protocolClientThread.isFinished()) {
+		QThread::currentThread()->wait(10);
+	}
+}
+
+void Client::delayedStartup() {
+	QString const databaseFile = m_optionMaster->getOptionAsQString(openmittsu::options::Options::FILEPATH_DATABASE);
+	QString const legacyClientConfiguration = m_optionMaster->getOptionAsQString(openmittsu::options::Options::FILEPATH_LEGACY_CLIENT_CONFIGURATION);
+	bool showFirstUseWizard = false;
+	bool showFromBackupWizard = false;
+
+	if (!databaseFile.isEmpty()) {
+		if (!QFile::exists(databaseFile)) {
+			LOGGER_DEBUG("Removing key \"FILEPATH_DATABASE\" from stored settings as the file is not valid.");
+			m_optionMaster->setOption(openmittsu::options::Options::FILEPATH_DATABASE, "");
+		} else {
+			openDatabaseFile(databaseFile);
+		}
+	} else {
+		if (!legacyClientConfiguration.isEmpty() && QFile::exists(legacyClientConfiguration)) {
+			showFromBackupWizard = true;
+		} else {
+			showFirstUseWizard = true;
+		}
+	}
+
 	contactRegistryOnIdentitiesChanged();
 
 	if (showFirstUseWizard) {
@@ -222,10 +239,15 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 
 	if (m_databaseWrapper.hasDatabase()) {
 		QString const legacyContactsFile = m_optionMaster->getOptionAsQString(openmittsu::options::Options::FILEPATH_LEGACY_CONTACTS_DATABASE);
-		if (!legacyContactsFile.isEmpty() && QFile::exists(legacyContactsFile)) {
-			auto const resultButton = QMessageBox::question(this, tr("Legacy contacts file found"), tr("Welcome.\nIt seems that you used an older version of openMittsu before that used a plaintext contacts file to store your contacts and groups.\nThis has been replaced by an encrypted database storing both your ID, contacts, groups and messages.\nIf you want, your legacy contacts file can be imported into your openMittsu database.\nClick \"Yes\" to import the old file (located at %1), or \"No\" to leave it for now.\nYou can always come back later and import it via Database -> Import openMittsu....").arg(legacyContactsFile));
+		m_optionMaster->forceInitialization();
+		if (!legacyContactsFile.isEmpty() && QFile::exists(legacyContactsFile) && !m_optionMaster->getOptionAsBool(openmittsu::options::Options::BOOLEAN_IGNORE_LEGACY_CONTACTS_DATABASE)) {
+			auto const resultButton = QMessageBox::question(this, tr("Legacy contacts file found"), tr("Welcome.\nIt seems that you used an older version of openMittsu before that used a plaintext contacts file to store your contacts and groups.\nThis has been replaced by an encrypted database storing both your ID, contacts, groups and messages.\nIf you want, your legacy contacts file can be imported into your openMittsu database.\nClick \"Yes\" to import the old file (located at %1), \"No\" to leave it for now, \"Ignore\" to permanently ignore the file (can be changed in the options) or \"Discard\" to delete the reference to the old file.\nYou can always come back later and import it via Database -> Import openMittsu....").arg(legacyContactsFile), QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No | QMessageBox::StandardButton::Ignore | QMessageBox::StandardButton::Discard);
 			if (resultButton == QMessageBox::StandardButton::Yes) {
 				menuDatabaseImportLegacyContactsAndGroupsOnClick(legacyContactsFile);
+				m_optionMaster->setOption(openmittsu::options::Options::FILEPATH_LEGACY_CONTACTS_DATABASE, "");
+			} else if (resultButton == QMessageBox::StandardButton::Ignore) {
+				m_optionMaster->setOption(openmittsu::options::Options::BOOLEAN_IGNORE_LEGACY_CONTACTS_DATABASE, true);
+			} else if (resultButton == QMessageBox::StandardButton::Discard) {
 				m_optionMaster->setOption(openmittsu::options::Options::FILEPATH_LEGACY_CONTACTS_DATABASE, "");
 			}
 		}
@@ -246,24 +268,11 @@ Client::Client(QWidget* parent) : QMainWindow(parent),
 	}
 }
 
-Client::~Client() {
-	if (m_protocolClient != nullptr) {
-		m_protocolClient = nullptr;
-	}
-
-	if (m_protocolClientThread.isRunning()) {
-		m_protocolClientThread.quit();
-	}
-	while (!m_protocolClientThread.isFinished()) {
-		QThread::currentThread()->wait(10);
-	}
-}
-
 void Client::closeEvent(QCloseEvent* event) {
 	// Save location and size of window
 	m_optionMaster->setOption(openmittsu::options::Options::BINARY_MAINWINDOW_GEOMETRY, saveGeometry());
 	m_optionMaster->setOption(openmittsu::options::Options::BINARY_MAINWINDOW_STATE, saveState());
-	
+
 	// Close server connection and tear down threads
 	if (m_protocolClient != nullptr) {
 		// Deletes the client
@@ -398,7 +407,7 @@ bool Client::validateDatabaseFile(QString const& databaseFileName, QString const
 		if (!folder.exists()) {
 			return false;
 		}
-		
+
 		openmittsu::database::SimpleDatabase db(databaseFileName, password, folder, false);
 		return true;
 	} catch (openmittsu::exceptions::BaseException& iex) {
@@ -467,12 +476,12 @@ void Client::openDatabaseFile(QString const& fileName) {
 					m_optionMaster->setOption(openmittsu::options::Options::FILEPATH_DATABASE, "");
 					break;
 				}
-			} 
-			
+			}
+
 			if (databaseOpenSuccess == 0) {
 				this->m_optionMaster->setOption(openmittsu::options::Options::FILEPATH_DATABASE, fileName);
 				m_databasePointerAuthority.setDatabase(m_databaseThread.getWorker().getDatabase());
-				
+
 				while (!m_databaseWrapper.hasDatabase()) {
 					QCoreApplication::processEvents();
 					QThread::msleep(25);
@@ -494,7 +503,7 @@ void Client::contactRegistryOnIdentitiesChanged() {
 	LOGGER_DEBUG("Updating contacts list on IdentitiesChanged() signal.");
 	m_ui->listContacts->clear();
 	m_ui->listGroups->clear();
-	
+
 	if (m_databaseWrapper.hasDatabase()) {
 		QHash<openmittsu::protocol::ContactId, openmittsu::database::ContactData> knownIdentities = m_databaseWrapper.getContactDataAll(false);
 		auto it = knownIdentities.constBegin();
@@ -652,7 +661,7 @@ void Client::protocolClientOnConnectToFinished(int errCode, QString message) {
 		if (m_databaseThread.getWorker().hasDatabase()) {
 			QSet<openmittsu::protocol::ContactId> const contactsRequiringAccountStatusCheck = m_databaseWrapper.getContactsRequiringAccountStatusCheck(86400);
 			QSet<openmittsu::protocol::ContactId> const contactsRequiringFeatureLevelCheck = m_databaseWrapper.getContactsRequiringFeatureLevelCheck(86400);
-			
+
 			if (contactsRequiringFeatureLevelCheck.size() > 0) {
 				openmittsu::tasks::CheckFeatureLevelCallbackTask* taskCheckFeatureLevels = new openmittsu::tasks::CheckFeatureLevelCallbackTask(m_serverConfiguration, contactsRequiringFeatureLevelCheck);
 				OPENMITTSU_CONNECT_QUEUED(taskCheckFeatureLevels, finished(openmittsu::tasks::CallbackTask*), this, callbackTaskFinished(openmittsu::tasks::CallbackTask*));
@@ -783,7 +792,7 @@ void Client::listContactsOnContextMenu(QPoint const& pos) {
 
 				auto it = groups.constBegin();
 				auto const end = groups.constEnd();
-				for (;it != end; ++it) {
+				for (; it != end; ++it) {
 					QAction* groupMember = new QAction(QString(" - ").append(*it), &listContactsContextMenu);
 					groupMember->setDisabled(true);
 					listContactsContextMenu.addAction(groupMember);
@@ -800,7 +809,7 @@ void Client::listContactsOnContextMenu(QPoint const& pos) {
 				QString const nickname = contactData.nickName;
 
 				openmittsu::dialogs::ContactEditDialog contactEditDialog(id, pubKey, nickname, this);
-					
+
 				int result = contactEditDialog.exec();
 
 				if (result == QDialog::DialogCode::Accepted) {
@@ -1015,7 +1024,7 @@ void Client::menuContactAddOnClick() {
 			try {
 				openmittsu::protocol::ContactId const contactId(identityString.toUtf8());
 				openmittsu::tasks::IdentityReceiverCallbackTask ir(m_serverConfiguration, contactId);
-				
+
 				QEventLoop eventLoop;
 				OPENMITTSU_CONNECT(&ir, finished(openmittsu::tasks::CallbackTask*), &eventLoop, quit());
 				ir.start();
