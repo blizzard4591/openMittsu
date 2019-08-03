@@ -20,9 +20,9 @@ namespace openmittsu {
 			OPENMITTSU_CONNECT_QUEUED(&m_database, optionsChanged(), this, onDatabaseOptionsChanged());
 			OPENMITTSU_CONNECT_QUEUED(&m_database, gotDatabase(), this, onDatabaseUpdated());
 
-			registerOptions();
-
 			onDatabaseOptionsChanged();
+
+			registerOptions();
 		}
 
 		OptionReader::~OptionReader() {
@@ -79,6 +79,7 @@ namespace openmittsu {
 			target->registerOption(OptionGroups::GROUP_PRIVACY, Options::BOOLEAN_SEND_READ_NOTIFICATION, QStringLiteral("options/sendReadNotification"), tr("Send \"message seen\" notifications"), true, OptionTypes::TYPE_BOOL, OptionStorage::STORAGE_DATABASE);
 			target->registerOption(OptionGroups::GROUP_NOTIFICATIONS, Options::BOOLEAN_FORCE_FOREGROUND_ON_MESSAGE_RECEIVED, QStringLiteral("options/forceForegroundOnMessageReceived"), tr("Force window into foreground on incoming message"), true, OptionTypes::TYPE_BOOL, OptionStorage::STORAGE_DATABASE);
 			target->registerOption(OptionGroups::GROUP_NOTIFICATIONS, Options::BOOLEAN_PLAY_SOUND_ON_MESSAGE_RECEIVED, QStringLiteral("options/playSoundOnMessageReceived"), tr("Play sound on incoming message"), true, OptionTypes::TYPE_BOOL, OptionStorage::STORAGE_DATABASE);
+			target->registerOption(OptionGroups::GROUP_NOTIFICATIONS, Options::BOOLEAN_BLINK_ICON_ON_MESSAGE_RECEIVED, QStringLiteral("options/blinkIconOnMessageReceived"), tr("Blink the App icon on incoming message"), true, OptionTypes::TYPE_BOOL, OptionStorage::STORAGE_DATABASE);
 			target->registerOption(OptionGroups::GROUP_GENERAL, Options::BOOLEAN_RECONNECT_ON_CONNECTION_LOSS, QStringLiteral("options/reconnectOnConnectionLoss"), tr("Automatically attempt reconnect on a connection loss"), true, OptionTypes::TYPE_BOOL, OptionStorage::STORAGE_DATABASE);
 			target->registerOption(OptionGroups::GROUP_GENERAL, Options::BOOLEAN_TRUST_OTHERS, QStringLiteral("options/trustOthers"), tr("Accept messages from users whose group membership has not (yet) been confirmed"), false, OptionTypes::TYPE_BOOL, OptionStorage::STORAGE_DATABASE);
 			target->registerOption(OptionGroups::GROUP_GENERAL, Options::BOOLEAN_UPDATE_FEATURE_LEVEL, QStringLiteral("options/updateFeatureLevel"), tr("Increase identity feature level to software feature level if possible"), true, OptionTypes::TYPE_BOOL, OptionStorage::STORAGE_DATABASE);

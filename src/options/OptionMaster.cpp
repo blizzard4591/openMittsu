@@ -27,7 +27,6 @@ namespace openmittsu {
 			OptionStorage const optionStorage = m_optionToOptionContainerMap.constFind(option)->storage;
 			OptionTypes const type = m_optionToOptionContainerMap.constFind(option)->type;
 
-
 			if (optionStorage == OptionStorage::STORAGE_DATABASE) {
 				if (!m_database.hasDatabase()) {
 					return;
