@@ -51,6 +51,7 @@ TEST_F(DatabaseTestFramework, MessageCenterTestUnknownGroup) {
 
 	std::unique_ptr<openmittsu::dataproviders::SimpleMessageCenter> mc = std::make_unique<openmittsu::dataproviders::SimpleMessageCenter>(openmittsu::database::TestDatabaseWrapperFactory(&dpa));
 	mc->setNetworkSentMessageAcceptor(networkSentMessageAcceptor);
+	QCoreApplication::processEvents();
 
 	openmittsu::protocol::MessageId const messageA = this->getFreeMessageId();
 	mc->processReceivedGroupMessageText(groupIdA, contactIdD, messageA, openmittsu::protocol::MessageTime::fromDatabase(1234567), openmittsu::protocol::MessageTime::fromDatabase(12345678), "Test 1");

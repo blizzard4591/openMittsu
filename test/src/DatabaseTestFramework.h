@@ -8,6 +8,7 @@
 #include <QHash>
 #include <QSet>
 #include <QString>
+#include <QCoreApplication>
 
 #include <memory>
 
@@ -67,6 +68,8 @@ protected:
 		db = std::make_shared<openmittsu::database::SimpleDatabase>(databaseFilename, selfContactId, selfKeyPair, QStringLiteral("AAAAAAAA"), tempMediaStorageLocation);
 
 		usedMessageIds.clear();
+
+		QCoreApplication::processEvents();
 	}
 	virtual void TearDown() override {
 		//std::cout << "per-test teardown" << std::endl;

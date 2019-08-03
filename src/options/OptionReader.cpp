@@ -23,6 +23,11 @@ namespace openmittsu {
 			onDatabaseOptionsChanged();
 
 			registerOptions();
+
+			// If the database is still unpopulated, only the registerOptions() call changed that and now the cache needs to be updated.
+			if (m_databaseCache.isEmpty()) {
+				onDatabaseOptionsChanged();
+			}
 		}
 
 		OptionReader::~OptionReader() {
@@ -211,6 +216,9 @@ namespace openmittsu {
 				if (!m_database.hasDatabase()) {
 					LOGGER_DEBUG("Returned default value for database option {} as database is not available.", optionName.toStdString());
 					return m_optionToOptionContainerMap.constFind(option)->defaultValue.toBool();
+				} else if (m_databaseCache.isEmpty()) {
+					LOGGER()->error("Database Cache of OptionReader is empty, this indicates a bug!");
+					throw openmittsu::exceptions::InternalErrorException() << "Database option cache not initialized!";
 				}
 
 				if (m_databaseCache.contains(optionName)) {
@@ -249,6 +257,9 @@ namespace openmittsu {
 			if (optionStorage == OptionStorage::STORAGE_DATABASE) {
 				if (!m_database.hasDatabase()) {
 					return m_optionToOptionContainerMap.constFind(option)->defaultValue.toString();
+				} else if (m_databaseCache.isEmpty()) {
+					LOGGER()->error("Database Cache of OptionReader is empty, this indicates a bug!");
+					throw openmittsu::exceptions::InternalErrorException() << "Database option cache not initialized!";
 				}
 
 				if (m_databaseCache.contains(optionName)) {
@@ -288,6 +299,9 @@ namespace openmittsu {
 			if (optionStorage == OptionStorage::STORAGE_DATABASE) {
 				if (!m_database.hasDatabase()) {
 					return m_optionToOptionContainerMap.constFind(option)->defaultValue.toByteArray();
+				} else if (m_databaseCache.isEmpty()) {
+					LOGGER()->error("Database Cache of OptionReader is empty, this indicates a bug!");
+					throw openmittsu::exceptions::InternalErrorException() << "Database option cache not initialized!";
 				}
 
 				if (m_databaseCache.contains(optionName)) {
