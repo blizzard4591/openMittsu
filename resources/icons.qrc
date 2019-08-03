@@ -1,6 +1,10 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource prefix="/icons">
     <file alias="icon.png">icon.png</file>
+	<file alias="icon_unread_message.png">icon_unread_message.png</file>
 	<file alias="icon-small-for-ico.ico">icon-small-for-ico.ico</file>
+	<file alias="icon_unread_message-small-for-ico.ico">icon_unread_message-small-for-ico.ico</file>
+	<file alias="logo.ico">logo.ico</file>
+	<file alias="logo_unread_message.ico">logo_unread_message.ico</file>
 </qresource>
 </RCC>

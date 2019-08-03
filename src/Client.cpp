@@ -72,7 +72,11 @@
 
 Client::Client(QWidget* parent) : QMainWindow(parent),
 m_ui(std::make_unique<Ui::MainWindow>()),
-m_protocolClient(nullptr), m_protocolClientThread(this), m_connectionTimer(this),
+m_protocolClient(nullptr),
+m_protocolClientThread(this),
+m_connectionTimer(this),
+m_unreadMessagesIconBlinkTimer(this),
+m_unreadMessagesIconBlinkState(false),
 m_updater(),
 m_connectionState(ConnectionState::STATE_DISCONNECTED),
 m_tabController(nullptr),
@@ -115,6 +119,7 @@ m_optionMinimize(false) {
 
 	m_connectionTimer.start(500);
 	OPENMITTSU_CONNECT(&m_connectionTimer, timeout(), this, connectionTimerOnTimer());
+	OPENMITTSU_CONNECT(&m_unreadMessagesIconBlinkTimer, timeout(), this, unreadMessagesIconBlinkTimerOnTimer());
 	OPENMITTSU_CONNECT(&m_messageCenterWrapper, newUnreadMessageAvailableContact(openmittsu::protocol::ContactId const&), this, onMessageCenterHasUnreadMessageContact(openmittsu::protocol::ContactId const&));
 	OPENMITTSU_CONNECT(&m_messageCenterWrapper, newUnreadMessageAvailableGroup(openmittsu::protocol::GroupId const&), this, onMessageCenterHasUnreadMessageGroup(openmittsu::protocol::GroupId const&));
 
@@ -576,6 +581,15 @@ void Client::onHasUnreadMessage(openmittsu::widgets::ChatTab* tab) {
 			m_audioNotifier->playNotification();
 		}
 	}
+
+	if (m_optionMaster->getOptionAsBool(openmittsu::options::Options::BOOLEAN_BLINK_ICON_ON_MESSAGE_RECEIVED)) {
+		if ((QApplication::activeWindow() == nullptr) && (!m_unreadMessagesIconBlinkTimer.isActive())) {
+			m_unreadMessagesIconBlinkState = true;
+			setAppIcon(true);
+			m_unreadMessagesIconBlinkTimer.setInterval(500);
+			m_unreadMessagesIconBlinkTimer.start();
+		}
+	}
 }
 
 void Client::onMessageCenterHasUnreadMessageContact(openmittsu::protocol::ContactId const& contact) {
@@ -965,7 +979,7 @@ void Client::menuAboutLicenseOnClick() {
 }
 
 void Client::menuAboutAboutOnClick() {
-	QMessageBox::about(this, "OpenMittsu - About", QString("<h2>OpenMittsu</h2><br><br>%1<br>%2<br><br>An open source chat client for Threema-style end-to-end encrypted chat networks.<br><br>This project is in no way connected, affiliated or endorsed with/by Threema GmbH.<br><br>Copyright (C) 2015-18 by Philipp Berger<br>This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.<br>See LICENSE for further information.<br><br>Don't be a jerk!").arg(QString::fromStdString(openmittsu::utility::Version::longVersionString())).arg(QString::fromStdString(openmittsu::utility::Version::buildInfo())));
+	QMessageBox::about(this, "OpenMittsu - About", QString("<h2>OpenMittsu</h2><br><br>%1<br>%2<br><br>An open source chat client for Threema-style end-to-end encrypted chat networks.<br><br>This project is in no way connected, affiliated or endorsed with/by Threema GmbH.<br><br>Copyright (C) 2015-19 by Philipp Berger<br>This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.<br>See LICENSE for further information.<br><br>Don't be a jerk!").arg(QString::fromStdString(openmittsu::utility::Version::longVersionString())).arg(QString::fromStdString(openmittsu::utility::Version::buildInfo())));
 }
 
 void Client::menuAboutAboutQtOnClick() {
@@ -1187,6 +1201,32 @@ void Client::connectionTimerOnTimer() {
 	} else {
 		QString const text(QStringLiteral("Not connected"));
 		m_ui->lblStatus->setText(text);
+	}
+}
+
+void Client::unreadMessagesIconBlinkTimerOnTimer() {
+	if (QApplication::activeWindow() != nullptr) {
+		// deactivate timer as window is active
+		setAppIcon(false);
+		m_unreadMessagesIconBlinkTimer.stop();
+		m_unreadMessagesIconBlinkState = false;
+	} else {
+		if (m_unreadMessagesIconBlinkState) {
+			setAppIcon(false);
+		} else {
+			setAppIcon(true);
+		}
+		m_unreadMessagesIconBlinkState = !m_unreadMessagesIconBlinkState;
+	}
+}
+
+void Client::setAppIcon(bool haveUnreadMessages) {
+	if (haveUnreadMessages) {
+		QIcon icon(":/icons/logo_unread_message.ico");
+		this->setWindowIcon(icon);
+	} else {
+		QIcon icon(":/icons/logo.ico");
+		this->setWindowIcon(icon);
 	}
 }
 

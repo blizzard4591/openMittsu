@@ -81,6 +81,7 @@ private slots:
 public slots:
 	void contactRegistryOnIdentitiesChanged();
 	void connectionTimerOnTimer();
+	void unreadMessagesIconBlinkTimerOnTimer();
 
 	void onDatabaseUpdated();
 	void onDatabaseContactChanged(openmittsu::protocol::ContactId const& contact);
@@ -109,6 +110,8 @@ private:
 	std::shared_ptr<openmittsu::network::ProtocolClient> m_protocolClient;
 	QThread m_protocolClientThread;
 	QTimer m_connectionTimer;
+	QTimer m_unreadMessagesIconBlinkTimer;
+	bool m_unreadMessagesIconBlinkState;
 
 	// Update functionality
 	openmittsu::updater::Updater m_updater;
@@ -150,6 +153,7 @@ private:
 
 	QString formatDuration(quint64 duration) const;
 	void onHasUnreadMessage(openmittsu::widgets::ChatTab* tab);
+	void setAppIcon(bool haveUnreadMessages);
 };
 
 #endif
