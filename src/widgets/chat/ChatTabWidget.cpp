@@ -12,7 +12,7 @@
 namespace openmittsu {
 	namespace widgets {
 
-		ChatTabWidget::ChatTabWidget(QWidget* parent) : QTabWidget(parent), standardColor(this->palette().color(QPalette::Foreground)), blinkColor(Qt::red), lastActiveIndex(-1) {
+		ChatTabWidget::ChatTabWidget(QWidget* parent) : QTabWidget(parent), standardColor(this->palette().color(QPalette::WindowText)), blinkColor(Qt::red), lastActiveIndex(-1) {
 			OPENMITTSU_CONNECT(&blinkTimer, timeout(), this, blinkTimerOnTimer());
 			OPENMITTSU_CONNECT(this, currentChanged(int), this, slotCurrentChanged(int));
 

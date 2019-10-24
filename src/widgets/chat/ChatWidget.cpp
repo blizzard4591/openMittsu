@@ -40,7 +40,7 @@ namespace openmittsu {
 			m_ui->scrollAreaWidgetContents->setLayout(m_topLayout);
 
 			QPalette myPalette(palette());
-			myPalette.setColor(QPalette::Background, Qt::white);
+			myPalette.setColor(QPalette::Window, Qt::white);
 			this->setAutoFillBackground(true);
 			this->setPalette(myPalette);
 
