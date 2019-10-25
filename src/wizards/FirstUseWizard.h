@@ -17,7 +17,7 @@ namespace openmittsu {
 			explicit FirstUseWizard(QWidget* parent = nullptr);
 			virtual ~FirstUseWizard();
 
-			enum UserChoice {
+			enum class UserChoice {
 				INVALID,
 				LOAD_DATABASE,
 				CREATE_DATABASE
@@ -26,6 +26,9 @@ namespace openmittsu {
 		private slots:
 			void onButtonPressed(int id);
 		private:
+			static int convertUserChoiceToInt(UserChoice const& userChoice);
+			static UserChoice convertIntToUserChoice(int choiceValue);
+
 			std::unique_ptr<Ui::FirstUseWizard> m_ui;
 			UserChoice m_userChoice;
 		};
