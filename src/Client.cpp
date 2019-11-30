@@ -91,23 +91,86 @@ m_databaseWrapper(&m_databasePointerAuthority),
 m_audioNotifier(std::make_shared<openmittsu::utility::AudioNotification>()),
 m_optionTryEmptyPassword(false),
 m_optionAutoConnect(false),
-m_optionMinimize(false) {
+m_optionMinimize(false),
+m_optionUsePasswordFile(false),
+m_optionPasswordFromFile(),
+m_optionUseDatabaseFile(),
+m_optionDatabaseFile() {
 	m_ui->setupUi(this);
 
 	// Parse commandline options
-
-
-	QHash<QString, bool*> knownOptions = { {"--openmittsu-nopassword", &m_optionTryEmptyPassword }, {"--openmittsu-autoconnect", &m_optionAutoConnect}, {"--openmittsu-minimize", &m_optionMinimize} };
+	bool showHelp = false;
+	bool lookForPasswordFilename = false;
+	QHash<QString, bool*> knownOptions = { 
+		{"--openmittsu-nopassword", &m_optionTryEmptyPassword }, 
+		{"--openmittsu-password-file", &m_optionUsePasswordFile }, 
+		{"--openmittsu-database-file", &m_optionUseDatabaseFile },
+		{"--openmittsu-autoconnect", &m_optionAutoConnect}, 
+		{"--openmittsu-minimize", &m_optionMinimize}, 
+		{"--help", &showHelp} 
+	};
 	QStringList arguments = QCoreApplication::arguments();
-	for (QString const& arg : arguments) {
+
+	for (int i = 0; i < arguments.size(); ++i) {
+		QString const& arg = arguments.at(i);
 		auto const it = knownOptions.constFind(arg.toLower());
 		if (it != knownOptions.constEnd()) {
 			// Found option
 			bool* option = it.value();
 			*option = true;
+			if (it.key().compare("--openmittsu-password-file") == 0) {
+				if ((i + 1) >= arguments.size()) {
+					std::cerr << "Missing required argument for --openmittsu-password-file!" << std::endl;
+					std::exit(-10);
+				}
+				
+				QString passwordFileName = arguments.at(i + 1);
+				QFile passwordFile(passwordFileName);
+				if (!passwordFile.open(QFile::ReadOnly)) {
+					QMessageBox::information(this, tr("Password file"), tr("Tried getting the database password from file '%1', but it does not exist or is not readable.").arg(passwordFileName));
+					LOGGER()->error("Tried getting the database password from file '{}', but it does not exist or is not readable.", passwordFileName.toStdString());
+					std::exit(-11);
+				}
+				m_optionPasswordFromFile = QString(passwordFile.readAll());
+				LOGGER()->info("Loaded password for OpenMittsu database from file.");
+
+				++i; // Skip parsing the string argument
+			} else if (it.key().compare("--openmittsu-database-file") == 0) {
+				if ((i + 1) >= arguments.size()) {
+					std::cerr << "Missing required argument for --openmittsu-database-file!" << std::endl;
+					std::exit(-12);
+				}
+
+				m_optionDatabaseFile = arguments.at(i + 1);
+				if (!QFile::exists(m_optionDatabaseFile)) {
+					QMessageBox::information(this, tr("Database file"), tr("Tried finding the database file '%1', but it does not exist or is not readable.").arg(m_optionDatabaseFile));
+					LOGGER()->error("Tried finding the database file '{}', but it does not exist or is not readable.", m_optionDatabaseFile.toStdString());
+					std::exit(-13);
+				}
+
+				++i; // Skip parsing the string argument
+			}
 		}
 	}
-
+	
+	if (showHelp) {
+		std::cout << "OpenMittsu" << std::endl;
+		std::cout << "----------" << std::endl;
+		std::cout << "A cross-platform open source implementation and desktop client for the Threema Messenger App." << std::endl;
+		std::cout << std::endl;
+		std::cout << openmittsu::utility::Version::longVersionString() << std::endl;
+		std::cout << std::endl;
+		std::cout << "Available command-line options:" << std::endl;
+		std::cout << std::endl;
+		std::cout << " --openmittsu-autoconnect - Auto-connect after starting." << std::endl;
+		std::cout << " --openmittsu-database-file PATH/FILENAME - Load the database FILENAME. Usually a path ending in 'openmittsu.sqlite'." << std::endl;
+		std::cout << " --openmittsu-minimize - Minimize the window after starting." << std::endl;
+		std::cout << " --openmittsu-nopassword - Try opening the database with the empty password." << std::endl;
+		std::cout << " --openmittsu-password-file PATH/FILENAME - Read the file and use its contents as the password to the database. Look out for extra new-lines!" << std::endl;
+		std::cout << std::endl;
+		std::cout << "Good bye!" << std::endl;
+		std::exit(0);
+	}
 
 	m_tabController = std::make_shared<openmittsu::widgets::SimpleTabController>(m_ui->tabWidget);
 
@@ -171,6 +234,7 @@ m_optionMinimize(false) {
 	OPENMITTSU_CONNECT(m_ui->actionDelete_a_Contact, triggered(), this, menuContactDeleteOnClick());
 	OPENMITTSU_CONNECT(m_ui->actionEdit_a_Contact, triggered(), this, menuContactEditOnClick());
 	OPENMITTSU_CONNECT(m_ui->actionSave_to_file, triggered(), this, menuContactSaveToFileOnClick());
+	//OPENMITTSU_CONNECT(m_ui->actionShow_Emoji_Input, triggered(bool), this, menuViewShowEmojiTabOnTriggered(bool));
 	OPENMITTSU_CONNECT(m_ui->actionAdd_Group, triggered(), this, menuGroupAddOnClick());
 	OPENMITTSU_CONNECT(m_ui->actionEdit_Group, triggered(), this, menuGroupEditOnClick());
 	OPENMITTSU_CONNECT(m_ui->actionLeave_Group, triggered(), this, menuGroupLeaveOnClick());
@@ -215,7 +279,10 @@ void Client::delayedStartup() {
 	bool showFirstUseWizard = false;
 	bool showFromBackupWizard = false;
 
-	if (!databaseFile.isEmpty()) {
+	if (m_optionUseDatabaseFile && QFile::exists(m_optionDatabaseFile)) {
+		LOGGER()->info("Loading database from command-line option provided location '{}'.", m_optionDatabaseFile.toStdString());
+		openDatabaseFile(m_optionDatabaseFile);
+	} else if (!databaseFile.isEmpty()) {
 		if (!QFile::exists(databaseFile)) {
 			LOGGER_DEBUG("Removing key \"FILEPATH_DATABASE\" from stored settings as the file is not valid.");
 			m_optionMaster->setOption(openmittsu::options::Options::FILEPATH_DATABASE, "");
@@ -443,6 +510,9 @@ void Client::openDatabaseFile(QString const& fileName) {
 		if (m_optionTryEmptyPassword) {
 			password = "";
 			ok = true;
+		} else if (m_optionUsePasswordFile) {
+			password = m_optionPasswordFromFile;
+			ok = true;
 		} else {
 			password = QInputDialog::getText(this, tr("Database password"), tr("Please enter the database password for file \"%1\":").arg(fileName), QLineEdit::Password, QString(), &ok);
 			if (password.isNull()) {
@@ -467,6 +537,9 @@ void Client::openDatabaseFile(QString const& fileName) {
 							if (m_optionTryEmptyPassword) {
 								QMessageBox::information(this, tr("Invalid password"), tr("Tried the empty password for opening the database (commandline option set), but it was rejected."));
 								m_optionTryEmptyPassword = false;
+							} else if (m_optionUsePasswordFile) {
+								QMessageBox::information(this, tr("Invalid password"), tr("Tried the password from the given file for opening the database (commandline option set), but it was rejected."));
+								m_optionUsePasswordFile = false;
 							} else {
 								QMessageBox::information(this, tr("Invalid password"), tr("The entered database password was invalid."));
 							}
@@ -1008,6 +1081,10 @@ void Client::menuAboutStatisticsOnClick() {
 		quint64 seconds = m_protocolClient->getConnectedSince().secsTo(now);
 		QMessageBox::information(this, "OpenMittsu - Statistics", QString("Current session:\n\nTime connected: %1\nSend: %2 Bytes\nReceived: %3 Bytes\nMessages send: %4\nMessages received: %5").arg(formatDuration(seconds)).arg(QString::number(m_protocolClient->getSendBytesCount(), 10)).arg(QString::number(m_protocolClient->getReceivedBytesCount(), 10)).arg(QString::number(m_protocolClient->getSendMessagesCount(), 10)).arg(QString::number(m_protocolClient->getReceivedMessagesCount(), 10)));
 	}
+}
+
+void Client::menuViewShowEmojiTabOnTriggered(bool checked) {
+	//
 }
 
 void Client::menuGroupEditOnClick() {
