@@ -45,7 +45,7 @@ option(OPENMITTSU_ENABLE_TESTS "Enables tests." ON)
 option(OPENMITTSU_USE_NSIS "Use NSIS generator to produce a Windows installer." OFF)
 option(OPENMITTSU_WITH_APP_BUNDLE "Enable Application Bundle for macOS" ON)
 
-SET(OPENMITTSU_CMAKE_SEARCH_PATH "C:/Qt/5.12.3/msvc2017_64" CACHE PATH "Additional Qt5 search path" )
+SET(OPENMITTSU_CMAKE_SEARCH_PATH "C:/Qt/5.13.1/msvc2017_64" CACHE PATH "Additional Qt5 search path" )
 set(OPENMITTSU_CUSTOM_VERSION_STRING "" CACHE STRING "Disables Git version number checking and uses the custom string instead. Should be of the form 0.1.2-34-567890ab, i.e. major.minor.patch-commitsSinceTag-shortHash")
 
 SET(CMAKE_PREFIX_PATH "${OPENMITTSU_CMAKE_SEARCH_PATH}/lib/cmake/")

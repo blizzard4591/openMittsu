@@ -61,6 +61,7 @@ private slots:
 	void menuAboutAboutOnClick();
 	void menuAboutAboutQtOnClick();
 	void menuAboutStatisticsOnClick();
+	void menuViewShowEmojiTabOnTriggered(bool checked);
 	void menuGroupAddOnClick();
 	void menuGroupEditOnClick();
 	void menuGroupLeaveOnClick();
@@ -143,6 +144,10 @@ private:
 	bool m_optionTryEmptyPassword;
 	bool m_optionAutoConnect;
 	bool m_optionMinimize;
+	bool m_optionUsePasswordFile;
+	QString m_optionPasswordFromFile;
+	bool m_optionUseDatabaseFile;
+	QString m_optionDatabaseFile;
 
 	void openDatabaseFile(QString const& fileName);
 	bool validateDatabaseFile(QString const& databaseFileName, QString const& password, bool quiet = false);
