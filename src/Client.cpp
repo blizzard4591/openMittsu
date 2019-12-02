@@ -528,9 +528,9 @@ void Client::contactRegistryOnIdentitiesChanged() {
 			}
 			openmittsu::protocol::AccountStatus const status = it->accountStatus;
 			if (status == openmittsu::protocol::AccountStatus::STATUS_INACTIVE) {
-				clwi->setBackgroundColor(QColor::fromRgb(255, 255, 51));
+				clwi->setBackground(QBrush(QColor::fromRgb(255, 255, 51)));
 			} else if (status == openmittsu::protocol::AccountStatus::STATUS_INVALID) {
-				clwi->setBackgroundColor(QColor::fromRgb(250, 128, 114));
+				clwi->setBackground(QBrush(QColor::fromRgb(250, 128, 114)));
 			}
 
 			bool inserted = false;
