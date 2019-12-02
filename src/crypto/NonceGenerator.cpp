@@ -9,14 +9,20 @@
 namespace openmittsu {
 	namespace crypto {
 
-		NonceGenerator::NonceGenerator() : prefix(PROTO_NONCE_PREFIX_LENGTH_BYTES, 0x00), counter(0) {
+		NonceGenerator::NonceGenerator() : m_mutex(), m_prefix(PROTO_NONCE_PREFIX_LENGTH_BYTES, 0x00), m_counter(0) {
 			// Generate a random Prefix
-			randombytes_buf(prefix.data(), PROTO_NONCE_PREFIX_LENGTH_BYTES);
+			randombytes_buf(m_prefix.data(), PROTO_NONCE_PREFIX_LENGTH_BYTES);
+		}
+		
+		NonceGenerator::NonceGenerator(NonceGenerator&& other) : m_mutex() {
+			QMutexLocker lock(&other.m_mutex);
+			m_prefix = std::move(other.m_prefix);
+			m_counter = std::move(other.m_counter);
 		}
 
-		NonceGenerator::NonceGenerator(QByteArray const& noncePrefix) : prefix(noncePrefix), counter(0) {
-			if (prefix.size() != (PROTO_NONCE_PREFIX_LENGTH_BYTES)) {
-				throw openmittsu::exceptions::IllegalArgumentException() << "Invalid nonce prefix with size of " << prefix.size() << " instead of " << (PROTO_NONCE_PREFIX_LENGTH_BYTES) << " Bytes.";
+		NonceGenerator::NonceGenerator(QByteArray const& noncePrefix) : m_mutex(), m_prefix(noncePrefix), m_counter(0) {
+			if (m_prefix.size() != (PROTO_NONCE_PREFIX_LENGTH_BYTES)) {
+				throw openmittsu::exceptions::IllegalArgumentException() << "Invalid nonce prefix with size of " << m_prefix.size() << " instead of " << (PROTO_NONCE_PREFIX_LENGTH_BYTES) << " Bytes.";
 			}
 		}
 
@@ -25,23 +31,24 @@ namespace openmittsu {
 		}
 
 		NonceGenerator& NonceGenerator::operator=(NonceGenerator const& other) {
-			this->prefix = other.prefix;
-			this->counter = other.counter;
+			QMutexLocker lockOther(&other.m_mutex);
+			QMutexLocker lock(&m_mutex);
+
+			this->m_prefix = other.m_prefix;
+			this->m_counter = other.m_counter;
 
 			return *this;
 		}
 
 		Nonce NonceGenerator::getNextNonce() {
-			QByteArray result(prefix);
+			QByteArray result(m_prefix);
 
-			mutex.lock();
+			QMutexLocker lock(&m_mutex);
 
 			// Endian awareness
-			const quint64 counterInLittleEndian = openmittsu::utility::Endian::uint64FromHostEndianToLittleEndian(counter);
+			const quint64 counterInLittleEndian = openmittsu::utility::Endian::uint64FromHostEndianToLittleEndian(m_counter);
 
-			++counter;
-
-			mutex.unlock();
+			++m_counter;
 
 			// 64bit Integer, 8 Bytes
 			result.append(reinterpret_cast<char const*>(&counterInLittleEndian), 8);
@@ -51,7 +58,7 @@ namespace openmittsu {
 		}
 
 		QByteArray const& NonceGenerator::getNoncePrefix() const {
-			return prefix;
+			return m_prefix;
 		}
 
 		int NonceGenerator::getNonceLength() {

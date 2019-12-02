@@ -11,6 +11,7 @@ namespace openmittsu {
 		class NonceGenerator {
 		public:
 			NonceGenerator();
+			NonceGenerator(NonceGenerator&& other);
 			NonceGenerator(QByteArray const& noncePrefix);
 			virtual ~NonceGenerator();
 
@@ -22,10 +23,10 @@ namespace openmittsu {
 			static int getNonceLength();
 			static int getNoncePrefixLength();
 		private:
-			QByteArray prefix;
-			quint64 counter;
+			mutable QMutex m_mutex;
 
-			QMutex mutex;
+			QByteArray m_prefix;
+			quint64 m_counter;
 		};
 
 	}
