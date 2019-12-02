@@ -100,7 +100,6 @@ m_optionDatabaseFile() {
 
 	// Parse commandline options
 	bool showHelp = false;
-	bool lookForPasswordFilename = false;
 	QHash<QString, bool*> knownOptions = { 
 		{"--openmittsu-nopassword", &m_optionTryEmptyPassword }, 
 		{"--openmittsu-password-file", &m_optionUsePasswordFile }, 
