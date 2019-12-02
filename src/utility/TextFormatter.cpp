@@ -11,8 +11,11 @@ namespace openmittsu {
 	namespace utility {
 
 		QString TextFormatter::format(QString const& input) {
+#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
+			// Qt 5.12 and later deprecated the QRegularExpression::OptimizeOnFirstUsageOption option.
+			static const QRegularExpression::PatternOptions patternOptions = QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption;
+#elif defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
 			// Qt 5.4 and later support the QRegularExpression::OptimizeOnFirstUsageOption option.
-#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
 			static const QRegularExpression::PatternOptions patternOptions = QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption | QRegularExpression::OptimizeOnFirstUsageOption;
 #else
 			static const QRegularExpression::PatternOptions patternOptions = QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption;
