@@ -130,7 +130,9 @@ m_optionDatabaseFile() {
 					LOGGER()->error("Tried getting the database password from file '{}', but it does not exist or is not readable.", passwordFileName.toStdString());
 					std::exit(-11);
 				}
-				m_optionPasswordFromFile = QString(passwordFile.readAll());
+
+				QTextStream inStream(&passwordFile);
+				m_optionPasswordFromFile = inStream.readAll();
 				LOGGER()->info("Loaded password for OpenMittsu database from file.");
 
 				++i; // Skip parsing the string argument
