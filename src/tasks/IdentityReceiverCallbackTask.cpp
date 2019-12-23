@@ -58,13 +58,13 @@ namespace openmittsu {
 					m_fetchedPublicKey = openmittsu::crypto::PublicKey::fromHexString(publicKeyHexString);
 					finishedWithNoError();
 				} catch (...) {
-					finishedWithError(-1, QString("Could not fetch public key for identity ").append(m_identityToFetch.toQString()).append("An error occurred while parsing the server reply: ").append(answer.toHex()));
+					finishedWithError(-1, QString("Could not fetch public key for identity ").append(m_identityToFetch.toQString()).append("!\r\nAn error occurred while parsing the server reply: ").append(answer.toHex()));
 				}
 			} else {
 				// failure
 				QString const errorString(reply->errorString());
 				delete reply;
-				finishedWithError(-2, QString("Could not fetch public key for identity ").append(m_identityToFetch.toQString()).append("An error occurred while parsing the server reply: ").append(errorString));
+				finishedWithError(-2, QString("Could not fetch public key for identity ").append(m_identityToFetch.toQString()).append("!\r\nAn error occurred while fetching the server reply: ").append(errorString));
 			}
 		}
 
