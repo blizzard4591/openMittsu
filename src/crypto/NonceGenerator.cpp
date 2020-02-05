@@ -61,13 +61,5 @@ namespace openmittsu {
 			return m_prefix;
 		}
 
-		int NonceGenerator::getNonceLength() {
-			return PROTO_MESSAGE_NONCE_LENGTH_BYTES;
-		}
-
-		int NonceGenerator::getNoncePrefixLength() {
-			return PROTO_NONCE_PREFIX_LENGTH_BYTES;
-		}
-
 	}
 }

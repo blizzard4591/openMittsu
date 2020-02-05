@@ -29,9 +29,5 @@ namespace openmittsu {
 			return reinterpret_cast<unsigned char const*>(nonce.data());
 		}
 
-		int Nonce::getNonceLength() {
-			return (PROTO_MESSAGE_NONCE_LENGTH_BYTES);
-		}
-
 	}
 }

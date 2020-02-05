@@ -3,6 +3,8 @@
 
 #include <QByteArray>
 
+#include "src/protocol/ProtocolSpecs.h"
+
 namespace openmittsu {
 	namespace crypto {
 
@@ -15,7 +17,9 @@ namespace openmittsu {
 			QByteArray const& getNonce() const;
 			unsigned char const* getNonceAsCharPtr() const;
 
-			static int getNonceLength();
+			static constexpr int getNonceLength() {
+				return (PROTO_MESSAGE_NONCE_LENGTH_BYTES);
+			}
 		private:
 			QByteArray nonce;
 		};

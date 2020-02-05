@@ -5,6 +5,8 @@
 #include <QtGlobal>
 #include <QByteArray>
 
+#include "src/protocol/ProtocolSpecs.h"
+
 namespace openmittsu {
 	namespace crypto {
 
@@ -18,7 +20,9 @@ namespace openmittsu {
 			QByteArray const& getEncryptionKey() const;
 			unsigned char const* getEncryptionKeyAsCharPtr() const;
 
-			static int getSizeOfEncryptionKeyInBytes();
+			static constexpr int getSizeOfEncryptionKeyInBytes() {
+				return (PROTO_FILE_ENCRYPTION_KEY_LENGTH_BYTES);
+			}
 
 			bool operator ==(EncryptionKey const& other) const;
 			bool operator !=(EncryptionKey const& other) const;

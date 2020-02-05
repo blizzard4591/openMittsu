@@ -42,10 +42,6 @@ namespace openmittsu {
 			return encryptionKey;
 		}
 
-		int EncryptionKey::getSizeOfEncryptionKeyInBytes() {
-			return (PROTO_FILE_ENCRYPTION_KEY_LENGTH_BYTES);
-		}
-
 		bool EncryptionKey::operator ==(EncryptionKey const& other) const {
 			return encryptionKey == other.encryptionKey;
 		}

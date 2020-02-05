@@ -27,15 +27,15 @@ namespace openmittsu {
 			virtual QString toQString() const = 0;
 			virtual std::string toString() const = 0;
 
-			static int getPrivateKeyLength() {
+			static constexpr int getPrivateKeyLength() {
 				return PROTO_KEY_LENGTH_BYTES;
 			}
 
-			static int getPublicKeyLength() {
+			static constexpr int getPublicKeyLength() {
 				return PROTO_KEY_LENGTH_BYTES;
 			}
 
-			static int getIndentityLength() {
+			static constexpr int getIndentityLength() {
 				return BACKUP_IDENTITY_BYTES;
 			}
 

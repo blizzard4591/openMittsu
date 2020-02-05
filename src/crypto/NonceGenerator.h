@@ -20,8 +20,12 @@ namespace openmittsu {
 			QByteArray const& getNoncePrefix() const;
 			Nonce getNextNonce();
 
-			static int getNonceLength();
-			static int getNoncePrefixLength();
+			static constexpr int getNonceLength() {
+				return PROTO_MESSAGE_NONCE_LENGTH_BYTES;
+			}
+			static constexpr int getNoncePrefixLength() {
+				return PROTO_NONCE_PREFIX_LENGTH_BYTES;
+			}
 		private:
 			mutable QMutex m_mutex;
 
