@@ -12,7 +12,6 @@
 #include <QSet>
 
 #include <iostream>
-#include "src/crypto/Crc32.h"
 #include "src/database/internal/DatabaseContactMessageCursor.h"
 #include "src/exceptions/InternalErrorException.h"
 #include "src/exceptions/InvalidPasswordOrDatabaseException.h"
@@ -582,6 +581,17 @@ namespace openmittsu {
 			return id;
 		}
 
+		QString SimpleDatabase::makeBodyForFile(QByteArray const& file, QString const& mimeType, QString const& fileName, QString const& caption) const {
+			// [null,null,""image/gif"",481500,""bla.gif"",1,true,""Test""]
+			QString body;
+			if (caption.isEmpty()) {
+				body = QStringLiteral("[null,null,\"%1\",%2,\"%3\",1,true,null]").arg(mimeType).arg(file.size()).arg(fileName);
+			} else {
+				body = QStringLiteral("[null,null,\"%1\",%2,\"%3\",1,true,\"%4\"]").arg(mimeType).arg(file.size()).arg(fileName).arg(caption);
+			}
+			return body;
+		}
+
 		openmittsu::protocol::MessageId SimpleDatabase::storeSentContactMessageAudio(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, QByteArray const& audio, quint16 lengthInSeconds) {
 			if (!hasContact(receiver)) {
 				throw openmittsu::exceptions::InternalErrorException() << "Could not save contact audio message, the given contact " << receiver.toString() << " is unknown!";
@@ -590,6 +600,17 @@ namespace openmittsu {
 			QString const uuid = generateUuid();
 			insertMediaItem(uuid, audio, MediaFileType::TYPE_STANDARD);
 			return internal::DatabaseContactMessage::insertContactMessageFromUs(this, receiver, uuid, timeCreated, ContactMessageType::AUDIO, QStringLiteral("[%1,true,\"\",\"\"]").arg(lengthInSeconds), isQueued, false, QStringLiteral(""));
+		}
+
+		openmittsu::protocol::MessageId SimpleDatabase::storeSentContactMessageFile(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) {
+			if (!hasContact(receiver)) {
+				throw openmittsu::exceptions::InternalErrorException() << "Could not save contact file message, the given contact " << receiver.toString() << " is unknown!";
+			}
+
+			QString const uuid = generateUuid();
+			insertMediaItem(uuid, file, MediaFileType::TYPE_STANDARD);
+			insertMediaItem(uuid, coverImage, MediaFileType::TYPE_THUMBNAIL);
+			return internal::DatabaseContactMessage::insertContactMessageFromUs(this, receiver, uuid, timeCreated, ContactMessageType::FILE, makeBodyForFile(file, mimeType, fileName, caption), isQueued, false, caption);
 		}
 
 		openmittsu::protocol::MessageId SimpleDatabase::storeSentContactMessageVideo(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) {
@@ -629,6 +650,17 @@ namespace openmittsu {
 			QString const uuid = generateUuid();
 			insertMediaItem(uuid, audio, MediaFileType::TYPE_STANDARD);
 			return internal::DatabaseGroupMessage::insertGroupMessageFromUs(this, group, uuid, timeCreated, GroupMessageType::AUDIO, QStringLiteral("[%1,true,\"\",\"\"]").arg(lengthInSeconds), isQueued, false, QStringLiteral(""));
+		}
+
+		openmittsu::protocol::MessageId SimpleDatabase::storeSentGroupMessageFile(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) {
+			if (!hasGroup(group)) {
+				throw openmittsu::exceptions::InternalErrorException() << "Could not save group file message, the given group " << group.toString() << " is unknown!";
+			}
+
+			QString const uuid = generateUuid();
+			insertMediaItem(uuid, file, MediaFileType::TYPE_STANDARD);
+			insertMediaItem(uuid, coverImage, MediaFileType::TYPE_THUMBNAIL);
+			return internal::DatabaseGroupMessage::insertGroupMessageFromUs(this, group, uuid, timeCreated, GroupMessageType::FILE, makeBodyForFile(file, mimeType, fileName, caption), isQueued, false, caption);
 		}
 
 		openmittsu::protocol::MessageId SimpleDatabase::storeSentGroupMessageVideo(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) {
@@ -690,6 +722,13 @@ namespace openmittsu {
 			QString const uuid = generateUuid();
 			insertMediaItem(uuid, audio, MediaFileType::TYPE_STANDARD);
 			internal::DatabaseContactMessage::insertContactMessageFromThem(this, sender, messageId, uuid, timeSent, timeReceived, ContactMessageType::AUDIO, QStringLiteral("[%1,true,\"\",\"\"]").arg(lengthInSeconds), false, QStringLiteral(""));
+		}
+
+		void SimpleDatabase::storeReceivedContactMessageFile(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) {
+			QString const uuid = generateUuid();
+			insertMediaItem(uuid, file, MediaFileType::TYPE_STANDARD);
+			insertMediaItem(uuid, coverImage, MediaFileType::TYPE_THUMBNAIL);
+			internal::DatabaseContactMessage::insertContactMessageFromThem(this, sender, messageId, uuid, timeSent, timeReceived, ContactMessageType::FILE, makeBodyForFile(file, mimeType, fileName, caption), false, caption);
 		}
 
 		void SimpleDatabase::storeReceivedContactMessageVideo(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) {
@@ -773,6 +812,17 @@ namespace openmittsu {
 			QString const uuid = generateUuid();
 			insertMediaItem(uuid, audio, MediaFileType::TYPE_STANDARD);
 			internal::DatabaseGroupMessage::insertGroupMessageFromThem(this, group, sender, messageId, uuid, timeSent, timeReceived, GroupMessageType::AUDIO, QStringLiteral("[%1,true,\"\",\"\"]").arg(lengthInSeconds), false, QStringLiteral(""));
+		}
+
+		void SimpleDatabase::storeReceivedGroupMessageFile(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) {
+			if (!hasGroup(group)) {
+				throw openmittsu::exceptions::InternalErrorException() << "Could not save group file message, the given group " << group.toString() << " is unknown!";
+			}
+
+			QString const uuid = generateUuid();
+			insertMediaItem(uuid, file, MediaFileType::TYPE_STANDARD);
+			insertMediaItem(uuid, coverImage, MediaFileType::TYPE_THUMBNAIL);
+			internal::DatabaseGroupMessage::insertGroupMessageFromThem(this, group, sender, messageId, uuid, timeSent, timeReceived, GroupMessageType::FILE, makeBodyForFile(file, mimeType, fileName, caption), false, caption);
 		}
 
 		void SimpleDatabase::storeReceivedGroupMessageVideo(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) {

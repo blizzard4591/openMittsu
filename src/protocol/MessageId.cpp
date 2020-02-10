@@ -1,7 +1,6 @@
 #include "src/protocol/MessageId.h"
 
 #include "src/exceptions/InternalErrorException.h"
-#include "src/protocol/ProtocolSpecs.h"
 #include "src/utility/ByteArrayConversions.h"
 
 #include <QHash>
@@ -51,10 +50,6 @@ namespace openmittsu {
 			throwIfInvalid();
 
 			return openmittsu::utility::ByteArrayConversions::convertQuint64toQByteArray(messageId);
-		}
-
-		int MessageId::getSizeOfMessageIdInBytes() {
-			return (PROTO_MESSAGE_MESSAGEID_LENGTH_BYTES);
 		}
 
 		bool MessageId::operator ==(MessageId const& other) const {

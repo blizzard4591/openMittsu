@@ -10,8 +10,8 @@ namespace openmittsu {
 		MessageQueue::ReceivedGroupMessage::ReceivedGroupMessage() 
 			: group(0, 0), sender(0), messageId(0), timeSent(), timeReceived(), messageType(), content(), contentTwo(), contentThree() {}
 
-		MessageQueue::ReceivedGroupMessage::ReceivedGroupMessage(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, messages::GroupMessageType const& messageType, QVariant const& content, QVariant const& contentTwo, QVariant const& contentThree)
-			: group(group), sender(sender), messageId(messageId), timeSent(timeSent), timeReceived(timeReceived), messageType(messageType), content(content), contentTwo(contentTwo), contentThree(contentThree) {
+		MessageQueue::ReceivedGroupMessage::ReceivedGroupMessage(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, messages::GroupMessageType const& messageType, QVariant const& content, QVariant const& contentTwo, QVariant const& contentThree, QVariant const& contentFour, QVariant const& contentFive)
+			: group(group), sender(sender), messageId(messageId), timeSent(timeSent), timeReceived(timeReceived), messageType(messageType), content(content), contentTwo(contentTwo), contentThree(contentThree), contentFour(contentFour), contentFive(contentFive) {
 			//
 		}
 

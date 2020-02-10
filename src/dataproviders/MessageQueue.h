@@ -40,7 +40,7 @@ namespace openmittsu {
 			class ReceivedGroupMessage {
 			public:
 				ReceivedGroupMessage();
-				ReceivedGroupMessage(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, messages::GroupMessageType const& messageType, QVariant const& content, QVariant const& contentTwo = QVariant(), QVariant const& contentThree = QVariant());
+				ReceivedGroupMessage(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, messages::GroupMessageType const& messageType, QVariant const& content, QVariant const& contentTwo = QVariant(), QVariant const& contentThree = QVariant(), QVariant const& contentFour = QVariant(), QVariant const& contentFive = QVariant());
 				
 				openmittsu::protocol::GroupId group;
 				openmittsu::protocol::ContactId sender;
@@ -51,6 +51,8 @@ namespace openmittsu {
 				QVariant content;
 				QVariant contentTwo;
 				QVariant contentThree;
+				QVariant contentFour;
+				QVariant contentFive;
 			};
 
 			void storeContactMessage(ReceivedContactMessage const& message);

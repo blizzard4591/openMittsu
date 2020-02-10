@@ -3,6 +3,7 @@
 
 #include "src/protocol/ContactId.h"
 #include "src/protocol/MessageId.h"
+#include "src/protocol/ProtocolSpecs.h"
 #include <cstdint>
 #include <QtGlobal>
 #include <QByteArray>
@@ -23,7 +24,7 @@ namespace openmittsu {
 			ContactId const& getOwner() const;
 			quint64 getGroupId() const;
 			QByteArray getGroupIdAsByteArray() const;
-			static int getSizeOfGroupIdInBytes();
+			static constexpr int getSizeOfGroupIdInBytes() { return ((PROTO_GROUP_GROUPID_LENGTH_BYTES) + (PROTO_IDENTITY_LENGTH_BYTES)); }
 			std::string toString() const;
 			QString toQString() const;
 			QString groupIdWithoutOwnerToQString() const;

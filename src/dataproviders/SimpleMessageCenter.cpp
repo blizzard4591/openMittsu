@@ -59,6 +59,30 @@ namespace openmittsu {
 			return true;
 		}
 
+		bool SimpleMessageCenter::sendFile(openmittsu::protocol::ContactId const& receiver, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) {
+			if (!this->m_storage.hasDatabase()) {
+				return false;
+			}
+			else if (!this->m_storage.hasContact(receiver)) {
+				LOGGER()->warn("Trying to send file message to unknown contact {}", receiver.toString());
+				return false;
+			}
+
+			bool willQueue = true;
+			if ((this->m_networkSentMessageAcceptor == nullptr) || (!this->m_networkSentMessageAcceptor->isConnected())) {
+				willQueue = false;
+			}
+
+			openmittsu::protocol::MessageTime const sentTime = openmittsu::protocol::MessageTime::now();
+			openmittsu::protocol::MessageId const messageId = this->m_storage.storeSentContactMessageFile(receiver, sentTime, willQueue, file, coverImage, mimeType, fileName, caption);
+
+			if (willQueue) {
+				m_networkSentMessageAcceptor->processSentContactMessageFile(receiver, messageId, sentTime, file, coverImage, mimeType, fileName, caption);
+			}
+
+			return true;
+		}
+
 		bool SimpleMessageCenter::sendVideo(openmittsu::protocol::ContactId const& receiver, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) {
 			if (!this->m_storage.hasDatabase()) {
 				return false;
@@ -430,6 +454,30 @@ namespace openmittsu {
 			return true;
 		}
 
+		bool SimpleMessageCenter::sendFile(openmittsu::protocol::GroupId const& group, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) {
+			if (!this->m_storage.hasDatabase()) {
+				return false;
+			}
+			else if (!this->m_storage.hasGroup(group)) {
+				LOGGER()->warn("Trying to send file message to unknown group {}", group.toString());
+				return false;
+			}
+
+			bool willQueue = true;
+			if ((this->m_networkSentMessageAcceptor == nullptr) || (!this->m_networkSentMessageAcceptor->isConnected())) {
+				willQueue = false;
+			}
+
+			openmittsu::protocol::MessageTime const sentTime = openmittsu::protocol::MessageTime::now();
+			openmittsu::protocol::MessageId const messageId = this->m_storage.storeSentGroupMessageFile(group, sentTime, willQueue, file, coverImage, mimeType, fileName, caption);
+
+			if (willQueue) {
+				m_networkSentMessageAcceptor->processSentGroupMessageFile(group, this->m_storage.getGroupMembers(group, true), messageId, sentTime, file, coverImage, mimeType, fileName, caption);
+			}
+
+			return true;
+		}
+
 		bool SimpleMessageCenter::sendVideo(openmittsu::protocol::GroupId const& group, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) {
 			if (!this->m_storage.hasDatabase()) {
 				return false;
@@ -554,6 +602,25 @@ namespace openmittsu {
 
 			openTabForIncomingMessage(sender);
 			this->m_storage.storeReceivedContactMessageAudio(sender, messageId, timeSent, timeReceived, audio, lengthInSeconds);
+			if (this->m_networkSentMessageAcceptor != nullptr) {
+				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
+			}
+
+			sendReceipt(sender, messageId, openmittsu::messages::contact::ReceiptMessageContent::ReceiptType::RECEIVED);
+		}
+
+		void SimpleMessageCenter::processReceivedContactMessageFile(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) {
+			if (!this->m_storage.hasDatabase()) {
+				LOGGER()->warn("We received a contact file message from sender {} with message ID #{} sent at {} with file {} that could not be saved as the storage system is not ready.", sender.toString(), messageId.toString(), timeSent.toString(), QString(file.toHex()).toStdString());
+				return;
+			}
+			else if (!this->m_storage.hasContact(sender)) {
+				LOGGER()->warn("We received a contact file message from sender {} with message ID #{} sent at {} with file {}, but we do not recognize the sender. Ignoring.", sender.toString(), messageId.toString(), timeSent.toString(), QString(file.toHex()).toStdString());
+				return;
+			}
+
+			openTabForIncomingMessage(sender);
+			this->m_storage.storeReceivedContactMessageFile(sender, messageId, timeSent, timeReceived, file, coverImage, mimeType, fileName, caption);
 			if (this->m_networkSentMessageAcceptor != nullptr) {
 				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
 			}
@@ -749,6 +816,28 @@ namespace openmittsu {
 
 			openTabForIncomingMessage(group);
 			this->m_storage.storeReceivedGroupMessageAudio(group, sender, messageId, timeSent, timeReceived, audio, lengthInSeconds);
+			if (this->m_networkSentMessageAcceptor != nullptr) {
+				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
+			}
+		}
+
+		void SimpleMessageCenter::processReceivedGroupMessageFile(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) {
+			if (!this->m_storage.hasDatabase()) {
+				LOGGER()->warn("We received a group file message from sender {} for group {} with message ID #{} sent at {} with file {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), QString(file.toHex()).toStdString());
+				return;
+			}
+			else if (!this->m_storage.hasContact(sender)) {
+				LOGGER()->warn("We received a group file message from sender {} for group {} with message ID #{} sent at {} with file {}, but we do not recognize the sender. Ignoring.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), QString(file.toHex()).toStdString());
+				return;
+			}
+
+			if (!checkAndFixGroupMembership(group, sender)) {
+				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::FILE, file, coverImage, mimeType, fileName, caption));
+				return;
+			}
+
+			openTabForIncomingMessage(group);
+			this->m_storage.storeReceivedGroupMessageFile(group, sender, messageId, timeSent, timeReceived, file, coverImage, mimeType, fileName, caption);
 			if (this->m_networkSentMessageAcceptor != nullptr) {
 				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
 			}

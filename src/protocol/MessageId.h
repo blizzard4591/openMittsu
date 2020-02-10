@@ -8,6 +8,8 @@
 #include <QVector>
 #include <QString>
 
+#include "src/protocol/ProtocolSpecs.h"
+
 namespace openmittsu {
 	namespace database {
 		class DatabaseWrapper;
@@ -26,7 +28,7 @@ namespace openmittsu {
 
 			quint64 getMessageId() const;
 			QByteArray getMessageIdAsByteArray() const;
-			static int getSizeOfMessageIdInBytes();
+			static constexpr int getSizeOfMessageIdInBytes() { return (PROTO_MESSAGE_MESSAGEID_LENGTH_BYTES); }
 			std::string toString() const;
 			QString toQString() const;
 

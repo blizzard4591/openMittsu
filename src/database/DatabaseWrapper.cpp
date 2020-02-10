@@ -137,6 +137,10 @@ namespace openmittsu {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(storeSentContactMessageAudio, openmittsu::protocol::MessageId, Q_ARG(openmittsu::protocol::ContactId const&, receiver), Q_ARG(openmittsu::protocol::MessageTime const&, timeCreated), Q_ARG(bool, isQueued), Q_ARG(QByteArray const&, audio), Q_ARG(quint16, lengthInSeconds));
 		}
 
+		openmittsu::protocol::MessageId DatabaseWrapper::storeSentContactMessageFile(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(storeSentContactMessageFile, openmittsu::protocol::MessageId, Q_ARG(openmittsu::protocol::ContactId const&, receiver), Q_ARG(openmittsu::protocol::MessageTime const&, timeCreated), Q_ARG(bool, isQueued), Q_ARG(QByteArray const&, file), Q_ARG(QByteArray const&, coverImage), Q_ARG(QString const&, mimeType), Q_ARG(QString const&, fileName), Q_ARG(QString const&, caption));
+		}
+
 		openmittsu::protocol::MessageId DatabaseWrapper::storeSentContactMessageImage(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, QByteArray const& image, QString const& caption) {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(storeSentContactMessageImage, openmittsu::protocol::MessageId, Q_ARG(openmittsu::protocol::ContactId const&, receiver), Q_ARG(openmittsu::protocol::MessageTime const&, timeCreated), Q_ARG(bool, isQueued), Q_ARG(QByteArray const&, image), Q_ARG(QString const&, caption));
 		}
@@ -181,6 +185,10 @@ namespace openmittsu {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(storeSentGroupMessageAudio, openmittsu::protocol::MessageId, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(openmittsu::protocol::MessageTime const&, timeCreated), Q_ARG(bool, isQueued), Q_ARG(QByteArray const&, audio), Q_ARG(quint16, lengthInSeconds));
 		}
 
+		openmittsu::protocol::MessageId DatabaseWrapper::storeSentGroupMessageFile(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(storeSentGroupMessageFile, openmittsu::protocol::MessageId, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(openmittsu::protocol::MessageTime const&, timeCreated), Q_ARG(bool, isQueued), Q_ARG(QByteArray const&, file), Q_ARG(QByteArray const&, coverImage), Q_ARG(QString const&, mimeType), Q_ARG(QString const&, fileName), Q_ARG(QString const&, caption));
+		}
+
 		openmittsu::protocol::MessageId DatabaseWrapper::storeSentGroupMessageImage(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageTime const& timeCreated, bool isQueued, QByteArray const& image, QString const& caption) {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(storeSentGroupMessageImage, openmittsu::protocol::MessageId, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(openmittsu::protocol::MessageTime const&, timeCreated), Q_ARG(bool, isQueued), Q_ARG(QByteArray const&, image), Q_ARG(QString const&, caption));
 		}
@@ -219,6 +227,10 @@ namespace openmittsu {
 
 		void DatabaseWrapper::storeReceivedContactMessageAudio(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& audio, quint16 lengthInSeconds) {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(storeReceivedContactMessageAudio, Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived), Q_ARG(QByteArray const&, audio), Q_ARG(quint16, lengthInSeconds));
+		}
+
+		void DatabaseWrapper::storeReceivedContactMessageFile(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(storeReceivedContactMessageFile, Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived), Q_ARG(QByteArray const&, file), Q_ARG(QByteArray const&, coverImage), Q_ARG(QString const&, mimeType), Q_ARG(QString const&, fileName), Q_ARG(QString const&, caption));
 		}
 
 		void DatabaseWrapper::storeReceivedContactMessageImage(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& image, QString const& caption) {
@@ -263,6 +275,10 @@ namespace openmittsu {
 
 		void DatabaseWrapper::storeReceivedGroupMessageAudio(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& audio, quint16 lengthInSeconds) {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(storeReceivedGroupMessageAudio, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived), Q_ARG(QByteArray const&, audio), Q_ARG(quint16, lengthInSeconds));
+		}
+
+		void DatabaseWrapper::storeReceivedGroupMessageFile(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(storeReceivedGroupMessageFile, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived), Q_ARG(QByteArray const&, file), Q_ARG(QByteArray const&, coverImage), Q_ARG(QString const&, mimeType), Q_ARG(QString const&, fileName), Q_ARG(QString const&, caption));
 		}
 
 		void DatabaseWrapper::storeReceivedGroupMessageImage(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& image, QString const& caption) {

@@ -8,6 +8,7 @@
 #include "src/utility/QObjectConnectionMacro.h"
 
 #include "src/widgets/chat/ContactAudioChatWidgetItem.h"
+#include "src/widgets/chat/ContactFileChatWidgetItem.h"
 #include "src/widgets/chat/ContactImageChatWidgetItem.h"
 #include "src/widgets/chat/ContactLocationChatWidgetItem.h"
 #include "src/widgets/chat/ContactStatusChatWidgetItem.h"
@@ -67,6 +68,9 @@ namespace openmittsu {
 			switch (messageType) {
 				case openmittsu::dataproviders::messages::ContactMessageType::AUDIO:
 					this->addChatWidgetItem(new ContactAudioChatWidgetItem(m_contact->getMessageByUuid(uuid)));
+					break;
+				case openmittsu::dataproviders::messages::ContactMessageType::FILE:
+					this->addChatWidgetItem(new ContactFileChatWidgetItem(m_contact->getMessageByUuid(uuid)));
 					break;
 				case openmittsu::dataproviders::messages::ContactMessageType::IMAGE:
 					this->addChatWidgetItem(new ContactImageChatWidgetItem(m_contact->getMessageByUuid(uuid)));

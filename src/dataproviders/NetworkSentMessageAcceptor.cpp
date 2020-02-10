@@ -58,6 +58,11 @@ namespace openmittsu {
 			send(preliminaryMessage);
 		}
 
+		void NetworkSentMessageAcceptor::processSentContactMessageFile(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) {
+			openmittsu::messages::contact::PreliminaryContactMessage const preliminaryMessage = openmittsu::messages::PreliminaryMessageFactory::createPreliminaryContactFileMessage(receiver, messageId, timeSent, file, coverImage, mimeType, fileName, caption);
+			send(preliminaryMessage);
+		}
+
 		void NetworkSentMessageAcceptor::processSentContactMessageVideo(openmittsu::protocol::ContactId const& receiver, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) {
 			openmittsu::messages::contact::PreliminaryContactMessage const preliminaryMessage = openmittsu::messages::PreliminaryMessageFactory::createPreliminaryContactVideoMessage(receiver, messageId, timeSent, video, coverImage, lengthInSeconds);
 			send(preliminaryMessage);
@@ -101,6 +106,11 @@ namespace openmittsu {
 
 		void NetworkSentMessageAcceptor::processSentGroupMessageAudio(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& targetGroupMembers, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, QByteArray const& audio, quint16 lengthInSeconds) {
 			openmittsu::messages::group::PreliminaryGroupMessage const preliminaryMessage = openmittsu::messages::PreliminaryMessageFactory::createPreliminaryGroupAudioMessage(group, messageId, timeSent, targetGroupMembers, audio, lengthInSeconds);
+			send(preliminaryMessage);
+		}
+
+		void NetworkSentMessageAcceptor::processSentGroupMessageFile(openmittsu::protocol::GroupId const& group, QSet<openmittsu::protocol::ContactId> const& targetGroupMembers, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) {
+			openmittsu::messages::group::PreliminaryGroupMessage const preliminaryMessage = openmittsu::messages::PreliminaryMessageFactory::createPreliminaryGroupFileMessage(group, messageId, timeSent, targetGroupMembers, file, coverImage, mimeType, fileName, caption);
 			send(preliminaryMessage);
 		}
 

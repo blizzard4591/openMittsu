@@ -51,8 +51,8 @@ namespace openmittsu {
 		}
 
 		GroupId GroupId::fromData(QByteArray const& data) {
-			if (data.size() < ((PROTO_GROUP_GROUPID_LENGTH_BYTES)+(PROTO_IDENTITY_LENGTH_BYTES))) {
-				throw openmittsu::exceptions::IllegalArgumentException() << "Need at least " << ((PROTO_GROUP_GROUPID_LENGTH_BYTES)+(PROTO_IDENTITY_LENGTH_BYTES)) << " Bytes for creating a Group Id from Data.";
+			if (data.size() < getSizeOfGroupIdInBytes()) {
+				throw openmittsu::exceptions::IllegalArgumentException() << "Need at least " << getSizeOfGroupIdInBytes() << " Bytes for creating a Group Id from Data.";
 			}
 
 			ContactId const owner(data.mid(0, ContactId::getSizeOfContactIdInBytes()));
@@ -66,10 +66,6 @@ namespace openmittsu {
 			randombytes_buf(&result, sizeof(quint64));
 
 			return GroupId(owner, result);
-		}
-
-		int GroupId::getSizeOfGroupIdInBytes() {
-			return ((PROTO_GROUP_GROUPID_LENGTH_BYTES)+(PROTO_IDENTITY_LENGTH_BYTES));
 		}
 
 		bool GroupId::operator ==(GroupId const& other) const {

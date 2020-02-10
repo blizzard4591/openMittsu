@@ -36,6 +36,7 @@
 #include "src/messages/contact/ContactMessage.h"
 #include "src/messages/contact/PreliminaryContactMessage.h"
 #include "src/messages/contact/audio/ContactAudioMessageContent.h"
+#include "src/messages/contact/file/ContactFileMessageContent.h"
 #include "src/messages/contact/image/ContactImageMessageContent.h"
 #include "src/messages/contact/ContactLocationMessageContent.h"
 #include "src/messages/contact/ContactTextMessageContent.h"
@@ -167,6 +168,7 @@ namespace openmittsu {
 			void handleIncomingMessage(openmittsu::messages::MessageWithPayload const& messageWithPayload, openmittsu::messages::MessageWithEncryptedPayload const*const message);
 			void handleIncomingMessage(openmittsu::messages::Message const*const message, openmittsu::messages::MessageWithEncryptedPayload const*const messageWithEncryptedPayload);
 			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ContactAudioMessageContent const> contactAudioMessageContent);
+			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ContactFileMessageContent const> contactFileAudioMessageContent);
 			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ContactImageMessageContent const> contactImageMessageContent);
 			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ContactLocationMessageContent const> contactLocationMessageContent);
 			void handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ContactTextMessageContent const> contactTextMessageContent);

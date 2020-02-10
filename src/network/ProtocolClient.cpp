@@ -41,7 +41,8 @@ namespace openmittsu {
 
 		ProtocolClient::ProtocolClient(openmittsu::database::DatabaseWrapperFactory const& databaseFactory, openmittsu::protocol::ContactId const& ourContactId, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, openmittsu::options::OptionReaderFactory const& optionReaderFactory, openmittsu::dataproviders::MessageCenterWrapperFactory const& messageCenterWrapperFactory, openmittsu::protocol::PushFromId const& pushFromId)
 			: QObject(nullptr), m_databaseWrapperFactory(databaseFactory), m_cryptoBox(nullptr), m_messageCenterWrapperFactory(messageCenterWrapperFactory), m_messageCenterWrapper(nullptr), m_pushFromIdPtr(std::make_unique<openmittsu::protocol::PushFromId>(pushFromId)),
-			m_isSetupDone(false), m_isNetworkSessionReady(false), m_isConnected(false), m_isAllowedToSend(false), m_isDisconnecting(false), m_socket(nullptr), m_networkSession(nullptr), m_ourContactId(ourContactId), m_serverConfiguration(serverConfiguration), m_optionReaderFactory(optionReaderFactory), m_optionReader(nullptr), outgoingMessagesTimer(nullptr), acknowledgmentWaitingTimer(nullptr), keepAliveTimer(nullptr), keepAliveCounter(0), failedReconnectAttempts(0) {
+			m_isSetupDone(false), m_isNetworkSessionReady(false), m_isConnected(false), m_isAllowedToSend(false), m_isDisconnecting(false), m_socket(nullptr), m_networkSession(nullptr), m_ourContactId(ourContactId), m_serverConfiguration(serverConfiguration), m_optionReaderFactory(optionReaderFactory), m_optionReader(nullptr), outgoingMessagesTimer(nullptr), acknowledgmentWaitingTimer(nullptr), keepAliveTimer(nullptr), keepAliveCounter(0), failedReconnectAttempts(0),
+			messagesReceived(0), messagesSend(0), bytesSend(0), bytesReceived(0) {
 			// Intentionally left empty.
 			LOGGER_DEBUG("Thread ID in ProtocolClient ctor = {}", QThread::currentThreadId());
 		}
@@ -563,6 +564,11 @@ namespace openmittsu {
 		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupAudioMessageContent const> groupAudioMessageContent) {
 			LOGGER_DEBUG("Received an audio message from {} to group {}.", messageHeader.getSender().toString(), groupAudioMessageContent->getGroupId().toString());
 			m_messageCenterWrapper->processReceivedGroupMessageAudio(groupAudioMessageContent->getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTime(), openmittsu::protocol::MessageTime::now(), groupAudioMessageContent->getAudioData(), groupAudioMessageContent->getLengthInSeconds());
+		}
+
+		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ContactFileMessageContent const> contactFileMessageContent) {
+			LOGGER_DEBUG("Received an file message from {}.", messageHeader.getSender().toString());
+			m_messageCenterWrapper->processReceivedContactMessageFile(messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTime(), openmittsu::protocol::MessageTime::now(), contactFileMessageContent->getFileData(), contactFileMessageContent->getImageData(), contactFileMessageContent->getMimeType(), contactFileMessageContent->getFileName(), contactFileMessageContent->getCaption());
 		}
 
 		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ContactTextMessageContent const> contactTextMessageContent) {

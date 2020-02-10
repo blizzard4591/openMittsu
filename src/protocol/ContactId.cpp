@@ -1,7 +1,6 @@
 #include "src/protocol/ContactId.h"
 
 #include "src/utility/Endian.h"
-#include "src/protocol/ProtocolSpecs.h"
 #include "src/utility/ByteArrayConversions.h"
 
 #include <QHash>
@@ -39,10 +38,6 @@ namespace openmittsu {
 
 		QByteArray ContactId::getContactIdAsByteArray() const {
 			return openmittsu::utility::ByteArrayConversions::convertQuint64toQByteArray(contactId);
-		}
-
-		int ContactId::getSizeOfContactIdInBytes() {
-			return (PROTO_IDENTITY_LENGTH_BYTES);
 		}
 
 		bool ContactId::operator ==(ContactId const& other) const {

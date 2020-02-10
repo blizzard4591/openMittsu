@@ -1,6 +1,7 @@
 #include "src/messages/PreliminaryMessageFactory.h"
 
 #include "src/messages/contact/audio/ContactAudioMessageContent.h"
+#include "src/messages/contact/file/ContactFileMessageContent.h"
 #include "src/messages/contact/image/ContactImageMessageContent.h"
 #include "src/messages/contact/ContactLocationMessageContent.h"
 #include "src/messages/contact/ContactTextMessageContent.h"
@@ -11,6 +12,7 @@
 
 #include "src/messages/group/PreliminaryGroupMessageHeader.h"
 #include "src/messages/group/audio/GroupAudioMessageContent.h"
+#include "src/messages/group/file/GroupFileMessageContent.h"
 #include "src/messages/group/image/GroupImageMessageContent.h"
 #include "src/messages/group/GroupLocationMessageContent.h"
 #include "src/messages/group/GroupTextMessageContent.h"
@@ -43,6 +45,10 @@ namespace openmittsu {
 			return contact::PreliminaryContactMessage(new contact::PreliminaryContactMessageHeader(receiverId, messageId, time, MessageFlagsFactory::createContactMessageFlags()), new contact::ContactAudioMessageContent(audioData, lengthInSeconds));
 		}
 
+		contact::PreliminaryContactMessage PreliminaryMessageFactory::createPreliminaryContactFileMessage(openmittsu::protocol::ContactId const& receiverId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) {
+			return contact::PreliminaryContactMessage(new contact::PreliminaryContactMessageHeader(receiverId, messageId, time, MessageFlagsFactory::createContactMessageFlags()), new contact::ContactFileMessageContent(file, coverImage, mimeType, fileName, caption, file.size()));
+		}
+
 		contact::PreliminaryContactMessage PreliminaryMessageFactory::createPreliminaryContactVideoMessage(openmittsu::protocol::ContactId const& receiverId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QByteArray const& videoData, QByteArray const& coverImageData, quint16 lengthInSeconds) {
 			return contact::PreliminaryContactMessage(new contact::PreliminaryContactMessageHeader(receiverId, messageId, time, MessageFlagsFactory::createContactMessageFlags()), new contact::ContactVideoMessageContent(videoData, coverImageData, lengthInSeconds));
 		}
@@ -73,6 +79,10 @@ namespace openmittsu {
 
 		group::PreliminaryGroupMessage PreliminaryMessageFactory::createPreliminaryGroupAudioMessage(openmittsu::protocol::GroupId const& groupId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QSet<openmittsu::protocol::ContactId> const& recipients, QByteArray const& audioData, quint16 lengthInSeconds) {
 			return group::PreliminaryGroupMessage(new group::PreliminaryGroupMessageHeader(groupId, messageId, time, MessageFlagsFactory::createGroupTextMessageFlags()), new group::GroupAudioMessageContent(groupId, audioData, lengthInSeconds), recipients);
+		}
+
+		group::PreliminaryGroupMessage PreliminaryMessageFactory::createPreliminaryGroupFileMessage(openmittsu::protocol::GroupId const& groupId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QSet<openmittsu::protocol::ContactId> const& recipients, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) {
+			return group::PreliminaryGroupMessage(new group::PreliminaryGroupMessageHeader(groupId, messageId, time, MessageFlagsFactory::createGroupTextMessageFlags()), new group::GroupFileMessageContent(groupId, file, coverImage, mimeType, fileName, caption, file.size()), recipients);
 		}
 
 		group::PreliminaryGroupMessage PreliminaryMessageFactory::createPreliminaryGroupVideoMessage(openmittsu::protocol::GroupId const& groupId, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& time, QSet<openmittsu::protocol::ContactId> const& recipients, QByteArray const& videoData, QByteArray const& coverImageData, quint16 lengthInSeconds) {

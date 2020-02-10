@@ -7,6 +7,8 @@
 #include <QMetaType>
 #include <QString>
 
+#include "src/protocol/ProtocolSpecs.h"
+
 namespace openmittsu {
 	namespace protocol {
 
@@ -22,7 +24,7 @@ namespace openmittsu {
 			quint64 getContactId() const;
 			QByteArray getContactIdAsByteArray() const;
 
-			static int getSizeOfContactIdInBytes();
+			static constexpr int getSizeOfContactIdInBytes() { return (PROTO_IDENTITY_LENGTH_BYTES); }
 			std::string toString() const;
 			QString toQString() const;
 
