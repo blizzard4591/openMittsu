@@ -88,7 +88,15 @@ namespace openmittsu {
 					mediaItem = MediaFileItem(MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE, MediaFileType::TYPE_STANDARD);
 				}
 
-				auto drcm = std::make_shared<DatabaseReadonlyContactMessage>(contact, messageId, isMessageFromUs, createdAt, sentAt, modifiedAt, isQueued, isSent, uuid, isRead, isSaved, messageState, receivedAt, seenAt, isStatusMessage, caption, contactMessageType, body, mediaItem);
+				openmittsu::database::MediaFileItem secondaryMediaItem;
+				if ((contactMessageType == openmittsu::dataproviders::messages::ContactMessageType::FILE) || (contactMessageType == openmittsu::dataproviders::messages::ContactMessageType::VIDEO)) {
+					secondaryMediaItem = getDatabase()->getMediaItem(uuid, MediaFileType::TYPE_THUMBNAIL);
+				}
+				else {
+					secondaryMediaItem = MediaFileItem(MediaFileItem::ItemStatus::UNAVAILABLE_NOT_IN_DATABASE, MediaFileType::TYPE_THUMBNAIL);
+				}
+
+				auto drcm = std::make_shared<DatabaseReadonlyContactMessage>(contact, messageId, isMessageFromUs, createdAt, sentAt, modifiedAt, isQueued, isSent, uuid, isRead, isSaved, messageState, receivedAt, seenAt, isStatusMessage, caption, contactMessageType, body, mediaItem, secondaryMediaItem);
 				if (!drcm) {
 					throw openmittsu::exceptions::InternalErrorException() << "Fetching a group message to readonly failed for group " << contact.toString() << " and UUID " << getMessageUuid().toStdString() << "!";
 				}

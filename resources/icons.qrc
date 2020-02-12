@@ -6,5 +6,7 @@
 	<file alias="icon_unread_message-small-for-ico.ico">icon_unread_message-small-for-ico.ico</file>
 	<file alias="logo.ico">logo.ico</file>
 	<file alias="logo_unread_message.ico">logo_unread_message.ico</file>
+	<file alias="icon_pause.png">icon_pause.png</file>
+	<file alias="icon_play.png">icon_play.png</file>
 </qresource>
 </RCC>
