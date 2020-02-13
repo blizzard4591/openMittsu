@@ -4,6 +4,7 @@
 #include "src/exceptions/IllegalArgumentException.h"
 #include "src/messages/MessageContentRegistry.h"
 #include "src/messages/contact/file/ContactEncryptedFileAndImageIdAndKeyMessageContent.h"
+#include "src/messages/contact/file/ContactEncryptedFileAndImageAndKeyMessageContent.h"
 #include "src/protocol/ProtocolSpecs.h"
 #include "src/tasks/BlobDownloaderCallbackTask.h"
 #include "src/utility/ByteArrayConversions.h"
@@ -59,6 +60,9 @@ namespace openmittsu {
 					}
 
 					LOGGER_DEBUG("Integrating result from BlobDownloaderCallbackTask into a new ContactEncryptedVideoAndImageIdAndKeyMessageContent.");
+					if (m_imageBlobId.isEmpty()) {
+						return new ContactEncryptedFileAndImageAndKeyMessageContent(bdct->getDownloadedBlob(), QByteArray(), m_encryptionKey, m_mimeType, m_fileName, m_caption, m_fileSizeInBytes);
+					}
 					return new ContactEncryptedFileAndImageIdAndKeyMessageContent(bdct->getDownloadedBlob(), m_imageBlobId, m_encryptionKey, m_mimeType, m_fileName, m_caption, m_fileSizeInBytes);
 				} else {
 					LOGGER()->critical("ContactFileIdAndImageIdAndKeyMessageContent::integrateCallbackTaskResult called for unexpected CallbackTask.");
@@ -95,8 +99,8 @@ namespace openmittsu {
 			}
 
 			MessageContent* ContactFileIdAndImageIdAndKeyMessageContent::fromPacketPayload(FullMessageHeader const& messageHeader, QByteArray const& payload) const {
-				verifyPayloadMinSizeAndSignatureByte(PROTO_MESSAGE_SIGNATURE_CONTACT_FILE, 1 + 170, payload, false);
-				// 177 is about the minimal size the json can have, so we use 170 to safely approximate
+				verifyPayloadMinSizeAndSignatureByte(PROTO_MESSAGE_SIGNATURE_CONTACT_FILE, 1 + 140, payload, false);
+				// 144 is about the minimal size the json can have, so we use 140 to safely approximate
 
 				int startingPosition = 1;
 				QByteArray const jsonData(payload.mid(startingPosition));
@@ -114,9 +118,6 @@ namespace openmittsu {
 				QJsonObject const jsonRootObject = jsonDocument.object();
 				if (!jsonRootObject.contains("b") || !jsonRootObject["b"].isString()) {
 					LOGGER()->error("Failed to parse JSON received in contact file message, 'b' is missing or no string: {}", QString(jsonData.toHex()).toStdString());
-					return nullptr;
-				} else if (!jsonRootObject.contains("t") || !jsonRootObject["t"].isString()) {
-					LOGGER()->error("Failed to parse JSON received in contact file message, 't' is missing or no string: {}", QString(jsonData.toHex()).toStdString());
 					return nullptr;
 				} else if (!jsonRootObject.contains("k") || !jsonRootObject["k"].isString()) {
 					LOGGER()->error("Failed to parse JSON received in contact file message, 'k' is missing or no string: {}", QString(jsonData.toHex()).toStdString());
@@ -136,7 +137,12 @@ namespace openmittsu {
 				}
 
 				QByteArray const fileId(QByteArray::fromHex(jsonRootObject["b"].toString().toUtf8()));
-				QByteArray const thumbId(QByteArray::fromHex(jsonRootObject["t"].toString().toUtf8()));
+				
+				QByteArray thumbId;
+				if (jsonRootObject.contains("t") || jsonRootObject["t"].isString()) {
+					thumbId = QByteArray::fromHex(jsonRootObject["t"].toString().toUtf8());
+				}
+
 				openmittsu::crypto::EncryptionKey const key(QByteArray::fromHex(jsonRootObject["k"].toString().toUtf8()));
 				QString const mimeType = jsonRootObject["m"].toString();
 				QString const fileName = jsonRootObject["n"].toString();
@@ -155,7 +161,9 @@ namespace openmittsu {
 
 				QJsonObject rootObject;
 				rootObject["b"] = QString(m_fileBlobId.toHex());
-				rootObject["t"] = QString(m_imageBlobId.toHex());
+				if (!m_imageBlobId.isEmpty()) {
+					rootObject["t"] = QString(m_imageBlobId.toHex());
+				}
 				rootObject["k"] = QString(m_encryptionKey.getEncryptionKey().toHex());
 				rootObject["m"] = m_mimeType;
 				rootObject["n"] = m_fileName;

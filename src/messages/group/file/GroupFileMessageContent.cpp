@@ -2,6 +2,7 @@
 
 #include "src/exceptions/IllegalFunctionCallException.h"
 #include "src/messages/group/file/GroupEncryptedFileAndImageAndKeyMessageContent.h"
+#include "src/messages/group/file/GroupEncryptedFileAndImageIdAndKeyMessageContent.h"
 #include "src/crypto/FullCryptoBox.h"
 #include "src/crypto/Nonce.h"
 #include "src/crypto/FixedNonces.h"
@@ -37,6 +38,9 @@ namespace openmittsu {
 				if (dynamic_cast<openmittsu::tasks::KeyAndFixedNonceEncryptionCallbackTask const*>(callbackTask) != nullptr) {
 					openmittsu::tasks::KeyAndFixedNonceEncryptionCallbackTask const* kfnect = dynamic_cast<openmittsu::tasks::KeyAndFixedNonceEncryptionCallbackTask const*>(callbackTask);
 					LOGGER_DEBUG("Integrating result from KeyAndFixedNonceEncryptionCallbackTask into a new GroupEncryptedFileAndImageAndKeyMessageContent.");
+					if (m_imageData.isEmpty()) {
+						return new GroupEncryptedFileAndImageIdAndKeyMessageContent(getGroupId(), kfnect->getEncryptedData(), QByteArray(), kfnect->getEncryptionKey(), m_mimeType, m_fileName, m_caption, m_fileSizeInBytes);
+					}
 					return new GroupEncryptedFileAndImageAndKeyMessageContent(getGroupId(), kfnect->getEncryptedData(), m_imageData, kfnect->getEncryptionKey(), m_mimeType, m_fileName, m_caption, m_fileSizeInBytes);
 				} else {
 					LOGGER()->critical("GroupFileMessageContent::integrateCallbackTaskResult called for unexpected CallbackTask.");
