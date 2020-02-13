@@ -6,6 +6,7 @@
 #include <QMenu>
 #include <QPixmap>
 
+#include "src/utility/Logging.h"
 #include "src/utility/QObjectConnectionMacro.h"
 
 #include "src/exceptions/InternalErrorException.h"
@@ -42,7 +43,11 @@ namespace openmittsu {
 			QPixmap pixmap;
 			openmittsu::database::MediaFileItem const image = m_contactMessage.getContentAsMediaFile();
 			openmittsu::database::MediaFileItem const thumbnail = m_contactMessage.getSecondaryContentAsMediaFile();
-			if (image.isAvailable()) {
+			
+			// [null,null,"image/gif",12345,"bla.gif",1,true,"My Caption"]
+			QString const messageData = m_contactMessage.getContentAsText();
+
+			if (image.isAvailable() && thumbnail.isAvailable()) {
 				m_lblImage->updateData(image.getData(), thumbnail.getData());
 				m_lblCaption->setText(preprocessLinks(m_contactMessage.getCaption()));
 			} else {

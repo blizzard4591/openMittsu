@@ -40,10 +40,10 @@ namespace openmittsu {
 			QImage m_play;
 			QImage m_pause;
 			QByteArray m_gifData;
-			QByteArray m_thumbnailData;
 			QBuffer m_gifBuffer;
 			QPixmap m_playPixmap;
 			QPixmap m_pausePixmap;
+			QPixmap m_thumbnailPixmap;
 			bool m_isMouseOver;
 		};
 

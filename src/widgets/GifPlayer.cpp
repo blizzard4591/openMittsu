@@ -82,13 +82,12 @@ namespace openmittsu {
 		void GifPlayer::paintEvent(QPaintEvent* event) {
 			QLabel::paintEvent(event);
 
-			if (m_isMouseOver) {
+			QMovie::MovieState const state = m_movie.state();
+			if (m_isMouseOver || (state != QMovie::MovieState::Running)) {
 				QPainter painter(this);
 				painter.setOpacity(0.75);
 
-				QSize const movieSize = m_movie.scaledSize();
-				LOGGER_DEBUG("Movie Width = {}, Height = {}", movieSize.width(), movieSize.height());
-				LOGGER_DEBUG("Our Width = {}, Height = {}", this->width(), this->height());
+				QSize const movieSize = m_thumbnailPixmap.size();
 				int const outerWidth = (movieSize.width() > 10) ? movieSize.width() : this->width();
 				int const outerHeight = (movieSize.height() > 10) ? movieSize.height() : this->height();
 
@@ -98,7 +97,6 @@ namespace openmittsu {
 				int const startX = (outerWidth - iconSize) / 2;
 				int const startY = (outerHeight - iconSize) / 2;
 
-				QMovie::MovieState const state = m_movie.state();
 				if (state == QMovie::MovieState::NotRunning) {
 					painter.drawPixmap(startX, startY, iconSize, iconSize, m_playPixmap);
 				} else if (state == QMovie::MovieState::Paused) {
@@ -113,7 +111,9 @@ namespace openmittsu {
 			m_gifBuffer.close();
 
 			m_gifData = gifData;
-			m_thumbnailData = thumbnailData;
+			if (!m_thumbnailPixmap.loadFromData(thumbnailData)) {
+				LOGGER()->error("Failed to load thumbnail from data stream!");
+			}
 
 			m_gifBuffer.setData(m_gifData);
 			m_gifBuffer.open(QBuffer::ReadOnly);
@@ -129,6 +129,7 @@ namespace openmittsu {
 			} else if (state == QMovie::MovieState::Running) {
 				LOGGER_DEBUG("State: Running.");
 			}
+			this->update();
 		}
 	}
 }
