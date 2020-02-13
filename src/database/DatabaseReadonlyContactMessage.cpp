@@ -101,7 +101,7 @@ namespace openmittsu {
 
 		QString const& DatabaseReadonlyContactMessage::getContentAsText() const {
 			ContactMessageType const messageType = getMessageType();
-			if ((messageType != ContactMessageType::TEXT) && (messageType != ContactMessageType::AUDIO)) {
+			if ((messageType != ContactMessageType::TEXT) && (messageType != ContactMessageType::AUDIO) && (messageType != ContactMessageType::FILE)) {
 				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of readonly contact message for message ID \"" << getMessageId().toString() << "\" as text because it has type " << ContactMessageTypeHelper::toString(messageType) << "!";
 			}
 			return m_body;

@@ -101,7 +101,7 @@ namespace openmittsu {
 
 		QString const& DatabaseReadonlyGroupMessage::getContentAsText() const {
 			GroupMessageType const messageType = getMessageType();
-			if ((messageType != GroupMessageType::TEXT) && (messageType != GroupMessageType::AUDIO) && (messageType != GroupMessageType::SET_IMAGE) && (messageType != GroupMessageType::SET_TITLE) && (messageType != GroupMessageType::GROUP_CREATION) && (messageType != GroupMessageType::LEAVE) && (messageType != GroupMessageType::SYNC_REQUEST)) {
+			if ((messageType != GroupMessageType::TEXT) && (messageType != GroupMessageType::FILE) && (messageType != GroupMessageType::AUDIO) && (messageType != GroupMessageType::SET_IMAGE) && (messageType != GroupMessageType::SET_TITLE) && (messageType != GroupMessageType::GROUP_CREATION) && (messageType != GroupMessageType::LEAVE) && (messageType != GroupMessageType::SYNC_REQUEST)) {
 				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of readonly group message for message ID \"" << getMessageId().toString() << "\" as text because it has type " << GroupMessageTypeHelper::toString(messageType) << "!";
 			}
 			return m_body;
