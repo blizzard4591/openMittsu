@@ -70,8 +70,6 @@
 
 #include "ui_main.h"
 
-#include "src/Test.h"
-
 Client::Client(QWidget* parent) : QMainWindow(parent),
 m_ui(std::make_unique<Ui::MainWindow>()),
 m_protocolClient(nullptr),
@@ -450,9 +448,6 @@ void Client::updateDatabaseInfo(QString const& currentFileName) {
 }
 
 void Client::btnConnectOnClick() {
-	//openmittsu::Test test(m_serverConfiguration, m_databasePointerAuthority.getDatabaseWrapperFactory());
-	//return;
-
 	if (m_connectionState == ConnectionState::STATE_DISCONNECTED) {
 		if ((m_serverConfiguration == nullptr) || (!m_databaseWrapper.hasDatabase())) {
 			QMessageBox::warning(this, "Can not connect", "Please choose a valid database file first.");
