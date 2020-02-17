@@ -7,7 +7,7 @@
 #include "src/dataproviders/BackedContactMessage.h"
 
 #include "src/widgets/chat/ContactMediaChatWidgetItem.h"
-#include "src/widgets/ClickAwareLabel.h"
+#include "src/widgets/GifPlayer.h"
 
 #include <QBuffer>
 #include <QMovie>
@@ -30,12 +30,10 @@ namespace openmittsu {
 			virtual QString getFileExtension() const override;
 			virtual bool saveMediaToFile(QString const& filename) const override;
 		private:
-			ClickAwareLabel* m_lblImage;
+			GifPlayer* m_lblImage;
 			QLabel* m_lblCaption;
-			QByteArray m_mainData;
-			QByteArray m_thumbnailData;
-			QBuffer m_mainDataBuffer;
-			QMovie m_mainMovie;
+			QString m_mimeType;
+			QString m_fileName;
 		};
 
 	}

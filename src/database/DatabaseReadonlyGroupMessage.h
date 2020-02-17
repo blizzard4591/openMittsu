@@ -15,7 +15,7 @@ namespace openmittsu {
 	namespace database {
 		class DatabaseReadonlyGroupMessage : public virtual openmittsu::dataproviders::messages::ReadonlyGroupMessage {
 		public:
-			DatabaseReadonlyGroupMessage(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, bool isMessageFromUs, openmittsu::protocol::MessageTime const& createdAt, openmittsu::protocol::MessageTime const& sentAt, openmittsu::protocol::MessageTime const& modifiedAt, bool isQueued, bool isSent, QString const& uuid, bool isRead, bool isSaved, openmittsu::dataproviders::messages::UserMessageState const& messageState, openmittsu::protocol::MessageTime const& receivedAt, openmittsu::protocol::MessageTime const& seenAt, bool isStatusMessage, QString const& caption, openmittsu::dataproviders::messages::GroupMessageType const& groupMessageType, QString const& body, MediaFileItem const& mediaItem);
+			DatabaseReadonlyGroupMessage(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, bool isMessageFromUs, openmittsu::protocol::MessageTime const& createdAt, openmittsu::protocol::MessageTime const& sentAt, openmittsu::protocol::MessageTime const& modifiedAt, bool isQueued, bool isSent, QString const& uuid, bool isRead, bool isSaved, openmittsu::dataproviders::messages::UserMessageState const& messageState, openmittsu::protocol::MessageTime const& receivedAt, openmittsu::protocol::MessageTime const& seenAt, bool isStatusMessage, QString const& caption, openmittsu::dataproviders::messages::GroupMessageType const& groupMessageType, QString const& body, MediaFileItem const& mediaItem, MediaFileItem const& secondaryMediaItem);
 			virtual ~DatabaseReadonlyGroupMessage();
 
 			virtual openmittsu::protocol::GroupId const& getGroupId() const override;
@@ -53,6 +53,7 @@ namespace openmittsu {
 			virtual QString const& getContentAsText() const override;
 			virtual openmittsu::utility::Location getContentAsLocation() const override;
 			virtual MediaFileItem getContentAsMediaFile() const override;
+			virtual MediaFileItem getSecondaryContentAsMediaFile() const override;
 		private:
 			openmittsu::protocol::GroupId m_group;
 			openmittsu::protocol::ContactId m_sender;
@@ -74,6 +75,7 @@ namespace openmittsu {
 			openmittsu::dataproviders::messages::GroupMessageType m_groupMessageType;
 			QString m_body;
 			MediaFileItem m_mediaItem;
+			MediaFileItem m_secondaryMediaItem;
 		};
 
 	}

@@ -14,8 +14,8 @@ namespace openmittsu {
 
 		using namespace openmittsu::dataproviders::messages;
 
-		DatabaseReadonlyGroupMessage::DatabaseReadonlyGroupMessage(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, bool isMessageFromUs, openmittsu::protocol::MessageTime const& createdAt, openmittsu::protocol::MessageTime const& sentAt, openmittsu::protocol::MessageTime const& modifiedAt, bool isQueued, bool isSent, QString const& uuid, bool isRead, bool isSaved, openmittsu::dataproviders::messages::UserMessageState const& messageState, openmittsu::protocol::MessageTime const& receivedAt, openmittsu::protocol::MessageTime const& seenAt, bool isStatusMessage, QString const& caption, openmittsu::dataproviders::messages::GroupMessageType const& groupMessageType, QString const& body, MediaFileItem const& mediaItem)
-			: m_group(group), m_sender(sender), m_messageId(messageId), m_isMessageFromUs(isMessageFromUs), m_createdAt(createdAt), m_sentAt(sentAt), m_modifiedAt(modifiedAt), m_isQueued(isQueued), m_isSent(isSent), m_uuid(uuid), m_isRead(isRead), m_isSaved(isSaved), m_messageState(messageState), m_receivedAt(receivedAt), m_seenAt(seenAt), m_isStatusMessage(isStatusMessage), m_caption(caption), m_groupMessageType(groupMessageType), m_body(body), m_mediaItem(mediaItem)
+		DatabaseReadonlyGroupMessage::DatabaseReadonlyGroupMessage(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, bool isMessageFromUs, openmittsu::protocol::MessageTime const& createdAt, openmittsu::protocol::MessageTime const& sentAt, openmittsu::protocol::MessageTime const& modifiedAt, bool isQueued, bool isSent, QString const& uuid, bool isRead, bool isSaved, openmittsu::dataproviders::messages::UserMessageState const& messageState, openmittsu::protocol::MessageTime const& receivedAt, openmittsu::protocol::MessageTime const& seenAt, bool isStatusMessage, QString const& caption, openmittsu::dataproviders::messages::GroupMessageType const& groupMessageType, QString const& body, MediaFileItem const& mediaItem, MediaFileItem const& secondaryMediaItem)
+			: m_group(group), m_sender(sender), m_messageId(messageId), m_isMessageFromUs(isMessageFromUs), m_createdAt(createdAt), m_sentAt(sentAt), m_modifiedAt(modifiedAt), m_isQueued(isQueued), m_isSent(isSent), m_uuid(uuid), m_isRead(isRead), m_isSaved(isSaved), m_messageState(messageState), m_receivedAt(receivedAt), m_seenAt(seenAt), m_isStatusMessage(isStatusMessage), m_caption(caption), m_groupMessageType(groupMessageType), m_body(body), m_mediaItem(mediaItem), m_secondaryMediaItem(secondaryMediaItem)
 		{
 			//
 		}
@@ -101,7 +101,7 @@ namespace openmittsu {
 
 		QString const& DatabaseReadonlyGroupMessage::getContentAsText() const {
 			GroupMessageType const messageType = getMessageType();
-			if ((messageType != GroupMessageType::TEXT) && (messageType != GroupMessageType::AUDIO) && (messageType != GroupMessageType::SET_IMAGE) && (messageType != GroupMessageType::SET_TITLE) && (messageType != GroupMessageType::GROUP_CREATION) && (messageType != GroupMessageType::LEAVE) && (messageType != GroupMessageType::SYNC_REQUEST)) {
+			if ((messageType != GroupMessageType::TEXT) && (messageType != GroupMessageType::FILE) && (messageType != GroupMessageType::AUDIO) && (messageType != GroupMessageType::SET_IMAGE) && (messageType != GroupMessageType::SET_TITLE) && (messageType != GroupMessageType::GROUP_CREATION) && (messageType != GroupMessageType::LEAVE) && (messageType != GroupMessageType::SYNC_REQUEST)) {
 				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of readonly group message for message ID \"" << getMessageId().toString() << "\" as text because it has type " << GroupMessageTypeHelper::toString(messageType) << "!";
 			}
 			return m_body;
@@ -121,6 +121,14 @@ namespace openmittsu {
 				throw openmittsu::exceptions::InternalErrorException() << "Can not get content of readonly group message for message ID \"" << getMessageId().toString() << "\" as media file because it has type " << GroupMessageTypeHelper::toString(messageType) << "!";
 			}
 			return m_mediaItem;
+		}
+
+		MediaFileItem DatabaseReadonlyGroupMessage::getSecondaryContentAsMediaFile() const {
+			GroupMessageType const messageType = getMessageType();
+			if ((messageType != GroupMessageType::FILE) && (messageType != GroupMessageType::VIDEO)) {
+				throw openmittsu::exceptions::InternalErrorException() << "Can not get secondary content of readonly group message for message ID \"" << getMessageId().toString() << "\" as media file because it has type " << GroupMessageTypeHelper::toString(messageType) << "!";
+			}
+			return m_secondaryMediaItem;
 		}
 
 	}

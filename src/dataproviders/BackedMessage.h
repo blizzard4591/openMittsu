@@ -45,6 +45,7 @@ namespace openmittsu {
 			QString getContentAsText() const;
 			openmittsu::utility::Location getContentAsLocation() const;
 			openmittsu::database::MediaFileItem getContentAsMediaFile() const;
+			openmittsu::database::MediaFileItem getSecondaryContentAsMediaFile() const;
 
 			QString const& getCaption() const;
 
