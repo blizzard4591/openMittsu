@@ -9,7 +9,7 @@
 namespace openmittsu {
 	namespace widgets {
 
-		GifPlayer::GifPlayer(QWidget* parent) : QLabel(parent), m_movie(), m_play(":/icons/icon_play.png"), m_pause(":/icons/icon_pause.png"), m_playPixmap(":/icons/icon_play.png"), m_pausePixmap(":/icons/icon_pause.png"), m_isMouseOver(false) {
+		GifPlayer::GifPlayer(QWidget* parent) : QLabel(parent), m_movie(), m_play(":/icons/icon_play.png"), m_pause(":/icons/icon_pause.png"), m_playPixmap(":/icons/icon_play.png"), m_pausePixmap(":/icons/icon_pause.png"), m_isMouseOver(false), m_gifMode(false) {
 			//
 			this->setMinimumSize(50, 50);
 			this->setAttribute(Qt::WA_Hover);
@@ -22,8 +22,7 @@ namespace openmittsu {
 		}
 
 		void GifPlayer::mousePressEvent(QMouseEvent* event) {
-			if (event->buttons() == Qt::LeftButton) {
-
+			if ((m_gifMode) && (event->buttons() == Qt::LeftButton)) {
 				QMovie::MovieState state = m_movie.state();
 				if (state == QMovie::MovieState::NotRunning) {
 					m_movie.start();
@@ -82,6 +81,10 @@ namespace openmittsu {
 		void GifPlayer::paintEvent(QPaintEvent* event) {
 			QLabel::paintEvent(event);
 
+			if (!m_gifMode) {
+				return;
+			}
+
 			QMovie::MovieState const state = m_movie.state();
 			if (m_isMouseOver || (state != QMovie::MovieState::Running)) {
 				QPainter painter(this);
@@ -119,6 +122,7 @@ namespace openmittsu {
 			m_gifBuffer.open(QBuffer::ReadOnly);
 			m_movie.setDevice(&m_gifBuffer);
 			m_movie.start();
+			m_gifMode = true;
 		}
 
 		void GifPlayer::onMovieStateChanges(QMovie::MovieState state) {
@@ -130,6 +134,10 @@ namespace openmittsu {
 				LOGGER_DEBUG("State: Running.");
 			}
 			this->update();
+		}
+
+		void GifPlayer::deactivateGifMode() {
+			m_gifMode = false;
 		}
 	}
 }

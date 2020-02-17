@@ -20,6 +20,7 @@ namespace openmittsu {
 			virtual ~GifPlayer();
 
 			void updateData(QByteArray const& gifData, QByteArray const& thumbnailData);
+			void deactivateGifMode();
 		signals:
 			void clicked();
 			void doubleClickSelectedText(QString const& selectedText);
@@ -45,6 +46,7 @@ namespace openmittsu {
 			QPixmap m_pausePixmap;
 			QPixmap m_thumbnailPixmap;
 			bool m_isMouseOver;
+			bool m_gifMode;
 		};
 
 	}

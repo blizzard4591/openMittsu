@@ -31,7 +31,7 @@ namespace openmittsu {
 				if (m_fileBlobId.size() != (PROTO_IMAGESERVER_ID_LENGTH_BYTES)) {
 					throw openmittsu::exceptions::IllegalArgumentException() << "The supplied blob ID has " << m_fileBlobId.size() << " Bytes instead of " << (PROTO_IMAGESERVER_ID_LENGTH_BYTES) << " Bytes.";
 				}
-				if (m_imageBlobId.size() != (PROTO_IMAGESERVER_ID_LENGTH_BYTES)) {
+				if ((!m_imageBlobId.isEmpty()) && (m_imageBlobId.size() != (PROTO_IMAGESERVER_ID_LENGTH_BYTES))) {
 					throw openmittsu::exceptions::IllegalArgumentException() << "The supplied blob ID has " << m_imageBlobId.size() << " Bytes instead of " << (PROTO_IMAGESERVER_ID_LENGTH_BYTES) << " Bytes.";
 				}
 			}

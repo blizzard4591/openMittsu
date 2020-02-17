@@ -41,7 +41,7 @@ namespace openmittsu {
 			}
 
 			if (payload.size() < minPayloadSize || (sizeIsExact && (payload.size() != minPayloadSize))) {
-				throw openmittsu::exceptions::IllegalArgumentException() << "Can not create MessageContent from payload with size " << payload.size() << " instead of " << minPayloadSize << " Bytes.";
+				throw openmittsu::exceptions::IllegalArgumentException() << "Can not create MessageContent from payload with size " << payload.size() << " instead of " << minPayloadSize << " Bytes. Payload: " << QString(payload.toHex()).toStdString();
 			} else if (signatureByte != payload.at(0)) {
 				throw openmittsu::exceptions::IllegalArgumentException() << "Invalid signatureByte - expected 0x" << openmittsu::utility::HexChar(signatureByte) << " but found 0x" << openmittsu::utility::HexChar(payload.at(0)) << " instead.";
 			}

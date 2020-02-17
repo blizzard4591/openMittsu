@@ -32,6 +32,8 @@ namespace openmittsu {
 		private:
 			GifPlayer* m_lblImage;
 			QLabel* m_lblCaption;
+			QString m_mimeType;
+			QString m_fileName;
 		};
 
 	}
