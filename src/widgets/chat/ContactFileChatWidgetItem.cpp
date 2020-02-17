@@ -97,6 +97,13 @@ namespace openmittsu {
 		}
 
 		QString ContactFileChatWidgetItem::getFileExtension() const {
+			if (!m_fileName.isEmpty()) {
+				int pos = m_fileName.lastIndexOf('.');
+				if (pos != -1) {
+					return m_fileName.mid(pos + 1);
+				}
+			}
+
 			return QStringLiteral("gif");
 		}
 
