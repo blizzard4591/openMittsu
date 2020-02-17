@@ -456,6 +456,8 @@ namespace openmittsu {
 
 				if (dynamic_cast<openmittsu::messages::contact::ContactAudioMessageContent const*>(cmc) != nullptr) {
 					handleIncomingMessage(contactMessage->getMessageHeader(), std::shared_ptr<openmittsu::messages::contact::ContactAudioMessageContent const>(dynamic_cast<openmittsu::messages::contact::ContactAudioMessageContent const*>(cmc->clone())));
+				} else if (dynamic_cast<openmittsu::messages::contact::ContactFileMessageContent const*>(cmc) != nullptr) {
+					handleIncomingMessage(contactMessage->getMessageHeader(), std::shared_ptr<openmittsu::messages::contact::ContactFileMessageContent const>(dynamic_cast<openmittsu::messages::contact::ContactFileMessageContent const*>(cmc->clone())));
 				} else if (dynamic_cast<openmittsu::messages::contact::ContactImageMessageContent const*>(cmc) != nullptr) {
 					handleIncomingMessage(contactMessage->getMessageHeader(), std::shared_ptr<openmittsu::messages::contact::ContactImageMessageContent const>(dynamic_cast<openmittsu::messages::contact::ContactImageMessageContent const*>(cmc->clone())));
 				} else if (dynamic_cast<openmittsu::messages::contact::ContactLocationMessageContent const*>(cmc) != nullptr) {
@@ -491,6 +493,8 @@ namespace openmittsu {
 
 				if (dynamic_cast<openmittsu::messages::group::GroupAudioMessageContent const*>(cmc) != nullptr) {
 					handleIncomingMessage(groupMessage->getMessageHeader(), std::shared_ptr<openmittsu::messages::group::GroupAudioMessageContent const>(dynamic_cast<openmittsu::messages::group::GroupAudioMessageContent const*>(cmc->clone())));
+				} else if (dynamic_cast<openmittsu::messages::group::GroupFileMessageContent const*>(cmc) != nullptr) {
+					handleIncomingMessage(groupMessage->getMessageHeader(), std::shared_ptr<openmittsu::messages::group::GroupFileMessageContent const>(dynamic_cast<openmittsu::messages::group::GroupFileMessageContent const*>(cmc->clone())));
 				} else if (dynamic_cast<openmittsu::messages::group::GroupImageMessageContent const*>(cmc) != nullptr) {
 					handleIncomingMessage(groupMessage->getMessageHeader(), std::shared_ptr<openmittsu::messages::group::GroupImageMessageContent const>(dynamic_cast<openmittsu::messages::group::GroupImageMessageContent const*>(cmc->clone())));
 				} else if (dynamic_cast<openmittsu::messages::group::GroupFileMessageContent const*>(cmc) != nullptr) {

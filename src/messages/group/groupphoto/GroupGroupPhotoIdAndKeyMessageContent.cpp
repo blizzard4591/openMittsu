@@ -72,7 +72,8 @@ namespace openmittsu {
 			}
 
 			MessageContent* GroupGroupPhotoIdAndKeyMessageContent::fromPacketPayload(FullMessageHeader const& messageHeader, QByteArray const& payload) const {
-				verifyPayloadMinSizeAndSignatureByte(PROTO_MESSAGE_SIGNATURE_GROUP_PHOTO, 1 + openmittsu::protocol::GroupId::getSizeOfGroupIdInBytes() + (PROTO_IMAGESERVER_ID_LENGTH_BYTES)+4 + openmittsu::crypto::EncryptionKey::getSizeOfEncryptionKeyInBytes(), payload, true);
+				constexpr int const payloadSize = 1 + openmittsu::protocol::GroupId::getSizeOfGroupIdInBytes() + (PROTO_IMAGESERVER_ID_LENGTH_BYTES)+4 + openmittsu::crypto::EncryptionKey::getSizeOfEncryptionKeyInBytes();
+				verifyPayloadMinSizeAndSignatureByte(PROTO_MESSAGE_SIGNATURE_GROUP_PHOTO, payloadSize, payload, true);
 
 				int startingPosition = 1;
 				openmittsu::protocol::GroupId const group(openmittsu::protocol::GroupId::fromData(payload.mid(startingPosition, openmittsu::protocol::GroupId::getSizeOfGroupIdInBytes())));
