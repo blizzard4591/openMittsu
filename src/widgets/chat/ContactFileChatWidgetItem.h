@@ -22,8 +22,6 @@ namespace openmittsu {
 			virtual ~ContactFileChatWidgetItem();
 		public slots:
 			virtual void onMessageDataChanged() override;
-
-			virtual void onImageHasBeenClicked();
 		protected:
 			virtual void copyToClipboard() override;
 

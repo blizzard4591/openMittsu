@@ -1,4 +1,4 @@
-#include "src/widgets/chat/ContactFileChatWidgetItem.h"
+#include "src/widgets/chat/GroupFileChatWidgetItem.h"
 
 #include <QAction>
 #include <QApplication>
@@ -15,9 +15,9 @@
 namespace openmittsu {
 	namespace widgets {
 
-		ContactFileChatWidgetItem::ContactFileChatWidgetItem(openmittsu::dataproviders::BackedContactMessage const& message, QWidget* parent) : ContactMediaChatWidgetItem(message, parent), m_lblImage(new openmittsu::widgets::GifPlayer()), m_lblCaption(new QLabel()) {
-			if (message.getMessageType() != openmittsu::dataproviders::messages::ContactMessageType::FILE) {
-				throw openmittsu::exceptions::InternalErrorException() << "Can not handle message with type " << openmittsu::dataproviders::messages::ContactMessageTypeHelper::toString(message.getMessageType()) << ".";
+		GroupFileChatWidgetItem::GroupFileChatWidgetItem(openmittsu::dataproviders::BackedGroupMessage const& message, QWidget* parent) : GroupMediaChatWidgetItem(message, parent), m_lblImage(new openmittsu::widgets::GifPlayer()), m_lblCaption(new QLabel()) {
+			if (message.getMessageType() != openmittsu::dataproviders::messages::GroupMessageType::FILE) {
+				throw openmittsu::exceptions::InternalErrorException() << "Can not handle message with type " << openmittsu::dataproviders::messages::GroupMessageTypeHelper::toString(message.getMessageType()) << ".";
 			}
 
 			ChatWidgetItem::configureLabel(m_lblCaption, 13);
@@ -28,18 +28,18 @@ namespace openmittsu {
 			onMessageDataChanged();
 		}
 
-		ContactFileChatWidgetItem::~ContactFileChatWidgetItem() {
+		GroupFileChatWidgetItem::~GroupFileChatWidgetItem() {
 			delete m_lblImage;
 			delete m_lblCaption;
 		}
 
-		void ContactFileChatWidgetItem::onMessageDataChanged() {
+		void GroupFileChatWidgetItem::onMessageDataChanged() {
 			QPixmap pixmap;
-			openmittsu::database::MediaFileItem const image = m_contactMessage.getContentAsMediaFile();
-			openmittsu::database::MediaFileItem const thumbnail = m_contactMessage.getSecondaryContentAsMediaFile();
+			openmittsu::database::MediaFileItem const image = m_groupMessage.getContentAsMediaFile();
+			openmittsu::database::MediaFileItem const thumbnail = m_groupMessage.getSecondaryContentAsMediaFile();
 			
 			// [null,null,"image/gif",12345,"bla.gif",1,true,"My Caption"]
-			QString const messageData = m_contactMessage.getContentAsText();
+			QString const messageData = m_groupMessage.getContentAsText();
 			QStringList const fields = utility::StringList::split(messageData);
 			if (fields.size() < 8) {
 				throw openmittsu::exceptions::InternalErrorException() << "Message control data could not be parsed to obtain MIME type of file: '" << messageData.toStdString() << "'.";
@@ -54,7 +54,7 @@ namespace openmittsu {
 			if (m_mimeType.compare("image/gif", Qt::CaseInsensitive) == 0) {
 				if (image.isAvailable() && thumbnail.isAvailable()) {
 					m_lblImage->updateData(image.getData(), thumbnail.getData());
-					m_lblCaption->setText(preprocessLinks(m_contactMessage.getCaption()));
+					m_lblCaption->setText(preprocessLinks(m_groupMessage.getCaption()));
 				} else {
 					pixmap = image.getPixmapWithErrorMessage(500, 500);
 					m_lblImage->setPixmap(pixmap);
@@ -64,7 +64,7 @@ namespace openmittsu {
 				m_lblImage->deactivateGifMode();
 				if (image.isAvailable()) {
 					m_lblImage->setText(QString("File: '%1'\nSize: %2 Bytes").arg(m_fileName).arg(fileSize));
-					m_lblCaption->setText(preprocessLinks(m_contactMessage.getCaption()));
+					m_lblCaption->setText(preprocessLinks(m_groupMessage.getCaption()));
 				} else {
 					pixmap = image.getPixmapWithErrorMessage(500, 500);
 					m_lblImage->setPixmap(pixmap);
@@ -72,12 +72,12 @@ namespace openmittsu {
 				}
 			}
 
-			ContactChatWidgetItem::onMessageDataChanged();
+			GroupChatWidgetItem::onMessageDataChanged();
 		}
 
-		void ContactFileChatWidgetItem::copyToClipboard() {
+		void GroupFileChatWidgetItem::copyToClipboard() {
 			QClipboard *clipboard = QApplication::clipboard();
-			openmittsu::database::MediaFileItem const image = m_contactMessage.getContentAsMediaFile();
+			openmittsu::database::MediaFileItem const image = m_groupMessage.getContentAsMediaFile();
 			if (image.isAvailable()) {
 				QPixmap pixmap;
 				pixmap.loadFromData(image.getData());
@@ -87,7 +87,7 @@ namespace openmittsu {
 			}
 		}
 
-		QString ContactFileChatWidgetItem::getFileExtension() const {
+		QString GroupFileChatWidgetItem::getFileExtension() const {
 			if (!m_fileName.isEmpty()) {
 				int pos = m_fileName.lastIndexOf('.');
 				if (pos != -1) {
@@ -98,8 +98,8 @@ namespace openmittsu {
 			return QStringLiteral("gif");
 		}
 
-		bool ContactFileChatWidgetItem::saveMediaToFile(QString const& filename) const {
-			openmittsu::database::MediaFileItem const image = m_contactMessage.getContentAsMediaFile();
+		bool GroupFileChatWidgetItem::saveMediaToFile(QString const& filename) const {
+			openmittsu::database::MediaFileItem const image = m_groupMessage.getContentAsMediaFile();
 			if (image.isAvailable()) {
 				return MediaChatWidgetItem::saveMediaToFile(filename, image.getData());
 			} else {

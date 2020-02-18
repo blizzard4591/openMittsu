@@ -9,6 +9,7 @@
 #include "src/utility/QObjectConnectionMacro.h"
 
 #include "src/widgets/chat/GroupAudioChatWidgetItem.h"
+#include "src/widgets/chat/GroupFileChatWidgetItem.h"
 #include "src/widgets/chat/GroupImageChatWidgetItem.h"
 #include "src/widgets/chat/GroupLocationChatWidgetItem.h"
 #include "src/widgets/chat/GroupStatusChatWidgetItem.h"
@@ -66,6 +67,9 @@ namespace openmittsu {
 			switch (messageType) {
 				case openmittsu::dataproviders::messages::GroupMessageType::AUDIO:
 					this->addChatWidgetItem(new GroupAudioChatWidgetItem(m_group->getMessageByUuid(uuid)));
+					break;
+				case openmittsu::dataproviders::messages::GroupMessageType::FILE:
+					this->addChatWidgetItem(new GroupFileChatWidgetItem(m_group->getMessageByUuid(uuid)));
 					break;
 				case openmittsu::dataproviders::messages::GroupMessageType::GROUP_CREATION:
 					this->addChatWidgetItem(new GroupStatusChatWidgetItem(m_group->getMessageByUuid(uuid)));
