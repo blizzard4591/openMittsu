@@ -22,15 +22,13 @@ then
 		echo "AppImages:"
 		find . -type f -name '*.AppImage'
 	else
-		ls -al
-		pwd
 		cd build
-		ls -al
 		/usr/local/Cellar/qt/$QT_VERSION/bin/macdeployqt openmittsu.app -always-overwrite -verbose=2
 		curl -o /tmp/macdeployqtfix.py https://raw.githubusercontent.com/aurelien-rainone/macdeployqtfix/master/macdeployqtfix.py
 		python /tmp/macdeployqtfix.py ./openmittsu.app/Contents/MacOS/openmittsu /usr/local/Cellar/qt/$QT_VERSION/
 		/usr/local/Cellar/qt/$QT_VERSION/bin/macdeployqt openmittsu.app -dmg -verbose=2
 		mv openmittsu.dmg ..
 		cd ..
+		curl -T "{openmittsu.dmg}" ftp://${FTP_ARTIFACTS_HOST}/dmg/ --user ${FTP_ARTIFACTS_USER}:${FTP_ARTIFACTS_PASSWORD}
 	fi
 fi
