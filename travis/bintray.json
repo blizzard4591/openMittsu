@@ -23,6 +23,11 @@
             "includePattern": "OpenMittsu-x86_64.AppImage",
             "uploadPattern": "OpenMittsu-Nightly-Linux-x86_64.AppImage",
             "matrixParams": {"override": 1}
+        },
+		{
+            "includePattern": "openmittsu.dmg",
+            "uploadPattern": "OpenMittsu-Nightly-MacOSX.dmg",
+            "matrixParams": {"override": 1}
         }
     ],
     "publish": true

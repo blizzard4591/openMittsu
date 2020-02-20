@@ -22,8 +22,12 @@ then
 		echo "AppImages:"
 		find . -type f -name '*.AppImage'
 	else
-		sudo wget -c $MACOS_SCRIPT_PACKAGE -O /usr/local/bin/macOsPackage.sh
-		sudo chmod a+x /usr/local/bin/macOsPackage.sh
-		/usr/local/bin/macOsPackage.sh
+		cd build
+		/usr/local/Cellar/qt/$QT_VERSION/bin/macdeployqt openmittsu.app -always-overwrite -verbose=2
+		curl -o /tmp/macdeployqtfix.py https://raw.githubusercontent.com/aurelien-rainone/macdeployqtfix/master/macdeployqtfix.py
+		python /tmp/macdeployqtfix.py ./openmittsu.app/Contents/MacOS/openmittsu /usr/local/Cellar/qt/$QT_VERSION/
+		/usr/local/Cellar/qt/$QT_VERSION/bin/macdeployqt openmittsu.app -dmg -verbose=2
+		mv openmittsu.dmg ..
+		cd ..
 	fi
 fi
