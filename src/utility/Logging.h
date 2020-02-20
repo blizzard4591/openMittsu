@@ -13,7 +13,10 @@
 #	define OPENMITTSU_LOGGING_LEVEL spdlog::level::warn
 #endif
 
+#define SPDLOG_HEADER_ONLY
 #include <spdlog/spdlog.h>
+#include <spdlog/sinks/stdout_sinks.h>
+#include <spdlog/sinks/rotating_file_sink.h>
 
 #define OPENMITTSU_LOGGING_LOGGER_MAIN_NAME "main"
 #define OPENMITTSU_LOGGING_MAX_FILESIZE (5 * 1024 * 1024) // 5 MBytes
