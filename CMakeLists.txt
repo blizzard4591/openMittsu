@@ -681,7 +681,7 @@ if(WIN32)
 elseif(APPLE AND WITH_APP_BUNDLE)
 	set(PROGNAME OpenMittsu)
 	configure_file(${CMAKE_SOURCE_DIR}/share/macosx/Info.plist.cmake ${CMAKE_CURRENT_BINARY_DIR}/Info.plist)
-	set_target_properties(${PROGNAME} PROPERTIES
+	set_target_properties(openMittsu PROPERTIES
 						MACOSX_BUNDLE ON
 						MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_BINARY_DIR}/Info.plist)
 
@@ -700,7 +700,7 @@ elseif(APPLE AND WITH_APP_BUNDLE)
 	add_custom_command(TARGET openMittsu
 					 POST_BUILD
 					 COMMAND ${MACDEPLOYQT_EXE} openMittsu.app
-					 WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/src
+					 WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 					 COMMENT "Deploying app bundle")
 endif()
 

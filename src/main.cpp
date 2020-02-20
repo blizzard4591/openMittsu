@@ -4,6 +4,9 @@
 #include "src/ExceptionHandlingApplication.h"
 #include "src/utility/Version.h"
 
+#include <QDirIterator>
+#include <QStringList>
+
 int main(int argc, char *argv[]) {
 	if (!initializeLogging(OPENMITTSU_LOGGING_MAX_FILESIZE, OPENMITTSU_LOGGING_MAX_FILECOUNT)) {
 		return -2;
@@ -20,6 +23,22 @@ int main(int argc, char *argv[]) {
 	
 	// Set encoding
 	QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
+
+	// Check for MacOSX Plugin directories
+	QDirIterator pluginDirIt("/usr/local/Cellar/qt5-sqlcipher");
+	QStringList pluginVersions;
+	while (pluginDirIt.hasNext()) {
+		QString const pluginDir =  pluginDirIt.next();
+		QString const fileName(pluginDirIt.fileName());
+		if ((fileName.compare(QStringLiteral(".")) == 0) || (fileName.compare(QStringLiteral("..")) == 0)) {
+			continue;
+		}
+		pluginVersions.append(pluginDir);
+	}
+	pluginVersions.sort();
+	if (!pluginVersions.isEmpty()) {
+		QCoreApplication::addLibraryPath(pluginVersions.last());
+	}
 
 	LOGGER()->info("Qt library load paths are: {}", QCoreApplication::libraryPaths().join(", ").toStdString());
 
