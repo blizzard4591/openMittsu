@@ -89,6 +89,7 @@ m_databaseThread(),
 m_databasePointerAuthority(),
 m_databaseWrapper(&m_databasePointerAuthority),
 m_audioNotifier(std::make_shared<openmittsu::utility::AudioNotification>()),
+m_desktopNotifier(),
 m_optionTryEmptyPassword(false),
 m_optionAutoConnect(false),
 m_optionMinimize(false),
@@ -275,6 +276,10 @@ Client::~Client() {
 }
 
 void Client::delayedStartup() {
+	// Restore Window location and size
+	restoreGeometry(m_optionMaster->getOptionAsQByteArray(openmittsu::options::Options::BINARY_MAINWINDOW_GEOMETRY));
+	restoreState(m_optionMaster->getOptionAsQByteArray(openmittsu::options::Options::BINARY_MAINWINDOW_STATE));
+
 	QString const databaseFile = m_optionMaster->getOptionAsQString(openmittsu::options::Options::FILEPATH_DATABASE);
 	QString const legacyClientConfiguration = m_optionMaster->getOptionAsQString(openmittsu::options::Options::FILEPATH_LEGACY_CLIENT_CONFIGURATION);
 	bool showFirstUseWizard = false;
@@ -326,14 +331,12 @@ void Client::delayedStartup() {
 		}
 	}
 
-	// Restore Window location and size
-	restoreGeometry(m_optionMaster->getOptionAsQByteArray(openmittsu::options::Options::BINARY_MAINWINDOW_GEOMETRY));
-	restoreState(m_optionMaster->getOptionAsQByteArray(openmittsu::options::Options::BINARY_MAINWINDOW_STATE));
-
 	// Autoconnect if asked to
 	if (m_optionAutoConnect) {
 		QTimer::singleShot(0, this, SLOT(btnConnectOnClick()));
 	}
+
+	m_desktopNotifier = std::make_shared<openmittsu::widgets::DesktopNotification>(this, openmittsu::options::OptionReaderFactory(m_databasePointerAuthority.getDatabaseWrapperFactory()));
 
 	// Minimize if asked to
 	if (m_optionMinimize) {
@@ -342,6 +345,12 @@ void Client::delayedStartup() {
 }
 
 void Client::closeEvent(QCloseEvent* event) {
+	if (m_optionMaster->getOptionAsBool(openmittsu::options::Options::BOOLEAN_MINIMIZE_TO_TRAY) && !m_desktopNotifier->isClosing()) {
+		this->hide();
+		event->ignore();
+		return;
+	}
+
 	// Save location and size of window
 	m_optionMaster->setOption(openmittsu::options::Options::BINARY_MAINWINDOW_GEOMETRY, saveGeometry());
 	m_optionMaster->setOption(openmittsu::options::Options::BINARY_MAINWINDOW_STATE, saveState());
@@ -685,6 +694,13 @@ void Client::onDatabaseReceivedNewContactMessage(openmittsu::protocol::ContactId
 			chatTab = m_tabController->getTab(identity);
 		}
 		onHasUnreadMessage(chatTab);
+		if (m_optionMaster->getOptionAsBool(openmittsu::options::Options::BOOLEAN_NOTIFICATION_ON_MESSAGE_RECEIVED)) {
+			if (m_desktopNotifier) {
+				auto const contactData = m_databaseWrapper.getContactData(identity, false);
+				QString const contactName = contactData.nickName;
+				m_desktopNotifier->showNotificationContact(contactName);
+			}
+		}
 	}
 }
 
@@ -699,6 +715,13 @@ void Client::onDatabaseReceivedNewGroupMessage(openmittsu::protocol::GroupId con
 			chatTab = m_tabController->getTab(group);
 		}
 		onHasUnreadMessage(chatTab);
+		if (m_optionMaster->getOptionAsBool(openmittsu::options::Options::BOOLEAN_NOTIFICATION_ON_MESSAGE_RECEIVED)) {
+			if (m_desktopNotifier) {
+				auto const groupData = m_databaseWrapper.getGroupData(group, false);
+				QString const groupName = groupData.title;
+				m_desktopNotifier->showNotificationGroup(groupName);
+			}
+		}
 	}
 }
 

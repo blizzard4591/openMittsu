@@ -34,6 +34,7 @@
 #include "src/utility/AudioNotification.h"
 #include "src/utility/ThreadContainer.h"
 
+#include "src/widgets/DesktopNotification.h"
 #include "src/widgets/TabController.h"
 
 namespace Ui {
@@ -139,6 +140,7 @@ private:
 	openmittsu::database::DatabaseWrapper m_databaseWrapper;
 
 	std::shared_ptr<openmittsu::utility::AudioNotification> m_audioNotifier;
+	std::shared_ptr<openmittsu::widgets::DesktopNotification> m_desktopNotifier;
 
 	// Commandline options
 	bool m_optionTryEmptyPassword;
