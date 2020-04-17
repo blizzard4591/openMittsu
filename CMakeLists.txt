@@ -129,6 +129,7 @@ else()
 endif()
 
 find_package(Libqrencode REQUIRED)
+find_package(Threads REQUIRED)
 
 if(APPLE)
 	set(CMAKE_MACOSX_RPATH TRUE)
@@ -601,7 +602,7 @@ target_link_libraries(openMittsuCore Qt5::Core Qt5::Network Qt5::Multimedia Qt5:
 target_link_libraries(openMittsu openMittsuCore Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network Qt5::Multimedia Qt5::MultimediaWidgets Qt5::Sql)
 target_link_libraries(openMittsuVersionInfo Qt5::Core)
 if (OPENMITTSU_ENABLE_TESTS)
-	target_link_libraries(openMittsuTests openMittsuCore Qt5::Core Qt5::Network Qt5::Multimedia Qt5::MultimediaWidgets Qt5::Sql gmock gtest pthread)
+	target_link_libraries(openMittsuTests openMittsuCore Qt5::Core Qt5::Network Qt5::Multimedia Qt5::MultimediaWidgets Qt5::Sql gmock gtest Threads::Threads)
 endif (OPENMITTSU_ENABLE_TESTS)
 
 # Link against libc++abi if requested.
