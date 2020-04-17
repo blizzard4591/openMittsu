@@ -184,6 +184,30 @@ namespace openmittsu {
 				}
 			}
 
+			openmittsu::protocol::MessageTime DatabaseGroupMessageCursor::getLastSyncRequestTimeByUs(InternalDatabaseInterface* database, openmittsu::protocol::GroupId const& group) {
+				QString const selectQuery = QStringLiteral("SELECT `uid`, `sort_by` FROM `group_messages` WHERE `group_id` = :groupId AND `is_outbox` = 1 AND `group_message_type` = :groupMessageType ORDER BY `sort_by` DESC LIMIT 1");
+				{
+					QSqlQuery query(database->getQueryObject());
+					if (!query.prepare(selectQuery)) {
+						throw openmittsu::exceptions::InternalErrorException() << "Could not prepare group message enumeration query. SQL error: " << query.lastError().text().toStdString();
+					}
+					query.bindValue(QStringLiteral(":groupId"), QVariant(group.groupIdWithoutOwnerToQString()));
+					query.bindValue(QStringLiteral(":groupMessageType"), QVariant(GroupMessageTypeHelper::toQString(GroupMessageType::SYNC_REQUEST)));
+					if (query.exec() && query.isSelect()) {
+						if (query.next()) {
+							QString const uuid(query.value(QStringLiteral("uid")).toString());
+							qint64 const messageTime = query.value(QStringLiteral("sort_by")).toLongLong();
+							return openmittsu::protocol::MessageTime::fromDatabase(messageTime);
+						} else {
+							LOGGER_DEBUG("Failed to find an outgoing group sync request for group {}.", group.toString());
+							return openmittsu::protocol::MessageTime::fromDatabase(-1); // This creates a "null" MessageTime
+						}
+					} else {
+						throw openmittsu::exceptions::InternalErrorException() << "Could not execute group message enumeration query for table group_messages. Query error: " << query.lastError().text().toStdString();
+					}
+				}
+			}
+
 		}
 	}
 }

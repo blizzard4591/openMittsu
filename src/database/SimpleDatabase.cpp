@@ -1408,6 +1408,10 @@ namespace openmittsu {
 			return m_contactAndGroupDataProvider.getKnownGroupsContainingMember(identity);
 		}
 
+		openmittsu::protocol::MessageTime SimpleDatabase::getGroupLastSyncRequestTime(openmittsu::protocol::GroupId const& group) {
+			return internal::DatabaseGroupMessageCursor::getLastSyncRequestTimeByUs(this, group);
+		}
+
 		internal::DatabaseContactMessageCursor SimpleDatabase::getMessageCursor(openmittsu::protocol::ContactId const& contact) {
 			if (!hasContact(contact)) {
 				throw openmittsu::exceptions::InternalErrorException() << "Could not create message cursor because the given contact " << contact.toString() << " is unknown!";

@@ -178,6 +178,7 @@ namespace openmittsu {
 			virtual void setContactAccountStatusBatch(ContactToAccountStatusMap const& status) = 0;
 			virtual void setContactFeatureLevelBatch(ContactToFeatureLevelMap const& featureLevels) = 0;
 			virtual GroupToTitleMap getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const = 0;
+			virtual openmittsu::protocol::MessageTime getGroupLastSyncRequestTime(openmittsu::protocol::GroupId const& group) = 0;
 
 			// Deleting Messages
 			virtual void deleteContactMessageByUuid(openmittsu::protocol::ContactId const& contact, QString const& uuid) = 0;

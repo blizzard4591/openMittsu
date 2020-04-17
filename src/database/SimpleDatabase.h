@@ -146,6 +146,7 @@ namespace openmittsu {
 			virtual QSet<openmittsu::protocol::ContactId> getContactsRequiringFeatureLevelCheck(int maximalAgeInSeconds) const override;
 			virtual QSet<openmittsu::protocol::ContactId> getContactsRequiringAccountStatusCheck(int maximalAgeInSeconds) const override;
 			virtual GroupToTitleMap getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const override;
+			virtual openmittsu::protocol::MessageTime getGroupLastSyncRequestTime(openmittsu::protocol::GroupId const& group) override;
 
 			virtual std::shared_ptr<openmittsu::backup::IdentityBackup> getBackup() const override;
 

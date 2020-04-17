@@ -137,6 +137,7 @@ namespace openmittsu {
 			virtual void setContactAccountStatusBatch(ContactToAccountStatusMap const& status) override;
 			virtual void setContactFeatureLevelBatch(ContactToFeatureLevelMap const& featureLevels) override;
 			virtual GroupToTitleMap getKnownGroupsContainingMember(openmittsu::protocol::ContactId const& identity) const override;
+			virtual openmittsu::protocol::MessageTime getGroupLastSyncRequestTime(openmittsu::protocol::GroupId const& group) override;
 			// Deleting Messages
 			virtual void deleteContactMessageByUuid(openmittsu::protocol::ContactId const& contact, QString const& uuid) override;
 			virtual void deleteContactMessagesByAge(openmittsu::protocol::ContactId const& contact, bool olderThanOrNewerThan, openmittsu::protocol::MessageTime const& timePoint) override;

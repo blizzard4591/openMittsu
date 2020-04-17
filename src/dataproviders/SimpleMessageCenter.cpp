@@ -1238,7 +1238,22 @@ namespace openmittsu {
 
 		void SimpleMessageCenter::requestSyncForGroupIfApplicable(openmittsu::protocol::GroupId const& group) {
 			if (!m_messageQueue.hasMessageForGroup(group)) {
-				this->sendSyncRequest(group);
+				openmittsu::protocol::MessageTime const lastSyncRequestTime = this->m_storage.getGroupLastSyncRequestTime(group);
+				bool isLastSyncRequestLongEnoughInThePast = false;
+				if (lastSyncRequestTime.isNull()) {
+					LOGGER_DEBUG("Last sync request time for group {} is null!", group.toString());
+					isLastSyncRequestLongEnoughInThePast = true;
+				} else if (lastSyncRequestTime.getTime().addSecs(5 * 60) < QDateTime::currentDateTime()) { // At least 5 minutes since the last sync request
+					LOGGER_DEBUG("Last sync request time for group {} is {}!", group.toString(), lastSyncRequestTime.getTime().toString().toStdString());
+					isLastSyncRequestLongEnoughInThePast = true;
+				}
+
+				if (isLastSyncRequestLongEnoughInThePast) {
+					LOGGER_DEBUG("requestSyncForGroupIfApplicable for group {} will send sync request.", group.toString());
+					this->sendSyncRequest(group);
+				}
+			} else {
+				LOGGER_DEBUG("requestSyncForGroupIfApplicable for group {} will NOT send sync request, messageQueue has waiting messages for group.", group.toString());
 			}
 		}
 

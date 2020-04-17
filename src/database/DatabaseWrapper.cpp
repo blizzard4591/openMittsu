@@ -453,6 +453,10 @@ namespace openmittsu {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getKnownGroupsContainingMember, GroupToTitleMap, Q_ARG(openmittsu::protocol::ContactId const&, identity));
 		}
 
+		openmittsu::protocol::MessageTime DatabaseWrapper::getGroupLastSyncRequestTime(openmittsu::protocol::GroupId const& group) {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getGroupLastSyncRequestTime, openmittsu::protocol::MessageTime, Q_ARG(openmittsu::protocol::GroupId const&, group));
+		}
+
 		void DatabaseWrapper::deleteContactMessageByUuid(openmittsu::protocol::ContactId const& contact, QString const& uuid) {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(deleteContactMessageByUuid, Q_ARG(openmittsu::protocol::ContactId const&, contact), Q_ARG(QString const&, uuid));
 		}

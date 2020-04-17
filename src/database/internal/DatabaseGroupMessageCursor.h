@@ -29,6 +29,7 @@ namespace openmittsu {
 
 				static void deleteMessagesByAge(InternalDatabaseInterface* database, openmittsu::protocol::GroupId const& group, bool olderThanOrNewerThan, openmittsu::protocol::MessageTime const& timePoint);
 				static void deleteMessagesByCount(InternalDatabaseInterface* database, openmittsu::protocol::GroupId const& group, bool oldestOrNewest, int count);
+				static openmittsu::protocol::MessageTime getLastSyncRequestTimeByUs(InternalDatabaseInterface* database, openmittsu::protocol::GroupId const& group);
 			protected:
 				virtual QString getWhereString() const override;
 				virtual void bindWhereStringValues(QSqlQuery& query) const override;
