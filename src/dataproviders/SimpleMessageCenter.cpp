@@ -809,6 +809,7 @@ namespace openmittsu {
 				return;
 			}
 
+			LOGGER_DEBUG("Received GROUP AUDIO message from {} in group {} with ID {}.", sender.toString(), group.toString(), messageId.toString());
 			if (!checkAndFixGroupMembership(group, sender)) {
 				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::AUDIO, audio, lengthInSeconds));
 				return;
@@ -831,6 +832,7 @@ namespace openmittsu {
 				return;
 			}
 
+			LOGGER_DEBUG("Received GROUP FILE message from {} in group {} with ID {}.", sender.toString(), group.toString(), messageId.toString());
 			if (!checkAndFixGroupMembership(group, sender)) {
 				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::FILE, file, coverImage, mimeType, fileName, caption));
 				return;
@@ -852,6 +854,7 @@ namespace openmittsu {
 				return;
 			}
 
+			LOGGER_DEBUG("Received GROUP VIDEO message from {} in group {} with ID {}.", sender.toString(), group.toString(), messageId.toString());
 			if (!checkAndFixGroupMembership(group, sender)) {
 				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::VIDEO, video, coverImage, lengthInSeconds));
 				return;
@@ -873,6 +876,7 @@ namespace openmittsu {
 				return;
 			}
 
+			LOGGER_DEBUG("Received GROUP TEXT message from {} in group {} with ID {}.", sender.toString(), group.toString(), messageId.toString());
 			if (!checkAndFixGroupMembership(group, sender)) {
 				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::TEXT, message));
 				return;
@@ -894,6 +898,7 @@ namespace openmittsu {
 				return;
 			}
 
+			LOGGER_DEBUG("Received GROUP IMAGE message from {} in group {} with ID {}.", sender.toString(), group.toString(), messageId.toString());
 			if (!checkAndFixGroupMembership(group, sender)) {
 				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::IMAGE, image));
 				return;
@@ -917,6 +922,7 @@ namespace openmittsu {
 				return;
 			}
 
+			LOGGER_DEBUG("Received GROUP LOCATION message from {} in group {} with ID {}.", sender.toString(), group.toString(), messageId.toString());
 			if (!checkAndFixGroupMembership(group, sender)) {
 				QVariant locationVariant;
 				locationVariant.setValue(location);
@@ -947,6 +953,7 @@ namespace openmittsu {
 				return;
 			}
 
+			LOGGER_DEBUG("Received GROUP CREATION message from {} in group {} with ID {}.", sender.toString(), group.toString(), messageId.toString());
 			this->m_storage.storeReceivedGroupCreation(group, sender, messageId, timeSent, timeReceived, members);
 			if (this->m_networkSentMessageAcceptor != nullptr) {
 				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
@@ -957,7 +964,14 @@ namespace openmittsu {
 			auto const end = queuedMessages.constEnd();
 			for (; it != end; ++it) {
 				messages::GroupMessageType const messageType = it->messageType;
+				LOGGER_DEBUG("Processing message in Queue for group {} with type {}.", group.toString(), messages::GroupMessageTypeHelper::toString(messageType));
 				switch (messageType) {
+					case messages::GroupMessageType::AUDIO:
+						processReceivedGroupMessageAudio(it->group, it->sender, it->messageId, it->timeSent, it->timeReceived, it->content.toByteArray(), it->contentTwo.toUInt());
+						break;
+					case messages::GroupMessageType::FILE:
+						processReceivedGroupMessageFile(it->group, it->sender, it->messageId, it->timeSent, it->timeReceived, it->content.toByteArray(), it->contentTwo.toByteArray(), it->contentThree.toString(), it->contentFour.toString(), it->contentFive.toString());
+						break;
 					case messages::GroupMessageType::IMAGE:
 						processReceivedGroupMessageImage(it->group, it->sender, it->messageId, it->timeSent, it->timeReceived, it->content.toByteArray());
 						break;
@@ -979,6 +993,9 @@ namespace openmittsu {
 					case messages::GroupMessageType::TEXT:
 						processReceivedGroupMessageText(it->group, it->sender, it->messageId, it->timeSent, it->timeReceived, it->content.toString());
 						break;
+					case messages::GroupMessageType::VIDEO:
+						processReceivedGroupMessageVideo(it->group, it->sender, it->messageId, it->timeSent, it->timeReceived, it->content.toByteArray(), it->contentTwo.toByteArray(), it->contentThree.toUInt());
+						break;
 					default:
 						throw openmittsu::exceptions::InternalErrorException() << "Group Message queue contains a message of type \"" << messages::GroupMessageTypeHelper::toString(messageType) << "\", which is unhandled. This should never happen!";
 				}
@@ -997,6 +1014,7 @@ namespace openmittsu {
 				return;
 			}
 
+			LOGGER_DEBUG("Received GROUP SET_IMAGE message from {} in group {} with ID {}.", sender.toString(), group.toString(), messageId.toString());
 			if (!checkAndFixGroupMembership(group, sender)) {
 				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::SET_IMAGE, image));
 				return;
@@ -1020,6 +1038,7 @@ namespace openmittsu {
 				return;
 			}
 
+			LOGGER_DEBUG("Received GROUP SET_TITLE message from {} in group {} with ID {}.", sender.toString(), group.toString(), messageId.toString());
 			if (!checkAndFixGroupMembership(group, sender)) {
 				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::SET_TITLE, groupTitle));
 				return;
@@ -1046,6 +1065,7 @@ namespace openmittsu {
 				return;
 			}
 
+			LOGGER_DEBUG("Received GROUP SYNC_REQUEST message from {} in group {} with ID {}.", sender.toString(), group.toString(), messageId.toString());
 			if (!checkAndFixGroupMembership(group, sender)) {
 				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::SYNC_REQUEST, QVariant()));
 				return;
@@ -1068,6 +1088,7 @@ namespace openmittsu {
 				return;
 			}
 
+			LOGGER_DEBUG("Received GROUP LEAVE message from {} in group {} with ID {}.", sender.toString(), group.toString(), messageId.toString());
 			if (!checkAndFixGroupMembership(group, sender)) {
 				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::LEAVE, QVariant()));
 				return;
@@ -1259,6 +1280,7 @@ namespace openmittsu {
 
 		bool SimpleMessageCenter::checkAndFixGroupMembership(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender) {
 			if (!this->m_storage.hasDatabase()) {
+				LOGGER_DEBUG("checkAndFixGroupMembership for group {} with sender {} failed, database not available.", group.toString(), sender.toString());
 				return false;
 			} else {
 				//	if group is unknown
@@ -1287,7 +1309,9 @@ namespace openmittsu {
 				//					ignore
 
 				if (!this->m_storage.hasGroup(group)) {
+					LOGGER_DEBUG("checkAndFixGroupMembership for group {} with sender {}: group unknown.", group.toString(), sender.toString());
 					if (group.getOwner() != this->m_storage.getSelfContact()) {
+						LOGGER_DEBUG("checkAndFixGroupMembership for group {} with sender {}: requesting sync if applicable.", group.toString(), sender.toString());
 						requestSyncForGroupIfApplicable(group);
 					}
 
@@ -1300,8 +1324,10 @@ namespace openmittsu {
 						groupMembers.insert(sender);
 						this->m_storage.storeNewGroup(group, groupMembers, true);
 
+						LOGGER_DEBUG("checkAndFixGroupMembership for group {} with sender {}: trusting sender, established temporary group.", group.toString(), sender.toString());
 						return true;
 					} else {
+						LOGGER_DEBUG("checkAndFixGroupMembership for group {} with sender {}: not trusting others, rejecting.", group.toString(), sender.toString());
 						return false;
 					}
 				} else {
@@ -1309,8 +1335,10 @@ namespace openmittsu {
 						return true;
 					} else {
 						if (group.getOwner() == this->m_storage.getSelfContact()) {
+							LOGGER_DEBUG("checkAndFixGroupMembership for group {} with sender {}: sender not in group, we are the owner, rejecting.", group.toString(), sender.toString());
 							return false;
 						} else {
+							LOGGER_DEBUG("checkAndFixGroupMembership for group {} with sender {}: sender not in group, requesting sync if applicable.", group.toString(), sender.toString());
 							requestSyncForGroupIfApplicable(group);
 							if (m_optionReader.getOptionAsBool(openmittsu::options::Options::BOOLEAN_TRUST_OTHERS)) {
 								QSet<openmittsu::protocol::ContactId> groupMembers = this->m_storage.getGroupMembers(group, false);
@@ -1318,8 +1346,10 @@ namespace openmittsu {
 								groupMembers.insert(sender);
 								this->m_storage.storeNewGroup(group, groupMembers, true);
 
+								LOGGER_DEBUG("checkAndFixGroupMembership for group {} with sender {}: trusting sender (group exists, sender not in group), established temporary group.", group.toString(), sender.toString());
 								return true;
 							} else {
+								LOGGER_DEBUG("checkAndFixGroupMembership for group {} with sender {}: not trusting others (group exists, sender not in group), rejecting.", group.toString(), sender.toString());
 								return false;
 							}
 						}
