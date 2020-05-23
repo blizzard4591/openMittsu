@@ -200,6 +200,7 @@ m_optionDatabaseFile() {
 		QMessageBox::warning(this, tr("Database driver not available"), tr("openMittsu relies on SqlCipher and QSqlCipher for securely storing the database.\nThe QSQLCIPHER driver is not available. It should reside in the sqldrivers\\ subdirectory of openMittsu.\nWe will use the unencrypted SQLITE driver instead."));
 #else
 		QMessageBox::critical(this, tr("Database driver not available"), tr("openMittsu relies on SqlCipher and QSqlCipher for securely storing the database.\nThe QSQLCIPHER driver is not available. It should reside in the sqldrivers\\ subdirectory of openMittsu.\nSince no encryption is available, OpenMittsu will now terminate."));
+		QApplication::exit(-1);
 #endif
 	}
 
@@ -249,6 +250,7 @@ m_optionDatabaseFile() {
 	OPENMITTSU_CONNECT(m_ui->actionOptions, triggered(), this, menuFileOptionsOnClick());
 	OPENMITTSU_CONNECT(m_ui->actionShow_First_Use_Wizard, triggered(), this, menuFileShowFirstUseWizardOnClick());
 	OPENMITTSU_CONNECT(m_ui->actionExit, triggered(), this, menuFileExitOnClick());
+	OPENMITTSU_CONNECT(qApp, aboutToQuit(), this, close());
 
 	m_protocolClientThread.start();
 	OPENMITTSU_CONNECT(&m_protocolClientThread, finished(), this, threadFinished());
@@ -1068,6 +1070,7 @@ void Client::menuFileShowFirstUseWizardOnClick() {
 
 void Client::menuFileExitOnClick() {
 	this->close();
+	QApplication::exit(0);
 }
 
 void Client::menuAboutLicenseOnClick() {

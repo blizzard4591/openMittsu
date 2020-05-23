@@ -54,6 +54,7 @@ namespace openmittsu {
 		void DesktopNotification::trayMenu_exitOnTriggered() {
 			m_isClosing = true;
 			m_mainWindow->close();
+			QApplication::exit(0);
 		}
 
 		bool DesktopNotification::isClosing() const {
