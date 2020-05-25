@@ -154,6 +154,7 @@ private:
 	void openDatabaseFile(QString const& fileName);
 	bool validateDatabaseFile(QString const& databaseFileName, QString const& password, bool quiet = false);
 	void updateDatabaseInfo(QString const& currentFileName);
+	void askForDatabaseRemovalFromConfig(QString const& databaseLocation);
 	void uiFocusOnOverviewTab();
 	void showNotYetImplementedInfo();
 	void setupProtocolClient();

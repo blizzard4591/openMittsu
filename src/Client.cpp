@@ -292,8 +292,7 @@ void Client::delayedStartup() {
 		openDatabaseFile(m_optionDatabaseFile);
 	} else if (!databaseFile.isEmpty()) {
 		if (!QFile::exists(databaseFile)) {
-			LOGGER_DEBUG("Removing key \"FILEPATH_DATABASE\" from stored settings as the file is not valid.");
-			m_optionMaster->setOption(openmittsu::options::Options::FILEPATH_DATABASE, "");
+			askForDatabaseRemovalFromConfig(databaseFile);
 		} else {
 			openDatabaseFile(databaseFile);
 		}
@@ -556,14 +555,12 @@ void Client::openDatabaseFile(QString const& fileName) {
 								QMessageBox::information(this, tr("Invalid password"), tr("The entered database password was invalid."));
 							}
 						} else {
-							LOGGER_DEBUG("Removing key \"FILEPATH_DATABASE\" from stored settings as the file is not valid.");
-							m_optionMaster->setOption(openmittsu::options::Options::FILEPATH_DATABASE, "");
+							askForDatabaseRemovalFromConfig(fileName);
 							break;
 						}
 					}
 				} else {
-					LOGGER_DEBUG("Removing key \"FILEPATH_DATABASE\" from stored settings as the file is not valid.");
-					m_optionMaster->setOption(openmittsu::options::Options::FILEPATH_DATABASE, "");
+					askForDatabaseRemovalFromConfig(fileName);
 					break;
 				}
 			}
@@ -586,6 +583,15 @@ void Client::openDatabaseFile(QString const& fileName) {
 			m_optionMaster->setOption(openmittsu::options::Options::FILEPATH_DATABASE, "");
 			break;
 		}
+	}
+}
+
+void Client::askForDatabaseRemovalFromConfig(QString const& databaseLocation) {
+	// TODO: Make an option for "never"
+	auto const answerButton = QMessageBox::question(this, tr("Forget this database and not ask to open it again?"), tr("The database '%1' could not be opened. Do you want openMittsu to forget this database and not ask you to open it automatically again?\n\nYou can always open it manually using the 'Open...' button in the database section.").arg(databaseLocation));
+	if (answerButton == QMessageBox::Yes) {
+		LOGGER_DEBUG("Removing key \"FILEPATH_DATABASE\" from stored settings as the file+password was invalid.");
+		m_optionMaster->setOption(openmittsu::options::Options::FILEPATH_DATABASE, "");
 	}
 }
 
