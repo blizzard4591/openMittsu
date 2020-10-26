@@ -81,7 +81,11 @@ namespace openmittsu {
 		template<typename T>
 		QHash<QString, int> FileReader<T>::parseOffsets(QString const& header) const {
 			QHash<QString, int> result;
+#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 14, 0))
+			QStringList const parts = header.split(',', Qt::SkipEmptyParts);
+#else
 			QStringList const parts = header.split(',', QString::SkipEmptyParts);
+#endif
 			for (int i = 0; i < parts.size(); ++i) {
 				int const size = parts.at(i).size();
 				result.insert(parts.at(i).mid(1, size - 2), i);

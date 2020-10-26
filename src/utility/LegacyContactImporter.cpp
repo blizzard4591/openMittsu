@@ -66,7 +66,11 @@ namespace openmittsu {
 					openmittsu::protocol::ContactId const groupOwner(groupRegExp.cap(2));
 					QString const groupIdHexString(groupRegExp.cap(1));
 					openmittsu::protocol::GroupId const groupId(groupOwner, groupIdHexString);
+#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 14, 0))
+					QStringList ids = groupRegExp.cap(3).split(',', Qt::SkipEmptyParts);
+#else
 					QStringList ids = groupRegExp.cap(3).split(',', QString::SkipEmptyParts);
+#endif
 					QSet<openmittsu::protocol::ContactId> groupMembers;
 					QStringList::const_iterator it = ids.constBegin();
 					QStringList::const_iterator end = ids.constEnd();

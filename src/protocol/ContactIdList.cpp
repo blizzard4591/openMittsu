@@ -60,7 +60,11 @@ namespace openmittsu {
 
 		ContactIdList ContactIdList::fromString(QString const& contactIdsString, QChar const& separator) {
 			QSet<ContactId> result;
+#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 14, 0))
+			QStringList const splitMembers = contactIdsString.split(separator, Qt::SkipEmptyParts);
+#else
 			QStringList const splitMembers = contactIdsString.split(separator, QString::SkipEmptyParts);
+#endif
 			for (int i = 0; i < splitMembers.size(); ++i) {
 				openmittsu::protocol::ContactId const memberId(splitMembers.at(i));
 				result.insert(memberId);

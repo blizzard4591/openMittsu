@@ -74,7 +74,11 @@ namespace openmittsu {
 				}
 
 				
+#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 14, 0))
+				QStringList splitPositions = positions.split(',', Qt::SkipEmptyParts);
+#else
 				QStringList splitPositions = positions.split(',', QString::SkipEmptyParts);
+#endif
 				if (splitPositions.size() != 3) {
 					throw openmittsu::exceptions::ProtocolErrorException() << "Could not split payload of a ContactLocationMessageContent, it contains " << splitPositions.size() << " instead of 3 positions. Input String: " << positions.toStdString();
 				}

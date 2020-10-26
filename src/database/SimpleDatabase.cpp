@@ -363,7 +363,11 @@ namespace openmittsu {
 				QString result = fileStream.readAll();
 				sqlFile.close();
 
-				return result.split(QStringLiteral("__OPENMITTSU_QUERY_SEP__"), QString::SplitBehavior::SkipEmptyParts);
+#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 14, 0))
+				return result.split(QStringLiteral("__OPENMITTSU_QUERY_SEP__"), Qt::SkipEmptyParts);
+#else
+				return result.split(QStringLiteral("__OPENMITTSU_QUERY_SEP__"), QString::SkipEmptyParts);
+#endif
 			}
 		}
 

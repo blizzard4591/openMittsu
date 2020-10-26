@@ -46,7 +46,11 @@ namespace openmittsu {
 				QString const name(splittedLines.getColumn(headerOffsets.value(QStringLiteral("groupname"))));
 				openmittsu::protocol::MessageTime const createdAt = openmittsu::protocol::MessageTime::fromDatabase(splittedLines.getColumn(headerOffsets.value(QStringLiteral("created_at"))).toLongLong());
 				QString const memberString(splittedLines.getColumn(headerOffsets.value(QStringLiteral("members"))));
+#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 14, 0))
+				QStringList const memberList = memberString.split(';', Qt::SkipEmptyParts);
+#else
 				QStringList const memberList = memberString.split(';', QString::SkipEmptyParts);
+#endif
 				QSet<openmittsu::protocol::ContactId> members;
 				for (int i = 0; i < memberList.size(); ++i) {
 					members.insert(openmittsu::protocol::ContactId(memberList.at(i)));
