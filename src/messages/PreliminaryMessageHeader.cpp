@@ -3,7 +3,7 @@
 namespace openmittsu {
 	namespace messages {
 
-		PreliminaryMessageHeader::PreliminaryMessageHeader() : m_messageId(0), m_time(0), m_flags(false, false, false, false, false, false) {
+		PreliminaryMessageHeader::PreliminaryMessageHeader() : m_messageId(0), m_time(0), m_flags(false, false, false, false, false, false, false) {
 			// This constructor is disabled and should not be used.
 			throw;
 		}

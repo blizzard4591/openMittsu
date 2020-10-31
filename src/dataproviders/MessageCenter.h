@@ -12,6 +12,8 @@
 
 #include "src/dataproviders/NetworkSentMessageAcceptor.h"
 #include "src/protocol/GroupId.h"
+#include "src/messages/ReceivedMessageHeader.h"
+#include "src/messages/ReceivedGroupMessageHeader.h"
 #include "src/messages/contact/ReceiptMessageContent.h"
 
 namespace openmittsu {
@@ -62,12 +64,12 @@ namespace openmittsu {
 			virtual void processMessageSendFailed(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId) = 0;
 			virtual void processMessageSendDone(openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageId const& messageId) = 0;
 
-			virtual void processReceivedContactMessageAudio(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& audio, quint16 lengthInSeconds) = 0;
-			virtual void processReceivedContactMessageFile(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) = 0;
-			virtual void processReceivedContactMessageImage(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& image) = 0;
-			virtual void processReceivedContactMessageLocation(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, openmittsu::utility::Location const& location) = 0;
-			virtual void processReceivedContactMessageText(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& message) = 0;
-			virtual void processReceivedContactMessageVideo(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) = 0;
+			virtual void processReceivedContactMessageAudio(openmittsu::messages::ReceivedMessageHeader const& messageHeader, QByteArray const& audio, quint16 lengthInSeconds) = 0;
+			virtual void processReceivedContactMessageFile(openmittsu::messages::ReceivedMessageHeader const& messageHeader, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) = 0;
+			virtual void processReceivedContactMessageImage(openmittsu::messages::ReceivedMessageHeader const& messageHeader, QByteArray const& image) = 0;
+			virtual void processReceivedContactMessageLocation(openmittsu::messages::ReceivedMessageHeader const& messageHeader, openmittsu::utility::Location const& location) = 0;
+			virtual void processReceivedContactMessageText(openmittsu::messages::ReceivedMessageHeader const& messageHeader, QString const& message) = 0;
+			virtual void processReceivedContactMessageVideo(openmittsu::messages::ReceivedMessageHeader const& messageHeader, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) = 0;
 
 			virtual void processReceivedContactMessageReceiptReceived(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageId const& referredMessageId) = 0;
 			virtual void processReceivedContactMessageReceiptSeen(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageId const& referredMessageId) = 0;
@@ -77,18 +79,18 @@ namespace openmittsu {
 			virtual void processReceivedContactTypingNotificationTyping(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent) = 0;
 			virtual void processReceivedContactTypingNotificationStopped(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent) = 0;
 
-			virtual void processReceivedGroupMessageAudio(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& audio, quint16 lengthInSeconds) = 0;
-			virtual void processReceivedGroupMessageFile(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) = 0;
-			virtual void processReceivedGroupMessageImage(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& image) = 0;
-			virtual void processReceivedGroupMessageLocation(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, openmittsu::utility::Location const& location) = 0;
-			virtual void processReceivedGroupMessageText(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& message) = 0;
-			virtual void processReceivedGroupMessageVideo(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) = 0;
+			virtual void processReceivedGroupMessageAudio(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, QByteArray const& audio, quint16 lengthInSeconds) = 0;
+			virtual void processReceivedGroupMessageFile(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) = 0;
+			virtual void processReceivedGroupMessageImage(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, QByteArray const& image) = 0;
+			virtual void processReceivedGroupMessageLocation(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, openmittsu::utility::Location const& location) = 0;
+			virtual void processReceivedGroupMessageText(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, QString const& message) = 0;
+			virtual void processReceivedGroupMessageVideo(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) = 0;
 
-			virtual void processReceivedGroupCreation(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QSet<openmittsu::protocol::ContactId> const& members) = 0;
-			virtual void processReceivedGroupSetImage(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& image) = 0;
-			virtual void processReceivedGroupSetTitle(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& groupTitle) = 0;
-			virtual void processReceivedGroupSyncRequest(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived) = 0;
-			virtual void processReceivedGroupLeave(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived) = 0;
+			virtual void processReceivedGroupCreation(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, QSet<openmittsu::protocol::ContactId> const& members) = 0;
+			virtual void processReceivedGroupSetImage(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, QByteArray const& image) = 0;
+			virtual void processReceivedGroupSetTitle(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, QString const& groupTitle) = 0;
+			virtual void processReceivedGroupSyncRequest(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader) = 0;
+			virtual void processReceivedGroupLeave(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader) = 0;
 
 			virtual void addNewContact(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& publicKey) = 0;
 

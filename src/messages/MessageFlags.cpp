@@ -7,18 +7,18 @@
 namespace openmittsu {
 	namespace messages {
 
-		MessageFlags::MessageFlags() : m_pushMessage(false), m_noQueuing(false), m_noAckExpected(false), m_messageHasAlreadyBeenDelivered(false), m_groupMessage(false), m_callMessage(false) {
+		MessageFlags::MessageFlags() : m_pushMessage(false), m_noQueuing(false), m_noAckExpected(false), m_noDeliveryReceipt(false), m_messageHasAlreadyBeenDelivered(false), m_groupMessage(false), m_callMessage(false) {
 			// Intentionally left empty.
 		}
 
-		MessageFlags::MessageFlags(char messageFlags) : m_pushMessage(byteToBool(messageFlags, 0)), m_noQueuing(byteToBool(messageFlags, 1)), m_noAckExpected(byteToBool(messageFlags, 2)), m_messageHasAlreadyBeenDelivered(byteToBool(messageFlags, 3)), m_groupMessage(byteToBool(messageFlags, 4)), m_callMessage(byteToBool(messageFlags, 5)) {
-			// Check if only the lowest 6 bits are used, if at all.
-			if ((messageFlags & (~0x3F)) != 0x00) {
+		MessageFlags::MessageFlags(char messageFlags) : m_pushMessage(byteToBool(messageFlags, 0)), m_noQueuing(byteToBool(messageFlags, 1)), m_noAckExpected(byteToBool(messageFlags, 2)), m_noDeliveryReceipt(byteToBool(messageFlags, 7)), m_messageHasAlreadyBeenDelivered(byteToBool(messageFlags, 3)), m_groupMessage(byteToBool(messageFlags, 4)), m_callMessage(byteToBool(messageFlags, 5)) {
+			// Check if only the lowest 6 bits or bit 7 are used, if at all.
+			if ((messageFlags & (~0xBF)) != 0x00) {
 				throw openmittsu::exceptions::IllegalArgumentException() << "Unknown Message Flag Bits are set: " << openmittsu::utility::ByteArrayToHexString::charToHexString(messageFlags).toStdString();
 			}
 		}
 
-		MessageFlags::MessageFlags(bool pushMessage, bool noQueuing, bool noAckExpected, bool messageHasAlreadyBeenDelivered, bool groupMessage, bool callMessage) : m_pushMessage(pushMessage), m_noQueuing(noQueuing), m_noAckExpected(noAckExpected), m_messageHasAlreadyBeenDelivered(messageHasAlreadyBeenDelivered), m_groupMessage(groupMessage), m_callMessage(callMessage) {
+		MessageFlags::MessageFlags(bool pushMessage, bool noQueuing, bool noAckExpected, bool noDeliveryReceipt, bool messageHasAlreadyBeenDelivered, bool groupMessage, bool callMessage) : m_pushMessage(pushMessage), m_noQueuing(noQueuing), m_noAckExpected(noAckExpected), m_noDeliveryReceipt(noDeliveryReceipt), m_messageHasAlreadyBeenDelivered(messageHasAlreadyBeenDelivered), m_groupMessage(groupMessage), m_callMessage(callMessage) {
 			// Intentionally left empty.
 		}
 
@@ -31,7 +31,7 @@ namespace openmittsu {
 		}
 
 		char MessageFlags::getFlags() const {
-			return boolsToByte(m_pushMessage, m_noQueuing, m_noAckExpected, m_messageHasAlreadyBeenDelivered, m_groupMessage, m_callMessage, false, false);
+			return boolsToByte(m_pushMessage, m_noQueuing, m_noAckExpected, m_messageHasAlreadyBeenDelivered, m_groupMessage, m_callMessage, false, m_noDeliveryReceipt);
 		}
 
 		bool MessageFlags::isPushMessage() const {
@@ -44,6 +44,10 @@ namespace openmittsu {
 
 		bool MessageFlags::isNoAckExpectedForMessage() const {
 			return m_noAckExpected;
+		}
+
+		bool MessageFlags::sendNoDeliveryReceiptForMessage() const {
+			return m_noDeliveryReceipt;
 		}
 
 		bool MessageFlags::isMessageHasAlreadyBeenDelivered() const {

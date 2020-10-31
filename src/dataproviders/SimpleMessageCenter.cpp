@@ -591,115 +591,115 @@ namespace openmittsu {
 		/*
 			Received Messages from Network
 		*/
-		void SimpleMessageCenter::processReceivedContactMessageAudio(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& audio, quint16 lengthInSeconds) {
+		void SimpleMessageCenter::processReceivedContactMessageAudio(openmittsu::messages::ReceivedMessageHeader const& messageHeader, QByteArray const& audio, quint16 lengthInSeconds) {
 			if (!this->m_storage.hasDatabase()) {
-				LOGGER()->warn("We received a contact audio message from sender {} with message ID #{} sent at {} with audio {} that could not be saved as the storage system is not ready.", sender.toString(), messageId.toString(), timeSent.toString(), QString(audio.toHex()).toStdString());
+				LOGGER()->warn("We received a contact audio message from sender {} with message ID #{} sent at {} with audio {} that could not be saved as the storage system is not ready.", messageHeader.getSender().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(audio.toHex()).toStdString());
 				return;
-			} else if (!this->m_storage.hasContact(sender)) {
-				LOGGER()->warn("We received a contact audio message from sender {} with message ID #{} sent at {} with audio {}, but we do not recognize the sender. Ignoring.", sender.toString(), messageId.toString(), timeSent.toString(), QString(audio.toHex()).toStdString());
+			} else if (!this->m_storage.hasContact(messageHeader.getSender())) {
+				LOGGER()->warn("We received a contact audio message from sender {} with message ID #{} sent at {} with audio {}, but we do not recognize the sender. Ignoring.", messageHeader.getSender().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(audio.toHex()).toStdString());
 				return;
 			}
 
-			openTabForIncomingMessage(sender);
-			this->m_storage.storeReceivedContactMessageAudio(sender, messageId, timeSent, timeReceived, audio, lengthInSeconds);
+			openTabForIncomingMessage(messageHeader.getSender());
+			this->m_storage.storeReceivedContactMessageAudio(messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTimeSent(), messageHeader.getTimeReceived(), audio, lengthInSeconds);
 			if (this->m_networkSentMessageAcceptor != nullptr) {
-				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
+				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(messageHeader.getSender(), messageHeader.getMessageId());
 			}
 
-			sendReceipt(sender, messageId, openmittsu::messages::contact::ReceiptMessageContent::ReceiptType::RECEIVED);
+			sendReceipt(messageHeader.getSender(), messageHeader.getMessageId(), openmittsu::messages::contact::ReceiptMessageContent::ReceiptType::RECEIVED);
 		}
 
-		void SimpleMessageCenter::processReceivedContactMessageFile(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) {
+		void SimpleMessageCenter::processReceivedContactMessageFile(openmittsu::messages::ReceivedMessageHeader const& messageHeader, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) {
 			if (!this->m_storage.hasDatabase()) {
-				LOGGER()->warn("We received a contact file message from sender {} with message ID #{} sent at {} with file {} that could not be saved as the storage system is not ready.", sender.toString(), messageId.toString(), timeSent.toString(), QString(file.toHex()).toStdString());
+				LOGGER()->warn("We received a contact file message from sender {} with message ID #{} sent at {} with file {} that could not be saved as the storage system is not ready.", messageHeader.getSender().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(file.toHex()).toStdString());
 				return;
 			}
-			else if (!this->m_storage.hasContact(sender)) {
-				LOGGER()->warn("We received a contact file message from sender {} with message ID #{} sent at {} with file {}, but we do not recognize the sender. Ignoring.", sender.toString(), messageId.toString(), timeSent.toString(), QString(file.toHex()).toStdString());
+			else if (!this->m_storage.hasContact(messageHeader.getSender())) {
+				LOGGER()->warn("We received a contact file message from sender {} with message ID #{} sent at {} with file {}, but we do not recognize the sender. Ignoring.", messageHeader.getSender().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(file.toHex()).toStdString());
 				return;
 			}
 
-			openTabForIncomingMessage(sender);
-			this->m_storage.storeReceivedContactMessageFile(sender, messageId, timeSent, timeReceived, file, coverImage, mimeType, fileName, caption);
+			openTabForIncomingMessage(messageHeader.getSender());
+			this->m_storage.storeReceivedContactMessageFile(messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTimeSent(), messageHeader.getTimeReceived(), file, coverImage, mimeType, fileName, caption);
 			if (this->m_networkSentMessageAcceptor != nullptr) {
-				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
+				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(messageHeader.getSender(), messageHeader.getMessageId());
 			}
 
-			sendReceipt(sender, messageId, openmittsu::messages::contact::ReceiptMessageContent::ReceiptType::RECEIVED);
+			sendReceipt(messageHeader.getSender(), messageHeader.getMessageId(), openmittsu::messages::contact::ReceiptMessageContent::ReceiptType::RECEIVED);
 		}
 
-		void SimpleMessageCenter::processReceivedContactMessageVideo(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) {
+		void SimpleMessageCenter::processReceivedContactMessageVideo(openmittsu::messages::ReceivedMessageHeader const& messageHeader, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) {
 			if (!this->m_storage.hasDatabase()) {
-				LOGGER()->warn("We received a contact video message from sender {} with message ID #{} sent at {} with video {} and cover image {} that could not be saved as the storage system is not ready.", sender.toString(), messageId.toString(), timeSent.toString(), QString(video.toHex()).toStdString(), QString(coverImage.toHex()).toStdString());
+				LOGGER()->warn("We received a contact video message from sender {} with message ID #{} sent at {} with video {} and cover image {} that could not be saved as the storage system is not ready.", messageHeader.getSender().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(video.toHex()).toStdString(), QString(coverImage.toHex()).toStdString());
 				return;
-			} else if (!this->m_storage.hasContact(sender)) {
-				LOGGER()->warn("We received a contact video message from sender {} with message ID #{} sent at {} with video {} and cover image {}, but we do not recognize the sender. Ignoring.", sender.toString(), messageId.toString(), timeSent.toString(), QString(video.toHex()).toStdString(), QString(coverImage.toHex()).toStdString());
+			} else if (!this->m_storage.hasContact(messageHeader.getSender())) {
+				LOGGER()->warn("We received a contact video message from sender {} with message ID #{} sent at {} with video {} and cover image {}, but we do not recognize the sender. Ignoring.", messageHeader.getSender().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(video.toHex()).toStdString(), QString(coverImage.toHex()).toStdString());
 				return;
 			}
 
-			openTabForIncomingMessage(sender);
-			this->m_storage.storeReceivedContactMessageVideo(sender, messageId, timeSent, timeReceived, video, coverImage, lengthInSeconds);
+			openTabForIncomingMessage(messageHeader.getSender());
+			this->m_storage.storeReceivedContactMessageVideo(messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTimeSent(), messageHeader.getTimeReceived(), video, coverImage, lengthInSeconds);
 			if (this->m_networkSentMessageAcceptor != nullptr) {
-				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
+				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(messageHeader.getSender(), messageHeader.getMessageId());
 			}
 
-			sendReceipt(sender, messageId, openmittsu::messages::contact::ReceiptMessageContent::ReceiptType::RECEIVED);
+			sendReceipt(messageHeader.getSender(), messageHeader.getMessageId(), openmittsu::messages::contact::ReceiptMessageContent::ReceiptType::RECEIVED);
 		}
 
-		void SimpleMessageCenter::processReceivedContactMessageText(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& message) {
+		void SimpleMessageCenter::processReceivedContactMessageText(openmittsu::messages::ReceivedMessageHeader const& messageHeader, QString const& message) {
 			if (!this->m_storage.hasDatabase()) {
-				LOGGER()->warn("We received a contact text message from sender {} with message ID #{} sent at {} with text {} that could not be saved as the storage system is not ready.", sender.toString(), messageId.toString(), timeSent.toString(), message.toStdString());
+				LOGGER()->warn("We received a contact text message from sender {} with message ID #{} sent at {} with text {} that could not be saved as the storage system is not ready.", messageHeader.getSender().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), message.toStdString());
 				return;
-			} else if (!this->m_storage.hasContact(sender)) {
-				LOGGER()->warn("We received a contact text message from sender {} with message ID #{} sent at {} with text {}, but we do not recognize the sender. Ignoring.", sender.toString(), messageId.toString(), timeSent.toString(), message.toStdString());
+			} else if (!this->m_storage.hasContact(messageHeader.getSender())) {
+				LOGGER()->warn("We received a contact text message from sender {} with message ID #{} sent at {} with text {}, but we do not recognize the sender. Ignoring.", messageHeader.getSender().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), message.toStdString());
 				return;
 			}
 
-			openTabForIncomingMessage(sender);
-			this->m_storage.storeReceivedContactMessageText(sender, messageId, timeSent, timeReceived, message);
+			openTabForIncomingMessage(messageHeader.getSender());
+			this->m_storage.storeReceivedContactMessageText(messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTimeSent(), messageHeader.getTimeReceived(), message);
 			if (this->m_networkSentMessageAcceptor != nullptr) {
-				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
+				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(messageHeader.getSender(), messageHeader.getMessageId());
 			}
 
-			sendReceipt(sender, messageId, openmittsu::messages::contact::ReceiptMessageContent::ReceiptType::RECEIVED);
+			sendReceipt(messageHeader.getSender(), messageHeader.getMessageId(), openmittsu::messages::contact::ReceiptMessageContent::ReceiptType::RECEIVED);
 		}
 
-		void SimpleMessageCenter::processReceivedContactMessageImage(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& image) {
+		void SimpleMessageCenter::processReceivedContactMessageImage(openmittsu::messages::ReceivedMessageHeader const& messageHeader, QByteArray const& image) {
 			if (!this->m_storage.hasDatabase()) {
-				LOGGER()->warn("We received a contact image message from sender {} with message ID #{} sent at {} with image {} that could not be saved as the storage system is not ready.", sender.toString(), messageId.toString(), timeSent.toString(), QString(image.toHex()).toStdString());
+				LOGGER()->warn("We received a contact image message from sender {} with message ID #{} sent at {} with image {} that could not be saved as the storage system is not ready.", messageHeader.getSender().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(image.toHex()).toStdString());
 				return;
-			} else if (!this->m_storage.hasContact(sender)) {
-				LOGGER()->warn("We received a contact image message from sender {} with message ID #{} sent at {} with image {}, but we do not recognize the sender. Ignoring.", sender.toString(), messageId.toString(), timeSent.toString(), QString(image.toHex()).toStdString());
+			} else if (!this->m_storage.hasContact(messageHeader.getSender())) {
+				LOGGER()->warn("We received a contact image message from sender {} with message ID #{} sent at {} with image {}, but we do not recognize the sender. Ignoring.", messageHeader.getSender().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(image.toHex()).toStdString());
 				return;
 			}
 
 			QString const caption = parseCaptionFromImage(image);
 
-			openTabForIncomingMessage(sender);
-			this->m_storage.storeReceivedContactMessageImage(sender, messageId, timeSent, timeReceived, image, caption);
+			openTabForIncomingMessage(messageHeader.getSender());
+			this->m_storage.storeReceivedContactMessageImage(messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTimeSent(), messageHeader.getTimeReceived(), image, caption);
 			if (this->m_networkSentMessageAcceptor != nullptr) {
-				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
+				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(messageHeader.getSender(), messageHeader.getMessageId());
 			}
 
-			sendReceipt(sender, messageId, openmittsu::messages::contact::ReceiptMessageContent::ReceiptType::RECEIVED);
+			sendReceipt(messageHeader.getSender(), messageHeader.getMessageId(), openmittsu::messages::contact::ReceiptMessageContent::ReceiptType::RECEIVED);
 		}
 		
-		void SimpleMessageCenter::processReceivedContactMessageLocation(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, openmittsu::utility::Location const& location) {
+		void SimpleMessageCenter::processReceivedContactMessageLocation(openmittsu::messages::ReceivedMessageHeader const& messageHeader, openmittsu::utility::Location const& location) {
 			if (!this->m_storage.hasDatabase()) {
-				LOGGER()->warn("We received a contact location message from sender {} with message ID #{} sent at {} with location {} that could not be saved as the storage system is not ready.", sender.toString(), messageId.toString(), timeSent.toString(), location.toString());
+				LOGGER()->warn("We received a contact location message from sender {} with message ID #{} sent at {} with location {} that could not be saved as the storage system is not ready.", messageHeader.getSender().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), location.toString());
 				return;
-			} else if (!this->m_storage.hasContact(sender)) {
-				LOGGER()->warn("We received a contact location message from sender {} with message ID #{} sent at {} with location {}, but we do not recognize the sender. Ignoring.", sender.toString(), messageId.toString(), timeSent.toString(), location.toString());
+			} else if (!this->m_storage.hasContact(messageHeader.getSender())) {
+				LOGGER()->warn("We received a contact location message from sender {} with message ID #{} sent at {} with location {}, but we do not recognize the sender. Ignoring.", messageHeader.getSender().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), location.toString());
 				return;
 			}
 
-			openTabForIncomingMessage(sender);
-			this->m_storage.storeReceivedContactMessageLocation(sender, messageId, timeSent, timeReceived, location);
+			openTabForIncomingMessage(messageHeader.getSender());
+			this->m_storage.storeReceivedContactMessageLocation(messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTimeSent(), messageHeader.getTimeReceived(), location);
 			if (this->m_networkSentMessageAcceptor != nullptr) {
-				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
+				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(messageHeader.getSender(), messageHeader.getMessageId());
 			}
 
-			sendReceipt(sender, messageId, openmittsu::messages::contact::ReceiptMessageContent::ReceiptType::RECEIVED);
+			sendReceipt(messageHeader.getSender(), messageHeader.getMessageId(), openmittsu::messages::contact::ReceiptMessageContent::ReceiptType::RECEIVED);
 		}
 
 		void SimpleMessageCenter::processReceivedContactMessageReceiptReceived(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageId const& referredMessageId) {
@@ -800,201 +800,201 @@ namespace openmittsu {
 			}
 		}
 
-		void SimpleMessageCenter::processReceivedGroupMessageAudio(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& audio, quint16 lengthInSeconds) {
+		void SimpleMessageCenter::processReceivedGroupMessageAudio(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, QByteArray const& audio, quint16 lengthInSeconds) {
 			if (!this->m_storage.hasDatabase()) {
-				LOGGER()->warn("We received a group audio message from sender {} for group {} with message ID #{} sent at {} with audio {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), QString(audio.toHex()).toStdString());
+				LOGGER()->warn("We received a group audio message from sender {} for group {} with message ID #{} sent at {} with audio {} that could not be saved as the storage system is not ready.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(audio.toHex()).toStdString());
 				return;
-			} else if (!this->m_storage.hasContact(sender)) {
-				LOGGER()->warn("We received a group audio message from sender {} for group {} with message ID #{} sent at {} with audio {}, but we do not recognize the sender. Ignoring.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), QString(audio.toHex()).toStdString());
-				return;
-			}
-
-			LOGGER_DEBUG("Received GROUP AUDIO message from {} in group {} with ID {}.", sender.toString(), group.toString(), messageId.toString());
-			if (!checkAndFixGroupMembership(group, sender)) {
-				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::AUDIO, audio, lengthInSeconds));
+			} else if (!this->m_storage.hasContact(messageHeader.getSender())) {
+				LOGGER()->warn("We received a group audio message from sender {} for group {} with message ID #{} sent at {} with audio {}, but we do not recognize the sender. Ignoring.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(audio.toHex()).toStdString());
 				return;
 			}
 
-			openTabForIncomingMessage(group);
-			this->m_storage.storeReceivedGroupMessageAudio(group, sender, messageId, timeSent, timeReceived, audio, lengthInSeconds);
+			LOGGER_DEBUG("Received GROUP AUDIO message from {} in group {} with ID {}.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString());
+			if (!checkAndFixGroupMembership(messageHeader.getGroupId(), messageHeader.getSender())) {
+				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(messageHeader, messages::GroupMessageType::AUDIO, audio, lengthInSeconds));
+				return;
+			}
+
+			openTabForIncomingMessage(messageHeader.getGroupId());
+			this->m_storage.storeReceivedGroupMessageAudio(messageHeader.getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTimeSent(), messageHeader.getTimeReceived(), audio, lengthInSeconds);
 			if (this->m_networkSentMessageAcceptor != nullptr) {
-				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
+				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(messageHeader.getSender(), messageHeader.getMessageId());
 			}
 		}
 
-		void SimpleMessageCenter::processReceivedGroupMessageFile(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) {
+		void SimpleMessageCenter::processReceivedGroupMessageFile(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) {
 			if (!this->m_storage.hasDatabase()) {
-				LOGGER()->warn("We received a group file message from sender {} for group {} with message ID #{} sent at {} with file {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), QString(file.toHex()).toStdString());
+				LOGGER()->warn("We received a group file message from sender {} for group {} with message ID #{} sent at {} with file {} that could not be saved as the storage system is not ready.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(file.toHex()).toStdString());
 				return;
 			}
-			else if (!this->m_storage.hasContact(sender)) {
-				LOGGER()->warn("We received a group file message from sender {} for group {} with message ID #{} sent at {} with file {}, but we do not recognize the sender. Ignoring.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), QString(file.toHex()).toStdString());
-				return;
-			}
-
-			LOGGER_DEBUG("Received GROUP FILE message from {} in group {} with ID {}.", sender.toString(), group.toString(), messageId.toString());
-			if (!checkAndFixGroupMembership(group, sender)) {
-				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::FILE, file, coverImage, mimeType, fileName, caption));
+			else if (!this->m_storage.hasContact(messageHeader.getSender())) {
+				LOGGER()->warn("We received a group file message from sender {} for group {} with message ID #{} sent at {} with file {}, but we do not recognize the sender. Ignoring.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(file.toHex()).toStdString());
 				return;
 			}
 
-			openTabForIncomingMessage(group);
-			this->m_storage.storeReceivedGroupMessageFile(group, sender, messageId, timeSent, timeReceived, file, coverImage, mimeType, fileName, caption);
+			LOGGER_DEBUG("Received GROUP FILE message from {} in group {} with ID {}.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString());
+			if (!checkAndFixGroupMembership(messageHeader.getGroupId(), messageHeader.getSender())) {
+				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(messageHeader, messages::GroupMessageType::FILE, file, coverImage, mimeType, fileName, caption));
+				return;
+			}
+
+			openTabForIncomingMessage(messageHeader.getGroupId());
+			this->m_storage.storeReceivedGroupMessageFile(messageHeader.getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTimeSent(), messageHeader.getTimeReceived(), file, coverImage, mimeType, fileName, caption);
 			if (this->m_networkSentMessageAcceptor != nullptr) {
-				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
+				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(messageHeader.getSender(), messageHeader.getMessageId());
 			}
 		}
 
-		void SimpleMessageCenter::processReceivedGroupMessageVideo(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) {
+		void SimpleMessageCenter::processReceivedGroupMessageVideo(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) {
 			if (!this->m_storage.hasDatabase()) {
-				LOGGER()->warn("We received a group video message from sender {} for group {} with message ID #{} sent at {} with video {} and cover image {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), QString(video.toHex()).toStdString(), QString(coverImage.toHex()).toStdString());
+				LOGGER()->warn("We received a group video message from sender {} for group {} with message ID #{} sent at {} with video {} and cover image {} that could not be saved as the storage system is not ready.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(video.toHex()).toStdString(), QString(coverImage.toHex()).toStdString());
 				return;
-			} else if (!this->m_storage.hasContact(sender)) {
-				LOGGER()->warn("We received a group video message from sender {} for group {} with message ID #{} sent at {} with video {} and cover image {}, but we do not recognize the sender. Ignoring.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), QString(video.toHex()).toStdString(), QString(coverImage.toHex()).toStdString());
-				return;
-			}
-
-			LOGGER_DEBUG("Received GROUP VIDEO message from {} in group {} with ID {}.", sender.toString(), group.toString(), messageId.toString());
-			if (!checkAndFixGroupMembership(group, sender)) {
-				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::VIDEO, video, coverImage, lengthInSeconds));
+			} else if (!this->m_storage.hasContact(messageHeader.getSender())) {
+				LOGGER()->warn("We received a group video message from sender {} for group {} with message ID #{} sent at {} with video {} and cover image {}, but we do not recognize the sender. Ignoring.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(video.toHex()).toStdString(), QString(coverImage.toHex()).toStdString());
 				return;
 			}
 
-			openTabForIncomingMessage(group);
-			this->m_storage.storeReceivedGroupMessageVideo(group, sender, messageId, timeSent, timeReceived, video, coverImage, lengthInSeconds);
+			LOGGER_DEBUG("Received GROUP VIDEO message from {} in group {} with ID {}.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString());
+			if (!checkAndFixGroupMembership(messageHeader.getGroupId(), messageHeader.getSender())) {
+				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(messageHeader, messages::GroupMessageType::VIDEO, video, coverImage, lengthInSeconds));
+				return;
+			}
+
+			openTabForIncomingMessage(messageHeader.getGroupId());
+			this->m_storage.storeReceivedGroupMessageVideo(messageHeader.getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTimeSent(), messageHeader.getTimeReceived(), video, coverImage, lengthInSeconds);
 			if (this->m_networkSentMessageAcceptor != nullptr) {
-				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
+				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(messageHeader.getSender(), messageHeader.getMessageId());
 			}
 		}
 
-		void SimpleMessageCenter::processReceivedGroupMessageText(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& message) {
+		void SimpleMessageCenter::processReceivedGroupMessageText(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, QString const& message) {
 			if (!this->m_storage.hasDatabase()) {
-				LOGGER()->warn("We received a group text message from sender {} for group {} with message ID #{} sent at {} with text {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), message.toStdString());
+				LOGGER()->warn("We received a group text message from sender {} for group {} with message ID #{} sent at {} with text {} that could not be saved as the storage system is not ready.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), message.toStdString());
 				return;
-			} else if (!this->m_storage.hasContact(sender)) {
-				LOGGER()->warn("We received a group text message from sender {} for group {} with message ID #{} sent at {} with text {}, but we do not recognize the sender. Ignoring.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), message.toStdString());
-				return;
-			}
-
-			LOGGER_DEBUG("Received GROUP TEXT message from {} in group {} with ID {}.", sender.toString(), group.toString(), messageId.toString());
-			if (!checkAndFixGroupMembership(group, sender)) {
-				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::TEXT, message));
+			} else if (!this->m_storage.hasContact(messageHeader.getSender())) {
+				LOGGER()->warn("We received a group text message from sender {} for group {} with message ID #{} sent at {} with text {}, but we do not recognize the sender. Ignoring.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), message.toStdString());
 				return;
 			}
 
-			openTabForIncomingMessage(group);
-			this->m_storage.storeReceivedGroupMessageText(group, sender, messageId, timeSent, timeReceived, message);
+			LOGGER_DEBUG("Received GROUP TEXT message from {} in group {} with ID {}.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString());
+			if (!checkAndFixGroupMembership(messageHeader.getGroupId(), messageHeader.getSender())) {
+				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(messageHeader, messages::GroupMessageType::TEXT, message));
+				return;
+			}
+
+			openTabForIncomingMessage(messageHeader.getGroupId());
+			this->m_storage.storeReceivedGroupMessageText(messageHeader.getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTimeSent(), messageHeader.getTimeReceived(), message);
 			if (this->m_networkSentMessageAcceptor != nullptr) {
-				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
+				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(messageHeader.getSender(), messageHeader.getMessageId());
 			}
 		}
 
-		void SimpleMessageCenter::processReceivedGroupMessageImage(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& image) {
+		void SimpleMessageCenter::processReceivedGroupMessageImage(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, QByteArray const& image) {
 			if (!this->m_storage.hasDatabase()) {
-				LOGGER()->warn("We received a group image message from sender {} for group {} with message ID #{} sent at {} with image {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), QString(image.toHex()).toStdString());
+				LOGGER()->warn("We received a group image message from sender {} for group {} with message ID #{} sent at {} with image {} that could not be saved as the storage system is not ready.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(image.toHex()).toStdString());
 				return;
-			} else if (!this->m_storage.hasContact(sender)) {
-				LOGGER()->warn("We received a group image message from sender {} for group {} with message ID #{} sent at {} with image {}, but we do not recognize the sender. Ignoring.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), QString(image.toHex()).toStdString());
+			} else if (!this->m_storage.hasContact(messageHeader.getSender())) {
+				LOGGER()->warn("We received a group image message from sender {} for group {} with message ID #{} sent at {} with image {}, but we do not recognize the sender. Ignoring.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(image.toHex()).toStdString());
 				return;
 			}
 
-			LOGGER_DEBUG("Received GROUP IMAGE message from {} in group {} with ID {}.", sender.toString(), group.toString(), messageId.toString());
-			if (!checkAndFixGroupMembership(group, sender)) {
-				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::IMAGE, image));
+			LOGGER_DEBUG("Received GROUP IMAGE message from {} in group {} with ID {}.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString());
+			if (!checkAndFixGroupMembership(messageHeader.getGroupId(), messageHeader.getSender())) {
+				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(messageHeader, messages::GroupMessageType::IMAGE, image));
 				return;
 			}
 
 			QString const caption = parseCaptionFromImage(image);
 
-			openTabForIncomingMessage(group);
-			this->m_storage.storeReceivedGroupMessageImage(group, sender, messageId, timeSent, timeReceived, image, caption);
+			openTabForIncomingMessage(messageHeader.getGroupId());
+			this->m_storage.storeReceivedGroupMessageImage(messageHeader.getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTimeSent(), messageHeader.getTimeReceived(), image, caption);
 			if (this->m_networkSentMessageAcceptor != nullptr) {
-				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
+				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(messageHeader.getSender(), messageHeader.getMessageId());
 			}
 		}
 
-		void SimpleMessageCenter::processReceivedGroupMessageLocation(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, openmittsu::utility::Location const& location) {
+		void SimpleMessageCenter::processReceivedGroupMessageLocation(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, openmittsu::utility::Location const& location) {
 			if (!this->m_storage.hasDatabase()) {
-				LOGGER()->warn("We received a group location message from sender {} for group {} with message ID #{} sent at {} with location {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), location.toString());
+				LOGGER()->warn("We received a group location message from sender {} for group {} with message ID #{} sent at {} with location {} that could not be saved as the storage system is not ready.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), location.toString());
 				return;
-			} else if (!this->m_storage.hasContact(sender)) {
-				LOGGER()->warn("We received a group location message from sender {} for group {} with message ID #{} sent at {} with location {}, but we do not recognize the sender. Ignoring.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), location.toString());
+			} else if (!this->m_storage.hasContact(messageHeader.getSender())) {
+				LOGGER()->warn("We received a group location message from sender {} for group {} with message ID #{} sent at {} with location {}, but we do not recognize the sender. Ignoring.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), location.toString());
 				return;
 			}
 
-			LOGGER_DEBUG("Received GROUP LOCATION message from {} in group {} with ID {}.", sender.toString(), group.toString(), messageId.toString());
-			if (!checkAndFixGroupMembership(group, sender)) {
+			LOGGER_DEBUG("Received GROUP LOCATION message from {} in group {} with ID {}.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString());
+			if (!checkAndFixGroupMembership(messageHeader.getGroupId(), messageHeader.getSender())) {
 				QVariant locationVariant;
 				locationVariant.setValue(location);
-				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::LOCATION, locationVariant));
+				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(messageHeader, messages::GroupMessageType::LOCATION, locationVariant));
 				return;
 			}
 
-			openTabForIncomingMessage(group);
-			this->m_storage.storeReceivedGroupMessageLocation(group, sender, messageId, timeSent, timeReceived, location);
+			openTabForIncomingMessage(messageHeader.getGroupId());
+			this->m_storage.storeReceivedGroupMessageLocation(messageHeader.getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTimeSent(), messageHeader.getTimeReceived(), location);
 			if (this->m_networkSentMessageAcceptor != nullptr) {
-				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
+				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(messageHeader.getSender(), messageHeader.getMessageId());
 			}
 		}
 
 
-		void SimpleMessageCenter::processReceivedGroupCreation(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QSet<openmittsu::protocol::ContactId> const& members) {
+		void SimpleMessageCenter::processReceivedGroupCreation(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, QSet<openmittsu::protocol::ContactId> const& members) {
 			if (!this->m_storage.hasDatabase()) {
 				QString const memberString = openmittsu::protocol::ContactIdList(members).toStringS();
-				LOGGER()->warn("We received a group creation message from sender {} for group {} with message ID #{} sent at {} with members {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), memberString.toStdString());
+				LOGGER()->warn("We received a group creation message from sender {} for group {} with message ID #{} sent at {} with members {} that could not be saved as the storage system is not ready.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), memberString.toStdString());
 				return;
-			} else if (sender != group.getOwner()) {
+			} else if (messageHeader.getSender() != messageHeader.getGroupId().getOwner()) {
 				QString const memberString = openmittsu::protocol::ContactIdList(members).toStringS();
-				LOGGER()->warn("We received a group creation message from sender {} for group {} with message ID #{} sent at {} with members {} that did not come from the group owner. Ignoring.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), memberString.toStdString());
+				LOGGER()->warn("We received a group creation message from sender {} for group {} with message ID #{} sent at {} with members {} that did not come from the group owner. Ignoring.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), memberString.toStdString());
 				return;
-			} else if (!this->m_storage.hasContact(sender)) {
+			} else if (!this->m_storage.hasContact(messageHeader.getSender())) {
 				QString const memberString = openmittsu::protocol::ContactIdList(members).toStringS();
-				LOGGER()->warn("We received a group creation message from sender {} for group {} with message ID #{} sent at {} with members {}, but we do not recognize the sender. Ignoring.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), memberString.toStdString());
+				LOGGER()->warn("We received a group creation message from sender {} for group {} with message ID #{} sent at {} with members {}, but we do not recognize the sender. Ignoring.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), memberString.toStdString());
 				return;
 			}
 
-			LOGGER_DEBUG("Received GROUP CREATION message from {} in group {} with ID {}.", sender.toString(), group.toString(), messageId.toString());
-			this->m_storage.storeReceivedGroupCreation(group, sender, messageId, timeSent, timeReceived, members);
+			LOGGER_DEBUG("Received GROUP CREATION message from {} in group {} with ID {}.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString());
+			this->m_storage.storeReceivedGroupCreation(messageHeader.getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTimeSent(), messageHeader.getTimeReceived(), members);
 			if (this->m_networkSentMessageAcceptor != nullptr) {
-				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
+				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(messageHeader.getSender(), messageHeader.getMessageId());
 			}
 
-			QVector<MessageQueue::ReceivedGroupMessage> queuedMessages = m_messageQueue.getAndRemoveQueuedMessages(group);
+			QVector<MessageQueue::ReceivedGroupMessage> queuedMessages = m_messageQueue.getAndRemoveQueuedMessages(messageHeader.getGroupId());
 			auto it = queuedMessages.constBegin();
 			auto const end = queuedMessages.constEnd();
 			for (; it != end; ++it) {
 				messages::GroupMessageType const messageType = it->messageType;
-				LOGGER_DEBUG("Processing message in Queue for group {} with type {}.", group.toString(), messages::GroupMessageTypeHelper::toString(messageType));
+				LOGGER_DEBUG("Processing message in Queue for group {} with type {}.", messageHeader.getGroupId().toString(), messages::GroupMessageTypeHelper::toString(messageType));
 				switch (messageType) {
 					case messages::GroupMessageType::AUDIO:
-						processReceivedGroupMessageAudio(it->group, it->sender, it->messageId, it->timeSent, it->timeReceived, it->content.toByteArray(), it->contentTwo.toUInt());
+						processReceivedGroupMessageAudio(it->messageHeader, it->content.toByteArray(), it->contentTwo.toUInt());
 						break;
 					case messages::GroupMessageType::FILE:
-						processReceivedGroupMessageFile(it->group, it->sender, it->messageId, it->timeSent, it->timeReceived, it->content.toByteArray(), it->contentTwo.toByteArray(), it->contentThree.toString(), it->contentFour.toString(), it->contentFive.toString());
+						processReceivedGroupMessageFile(it->messageHeader, it->content.toByteArray(), it->contentTwo.toByteArray(), it->contentThree.toString(), it->contentFour.toString(), it->contentFive.toString());
 						break;
 					case messages::GroupMessageType::IMAGE:
-						processReceivedGroupMessageImage(it->group, it->sender, it->messageId, it->timeSent, it->timeReceived, it->content.toByteArray());
+						processReceivedGroupMessageImage(it->messageHeader, it->content.toByteArray());
 						break;
 					case messages::GroupMessageType::LEAVE:
-						processReceivedGroupLeave(it->group, it->sender, it->messageId, it->timeSent, it->timeReceived);
+						processReceivedGroupLeave(it->messageHeader);
 						break;
 					case messages::GroupMessageType::LOCATION:
-						processReceivedGroupMessageLocation(it->group, it->sender, it->messageId, it->timeSent, it->timeReceived, it->content.value<openmittsu::utility::Location>());
+						processReceivedGroupMessageLocation(it->messageHeader, it->content.value<openmittsu::utility::Location>());
 						break;
 					case messages::GroupMessageType::SET_IMAGE:
-						processReceivedGroupSetImage(it->group, it->sender, it->messageId, it->timeSent, it->timeReceived, it->content.toByteArray());
+						processReceivedGroupSetImage(it->messageHeader, it->content.toByteArray());
 						break;
 					case messages::GroupMessageType::SET_TITLE:
-						processReceivedGroupSetTitle(it->group, it->sender, it->messageId, it->timeSent, it->timeReceived, it->content.toString());
+						processReceivedGroupSetTitle(it->messageHeader, it->content.toString());
 						break;
 					case messages::GroupMessageType::SYNC_REQUEST:
-						processReceivedGroupSyncRequest(it->group, it->sender, it->messageId, it->timeSent, it->timeReceived);
+						processReceivedGroupSyncRequest(it->messageHeader);
 						break;
 					case messages::GroupMessageType::TEXT:
-						processReceivedGroupMessageText(it->group, it->sender, it->messageId, it->timeSent, it->timeReceived, it->content.toString());
+						processReceivedGroupMessageText(it->messageHeader, it->content.toString());
 						break;
 					case messages::GroupMessageType::VIDEO:
-						processReceivedGroupMessageVideo(it->group, it->sender, it->messageId, it->timeSent, it->timeReceived, it->content.toByteArray(), it->contentTwo.toByteArray(), it->contentThree.toUInt());
+						processReceivedGroupMessageVideo(it->messageHeader, it->content.toByteArray(), it->contentTwo.toByteArray(), it->contentThree.toUInt());
 						break;
 					default:
 						throw openmittsu::exceptions::InternalErrorException() << "Group Message queue contains a message of type \"" << messages::GroupMessageTypeHelper::toString(messageType) << "\", which is unhandled. This should never happen!";
@@ -1002,101 +1002,101 @@ namespace openmittsu {
 			}
 		}
 
-		void SimpleMessageCenter::processReceivedGroupSetImage(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& image) {
+		void SimpleMessageCenter::processReceivedGroupSetImage(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, QByteArray const& image) {
 			if (!this->m_storage.hasDatabase()) {
-				LOGGER()->warn("We received a group set image message from sender {} for group {} with message ID #{} sent at {} with members {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), QString(image.toHex()).toStdString());
+				LOGGER()->warn("We received a group set image message from sender {} for group {} with message ID #{} sent at {} with members {} that could not be saved as the storage system is not ready.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(image.toHex()).toStdString());
 				return;
-			} else if (sender != group.getOwner()) {
-				LOGGER()->warn("We received a group set image message from sender {} for group {} with message ID #{} sent at {} with members {} that did not come from the group owner. Ignoring.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), QString(image.toHex()).toStdString());
+			} else if (messageHeader.getSender() != messageHeader.getGroupId().getOwner()) {
+				LOGGER()->warn("We received a group set image message from sender {} for group {} with message ID #{} sent at {} with members {} that did not come from the group owner. Ignoring.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(image.toHex()).toStdString());
 				return;
-			} else if (!this->m_storage.hasContact(sender)) {
-				LOGGER()->warn("We received a group set image message from sender {} for group {} with message ID #{} sent at {} with members {}, but we do not recognize the sender. Ignoring.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), QString(image.toHex()).toStdString());
-				return;
-			}
-
-			LOGGER_DEBUG("Received GROUP SET_IMAGE message from {} in group {} with ID {}.", sender.toString(), group.toString(), messageId.toString());
-			if (!checkAndFixGroupMembership(group, sender)) {
-				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::SET_IMAGE, image));
+			} else if (!this->m_storage.hasContact(messageHeader.getSender())) {
+				LOGGER()->warn("We received a group set image message from sender {} for group {} with message ID #{} sent at {} with members {}, but we do not recognize the sender. Ignoring.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(image.toHex()).toStdString());
 				return;
 			}
 
-			this->m_storage.storeReceivedGroupSetImage(group, sender, messageId, timeSent, timeReceived, image);
+			LOGGER_DEBUG("Received GROUP SET_IMAGE message from {} in group {} with ID {}.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString());
+			if (!checkAndFixGroupMembership(messageHeader.getGroupId(), messageHeader.getSender())) {
+				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(messageHeader, messages::GroupMessageType::SET_IMAGE, image));
+				return;
+			}
+
+			this->m_storage.storeReceivedGroupSetImage(messageHeader.getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTimeSent(), messageHeader.getTimeReceived(), image);
 			if (this->m_networkSentMessageAcceptor != nullptr) {
-				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
+				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(messageHeader.getSender(), messageHeader.getMessageId());
 			}
 		}
 
-		void SimpleMessageCenter::processReceivedGroupSetTitle(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& groupTitle) {
+		void SimpleMessageCenter::processReceivedGroupSetTitle(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, QString const& groupTitle) {
 			if (!this->m_storage.hasDatabase()) {
-				LOGGER()->warn("We received a group set title message from sender {} for group {} with message ID #{} sent at {} with members {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), groupTitle.toStdString());
+				LOGGER()->warn("We received a group set title message from sender {} for group {} with message ID #{} sent at {} with members {} that could not be saved as the storage system is not ready.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), groupTitle.toStdString());
 				return;
-			} else if (sender != group.getOwner()) {
-				LOGGER()->warn("We received a group set title message from sender {} for group {} with message ID #{} sent at {} with members {} that did not come from the group owner. Ignoring.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), groupTitle.toStdString());
+			} else if (messageHeader.getSender() != messageHeader.getGroupId().getOwner()) {
+				LOGGER()->warn("We received a group set title message from sender {} for group {} with message ID #{} sent at {} with members {} that did not come from the group owner. Ignoring.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), groupTitle.toStdString());
 				return;
-			} else if (!this->m_storage.hasContact(sender)) {
-				LOGGER()->warn("We received a group set title message from sender {} for group {} with message ID #{} sent at {} with members {}, but we do not recognize the sender. Ignoring.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString(), groupTitle.toStdString());
-				return;
-			}
-
-			LOGGER_DEBUG("Received GROUP SET_TITLE message from {} in group {} with ID {}.", sender.toString(), group.toString(), messageId.toString());
-			if (!checkAndFixGroupMembership(group, sender)) {
-				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::SET_TITLE, groupTitle));
+			} else if (!this->m_storage.hasContact(messageHeader.getSender())) {
+				LOGGER()->warn("We received a group set title message from sender {} for group {} with message ID #{} sent at {} with members {}, but we do not recognize the sender. Ignoring.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), groupTitle.toStdString());
 				return;
 			}
 
-			this->m_storage.storeReceivedGroupSetTitle(group, sender, messageId, timeSent, timeReceived, groupTitle);
+			LOGGER_DEBUG("Received GROUP SET_TITLE message from {} in group {} with ID {}.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString());
+			if (!checkAndFixGroupMembership(messageHeader.getGroupId(), messageHeader.getSender())) {
+				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(messageHeader, messages::GroupMessageType::SET_TITLE, groupTitle));
+				return;
+			}
+
+			this->m_storage.storeReceivedGroupSetTitle(messageHeader.getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTimeSent(), messageHeader.getTimeReceived(), groupTitle);
 			if (this->m_networkSentMessageAcceptor != nullptr) {
-				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
+				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(messageHeader.getSender(), messageHeader.getMessageId());
 			}
 		}
 
-		void SimpleMessageCenter::processReceivedGroupSyncRequest(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived) {
+		void SimpleMessageCenter::processReceivedGroupSyncRequest(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader) {
 			if (!this->m_storage.hasDatabase()) {
-				LOGGER()->warn("We received a group sync request message from sender {} for group {} with message ID #{} sent at {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString());
+				LOGGER()->warn("We received a group sync request message from sender {} for group {} with message ID #{} sent at {} that could not be saved as the storage system is not ready.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString());
 				return;
-			} else if (sender == group.getOwner()) {
-				LOGGER()->warn("We received a group sync request message from sender {} for group {} with message ID #{} sent at {} that did come from the group owner. Ignoring.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString());
+			} else if (messageHeader.getSender() != messageHeader.getGroupId().getOwner()) {
+				LOGGER()->warn("We received a group sync request message from sender {} for group {} with message ID #{} sent at {} that did come from the group owner. Ignoring.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString());
 				return;
-			} else if (group.getOwner() != m_storage.getSelfContact()) {
-				LOGGER()->warn("We received a group sync request message from sender {} for group {} with message ID #{} sent at {}, but we are not the group owner. Ignoring.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString());
+			} else if (messageHeader.getGroupId().getOwner() != m_storage.getSelfContact()) {
+				LOGGER()->warn("We received a group sync request message from sender {} for group {} with message ID #{} sent at {}, but we are not the group owner. Ignoring.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString());
 				return;
-			} else if (!this->m_storage.hasContact(sender)) {
-				LOGGER()->warn("We received a group sync request message from sender {} for group {} with message ID #{} sent at {}, but we do not recognize the sender. Ignoring.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString());
-				return;
-			}
-
-			LOGGER_DEBUG("Received GROUP SYNC_REQUEST message from {} in group {} with ID {}.", sender.toString(), group.toString(), messageId.toString());
-			if (!checkAndFixGroupMembership(group, sender)) {
-				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::SYNC_REQUEST, QVariant()));
+			} else if (!this->m_storage.hasContact(messageHeader.getSender())) {
+				LOGGER()->warn("We received a group sync request message from sender {} for group {} with message ID #{} sent at {}, but we do not recognize the sender. Ignoring.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString());
 				return;
 			}
 
-			this->m_storage.storeReceivedGroupSyncRequest(group, sender, messageId, timeSent, timeReceived);
+			LOGGER_DEBUG("Received GROUP SYNC_REQUEST message from {} in group {} with ID {}.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString());
+			if (!checkAndFixGroupMembership(messageHeader.getGroupId(), messageHeader.getSender())) {
+				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(messageHeader, messages::GroupMessageType::SYNC_REQUEST, QVariant()));
+				return;
+			}
+
+			this->m_storage.storeReceivedGroupSyncRequest(messageHeader.getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTimeSent(), messageHeader.getTimeReceived());
 			if (this->m_networkSentMessageAcceptor != nullptr) {
-				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
+				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(messageHeader.getSender(), messageHeader.getMessageId());
 			}
 
-			this->resendGroupSetup(group, {sender});
+			this->resendGroupSetup(messageHeader.getGroupId(), { messageHeader.getSender() });
 		}
 
-		void SimpleMessageCenter::processReceivedGroupLeave(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived) {
+		void SimpleMessageCenter::processReceivedGroupLeave(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader) {
 			if (!this->m_storage.hasDatabase()) {
-				LOGGER()->warn("We received a group leave message from sender {} for group {} with message ID #{} sent at {} that could not be saved as the storage system is not ready.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString());
+				LOGGER()->warn("We received a group leave message from sender {} for group {} with message ID #{} sent at {} that could not be saved as the storage system is not ready.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString());
 				return;
-			} else if (!this->m_storage.hasContact(sender)) {
-				LOGGER()->warn("We received a group leave message from sender {} for group {} with message ID #{} sent at {}, but we do not recognize the sender. Ignoring.", sender.toString(), group.toString(), messageId.toString(), timeSent.toString());
-				return;
-			}
-
-			LOGGER_DEBUG("Received GROUP LEAVE message from {} in group {} with ID {}.", sender.toString(), group.toString(), messageId.toString());
-			if (!checkAndFixGroupMembership(group, sender)) {
-				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(group, sender, messageId, timeSent, timeReceived, messages::GroupMessageType::LEAVE, QVariant()));
+			} else if (!this->m_storage.hasContact(messageHeader.getSender())) {
+				LOGGER()->warn("We received a group leave message from sender {} for group {} with message ID #{} sent at {}, but we do not recognize the sender. Ignoring.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString());
 				return;
 			}
 
-			this->m_storage.storeReceivedGroupLeave(group, sender, messageId, timeSent, timeReceived);
+			LOGGER_DEBUG("Received GROUP LEAVE message from {} in group {} with ID {}.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString());
+			if (!checkAndFixGroupMembership(messageHeader.getGroupId(), messageHeader.getSender())) {
+				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(messageHeader, messages::GroupMessageType::LEAVE, QVariant()));
+				return;
+			}
+
+			this->m_storage.storeReceivedGroupLeave(messageHeader.getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTimeSent(), messageHeader.getTimeReceived());
 			if (this->m_networkSentMessageAcceptor != nullptr) {
-				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(sender, messageId);
+				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(messageHeader.getSender(), messageHeader.getMessageId());
 			}
 		}
 

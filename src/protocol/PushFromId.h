@@ -28,7 +28,7 @@ namespace openmittsu {
 			bool operator ==(PushFromId const& other) const;
 			bool operator !=(PushFromId const& other) const;
 		private:
-			QByteArray const pushFromIdBytes;
+			QByteArray pushFromIdBytes;
 
 			static QByteArray expandFromContactId(ContactId const& contactId);
 			static QByteArray expandFromNickname(QString const& nickname);

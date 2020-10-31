@@ -11,9 +11,8 @@
 #include <memory>
 
 #include "src/utility/Location.h"
-#include "src/protocol/ContactId.h"
-#include "src/protocol/GroupId.h"
-#include "src/protocol/MessageId.h"
+#include "src/messages/ReceivedMessageHeader.h"
+#include "src/messages/ReceivedGroupMessageHeader.h"
 #include "src/protocol/MessageTime.h"
 #include "src/dataproviders/messages/ContactMessageType.h"
 #include "src/dataproviders/messages/GroupMessageType.h"
@@ -29,10 +28,7 @@ namespace openmittsu {
 			class ReceivedContactMessage {
 			public:
 				ReceivedContactMessage();
-				openmittsu::protocol::ContactId sender;
-				openmittsu::protocol::MessageId messageId;
-				openmittsu::protocol::MessageTime timeSent;
-				openmittsu::protocol::MessageTime timeReceived;
+				openmittsu::messages::ReceivedMessageHeader messageHeader;
 				messages::ContactMessageType messageType;
 				QVariant content;
 			};
@@ -40,13 +36,9 @@ namespace openmittsu {
 			class ReceivedGroupMessage {
 			public:
 				ReceivedGroupMessage();
-				ReceivedGroupMessage(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, messages::GroupMessageType const& messageType, QVariant const& content, QVariant const& contentTwo = QVariant(), QVariant const& contentThree = QVariant(), QVariant const& contentFour = QVariant(), QVariant const& contentFive = QVariant());
+				ReceivedGroupMessage(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, messages::GroupMessageType const& messageType, QVariant const& content, QVariant const& contentTwo = QVariant(), QVariant const& contentThree = QVariant(), QVariant const& contentFour = QVariant(), QVariant const& contentFive = QVariant());
 				
-				openmittsu::protocol::GroupId group;
-				openmittsu::protocol::ContactId sender;
-				openmittsu::protocol::MessageId messageId;
-				openmittsu::protocol::MessageTime timeSent;
-				openmittsu::protocol::MessageTime timeReceived;
+				openmittsu::messages::ReceivedGroupMessageHeader messageHeader;
 				messages::GroupMessageType messageType;
 				QVariant content;
 				QVariant contentTwo;

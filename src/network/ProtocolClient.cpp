@@ -257,8 +257,8 @@ namespace openmittsu {
 					m_socket->flush();
 
 					// Update stats
-					bytesSend += (2 + data.size());
-					messagesSend += 1;
+					bytesSend += (2uLL + data.size());
+					messagesSend += 1uLL;
 
 					++count;
 				}
@@ -562,57 +562,57 @@ namespace openmittsu {
 
 		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ContactAudioMessageContent const> contactAudioMessageContent) {
 			LOGGER_DEBUG("Received an audio message from {}.", messageHeader.getSender().toString());
-			m_messageCenterWrapper->processReceivedContactMessageAudio(messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTime(), openmittsu::protocol::MessageTime::now(), contactAudioMessageContent->getAudioData(), contactAudioMessageContent->getLengthInSeconds());
+			m_messageCenterWrapper->processReceivedContactMessageAudio(openmittsu::messages::ReceivedMessageHeader(messageHeader), contactAudioMessageContent->getAudioData(), contactAudioMessageContent->getLengthInSeconds());
 		}
 
 		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupAudioMessageContent const> groupAudioMessageContent) {
 			LOGGER_DEBUG("Received an audio message from {} to group {}.", messageHeader.getSender().toString(), groupAudioMessageContent->getGroupId().toString());
-			m_messageCenterWrapper->processReceivedGroupMessageAudio(groupAudioMessageContent->getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTime(), openmittsu::protocol::MessageTime::now(), groupAudioMessageContent->getAudioData(), groupAudioMessageContent->getLengthInSeconds());
+			m_messageCenterWrapper->processReceivedGroupMessageAudio(openmittsu::messages::ReceivedGroupMessageHeader(messageHeader, groupAudioMessageContent->getGroupId()), groupAudioMessageContent->getAudioData(), groupAudioMessageContent->getLengthInSeconds());
 		}
 
 		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ContactFileMessageContent const> contactFileMessageContent) {
 			LOGGER_DEBUG("Received an file message from {}.", messageHeader.getSender().toString());
-			m_messageCenterWrapper->processReceivedContactMessageFile(messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTime(), openmittsu::protocol::MessageTime::now(), contactFileMessageContent->getFileData(), contactFileMessageContent->getImageData(), contactFileMessageContent->getMimeType(), contactFileMessageContent->getFileName(), contactFileMessageContent->getCaption());
+			m_messageCenterWrapper->processReceivedContactMessageFile(openmittsu::messages::ReceivedMessageHeader(messageHeader), contactFileMessageContent->getFileData(), contactFileMessageContent->getImageData(), contactFileMessageContent->getMimeType(), contactFileMessageContent->getFileName(), contactFileMessageContent->getCaption());
 		}
 
 		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ContactTextMessageContent const> contactTextMessageContent) {
 			LOGGER_DEBUG("Received a message from {} with {} Bytes of text.", messageHeader.getSender().toString(), contactTextMessageContent->getText().size());
-			m_messageCenterWrapper->processReceivedContactMessageText(messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTime(), openmittsu::protocol::MessageTime::now(), contactTextMessageContent->getText());
+			m_messageCenterWrapper->processReceivedContactMessageText(openmittsu::messages::ReceivedMessageHeader(messageHeader), contactTextMessageContent->getText());
 		}
 
 		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupTextMessageContent const> groupTextMessageContent) {
 			LOGGER_DEBUG("Received a group message from {} to group {} with {} Bytes of text.", messageHeader.getSender().toString(), groupTextMessageContent->getGroupId().toString(), groupTextMessageContent->getText().size());
-			m_messageCenterWrapper->processReceivedGroupMessageText(groupTextMessageContent->getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTime(), openmittsu::protocol::MessageTime::now(), groupTextMessageContent->getText());
+			m_messageCenterWrapper->processReceivedGroupMessageText(openmittsu::messages::ReceivedGroupMessageHeader(messageHeader, groupTextMessageContent->getGroupId()), groupTextMessageContent->getText());
 		}
 
 		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ContactImageMessageContent const> contactImageMessageContent) {
 			LOGGER_DEBUG("Received an image message from {}.", messageHeader.getSender().toString());
-			m_messageCenterWrapper->processReceivedContactMessageImage(messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTime(), openmittsu::protocol::MessageTime::now(), contactImageMessageContent->getImageData());
+			m_messageCenterWrapper->processReceivedContactMessageImage(openmittsu::messages::ReceivedMessageHeader(messageHeader), contactImageMessageContent->getImageData());
 		}
 
 		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupImageMessageContent const> groupImageMessageContent) {
 			LOGGER_DEBUG("Received an image message from {} to group {}.", messageHeader.getSender().toString(), groupImageMessageContent->getGroupId().toString());
-			m_messageCenterWrapper->processReceivedGroupMessageImage(groupImageMessageContent->getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTime(), openmittsu::protocol::MessageTime::now(), groupImageMessageContent->getImageData());
+			m_messageCenterWrapper->processReceivedGroupMessageImage(openmittsu::messages::ReceivedGroupMessageHeader(messageHeader, groupImageMessageContent->getGroupId()), groupImageMessageContent->getImageData());
 		}
 
 		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ContactLocationMessageContent const> contactLocationMessageContent) {
 			LOGGER_DEBUG("Received a location message from {}.", messageHeader.getSender().toString());
-			m_messageCenterWrapper->processReceivedContactMessageLocation(messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTime(), openmittsu::protocol::MessageTime::now(), contactLocationMessageContent->getLocation());
+			m_messageCenterWrapper->processReceivedContactMessageLocation(openmittsu::messages::ReceivedMessageHeader(messageHeader), contactLocationMessageContent->getLocation());
 		}
 
 		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupLocationMessageContent const> groupLocationMessageContent) {
 			LOGGER_DEBUG("Received a location message from {} to group {}.", messageHeader.getSender().toString(), groupLocationMessageContent->getGroupId().toString());
-			m_messageCenterWrapper->processReceivedGroupMessageLocation(groupLocationMessageContent->getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTime(), openmittsu::protocol::MessageTime::now(), groupLocationMessageContent->getLocation());
+			m_messageCenterWrapper->processReceivedGroupMessageLocation(openmittsu::messages::ReceivedGroupMessageHeader(messageHeader, groupLocationMessageContent->getGroupId()), groupLocationMessageContent->getLocation());
 		}
 
 		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ContactVideoMessageContent const> contactVideoMessageContent) {
 			LOGGER_DEBUG("Received a video message from {}.", messageHeader.getSender().toString());
-			m_messageCenterWrapper->processReceivedContactMessageVideo(messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTime(), openmittsu::protocol::MessageTime::now(), contactVideoMessageContent->getVideoData(), contactVideoMessageContent->getImageData(), contactVideoMessageContent->getLengthInSeconds());
+			m_messageCenterWrapper->processReceivedContactMessageVideo(openmittsu::messages::ReceivedMessageHeader(messageHeader), contactVideoMessageContent->getVideoData(), contactVideoMessageContent->getImageData(), contactVideoMessageContent->getLengthInSeconds());
 		}
 
 		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupVideoMessageContent const> groupVideoMessageContent) {
 			LOGGER_DEBUG("Received a video message from {} to group {}.", messageHeader.getSender().toString(), groupVideoMessageContent->getGroupId().toString());
-			m_messageCenterWrapper->processReceivedGroupMessageVideo(groupVideoMessageContent->getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTime(), openmittsu::protocol::MessageTime::now(), groupVideoMessageContent->getVideoData(), groupVideoMessageContent->getImageData(), groupVideoMessageContent->getLengthInSeconds());
+			m_messageCenterWrapper->processReceivedGroupMessageVideo(openmittsu::messages::ReceivedGroupMessageHeader(messageHeader, groupVideoMessageContent->getGroupId()), groupVideoMessageContent->getVideoData(), groupVideoMessageContent->getImageData(), groupVideoMessageContent->getLengthInSeconds());
 		}
 
 		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupFileMessageContent const> groupFileMessageContent) {
@@ -661,27 +661,27 @@ namespace openmittsu {
 				return;
 			}
 
-			m_messageCenterWrapper->processReceivedGroupCreation(groupCreationMessageContent->getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTime(), openmittsu::protocol::MessageTime::now(), groupCreationMessageContent->getGroupMembers());
+			m_messageCenterWrapper->processReceivedGroupCreation(openmittsu::messages::ReceivedGroupMessageHeader(messageHeader, groupCreationMessageContent->getGroupId()), groupCreationMessageContent->getGroupMembers());
 		}
 
 		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupSetPhotoMessageContent const> groupSetPhotoMessageContent) {
 			LOGGER_DEBUG("Received a group SetPhoto message from {} to group {}.", messageHeader.getSender().toString(), groupSetPhotoMessageContent->getGroupId().toString());
-			m_messageCenterWrapper->processReceivedGroupSetImage(groupSetPhotoMessageContent->getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTime(), openmittsu::protocol::MessageTime::now(), groupSetPhotoMessageContent->getGroupPhoto());
+			m_messageCenterWrapper->processReceivedGroupSetImage(openmittsu::messages::ReceivedGroupMessageHeader(messageHeader, groupSetPhotoMessageContent->getGroupId()), groupSetPhotoMessageContent->getGroupPhoto());
 		}
 
 		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupSetTitleMessageContent const> groupSetTitleMessageContent) {
 			LOGGER_DEBUG("Received a group SetTitle message from {} to group {}.", messageHeader.getSender().toString(), groupSetTitleMessageContent->getGroupId().toString());
-			m_messageCenterWrapper->processReceivedGroupSetTitle(groupSetTitleMessageContent->getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTime(), openmittsu::protocol::MessageTime::now(), groupSetTitleMessageContent->getTitle());
+			m_messageCenterWrapper->processReceivedGroupSetTitle(openmittsu::messages::ReceivedGroupMessageHeader(messageHeader, groupSetTitleMessageContent->getGroupId()), groupSetTitleMessageContent->getTitle());
 		}
 
 		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupSyncMessageContent const> groupSyncMessageContent) {
 			LOGGER_DEBUG("Received a group SyncRequest message from {} to group {}.", messageHeader.getSender().toString(), groupSyncMessageContent->getGroupId().toString());
-			m_messageCenterWrapper->processReceivedGroupSyncRequest(groupSyncMessageContent->getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTime(), openmittsu::protocol::MessageTime::now());
+			m_messageCenterWrapper->processReceivedGroupSyncRequest(openmittsu::messages::ReceivedGroupMessageHeader(messageHeader, groupSyncMessageContent->getGroupId()));
 		}
 
 		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupLeaveMessageContent const> groupLeaveMessageContent) {
 			LOGGER_DEBUG("Received a group Leave message from {} to group {}.", messageHeader.getSender().toString(), groupLeaveMessageContent->getGroupId().toString());
-			m_messageCenterWrapper->processReceivedGroupLeave(groupLeaveMessageContent->getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTime(), openmittsu::protocol::MessageTime::now());
+			m_messageCenterWrapper->processReceivedGroupLeave(openmittsu::messages::ReceivedGroupMessageHeader(messageHeader, groupLeaveMessageContent->getGroupId()));
 		}
 
 		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::contact::ReceiptMessageContent const> receiptMessageContent) {

@@ -156,28 +156,28 @@ namespace openmittsu {
 			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processMessageSendDone, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(openmittsu::protocol::MessageId const&, messageId));
 		}
 
-		void MessageCenterWrapper::processReceivedContactMessageAudio(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& audio, quint16 lengthInSeconds) {
-			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedContactMessageAudio, Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived), Q_ARG(QByteArray const&, audio), Q_ARG(quint16, lengthInSeconds));
+		void MessageCenterWrapper::processReceivedContactMessageAudio(openmittsu::messages::ReceivedMessageHeader const& messageHeader, QByteArray const& audio, quint16 lengthInSeconds) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedContactMessageAudio, Q_ARG(openmittsu::messages::ReceivedMessageHeader const&, messageHeader), Q_ARG(QByteArray const&, audio), Q_ARG(quint16, lengthInSeconds));
 		}
 
-		void MessageCenterWrapper::processReceivedContactMessageFile(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) {
-			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedContactMessageFile, Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived), Q_ARG(QByteArray const&, file), Q_ARG(QByteArray const&, coverImage), Q_ARG(QString const&, mimeType), Q_ARG(QString const&, fileName), Q_ARG(QString const&, caption));
+		void MessageCenterWrapper::processReceivedContactMessageFile(openmittsu::messages::ReceivedMessageHeader const& messageHeader, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedContactMessageFile, Q_ARG(openmittsu::messages::ReceivedMessageHeader const&, messageHeader), Q_ARG(QByteArray const&, file), Q_ARG(QByteArray const&, coverImage), Q_ARG(QString const&, mimeType), Q_ARG(QString const&, fileName), Q_ARG(QString const&, caption));
 		}
 
-		void MessageCenterWrapper::processReceivedContactMessageImage(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& image) {
-			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedContactMessageImage, Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived), Q_ARG(QByteArray const&, image));
+		void MessageCenterWrapper::processReceivedContactMessageImage(openmittsu::messages::ReceivedMessageHeader const& messageHeader, QByteArray const& image) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedContactMessageImage, Q_ARG(openmittsu::messages::ReceivedMessageHeader const&, messageHeader), Q_ARG(QByteArray const&, image));
 		}
 
-		void MessageCenterWrapper::processReceivedContactMessageLocation(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, openmittsu::utility::Location const& location) {
-			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedContactMessageLocation, Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived), Q_ARG(openmittsu::utility::Location const&, location));
+		void MessageCenterWrapper::processReceivedContactMessageLocation(openmittsu::messages::ReceivedMessageHeader const& messageHeader, openmittsu::utility::Location const& location) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedContactMessageLocation, Q_ARG(openmittsu::messages::ReceivedMessageHeader const&, messageHeader), Q_ARG(openmittsu::utility::Location const&, location));
 		}
 
-		void MessageCenterWrapper::processReceivedContactMessageText(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& message) {
-			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedContactMessageText, Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived), Q_ARG(QString const&, message));
+		void MessageCenterWrapper::processReceivedContactMessageText(openmittsu::messages::ReceivedMessageHeader const& messageHeader, QString const& message) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedContactMessageText, Q_ARG(openmittsu::messages::ReceivedMessageHeader const&, messageHeader), Q_ARG(QString const&, message));
 		}
 
-		void MessageCenterWrapper::processReceivedContactMessageVideo(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) {
-			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedContactMessageVideo, Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived), Q_ARG(QByteArray const&, video), Q_ARG(QByteArray const&, coverImage), Q_ARG(quint16, lengthInSeconds));
+		void MessageCenterWrapper::processReceivedContactMessageVideo(openmittsu::messages::ReceivedMessageHeader const& messageHeader, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedContactMessageVideo, Q_ARG(openmittsu::messages::ReceivedMessageHeader const&, messageHeader), Q_ARG(QByteArray const&, video), Q_ARG(QByteArray const&, coverImage), Q_ARG(quint16, lengthInSeconds));
 		}
 
 		void MessageCenterWrapper::processReceivedContactMessageReceiptReceived(openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageId const& referredMessageId) {
@@ -204,48 +204,48 @@ namespace openmittsu {
 			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedContactTypingNotificationStopped, Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent));
 		}
 
-		void MessageCenterWrapper::processReceivedGroupMessageAudio(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& audio, quint16 lengthInSeconds) {
-			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedGroupMessageAudio, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived), Q_ARG(QByteArray const&, audio), Q_ARG(quint16, lengthInSeconds));
+		void MessageCenterWrapper::processReceivedGroupMessageAudio(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, QByteArray const& audio, quint16 lengthInSeconds) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedGroupMessageAudio, Q_ARG(openmittsu::messages::ReceivedGroupMessageHeader const&, messageHeader), Q_ARG(QByteArray const&, audio), Q_ARG(quint16, lengthInSeconds));
 		}
 
-		void MessageCenterWrapper::processReceivedGroupMessageFile(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) {
-			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedGroupMessageFile, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived), Q_ARG(QByteArray const&, file), Q_ARG(QByteArray const&, coverImage), Q_ARG(QString const&, mimeType), Q_ARG(QString const&, fileName), Q_ARG(QString const&, caption));
+		void MessageCenterWrapper::processReceivedGroupMessageFile(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, QByteArray const& file, QByteArray const& coverImage, QString const& mimeType, QString const& fileName, QString const& caption) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedGroupMessageFile, Q_ARG(openmittsu::messages::ReceivedGroupMessageHeader const&, messageHeader), Q_ARG(QByteArray const&, file), Q_ARG(QByteArray const&, coverImage), Q_ARG(QString const&, mimeType), Q_ARG(QString const&, fileName), Q_ARG(QString const&, caption));
 		}
 
-		void MessageCenterWrapper::processReceivedGroupMessageImage(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& image) {
-			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedGroupMessageImage, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived), Q_ARG(QByteArray const&, image));
+		void MessageCenterWrapper::processReceivedGroupMessageImage(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, QByteArray const& image) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedGroupMessageImage, Q_ARG(openmittsu::messages::ReceivedGroupMessageHeader const&, messageHeader), Q_ARG(QByteArray const&, image));
 		}
 
-		void MessageCenterWrapper::processReceivedGroupMessageLocation(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, openmittsu::utility::Location const& location) {
-			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedGroupMessageLocation, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived), Q_ARG(openmittsu::utility::Location const&, location));
+		void MessageCenterWrapper::processReceivedGroupMessageLocation(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, openmittsu::utility::Location const& location) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedGroupMessageLocation, Q_ARG(openmittsu::messages::ReceivedGroupMessageHeader const&, messageHeader), Q_ARG(openmittsu::utility::Location const&, location));
 		}
 
-		void MessageCenterWrapper::processReceivedGroupMessageText(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& message) {
-			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedGroupMessageText, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived), Q_ARG(QString const&, message));
+		void MessageCenterWrapper::processReceivedGroupMessageText(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, QString const& message) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedGroupMessageText, Q_ARG(openmittsu::messages::ReceivedGroupMessageHeader const&, messageHeader), Q_ARG(QString const&, message));
 		}
 
-		void MessageCenterWrapper::processReceivedGroupMessageVideo(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) {
-			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedGroupMessageVideo, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived), Q_ARG(QByteArray const&, video), Q_ARG(QByteArray const&, coverImage), Q_ARG(quint16, lengthInSeconds));
+		void MessageCenterWrapper::processReceivedGroupMessageVideo(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, QByteArray const& video, QByteArray const& coverImage, quint16 lengthInSeconds) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedGroupMessageVideo, Q_ARG(openmittsu::messages::ReceivedGroupMessageHeader const&, messageHeader), Q_ARG(QByteArray const&, video), Q_ARG(QByteArray const&, coverImage), Q_ARG(quint16, lengthInSeconds));
 		}
 
-		void MessageCenterWrapper::processReceivedGroupCreation(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QSet<openmittsu::protocol::ContactId> const& members) {
-			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedGroupCreation, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived), Q_ARG(QSet<openmittsu::protocol::ContactId> const&, members));
+		void MessageCenterWrapper::processReceivedGroupCreation(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, QSet<openmittsu::protocol::ContactId> const& members) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedGroupCreation, Q_ARG(openmittsu::messages::ReceivedGroupMessageHeader const&, messageHeader), Q_ARG(QSet<openmittsu::protocol::ContactId> const&, members));
 		}
 
-		void MessageCenterWrapper::processReceivedGroupSetImage(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QByteArray const& image) {
-			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedGroupSetImage, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived), Q_ARG(QByteArray const&, image));
+		void MessageCenterWrapper::processReceivedGroupSetImage(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, QByteArray const& image) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedGroupSetImage, Q_ARG(openmittsu::messages::ReceivedGroupMessageHeader const&, messageHeader), Q_ARG(QByteArray const&, image));
 		}
 
-		void MessageCenterWrapper::processReceivedGroupSetTitle(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived, QString const& groupTitle) {
-			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedGroupSetTitle, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived), Q_ARG(QString const&, groupTitle));
+		void MessageCenterWrapper::processReceivedGroupSetTitle(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader, QString const& groupTitle) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedGroupSetTitle, Q_ARG(openmittsu::messages::ReceivedGroupMessageHeader const&, messageHeader), Q_ARG(QString const&, groupTitle));
 		}
 
-		void MessageCenterWrapper::processReceivedGroupSyncRequest(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived) {
-			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedGroupSyncRequest, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived));
+		void MessageCenterWrapper::processReceivedGroupSyncRequest(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedGroupSyncRequest, Q_ARG(openmittsu::messages::ReceivedGroupMessageHeader const&, messageHeader));
 		}
 
-		void MessageCenterWrapper::processReceivedGroupLeave(openmittsu::protocol::GroupId const& group, openmittsu::protocol::ContactId const& sender, openmittsu::protocol::MessageId const& messageId, openmittsu::protocol::MessageTime const& timeSent, openmittsu::protocol::MessageTime const& timeReceived) {
-			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedGroupLeave, Q_ARG(openmittsu::protocol::GroupId const&, group), Q_ARG(openmittsu::protocol::ContactId const&, sender), Q_ARG(openmittsu::protocol::MessageId const&, messageId), Q_ARG(openmittsu::protocol::MessageTime const&, timeSent), Q_ARG(openmittsu::protocol::MessageTime const&, timeReceived));
+		void MessageCenterWrapper::processReceivedGroupLeave(openmittsu::messages::ReceivedGroupMessageHeader const& messageHeader) {
+			OPENMITTSU_MESSAGECENTERWRAPPER_WRAP_VOID(processReceivedGroupLeave, Q_ARG(openmittsu::messages::ReceivedGroupMessageHeader const&, messageHeader));
 		}
 
 		void MessageCenterWrapper::addNewContact(openmittsu::protocol::ContactId const& contact, openmittsu::crypto::PublicKey const& publicKey) {

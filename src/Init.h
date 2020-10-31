@@ -35,6 +35,8 @@
 #include "src/database/NewGroupData.h"
 #include "src/dataproviders/NetworkSentMessageAcceptor.h"
 #include "src/messages/FullMessageHeader.h"
+#include "src/messages/ReceivedMessageHeader.h"
+#include "src/messages/ReceivedGroupMessageHeader.h"
 #include "src/messages/contact/PreliminaryContactMessage.h"
 #include "src/messages/contact/ReceiptMessageContent.h"
 #include "src/messages/group/PreliminaryGroupMessage.h"
@@ -70,6 +72,8 @@
 	qRegisterMetaType<openmittsu::database::NewGroupData>("NewGroupData"); \
 	qRegisterMetaType<openmittsu::database::NewGroupData>("openmittsu::database::NewGroupData"); \
 	qRegisterMetaType<openmittsu::messages::FullMessageHeader>(); \
+	qRegisterMetaType<openmittsu::messages::ReceivedMessageHeader>(); \
+	qRegisterMetaType<openmittsu::messages::ReceivedGroupMessageHeader>(); \
 	qRegisterMetaType<QSharedPointer<openmittsu::messages::FullMessageHeader const>>(); \
 	qRegisterMetaType<openmittsu::messages::contact::PreliminaryContactMessage>(); \
 	qRegisterMetaType<openmittsu::messages::contact::ReceiptMessageContent::ReceiptType>(); \
