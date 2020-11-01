@@ -10,6 +10,7 @@ namespace openmittsu {
 		public:
 			ReceivedGroupMessageHeader();
 			ReceivedGroupMessageHeader(FullMessageHeader const& other, openmittsu::protocol::GroupId const& groupId);
+			ReceivedGroupMessageHeader(FullMessageHeader const& other, openmittsu::protocol::GroupId const& groupId, openmittsu::protocol::MessageTime const& timeReceived);
 			virtual ~ReceivedGroupMessageHeader();
 
 			virtual openmittsu::protocol::GroupId const& getGroupId() const;

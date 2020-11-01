@@ -11,6 +11,10 @@ namespace openmittsu {
 			// Intentionally left empty.
 		}
 
+		ReceivedGroupMessageHeader::ReceivedGroupMessageHeader(FullMessageHeader const& header, openmittsu::protocol::GroupId const& group, openmittsu::protocol::MessageTime const& timeReceived) : ReceivedMessageHeader(header, timeReceived), group(group) {
+			// Intentionally left empty.
+		}
+
 		ReceivedGroupMessageHeader::~ReceivedGroupMessageHeader() {
 			// Intentionally left empty.
 		}

@@ -54,16 +54,16 @@ TEST_F(DatabaseTestFramework, MessageCenterTestUnknownGroup) {
 	QCoreApplication::processEvents();
 
 	openmittsu::protocol::MessageId const messageA = this->getFreeMessageId();
-	mc->processReceivedGroupMessageText(groupIdA, contactIdD, messageA, openmittsu::protocol::MessageTime::fromDatabase(1234567), openmittsu::protocol::MessageTime::fromDatabase(12345678), "Test 1");
+	mc->processReceivedGroupMessageText(openmittsu::messages::ReceivedGroupMessageHeader(openmittsu::messages::FullMessageHeader(selfContactId, openmittsu::protocol::MessageTime::fromDatabase(1234567), contactIdD, messageA, openmittsu::messages::MessageFlags(), openmittsu::protocol::PushFromId(QString(""))), groupIdA, openmittsu::protocol::MessageTime::fromDatabase(12345678)), "Test 1");
 
 	openmittsu::protocol::MessageId const messageB = this->getFreeMessageId();
-	mc->processReceivedGroupMessageText(groupIdA, contactIdC, messageB, openmittsu::protocol::MessageTime::fromDatabase(2234567), openmittsu::protocol::MessageTime::fromDatabase(22345678), "Test 2");
+	mc->processReceivedGroupMessageText(openmittsu::messages::ReceivedGroupMessageHeader(openmittsu::messages::FullMessageHeader(selfContactId, openmittsu::protocol::MessageTime::fromDatabase(2234567), contactIdC, messageB, openmittsu::messages::MessageFlags(), openmittsu::protocol::PushFromId(QString(""))), groupIdA, openmittsu::protocol::MessageTime::fromDatabase(22345678)), "Test 2");
 
 	ASSERT_FALSE(db->hasGroup(groupIdA));
 	ASSERT_EQ(db->getGroupMessageCount(), 1);
 
 	openmittsu::protocol::MessageId const messageC = this->getFreeMessageId();
-	mc->processReceivedGroupCreation(groupIdA, contactIdC, messageC, openmittsu::protocol::MessageTime::fromDatabase(3234567), openmittsu::protocol::MessageTime::fromDatabase(32345678), { contactIdC, contactIdD, selfContactId });
+	mc->processReceivedGroupCreation(openmittsu::messages::ReceivedGroupMessageHeader(openmittsu::messages::FullMessageHeader(selfContactId, openmittsu::protocol::MessageTime::fromDatabase(3234567), contactIdC, messageC, openmittsu::messages::MessageFlags(), openmittsu::protocol::PushFromId(QString(""))), groupIdA, openmittsu::protocol::MessageTime::fromDatabase(32345678)), { contactIdC, contactIdD, selfContactId });
 	ASSERT_TRUE(db->hasGroup(groupIdA));
 	ASSERT_EQ(db->getGroupMessageCount(), 4);
 

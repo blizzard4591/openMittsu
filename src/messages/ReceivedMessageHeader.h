@@ -15,6 +15,7 @@ namespace openmittsu {
 		public:
 			ReceivedMessageHeader();
 			ReceivedMessageHeader(FullMessageHeader const& fullMessageHeader);
+			ReceivedMessageHeader(FullMessageHeader const& fullMessageHeader, openmittsu::protocol::MessageTime const& timeReceived);
 			virtual ~ReceivedMessageHeader();
 
 			virtual openmittsu::protocol::ContactId const& getSender() const;

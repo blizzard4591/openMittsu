@@ -17,6 +17,10 @@ namespace openmittsu {
 			// Intentionally left empty.
 		}
 
+		ReceivedMessageHeader::ReceivedMessageHeader(FullMessageHeader const& header, openmittsu::protocol::MessageTime const& timeReceived) : sender(header.getSender()), receiver(header.getReceiver()), messageId(header.getMessageId()), timeSent(header.getTime()), timeReceived(timeReceived), flags(header.getFlags()), pushFromName(header.getPushFromName()) {
+			// Intentionally left empty.
+		}
+
 		ReceivedMessageHeader::~ReceivedMessageHeader() {
 			// Intentionally left empty.
 		}
