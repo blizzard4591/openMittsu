@@ -377,12 +377,12 @@ namespace openmittsu {
 					// This should be OUR id. Does not make sense, maybe an early error in the server implementation?
 					openmittsu::protocol::ContactId const senderIdentity(packetContents.left(PROTO_IDENTITY_LENGTH_BYTES));
 					openmittsu::protocol::MessageId const messageId(packetContents.right(PROTO_MESSAGE_MESSAGEID_LENGTH_BYTES));
-					if (senderIdentity != m_ourContactId) {
+					/*if (senderIdentity != m_ourContactId) {
 						LOGGER()->error("Received a SERVER_ACKNOWLEDGE packet for Sender {} and Message #{}, but we are NOT the sender?!", senderIdentity.toString(), messageId.toString());
-					} else {
+					} else {*/
 						LOGGER_DEBUG("Received a SERVER_ACKNOWLEDGE packet for message #{}.", messageId.toString());
 						handleIncomingAcknowledgment(messageId);
-					}
+					//}
 				} else if (packetTypeByte == (PROTO_PACKET_SIGNATURE_CLIENT_ACK)) {
 					LOGGER()->warn("Received a CLIENT_ACKNOWLEDGE packet: {}", QString(packetContents.toHex()).toStdString());
 				} else if (packetTypeByte == (PROTO_PACKET_SIGNATURE_CONNECTION_ESTABLISHED)) {
