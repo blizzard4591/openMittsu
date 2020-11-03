@@ -60,7 +60,7 @@ namespace openmittsu {
 			startPosition += PROTO_MESSAGE_MESSAGEID_LENGTH_BYTES;
 			openmittsu::protocol::MessageTime const timestamp(headerData.mid(startPosition, PROTO_MESSAGE_TIMESTAMP_LENGTH_BYTES));
 			startPosition += PROTO_MESSAGE_TIMESTAMP_LENGTH_BYTES;
-			MessageFlags const flags(headerData.at(startPosition));
+			MessageFlags const flags((uint8_t)headerData.at(startPosition));
 			startPosition += (PROTO_MESSAGE_FLAGS_LENGTH_BYTES + PROTO_MESSAGE_RESERVED_AFTER_FLAGS_LENGTH_BYTES);
 			openmittsu::protocol::PushFromId const pushFromId(headerData.mid(startPosition, PROTO_MESSAGE_PUSH_FROM_LENGTH_BYTES));
 			startPosition += PROTO_MESSAGE_PUSH_FROM_LENGTH_BYTES;
@@ -103,7 +103,7 @@ namespace openmittsu {
 			result.append(receiver.getContactIdAsByteArray());
 			result.append(messageId.getMessageIdAsByteArray());
 			result.append(time.getMessageTimeAsByteArray());
-			result.append(flags.getFlags());
+			result.append((char)flags.getFlags());
 			result.append(QByteArray(PROTO_MESSAGE_RESERVED_AFTER_FLAGS_LENGTH_BYTES, 0x00));
 			result.append(pushFromName.getPushFromIdAsByteArray());
 

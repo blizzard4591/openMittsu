@@ -9,12 +9,12 @@ namespace openmittsu {
 		class MessageFlags {
 		public:
 			MessageFlags();
-			MessageFlags(char messageFlags);
+			MessageFlags(uint8_t messageFlags);
 			MessageFlags(bool pushMessage, bool noQueuing, bool noAckExpected, bool noDeliveryReceipt, bool messageHasAlreadyBeenDelivered, bool groupMessage, bool callMessage);
 			MessageFlags(MessageFlags const& other);
 			virtual ~MessageFlags();
 
-			virtual char getFlags() const;
+			virtual uint8_t getFlags() const;
 
 			virtual bool isPushMessage() const;
 			virtual bool isNoQueueMessage() const;
@@ -32,8 +32,8 @@ namespace openmittsu {
 			bool m_groupMessage;
 			bool m_callMessage;
 
-			static char boolsToByte(bool bitLsbPlus0, bool bitLsbPlus1, bool bitLsbPlus2, bool bitLsbPlus3, bool bitLsbPlus4, bool bitLsbPlus5, bool bitLsbPlus6, bool bitLsbPlus7);
-			static bool byteToBool(char c, size_t position);
+			static uint8_t boolsToByte(bool bitLsbPlus0, bool bitLsbPlus1, bool bitLsbPlus2, bool bitLsbPlus3, bool bitLsbPlus4, bool bitLsbPlus5, bool bitLsbPlus6, bool bitLsbPlus7);
+			static bool byteToBool(uint8_t c, size_t position);
 		};
 
 	}

@@ -11,7 +11,7 @@ namespace openmittsu {
 			// Intentionally left empty.
 		}
 
-		MessageFlags::MessageFlags(char messageFlags) : m_pushMessage(byteToBool(messageFlags, 0)), m_noQueuing(byteToBool(messageFlags, 1)), m_noAckExpected(byteToBool(messageFlags, 2)), m_noDeliveryReceipt(byteToBool(messageFlags, 7)), m_messageHasAlreadyBeenDelivered(byteToBool(messageFlags, 3)), m_groupMessage(byteToBool(messageFlags, 4)), m_callMessage(byteToBool(messageFlags, 5)) {
+		MessageFlags::MessageFlags(uint8_t messageFlags) : m_pushMessage(byteToBool(messageFlags, 0)), m_noQueuing(byteToBool(messageFlags, 1)), m_noAckExpected(byteToBool(messageFlags, 2)), m_noDeliveryReceipt(byteToBool(messageFlags, 7)), m_messageHasAlreadyBeenDelivered(byteToBool(messageFlags, 3)), m_groupMessage(byteToBool(messageFlags, 4)), m_callMessage(byteToBool(messageFlags, 5)) {
 			// Check if only the lowest 6 bits or bit 7 are used, if at all.
 			if ((messageFlags & (~0xBF)) != 0x00) {
 				throw openmittsu::exceptions::IllegalArgumentException() << "Unknown Message Flag Bits are set: " << openmittsu::utility::ByteArrayToHexString::charToHexString(messageFlags).toStdString();
@@ -30,7 +30,7 @@ namespace openmittsu {
 			// Intentionally left empty.
 		}
 
-		char MessageFlags::getFlags() const {
+		uint8_t MessageFlags::getFlags() const {
 			return boolsToByte(m_pushMessage, m_noQueuing, m_noAckExpected, m_messageHasAlreadyBeenDelivered, m_groupMessage, m_callMessage, false, m_noDeliveryReceipt);
 		}
 
@@ -62,8 +62,8 @@ namespace openmittsu {
 			return m_callMessage;
 		}
 
-		char MessageFlags::boolsToByte(bool bitLsbPlus0, bool bitLsbPlus1, bool bitLsbPlus2, bool bitLsbPlus3, bool bitLsbPlus4, bool bitLsbPlus5, bool bitLsbPlus6, bool bitLsbPlus7) {
-			char c = 0x00;
+		uint8_t MessageFlags::boolsToByte(bool bitLsbPlus0, bool bitLsbPlus1, bool bitLsbPlus2, bool bitLsbPlus3, bool bitLsbPlus4, bool bitLsbPlus5, bool bitLsbPlus6, bool bitLsbPlus7) {
+			uint8_t c = 0x00;
 
 			// LSB + 0
 			if (bitLsbPlus0) {
@@ -101,7 +101,7 @@ namespace openmittsu {
 			return c;
 		}
 
-		bool MessageFlags::byteToBool(char c, size_t position) {
+		bool MessageFlags::byteToBool(uint8_t c, size_t position) {
 			if (position > 7) {
 				throw openmittsu::exceptions::IllegalArgumentException() << "Position is out of bounds, only values from 0 to 7 are allowed. Given: " << position;
 			}
