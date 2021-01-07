@@ -5,6 +5,7 @@
 #include <QTabBar>
 
 #include "src/exceptions/InternalErrorException.h"
+#include "src/utility/Logging.h"
 #include "src/utility/QObjectConnectionMacro.h"
 
 #include "src/widgets/chat/ChatTab.h"
@@ -12,7 +13,7 @@
 namespace openmittsu {
 	namespace widgets {
 
-		ChatTabWidget::ChatTabWidget(QWidget* parent) : QTabWidget(parent), standardColor(this->palette().color(QPalette::WindowText)), blinkColor(Qt::red), lastActiveIndex(-1) {
+		ChatTabWidget::ChatTabWidget(QWidget* parent) : QTabWidget(parent), standardColor(this->palette().color(QPalette::WindowText)), blinkColor(Qt::red), isCurrentlyInBlink(false), lastActiveIndex(-1) {
 			OPENMITTSU_CONNECT(&blinkTimer, timeout(), this, blinkTimerOnTimer());
 			OPENMITTSU_CONNECT(this, currentChanged(int), this, slotCurrentChanged(int));
 
@@ -23,21 +24,28 @@ namespace openmittsu {
 		void ChatTabWidget::setTabBlinking(int index, bool doBlink) {
 			if (doBlink) {
 				if (!indexToIconHashMap.contains(index)) {
-					QIcon const& icon = this->tabBar()->tabIcon(index);
+					QIcon const icon = this->tabBar()->tabIcon(index);
 					IconSet iconSet;
 					iconSet.standardIcon = icon;
-
+					
 					// Use the current icon, blend it and use that as blink-icon
-					QImage standardIconImage = icon.pixmap(tabBar()->iconSize()).toImage();
+					QImage const standardIconImageBase = icon.pixmap(tabBar()->iconSize()).toImage();
+					QImage standardIconImage = standardIconImageBase.convertToFormat(QImage::Format_ARGB32_Premultiplied);
 
-					QPainter painter(&standardIconImage);
-					painter.setCompositionMode(QPainter::CompositionMode_SourceAtop);
+					if (!icon.isNull()) {
+						QPainter painter;
+						if (!painter.begin(&standardIconImage)) {
+							LOGGER()->warn("Failed to get painter for tab icon, size = {} x {}, null = {}!", tabBar()->iconSize().height(), tabBar()->iconSize().width(), standardIconImageBase.isNull());
+						} else {
+							painter.setCompositionMode(QPainter::CompositionMode_SourceAtop);
 
-					// Use a white image in half transparent mode for blending
-					QPixmap overlay(standardIconImage.size());
-					overlay.fill(QColor(255, 255, 255, 127));
-					painter.drawPixmap(0, 0, overlay);
-					painter.end();
+							// Use a white image in half transparent mode for blending
+							QPixmap overlay(standardIconImage.size());
+							overlay.fill(QColor(255, 255, 255, 127));
+							painter.drawPixmap(0, 0, overlay);
+							painter.end();
+						}
+					}
 
 					iconSet.blinkIcon = QIcon(QPixmap::fromImage(standardIconImage));
 					indexToIconHashMap.insert(index, iconSet);
