@@ -164,7 +164,7 @@ namespace openmittsu {
 				}
 			}
 
-			m_ui->layInnerVertical->insertWidget(m_registeredWidgets.size(), widget, 0, 0);
+			m_ui->layInnerVertical->insertWidget(m_registeredWidgets.size(), widget, 0, Qt::Alignment());
 
 			updateUiVisibilityAndEdgeRounding();
 		}
