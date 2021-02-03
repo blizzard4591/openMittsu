@@ -41,7 +41,7 @@ namespace openmittsu {
 
 		ProtocolClient::ProtocolClient(openmittsu::database::DatabaseWrapperFactory const& databaseFactory, openmittsu::protocol::ContactId const& ourContactId, std::shared_ptr<openmittsu::network::ServerConfiguration> const& serverConfiguration, openmittsu::options::OptionReaderFactory const& optionReaderFactory, openmittsu::dataproviders::MessageCenterWrapperFactory const& messageCenterWrapperFactory, openmittsu::protocol::PushFromId const& pushFromId)
 			: QObject(nullptr), m_databaseWrapperFactory(databaseFactory), m_cryptoBox(nullptr), m_messageCenterWrapperFactory(messageCenterWrapperFactory), m_messageCenterWrapper(nullptr), m_pushFromIdPtr(std::make_unique<openmittsu::protocol::PushFromId>(pushFromId)),
-			m_isSetupDone(false), m_isNetworkSessionReady(false), m_isConnected(false), m_isAllowedToSend(false), m_isDisconnecting(false), m_socket(nullptr), m_networkSession(nullptr), m_ourContactId(ourContactId), m_serverConfiguration(serverConfiguration), m_optionReaderFactory(optionReaderFactory), m_optionReader(nullptr), outgoingMessagesTimer(nullptr), acknowledgmentWaitingTimer(nullptr), keepAliveTimer(nullptr), keepAliveCounter(0), failedReconnectAttempts(0),
+			m_isSetupDone(false), m_isConnected(false), m_isAllowedToSend(false), m_isDisconnecting(false), m_socket(nullptr), m_ourContactId(ourContactId), m_serverConfiguration(serverConfiguration), m_optionReaderFactory(optionReaderFactory), m_optionReader(nullptr), outgoingMessagesTimer(nullptr), acknowledgmentWaitingTimer(nullptr), keepAliveTimer(nullptr), keepAliveCounter(0), failedReconnectAttempts(0),
 			messagesReceived(0), messagesSend(0), bytesSend(0), bytesReceived(0) {
 			// Intentionally left empty.
 			LOGGER_DEBUG("Thread ID in ProtocolClient ctor = {}", QThread::currentThreadId());
@@ -65,8 +65,6 @@ namespace openmittsu {
 		void ProtocolClient::connectToServer() {
 			if (!m_isSetupDone) {
 				throw openmittsu::exceptions::InternalErrorException() << "ProtocolClient::connect() was called before the initial setup was finished!";
-			} else if (!m_isNetworkSessionReady) {
-				throw openmittsu::exceptions::InternalErrorException() << "ProtocolClient::connect() was called before the network session was available!";
 			} else if (m_isConnected) {
 				LOGGER()->info("Disconnecting from old server before connection with new settings...");
 				disconnectFromServer();
@@ -162,32 +160,7 @@ namespace openmittsu {
 				keepAliveCounter = 1;
 				OPENMITTSU_CONNECT(keepAliveTimer.get(), timeout(), this, keepAliveTimerOnTimer());
 
-				QNetworkConfigurationManager manager;
-				if (manager.capabilities() & QNetworkConfigurationManager::NetworkSessionRequired) {
-					LOGGER_DEBUG("Using Network Manager and Session.");
-					// Get saved network configuration
-					QSettings settings(QSettings::UserScope, QLatin1String("openMittsu"));
-					settings.beginGroup(QLatin1String("QtNetwork"));
-					const QString id = settings.value(QLatin1String("DefaultNetworkConfiguration")).toString();
-					settings.endGroup();
-
-					// If the saved network configuration is not currently discovered use the system default
-					QNetworkConfiguration config = manager.configurationFromIdentifier(id);
-					if ((config.state() & QNetworkConfiguration::Discovered) != QNetworkConfiguration::Discovered) {
-						config = manager.defaultConfiguration();
-					}
-
-					m_networkSession = std::make_unique<QNetworkSession>(config);
-					OPENMITTSU_CONNECT(m_networkSession.get(), opened(), this, networkSessionOnIsOpen());
-
-					m_isNetworkSessionReady = false;
-					m_networkSession->open();
-				} else {
-					LOGGER_DEBUG("Not using the Network Manager and Session.");
-					m_isNetworkSessionReady = true;
-
-					emit readyConnect();
-				}
+				emit readyConnect();
 
 				m_isSetupDone = true;
 				emit setupDone();
@@ -213,12 +186,6 @@ namespace openmittsu {
 				}
 
 				m_socket = nullptr;
-
-				m_isNetworkSessionReady = false;
-				if (m_networkSession != nullptr) {
-					OPENMITTSU_DISCONNECT(m_networkSession.get(), opened(), this, networkSessionOnIsOpen());
-					m_networkSession = nullptr;
-				}
 
 				outgoingMessagesTimer->stop();
 				outgoingMessagesTimer = nullptr;
@@ -961,26 +928,6 @@ namespace openmittsu {
 				LOGGER_DEBUG("SocketError: {}", m_socket->errorString().toStdString());
 				emit connectToFinished(-4, tr("The following error occurred: %1.").arg(m_socket->errorString()));
 			}
-		}
-
-		void ProtocolClient::networkSessionOnIsOpen() {
-			// Save the used configuration
-			QNetworkConfiguration config = m_networkSession->configuration();
-			QString id;
-			if (config.type() == QNetworkConfiguration::UserChoice) {
-				id = m_networkSession->sessionProperty(QLatin1String("UserChoiceConfiguration")).toString();
-			} else {
-				id = config.identifier();
-			}
-
-			QSettings settings(QSettings::UserScope, QLatin1String("openMittsu"));
-			settings.beginGroup(QLatin1String("QtNetwork"));
-			settings.setValue(QLatin1String("DefaultNetworkConfiguration"), id);
-			settings.endGroup();
-
-			m_isNetworkSessionReady = true;
-
-			emit readyConnect();
 		}
 
 		bool ProtocolClient::waitForData(qint64 minBytesRequired) {

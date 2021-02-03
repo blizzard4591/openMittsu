@@ -101,7 +101,6 @@ namespace openmittsu {
 			void socketOnError(QAbstractSocket::SocketError socketError);
 			void socketConnected();
 			void socketDisconnected(bool emitSignal = true);
-			void networkSessionOnIsOpen();
 			void outgoingMessagesTimerOnTimer();
 			void acknowledgmentWaitingTimerOnTimer();
 			void keepAliveTimerOnTimer();
@@ -114,13 +113,11 @@ namespace openmittsu {
 			std::unique_ptr<openmittsu::protocol::PushFromId> m_pushFromIdPtr;
 
 			bool m_isSetupDone;
-			bool m_isNetworkSessionReady;
 			bool m_isConnected;
 			bool m_isAllowedToSend;
 			bool m_isDisconnecting;
 			QByteArray m_readyReadRemainingData;
 			std::unique_ptr<QTcpSocket> m_socket;
-			std::unique_ptr<QNetworkSession> m_networkSession;
 			openmittsu::protocol::ContactId const m_ourContactId;
 			std::shared_ptr<openmittsu::network::ServerConfiguration> m_serverConfiguration;
 			openmittsu::options::OptionReaderFactory m_optionReaderFactory;
