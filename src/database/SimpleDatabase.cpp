@@ -1322,6 +1322,7 @@ namespace openmittsu {
 			try {
 				m_mediaFileStorage.insertMediaItem(uuid, data, fileType);
 			} catch (openmittsu::exceptions::UuidAlreadyExistsExceptionImpl&) {
+				LOGGER()->error("Detected UUID duplication when inserting file with UUID {}, size {} and file type {} (if this message appears multiple times, something major is broken!).", uuid.toStdString(), data.size(), MediaFileTypeHelper::toInt(fileType));
 				return false;
 			}
 			return true;
