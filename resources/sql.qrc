@@ -10,5 +10,6 @@
 	<file alias="CreateSettings.sql">sql/CreateSettings.sql</file>
 	<file alias="CreateTableVersions.sql">sql/CreateTableVersions.sql</file>
 	<file alias="UpdateMediaToVersion2.sql">sql/UpdateMediaToVersion2.sql</file>
+	<file alias="UpdateMediaToVersion3.sql">sql/UpdateMediaToVersion3.sql</file>
 </qresource>
 </RCC>

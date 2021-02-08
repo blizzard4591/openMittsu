@@ -492,7 +492,7 @@ namespace openmittsu {
 			int versionTableFeatureLevels = createTableIfMissingAndGetVersion(Tables::FeatureLevels, 1);
 			int versionTableGroups = createTableIfMissingAndGetVersion(Tables::Groups, 1);
 			int versionTableGroupMessages = createTableIfMissingAndGetVersion(Tables::GroupMessages, 1);
-			int versionTableMedia = createTableIfMissingAndGetVersion(Tables::Media, 2);
+			int versionTableMedia = createTableIfMissingAndGetVersion(Tables::Media, 1);
 			int versionTableSettings = createTableIfMissingAndGetVersion(Tables::Settings, 1);
 
 			if (versionTableVersions != 1) {
@@ -516,15 +516,15 @@ namespace openmittsu {
 			if (versionTableGroupMessages != 1) {
 				LOGGER()->warn("Table GroupMessages has version {} instead of {}.", versionTableGroupMessages, 1);
 			}
-			if (versionTableMedia != 2) {
-				LOGGER()->warn("Table Media has version {} instead of {}.", versionTableMedia, 2);
+			if (versionTableMedia != 3) {
+				LOGGER()->warn("Table Media has version {} instead of {}.", versionTableMedia, 3);
 
 				if (versionTableMedia == 1) {
 					// Update 1: Added `type` field to media table.
 					LOGGER()->info("Upgrading media database to file schema version 2...");
 					this->transactionStart();
 					QSqlQuery query(database);
-					QStringList updateQueries = getUpdateStatementForTable(Tables::Media, 2);
+					QStringList const updateQueries = getUpdateStatementForTable(Tables::Media, 2);
 					auto it = updateQueries.constBegin();
 					auto const end = updateQueries.constEnd();
 					for (; it != end; ++it) {
@@ -537,6 +537,38 @@ namespace openmittsu {
 					m_mediaFileStorage.upgradeMediaDatabase(1);
 					this->transactionCommit();
 					LOGGER()->info("Upgrading media database to file schema version 2... Done.");
+				} else if (versionTableMedia == 2) {
+					// Update 2: Creation of the tables was broken, everyone maybe needs this fix.
+					LOGGER()->info("Upgrading media database to file schema version 3...");
+					this->transactionStart();
+					QSqlQuery query(database);
+					// Two possible situations: All good, or: uid is UNIQUE and the primary key is not fixed.
+					query.prepare(QStringLiteral("SELECT `sql` FROM `sqlite_master` WHERE `type` = \"table\" AND `tbl_name` = \"media\""));
+					if (query.exec() && query.isSelect() && query.next()) {
+						QString const sqlCmd = query.value(QStringLiteral("sql")).toString();
+						QRegularExpression keyExpr("PRIMARY\\s+KEY\\s*\\(\\s*`?uid`?\\s*\\)");
+						if (sqlCmd.contains(QStringLiteral("UNIQUE")) || sqlCmd.contains(keyExpr)) {
+							LOGGER()->warn("Database is suffering from the incorrect creation bug, fixing...");
+							QStringList const updateQueries = getUpdateStatementForTable(Tables::Media, 3);
+							auto it = updateQueries.constBegin();
+							auto const end = updateQueries.constEnd();
+							for (; it != end; ++it) {
+								LOGGER_DEBUG("Running part of update query: {}", it->toStdString());
+								if (!query.exec(*it)) {
+									throw openmittsu::exceptions::InternalErrorException() << "Could not update table 'media' to version 3. Query error: " << query.lastError().text().toStdString();
+								}
+							}
+						} else {
+							LOGGER()->info("Database is NOT suffering from the incorrect creation bug.");
+						}
+					} else {
+						throw openmittsu::exceptions::InternalErrorException() << "Could not execute media table creation command query. Query error: " << query.lastError().text().toStdString();
+					}
+					
+					setTableVersion(Tables::Media, 3);
+					m_mediaFileStorage.upgradeMediaDatabase(2);
+					this->transactionCommit();
+					LOGGER()->info("Upgrading media database to file schema version 3... Done.");
 				}
 			}
 			if (versionTableSettings != 1) {
