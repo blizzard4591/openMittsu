@@ -492,7 +492,7 @@ namespace openmittsu {
 			int versionTableFeatureLevels = createTableIfMissingAndGetVersion(Tables::FeatureLevels, 1);
 			int versionTableGroups = createTableIfMissingAndGetVersion(Tables::Groups, 1);
 			int versionTableGroupMessages = createTableIfMissingAndGetVersion(Tables::GroupMessages, 1);
-			int versionTableMedia = createTableIfMissingAndGetVersion(Tables::Media, 1);
+			int versionTableMedia = createTableIfMissingAndGetVersion(Tables::Media, 3);
 			int versionTableSettings = createTableIfMissingAndGetVersion(Tables::Settings, 1);
 
 			if (versionTableVersions != 1) {
