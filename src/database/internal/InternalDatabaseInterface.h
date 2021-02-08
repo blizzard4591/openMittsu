@@ -47,7 +47,8 @@ namespace openmittsu {
 				virtual MediaFileItem getMediaItem(QString const& uuid, MediaFileType const& fileType) const = 0;
 				virtual void removeMediaItem(QString const& uuid, MediaFileType const& fileType) = 0;
 				virtual void removeAllMediaItems(QString const& uuid) = 0;
-				virtual void insertMediaItem(QString const& uuid, QByteArray const& data, MediaFileType const& fileType) = 0;
+				// Returns false iff the UUID already exists.
+				virtual bool insertMediaItem(QString const& uuid, QByteArray const& data, MediaFileType const& fileType) = 0;
 			};
 
 		}

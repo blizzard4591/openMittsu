@@ -6,6 +6,7 @@
 #include "src/database/internal/InternalDatabaseInterface.h"
 #include "src/database/internal/DatabaseUtilities.h"
 #include "src/exceptions/InternalErrorException.h"
+#include "src/exceptions/UuidAlreadyExistsException.h"
 #include "src/utility/Logging.h"
 
 #include <QDirIterator>
@@ -142,18 +143,20 @@ namespace openmittsu {
 					auto const queryErrorMessage = queryMedia.lastError().text();
 					if (queryErrorMessage.contains("UNIQUE constraint failed: media.uid")) {
 						QSqlQuery query(m_database->getQueryObject());
-						query.prepare(QStringLiteral("SELECT `uid`, `type`, `size`, `checksum` FROM `media` WHERE `uid` = :uuid"));
+						query.prepare(QStringLiteral("SELECT `uid`, `type`, `size`, `checksum` FROM `media` WHERE `uid` = :uuid AND `type` = :type"));
 						query.bindValue(QStringLiteral(":uuid"), QVariant(uuid));
+						query.bindValue(QStringLiteral(":type"), QVariant(MediaFileTypeHelper::toInt(fileType)));
 
 						if (query.exec() && query.isSelect() && query.next()) {
 							int const storedType = query.value(QStringLiteral("type")).toInt();
 							int const storedSize = query.value(QStringLiteral("size")).toInt();
 							uint32_t const storedChecksum = query.value(QStringLiteral("checksum")).toUInt();
 							if ((storedType == MediaFileTypeHelper::toInt(fileType)) && (storedSize == size) && (storedChecksum == actualChecksum)) {
+								LOGGER()->warn("Media item with this UUID and properties already exists in database, ignoring...");
 								// Hmpf, okay, file already stored, so, whatever...
 								return;
 							} else {
-								throw openmittsu::exceptions::InternalErrorException() << "Could not insert media data into 'media', item with this UUID already exists, but size ('" << storedSize << "' vs. '" << size << "'), type ('" << storedType << "' vs. '" << MediaFileTypeHelper::toInt(fileType) << "') or checksum ('" << storedChecksum << "' vs. '" << actualChecksum << "') do not match! Query error: " << queryErrorMessage.toStdString();
+								throw openmittsu::exceptions::UuidAlreadyExistsException() << "Could not insert media data into 'media', item with this UUID already exists, but size ('" << storedSize << "' vs. '" << size << "'), type ('" << storedType << "' vs. '" << MediaFileTypeHelper::toInt(fileType) << "') or checksum ('" << storedChecksum << "' vs. '" << actualChecksum << "') do not match! Query error: " << queryErrorMessage.toStdString();
 							}
 						} else {
 							throw openmittsu::exceptions::InternalErrorException() << "Could not execute media existance query for uuid \"" << uuid.toStdString() << "\" table 'media'. Query error: " << query.lastError().text().toStdString();
@@ -242,7 +245,7 @@ namespace openmittsu {
 				}
 
 				auto it = items.constBegin();
-				auto end = items.constEnd();
+				auto const end = items.constEnd();
 				for (; it != end; ++it) {
 					insertMediaItem(it->getUuid(), it->getData(), MediaFileType::TYPE_STANDARD);
 				}
@@ -258,7 +261,7 @@ namespace openmittsu {
 				}
 
 				auto it = items.constBegin();
-				auto end = items.constEnd();
+				auto const end = items.constEnd();
 				for (; it != end; ++it) {
 					insertMediaItem(it->getUuid(), it->getData(), MediaFileType::TYPE_STANDARD);
 				}
