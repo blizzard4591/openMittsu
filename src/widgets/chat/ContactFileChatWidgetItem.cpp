@@ -9,28 +9,28 @@
 #include "src/utility/Logging.h"
 #include "src/utility/QObjectConnectionMacro.h"
 #include "src/utility/StringList.h"
+#include "src/utility/MakeUnique.h"
 
 #include "src/exceptions/InternalErrorException.h"
 
 namespace openmittsu {
 	namespace widgets {
 
-		ContactFileChatWidgetItem::ContactFileChatWidgetItem(openmittsu::dataproviders::BackedContactMessage const& message, QWidget* parent) : ContactMediaChatWidgetItem(message, parent), m_lblImage(new openmittsu::widgets::GifPlayer()), m_lblCaption(new QLabel()) {
+		ContactFileChatWidgetItem::ContactFileChatWidgetItem(openmittsu::dataproviders::BackedContactMessage const& message, QWidget* parent) : ContactMediaChatWidgetItem(message, parent), m_lblImage(std::make_unique<openmittsu::widgets::GifPlayer>()), m_lblCaption(std::make_unique<QLabel>()) {
 			if (message.getMessageType() != openmittsu::dataproviders::messages::ContactMessageType::FILE) {
 				throw openmittsu::exceptions::InternalErrorException() << "Can not handle message with type " << openmittsu::dataproviders::messages::ContactMessageTypeHelper::toString(message.getMessageType()) << ".";
 			}
 
-			ChatWidgetItem::configureLabel(m_lblCaption, 13);
-			this->addWidget(m_lblImage);
-			this->addWidget(m_lblCaption);
+			ChatWidgetItem::configureLabel(m_lblCaption.get(), 13);
+			this->addWidget(m_lblImage.get());
+			this->addWidget(m_lblCaption.get());
 
 			onContactDataChanged();
 			onMessageDataChanged();
 		}
 
 		ContactFileChatWidgetItem::~ContactFileChatWidgetItem() {
-			delete m_lblImage;
-			delete m_lblCaption;
+			//
 		}
 
 		void ContactFileChatWidgetItem::onMessageDataChanged() {
@@ -54,6 +54,17 @@ namespace openmittsu {
 			if (m_mimeType.compare("image/gif", Qt::CaseInsensitive) == 0) {
 				if (image.isAvailable() && thumbnail.isAvailable()) {
 					m_lblImage->updateData(image.getData(), thumbnail.getData());
+					m_lblCaption->setText(preprocessLinks(m_contactMessage.getCaption()));
+				} else {
+					pixmap = image.getPixmapWithErrorMessage(500, 500);
+					m_lblImage->setPixmap(pixmap);
+					m_lblCaption->setText("");
+				}
+			} else if (m_mimeType.compare("image/jpeg", Qt::CaseInsensitive) == 0 || m_mimeType.compare("image/png", Qt::CaseInsensitive) == 0) {
+				m_lblImage->deactivateGifMode();
+				if (image.isAvailable()) {
+					pixmap.loadFromData(image.getData());
+					m_lblImage->setPixmap(pixmap);
 					m_lblCaption->setText(preprocessLinks(m_contactMessage.getCaption()));
 				} else {
 					pixmap = image.getPixmapWithErrorMessage(500, 500);
