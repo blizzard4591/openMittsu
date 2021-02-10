@@ -12,6 +12,8 @@
 #include <QBuffer>
 #include <QMovie>
 
+#include <memory>
+
 namespace openmittsu {
 	namespace widgets {
 
@@ -28,8 +30,13 @@ namespace openmittsu {
 			virtual QString getFileExtension() const override;
 			virtual bool saveMediaToFile(QString const& filename) const override;
 		private:
-			GifPlayer* m_lblImage;
-			QLabel* m_lblCaption;
+			enum class LabelType {
+				INVALID, GIF, IMAGE, FILE
+			};
+
+			static LabelType extractData(QString const& text, QString& mimeType, QString& fileName, QString& fileSize);
+			std::unique_ptr<GifPlayer> m_lblImage;
+			std::unique_ptr<QLabel> m_lblCaption;
 			QString m_mimeType;
 			QString m_fileName;
 		};

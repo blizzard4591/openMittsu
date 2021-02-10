@@ -22,14 +22,16 @@ namespace openmittsu {
 		}
 
 		void GifPlayer::mousePressEvent(QMouseEvent* event) {
-			if ((m_gifMode) && (event->buttons() == Qt::LeftButton)) {
-				QMovie::MovieState state = m_movie.state();
-				if (state == QMovie::MovieState::NotRunning) {
-					m_movie.start();
-				} else if (state == QMovie::MovieState::Paused) {
-					m_movie.setPaused(false);
-				} else if (state == QMovie::MovieState::Running) {
-					m_movie.setPaused(true);
+			if (event->buttons() == Qt::LeftButton) {
+				if (m_gifMode) {
+					QMovie::MovieState state = m_movie.state();
+					if (state == QMovie::MovieState::NotRunning) {
+						m_movie.start();
+					} else if (state == QMovie::MovieState::Paused) {
+						m_movie.setPaused(false);
+					} else if (state == QMovie::MovieState::Running) {
+						m_movie.setPaused(true);
+					}
 				}
 
 				emit clicked();
@@ -136,8 +138,8 @@ namespace openmittsu {
 			this->update();
 		}
 
-		void GifPlayer::deactivateGifMode() {
-			m_gifMode = false;
+		void GifPlayer::setGifMode(bool active) {
+			m_gifMode = active;
 		}
 	}
 }
