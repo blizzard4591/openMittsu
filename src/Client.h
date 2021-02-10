@@ -108,6 +108,7 @@ public slots:
 protected:
 	virtual void closeEvent(QCloseEvent* event) override;
 private:
+	bool m_isClosing;
 	std::unique_ptr<Ui::MainWindow> m_ui;
 	std::shared_ptr<openmittsu::network::ProtocolClient> m_protocolClient;
 	QThread m_protocolClientThread;

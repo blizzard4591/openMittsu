@@ -71,6 +71,7 @@
 #include "ui_main.h"
 
 Client::Client(QWidget* parent) : QMainWindow(parent),
+m_isClosing(false),
 m_ui(std::make_unique<Ui::MainWindow>()),
 m_protocolClient(nullptr),
 m_protocolClientThread(this),
@@ -265,15 +266,13 @@ m_optionDatabaseFile() {
 }
 
 Client::~Client() {
+	m_isClosing = true;
 	if (m_protocolClient != nullptr) {
 		m_protocolClient = nullptr;
 	}
 
 	if (m_protocolClientThread.isRunning()) {
 		m_protocolClientThread.quit();
-	}
-	while (!m_protocolClientThread.isFinished()) {
-		QThread::currentThread()->wait(10);
 	}
 }
 
@@ -346,7 +345,7 @@ void Client::delayedStartup() {
 }
 
 void Client::closeEvent(QCloseEvent* event) {
-	if (m_optionMaster->getOptionAsBool(openmittsu::options::Options::BOOLEAN_MINIMIZE_TO_TRAY) && !m_desktopNotifier->isClosing()) {
+	if (!m_isClosing && (m_optionMaster->getOptionAsBool(openmittsu::options::Options::BOOLEAN_MINIMIZE_TO_TRAY) && !m_desktopNotifier->isClosing())) {
 		this->hide();
 		event->ignore();
 		return;
@@ -437,7 +436,6 @@ void Client::threadFinished() {
 		m_protocolClient->deleteLater();
 		m_protocolClient.reset();
 	}
-	LOGGER()->critical("Since the worker thread just terminated, everything will close now.");
 	this->close();
 }
 
