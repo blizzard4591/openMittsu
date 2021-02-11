@@ -36,7 +36,11 @@ namespace openmittsu {
 		}
 
 		void GroupFileChatWidgetItem::onImageHasBeenClicked() {
+#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
 			ImageViewer* imageViewer = new ImageViewer(m_lblImage->pixmap(Qt::ReturnByValue).toImage());
+#else
+			ImageViewer* imageViewer = new ImageViewer(m_lblImage->pixmap()->toImage());
+#endif
 			imageViewer->show();
 		}
 
