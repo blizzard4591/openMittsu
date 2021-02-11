@@ -583,8 +583,8 @@ namespace openmittsu {
 		}
 
 		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupFileMessageContent const> groupFileMessageContent) {
-			LOGGER()->warn("Received a file message from {} to group {}. THIS IS STILL UNSUPPORTED.", messageHeader.getSender().toString(), groupFileMessageContent->getGroupId().toString());
-			sendMessageReceivedAcknowledgement(messageHeader.getSender(), messageHeader.getMessageId());
+			LOGGER()->warn("Received a file message from {} to group {}.", messageHeader.getSender().toString(), groupFileMessageContent->getGroupId().toString());
+			m_messageCenterWrapper->processReceivedGroupMessageFile(openmittsu::messages::ReceivedGroupMessageHeader(messageHeader, groupFileMessageContent->getGroupId()), groupFileMessageContent->getFileData(), groupFileMessageContent->getImageData(), groupFileMessageContent->getMimeType(), groupFileMessageContent->getFileName(), groupFileMessageContent->getCaption());
 		}
 
 		void ProtocolClient::handleIncomingMessage(openmittsu::messages::FullMessageHeader const& messageHeader, std::shared_ptr<openmittsu::messages::group::GroupCreationMessageContent const> groupCreationMessageContent, openmittsu::messages::MessageWithEncryptedPayload const*const messageWithEncryptedPayload) {

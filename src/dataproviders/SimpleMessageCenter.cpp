@@ -826,8 +826,7 @@ namespace openmittsu {
 			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We received a group file message from sender {} for group {} with message ID #{} sent at {} with file {} that could not be saved as the storage system is not ready.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(file.toHex()).toStdString());
 				return;
-			}
-			else if (!this->m_storage.hasContact(messageHeader.getSender())) {
+			} else if (!this->m_storage.hasContact(messageHeader.getSender())) {
 				LOGGER()->warn("We received a group file message from sender {} for group {} with message ID #{} sent at {} with file {}, but we do not recognize the sender. Ignoring.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(file.toHex()).toStdString());
 				return;
 			}

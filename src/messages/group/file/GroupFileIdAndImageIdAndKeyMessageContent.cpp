@@ -59,7 +59,7 @@ namespace openmittsu {
 						LOGGER()->warn("Size of downloaded blob differs from stated size ({} Bytes downloaded vs. {} Bytes promised).", bdct->getDownloadedBlob().size(), m_fileSizeInBytes);
 					}
 
-					LOGGER_DEBUG("Integrating result from BlobDownloaderCallbackTask into a new GroupEncryptedVideoAndImageIdAndKeyMessageContent.");
+					LOGGER_DEBUG("Integrating result from BlobDownloaderCallbackTask into a new GroupEncryptedFileAndImageIdAndKeyMessageContent.");
 					if (m_imageBlobId.isEmpty()) {
 						return new GroupEncryptedFileAndImageAndKeyMessageContent(getGroupId(), bdct->getDownloadedBlob(), QByteArray(), m_encryptionKey, m_mimeType, m_fileName, m_caption, m_fileSizeInBytes);
 					}
