@@ -150,7 +150,9 @@ bool initializeLogging(std::size_t maxLogfileSize, std::size_t maxFileCount) {
 	
 	try {
 		std::vector<spdlog::sink_ptr> sinks;
+#if !defined(_MSC_VER) || !defined(NDEBUG) // Do not try to use stdout when it is not available.
 		sinks.push_back(std::make_shared<spdlog::sinks::stdout_sink_st>());
+#endif
 		sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_mt>(logFileName.toStdString(), maxLogfileSize, maxFileCount));
 		auto combined_logger = std::make_shared<spdlog::logger>(OPENMITTSU_LOGGING_LOGGER_MAIN_NAME, begin(sinks), end(sinks));
 
