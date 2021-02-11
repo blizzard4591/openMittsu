@@ -18,6 +18,13 @@ namespace openmittsu {
 			virtual QString getFileExtension() const = 0;
 			virtual bool saveMediaToFile(QString const& filename) const = 0;
 			virtual bool saveMediaToFile(QString const& filename, QByteArray const& data) const;
+
+			enum class LabelType {
+				INVALID, GIF, IMAGE, FILE
+			};
+
+			static LabelType extractDataFromJson(QString const& text, QString& mimeType, QString& fileName, QString& fileSize);
+			virtual QString getDefaultFilename() const = 0;
 		private:
 			QAction* m_action;
 		};

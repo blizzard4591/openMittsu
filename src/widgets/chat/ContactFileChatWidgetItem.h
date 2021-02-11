@@ -24,17 +24,14 @@ namespace openmittsu {
 			virtual ~ContactFileChatWidgetItem();
 		public slots:
 			virtual void onMessageDataChanged() override;
+			virtual void onImageHasBeenClicked();
 		protected:
 			virtual void copyToClipboard() override;
 
 			virtual QString getFileExtension() const override;
 			virtual bool saveMediaToFile(QString const& filename) const override;
+			virtual QString getDefaultFilename() const override;
 		private:
-			enum class LabelType {
-				INVALID, GIF, IMAGE, FILE
-			};
-
-			static LabelType extractData(QString const& text, QString& mimeType, QString& fileName, QString& fileSize);
 			std::unique_ptr<GifPlayer> const m_lblImage;
 			std::unique_ptr<QLabel> const m_lblCaption;
 			QString m_mimeType;

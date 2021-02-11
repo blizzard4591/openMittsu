@@ -64,6 +64,10 @@ namespace openmittsu {
 			return QStringLiteral("mp4");
 		}
 
+		QString GroupVideoChatWidgetItem::getDefaultFilename() const {
+			return QStringLiteral("video.mp4");
+		}
+
 		bool GroupVideoChatWidgetItem::saveMediaToFile(QString const& filename) const {
 			openmittsu::database::MediaFileItem const video = m_groupMessage.getContentAsMediaFile();
 			if (video.isAvailable()) {

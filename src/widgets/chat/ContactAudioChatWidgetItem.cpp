@@ -71,6 +71,10 @@ namespace openmittsu {
 			return QStringLiteral("mp4");
 		}
 
+		QString ContactAudioChatWidgetItem::getDefaultFilename() const {
+			return QStringLiteral("audio.mp4");
+		}
+
 		bool ContactAudioChatWidgetItem::saveMediaToFile(QString const& filename) const {
 			openmittsu::database::MediaFileItem const audio = m_contactMessage.getContentAsMediaFile();
 			if (audio.isAvailable()) {

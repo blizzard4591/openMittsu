@@ -9,6 +9,7 @@
 #include "src/utility/Logging.h"
 #include "src/utility/QObjectConnectionMacro.h"
 #include "src/utility/StringList.h"
+#include "src/widgets/ImageViewer.h"
 
 #include "src/exceptions/InternalErrorException.h"
 
@@ -24,6 +25,8 @@ namespace openmittsu {
 			this->addWidget(m_lblImage.get());
 			this->addWidget(m_lblCaption.get());
 
+			OPENMITTSU_CONNECT(m_lblImage.get(), clicked(), this, onImageHasBeenClicked());
+
 			onContactDataChanged();
 			onMessageDataChanged();
 		}
@@ -32,22 +35,9 @@ namespace openmittsu {
 			//
 		}
 
-		GroupFileChatWidgetItem::LabelType GroupFileChatWidgetItem::extractData(QString const& text, QString& mimeType, QString& fileName, QString& fileSize) {
-			QStringList const fields = utility::StringList::split(text);
-			if (fields.size() < 8) {
-				throw openmittsu::exceptions::InternalErrorException() << "Message control data could not be parsed to obtain MIME type of file: '" << text.toStdString() << "'.";
-			}
-
-			mimeType = fields.at(2);
-			fileSize = fields.at(2);
-			fileName = fields.at(4);
-			if (mimeType.compare("image/gif", Qt::CaseInsensitive) == 0) {
-				return LabelType::GIF;
-			} else if (mimeType.compare("image/jpeg", Qt::CaseInsensitive) == 0 || mimeType.compare("image/png", Qt::CaseInsensitive) == 0) {
-				return LabelType::IMAGE;
-			} else {
-				return LabelType::FILE;
-			}
+		void GroupFileChatWidgetItem::onImageHasBeenClicked() {
+			ImageViewer* imageViewer = new ImageViewer(m_lblImage->pixmap(Qt::ReturnByValue).toImage());
+			imageViewer->show();
 		}
 
 		void GroupFileChatWidgetItem::onMessageDataChanged() {
@@ -55,7 +45,7 @@ namespace openmittsu {
 			QString const messageData = m_groupMessage.getContentAsText();
 
 			QString m_fileSize;
-			LabelType const labelType = extractData(messageData, m_mimeType, m_fileName, m_fileSize);
+			LabelType const labelType = extractDataFromJson(messageData, m_mimeType, m_fileName, m_fileSize);
 			LOGGER_DEBUG("FileMessage has MIME type '{}'", m_mimeType.toStdString());
 
 			if (labelType == LabelType::FILE) {
@@ -120,6 +110,10 @@ namespace openmittsu {
 			}
 
 			return QStringLiteral("gif");
+		}
+
+		QString GroupFileChatWidgetItem::getDefaultFilename() const {
+			return m_fileName;
 		}
 
 		bool GroupFileChatWidgetItem::saveMediaToFile(QString const& filename) const {

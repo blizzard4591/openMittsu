@@ -34,7 +34,7 @@ namespace openmittsu {
 		}
 
 		void GroupImageChatWidgetItem::onImageHasBeenClicked() {
-			ImageViewer* imageViewer = new ImageViewer(m_lblImage->pixmap()->toImage());
+			ImageViewer* imageViewer = new ImageViewer(m_lblImage->pixmap(Qt::ReturnByValue).toImage());
 			imageViewer->show();
 		}
 
@@ -68,6 +68,10 @@ namespace openmittsu {
 
 		QString GroupImageChatWidgetItem::getFileExtension() const {
 			return QStringLiteral("jpg");
+		}
+
+		QString GroupImageChatWidgetItem::getDefaultFilename() const {
+			return QStringLiteral("image.jpg");
 		}
 
 		bool GroupImageChatWidgetItem::saveMediaToFile(QString const& filename) const {

@@ -76,6 +76,10 @@ namespace openmittsu {
 			return QStringLiteral("jpg");
 		}
 
+		QString ContactImageChatWidgetItem::getDefaultFilename() const {
+			return QStringLiteral("image.jpg");
+		}
+
 		bool ContactImageChatWidgetItem::saveMediaToFile(QString const& filename) const {
 			openmittsu::database::MediaFileItem const image = m_contactMessage.getContentAsMediaFile();
 			if (image.isAvailable()) {

@@ -3,6 +3,8 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
+#include "src/exceptions/InternalErrorException.h"
+#include "src/utility/StringList.h"
 #include "src/widgets/chat/ChatWidgetItem.h"
 
 namespace openmittsu {
@@ -20,7 +22,7 @@ namespace openmittsu {
 		bool MediaChatWidgetItem::media_handleCustomContextMenuEntrySelection(QWidget* parent, QAction* selectedAction) {
 			if ((m_action != nullptr) && (m_action == selectedAction)) {
 				while (true) {
-					QString fileName = QFileDialog::getSaveFileName(parent, ChatWidgetItem::tr("Save Media Item"), "", ChatWidgetItem::tr("Media Item (*.%1)").arg(getFileExtension()));
+					QString const fileName = QFileDialog::getSaveFileName(parent, ChatWidgetItem::tr("Save Media Item"), getDefaultFilename(), ChatWidgetItem::tr("Media Item (*.%1)").arg(getFileExtension()));
 					if (!fileName.isEmpty() && !fileName.isNull()) {
 						if (saveMediaToFile(fileName)) {
 							return true;
@@ -46,6 +48,24 @@ namespace openmittsu {
 
 			file.close();
 			return true;
+		}
+
+		MediaChatWidgetItem::LabelType MediaChatWidgetItem::extractDataFromJson(QString const& text, QString& mimeType, QString& fileName, QString& fileSize) {
+			QStringList const fields = utility::StringList::split(text);
+			if (fields.size() < 8) {
+				throw openmittsu::exceptions::InternalErrorException() << "Message control data could not be parsed to obtain MIME type of file: '" << text.toStdString() << "'.";
+			}
+
+			mimeType = fields.at(2);
+			fileSize = fields.at(2);
+			fileName = fields.at(4);
+			if (mimeType.compare("image/gif", Qt::CaseInsensitive) == 0) {
+				return LabelType::GIF;
+			} else if (mimeType.compare("image/jpeg", Qt::CaseInsensitive) == 0 || mimeType.compare("image/png", Qt::CaseInsensitive) == 0) {
+				return LabelType::IMAGE;
+			} else {
+				return LabelType::FILE;
+			}
 		}
 
 	}

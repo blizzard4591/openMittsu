@@ -64,6 +64,10 @@ namespace openmittsu {
 			return QStringLiteral("mp4");
 		}
 
+		QString GroupAudioChatWidgetItem::getDefaultFilename() const {
+			return QStringLiteral("audio.mp4");
+		}
+
 		bool GroupAudioChatWidgetItem::saveMediaToFile(QString const& filename) const {
 			openmittsu::database::MediaFileItem const audio = m_groupMessage.getContentAsMediaFile();
 			if (audio.isAvailable()) {

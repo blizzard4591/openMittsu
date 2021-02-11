@@ -27,6 +27,7 @@ namespace openmittsu {
 
 			virtual QString getFileExtension() const override;
 			virtual bool saveMediaToFile(QString const& filename) const override;
+			virtual QString getDefaultFilename() const override;
 		private:
 			Player* m_player;
 			QLabel* m_lblCaption;

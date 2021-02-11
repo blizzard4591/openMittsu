@@ -26,6 +26,7 @@ namespace openmittsu {
 
 			virtual QString getFileExtension() const override;
 			virtual bool saveMediaToFile(QString const& filename) const override;
+			virtual QString getDefaultFilename() const override;
 		private:
 			ClickAwareLabel* m_lblImage;
 			QLabel* m_lblCaption;
