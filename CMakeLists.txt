@@ -18,6 +18,8 @@ include(RegisterSourceGroup)
 include(ExternalProject)
 include(AddImportedLibrary)
 
+message(STATUS "Target processor: ${CMAKE_SYSTEM_PROCESSOR}")
+
 # SpdLog base path, included via GIT Submodule
 set(SPDLOG_MODULE_BASEPATH "${PROJECT_SOURCE_DIR}/3rdparty/spdlog")
 

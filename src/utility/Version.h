@@ -21,6 +21,8 @@ namespace openmittsu {
 			const static unsigned dirty;
 			/// The system which has compiled OpenMittsu
 			const static std::string systemName;
+			/// The system processor for which OpenMittsu was compiled
+			const static std::string systemProcessor;
 			/// The size of a pointer of the system that has compiled OpenMittsu
 			const static std::string systemPtrSize;
 			/// The system version which has compiled OpenMittsu
@@ -66,7 +68,7 @@ namespace openmittsu {
 
 			static std::string buildInfo() {
 				std::stringstream sstream;
-				sstream << "Compiled on " << systemName << " " << systemVersion << " ";
+				sstream << "Compiled on " << systemName << "(" << systemProcessor << ") " << systemVersion << " ";
 				sstream << "using compiler version " << cxxCompiler;
 				if (buildType != "") {
 					sstream << " with " << buildType << " flags";

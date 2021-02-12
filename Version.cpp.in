@@ -23,6 +23,9 @@ namespace openmittsu {
 
 		// The system which has compiled OpenMittsu
 		const std::string Version::systemName = "@CMAKE_SYSTEM_NAME@";
+		
+		// The system processor for which OpenMittsu was compiled
+		const std::string Version::systemProcessor = "@CMAKE_SYSTEM_PROCESSOR@";
 
 		// The size of a pointer of the system that has compiled OpenMittsu
 		const std::string Version::systemPtrSize = "@OPENMITTSU_CPP_POINTER_SIZE@";

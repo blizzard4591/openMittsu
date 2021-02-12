@@ -25,12 +25,19 @@ int main(int argc, char *argv[]) {
 
 	std::string const ptrSize64Bits = "64";
 	std::string const ptrSize32Bits = "32";
-	if (openmittsu::utility::Version::systemPtrSize == ptrSize64Bits) {
+	std::string const processorNameAmd64 = "AMD64";
+	if (openmittsu::utility::Version::systemProcessor == processorNameAmd64) {
+		if (openmittsu::utility::Version::systemPtrSize == ptrSize64Bits) {
 		std::cout << "x64";
-	} else if (openmittsu::utility::Version::systemPtrSize == ptrSize32Bits) {
-		std::cout << "x86";
+		} else if (openmittsu::utility::Version::systemPtrSize == ptrSize32Bits) {
+			std::cout << "x86";
+		} else {
+			std::cout << openmittsu::utility::Version::systemPtrSize;
+		}
 	} else {
-		std::cout << openmittsu::utility::Version::systemPtrSize;
+		std::string processorName = openmittsu::utility::Version::systemProcessor;
+		std::transform(processorName.begin(), processorName.end(), processorName.begin(), ::tolower);
+		std::cout << processorName;
 	}
 
 	std::cout << "-";
