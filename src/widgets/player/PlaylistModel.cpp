@@ -91,7 +91,11 @@ namespace openmittsu {
 			if (index.isValid() && role == Qt::DisplayRole) {
 				QVariant value = m_data[index];
 				if (!value.isValid() && index.column() == Title) {
+#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 14, 0))
+					QUrl location = m_playlist->media(index.row()).request().url();
+#else
 					QUrl location = m_playlist->media(index.row()).canonicalUrl();
+#endif
 					return QFileInfo(location.path()).fileName();
 				}
 
