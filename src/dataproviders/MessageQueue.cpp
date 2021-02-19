@@ -76,5 +76,16 @@ namespace openmittsu {
 			}
 		}
 
+		bool MessageQueue::hasGroupIdForPartial(quint64 const groupId, std::unique_ptr<openmittsu::protocol::GroupId>& target) const {
+			QMutexLocker lock(&m_mutex);
+			for (auto it = m_storedGroupMessages.constBegin(); it != m_storedGroupMessages.constEnd(); ++it) {
+				if (it.key().getGroupId() == groupId) {
+					target = std::make_unique<openmittsu::protocol::GroupId>(it.key());
+					return true;
+				}
+			}
+			return false;
+		}
+
 	}
 }

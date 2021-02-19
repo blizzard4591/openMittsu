@@ -54,10 +54,12 @@ namespace openmittsu {
 
 			QVector<ReceivedContactMessage> getAndRemoveQueuedMessages(openmittsu::protocol::ContactId const& sender);
 			QVector<ReceivedGroupMessage> getAndRemoveQueuedMessages(openmittsu::protocol::GroupId const& group);
+
+			bool hasGroupIdForPartial(quint64 const groupId, std::unique_ptr<openmittsu::protocol::GroupId>& target) const;
 		private:
 			QHash<openmittsu::protocol::ContactId, QVector<ReceivedContactMessage>> m_storedContactMessages;
 			QHash<openmittsu::protocol::GroupId, QVector<ReceivedGroupMessage>> m_storedGroupMessages;
-			QMutex m_mutex;
+			mutable QMutex m_mutex;
 		};
 	}
 }

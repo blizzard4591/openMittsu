@@ -7,6 +7,7 @@
 #include "src/messages/PreliminaryMessageFactory.h"
 #include "src/protocol/ContactIdList.h"
 #include "src/utility/Logging.h"
+#include "src/utility/MakeUnique.h"
 #include "src/utility/QExifImageHeader.h"
 #include "src/utility/QObjectConnectionMacro.h"
 
@@ -14,6 +15,8 @@
 #include <QFile>
 #include <QTextStream>
 #include <QRegExp>
+
+#include <memory>
 
 namespace openmittsu {
 	namespace dataproviders {
@@ -1005,21 +1008,40 @@ namespace openmittsu {
 			if (!this->m_storage.hasDatabase()) {
 				LOGGER()->warn("We received a group set image message from sender {} for group {} with message ID #{} sent at {} with members {} that could not be saved as the storage system is not ready.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(image.toHex()).toStdString());
 				return;
-			} else if (messageHeader.getSender() != messageHeader.getGroupId().getOwner()) {
-				LOGGER()->warn("We received a group set image message from sender {} for group {} with message ID #{} sent at {} with members {} that did not come from the group owner. Ignoring.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(image.toHex()).toStdString());
+			}
+			
+			// Since the protocol only includes the groups ID, not its owner, we do this silly dance:
+			std::unique_ptr<openmittsu::protocol::GroupId> realGroupId;
+			quint64 const partialGroupId = messageHeader.getGroupId().getGroupId();
+			if (!m_messageQueue.hasGroupIdForPartial(partialGroupId, realGroupId)) {
+				openmittsu::database::GroupToGroupDataMap groupData = m_storage.getGroupDataAll(false);
+				for (auto it = groupData.constBegin(); it != groupData.constEnd(); ++it) {
+					if (it.key().getGroupId() == partialGroupId) {
+						realGroupId = std::make_unique<openmittsu::protocol::GroupId>(it.key());
+						break;
+					}
+				}
+			}
+			
+			if (!realGroupId) {
+				// Since this is a protocol quirk, just drop the message and wait for a re-send
+				LOGGER()->warn("We received a group set image message for group {} with message ID #{} sent at {} with members {} that we could not determine the group owner for (protocol quirk!). Ignoring.", messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(image.toHex()).toStdString());
+				return;
+			} else if (messageHeader.getSender() != realGroupId->getOwner()) {
+				LOGGER()->warn("We received a group set image message from sender {} for group {} with message ID #{} sent at {} with members {} that did not come from the group owner. Ignoring.", messageHeader.getSender().toString(), realGroupId->toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(image.toHex()).toStdString());
 				return;
 			} else if (!this->m_storage.hasContact(messageHeader.getSender())) {
-				LOGGER()->warn("We received a group set image message from sender {} for group {} with message ID #{} sent at {} with members {}, but we do not recognize the sender. Ignoring.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(image.toHex()).toStdString());
+				LOGGER()->warn("We received a group set image message from sender {} for group {} with message ID #{} sent at {} with members {}, but we do not recognize the sender. Ignoring.", messageHeader.getSender().toString(), realGroupId->toString(), messageHeader.getMessageId().toString(), messageHeader.getTimeSent().toString(), QString(image.toHex()).toStdString());
 				return;
 			}
 
-			LOGGER_DEBUG("Received GROUP SET_IMAGE message from {} in group {} with ID {}.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString());
-			if (!checkAndFixGroupMembership(messageHeader.getGroupId(), messageHeader.getSender())) {
+			LOGGER_DEBUG("Received GROUP SET_IMAGE message from {} in group {} with ID {}.", messageHeader.getSender().toString(), realGroupId->toString(), messageHeader.getMessageId().toString());
+			if (!checkAndFixGroupMembership(*realGroupId, messageHeader.getSender())) {
 				m_messageQueue.storeGroupMessage(MessageQueue::ReceivedGroupMessage(messageHeader, messages::GroupMessageType::SET_IMAGE, image));
 				return;
 			}
 
-			this->m_storage.storeReceivedGroupSetImage(messageHeader.getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTimeSent(), messageHeader.getTimeReceived(), image);
+			this->m_storage.storeReceivedGroupSetImage(*realGroupId, messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTimeSent(), messageHeader.getTimeReceived(), image);
 			if (this->m_networkSentMessageAcceptor != nullptr) {
 				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(messageHeader.getSender(), messageHeader.getMessageId());
 			}

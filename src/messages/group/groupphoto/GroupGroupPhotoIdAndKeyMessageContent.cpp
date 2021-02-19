@@ -72,11 +72,13 @@ namespace openmittsu {
 			}
 
 			MessageContent* GroupGroupPhotoIdAndKeyMessageContent::fromPacketPayload(FullMessageHeader const& messageHeader, QByteArray const& payload) const {
-				constexpr int const payloadSize = 1 + openmittsu::protocol::GroupId::getSizeOfGroupIdInBytes() + (PROTO_IMAGESERVER_ID_LENGTH_BYTES)+4 + openmittsu::crypto::EncryptionKey::getSizeOfEncryptionKeyInBytes();
+				// Super weird message, only has the group ID but not the creator, seems like a protocol bug
+				constexpr int const payloadSize = 1 + PROTO_GROUP_GROUPID_LENGTH_BYTES + (PROTO_IMAGESERVER_ID_LENGTH_BYTES) + 4 + openmittsu::crypto::EncryptionKey::getSizeOfEncryptionKeyInBytes();
 				verifyPayloadMinSizeAndSignatureByte(PROTO_MESSAGE_SIGNATURE_GROUP_PHOTO, payloadSize, payload, true);
 
 				int startingPosition = 1;
-				openmittsu::protocol::GroupId const group(openmittsu::protocol::GroupId::fromData(payload.mid(startingPosition, openmittsu::protocol::GroupId::getSizeOfGroupIdInBytes())));
+				quint64 const groupId = openmittsu::utility::ByteArrayConversions::convert8ByteQByteArrayToQuint64(payload.mid(startingPosition, PROTO_GROUP_GROUPID_LENGTH_BYTES));
+				openmittsu::protocol::GroupId const group(0, groupId);
 				startingPosition += openmittsu::protocol::GroupId::getSizeOfGroupIdInBytes();
 				QByteArray const id(payload.mid(startingPosition, PROTO_IMAGESERVER_ID_LENGTH_BYTES));
 				startingPosition += PROTO_IMAGESERVER_ID_LENGTH_BYTES;
@@ -89,7 +91,8 @@ namespace openmittsu {
 
 			QByteArray GroupGroupPhotoIdAndKeyMessageContent::toPacketPayload() const {
 				QByteArray result(1, PROTO_MESSAGE_SIGNATURE_GROUP_PHOTO);
-				result.append(getGroupId().getGroupIdAsByteArray());
+				//result.append(getGroupId().getGroupIdAsByteArray());
+				result.append(openmittsu::utility::ByteArrayConversions::convertQuint64toQByteArray(getGroupId().getGroupId()));
 				result.append(imageId);
 				result.append(openmittsu::utility::Endian::uint32FromHostToLittleEndianByteArray(sizeInBytes));
 				result.append(encryptionKey.getEncryptionKey());
