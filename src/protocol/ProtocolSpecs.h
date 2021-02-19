@@ -47,6 +47,7 @@ constexpr auto PROTO_PACKET_SIGNATURE_SERVER_ACK                = ((char)-127); 
 constexpr auto PROTO_PACKET_SIGNATURE_CLIENT_ACK                = ((char)-126);                 // 0x82
 constexpr auto PROTO_PACKET_SIGNATURE_CONNECTION_ESTABLISHED    = ((char)-48);                  // 0xD0
 constexpr auto PROTO_PACKET_SIGNATURE_CONNECTION_DUPLICATE      = ((char)-32);                  // 0xE0
+constexpr auto PROTO_PACKET_SIGNATURE_CONNECTION_ALERT          = ((char)-31);                  // 0xE1
 
 // Payload Signature Bytes
 constexpr auto PROTO_MESSAGE_SIGNATURE_CONTACT_TEXT             = ((char)1);                    // 0x01
@@ -54,7 +55,13 @@ constexpr auto PROTO_MESSAGE_SIGNATURE_CONTACT_PICTURE          = ((char)2);    
 constexpr auto PROTO_MESSAGE_SIGNATURE_CONTACT_LOCATION         = ((char)16);                   // 0x10
 constexpr auto PROTO_MESSAGE_SIGNATURE_CONTACT_VIDEO            = ((char)19);                   // 0x13
 constexpr auto PROTO_MESSAGE_SIGNATURE_CONTACT_AUDIO            = ((char)20);                   // 0x14
+constexpr auto PROTO_MESSAGE_SIGNATURE_CONTACT_POLL_CREATION    = ((char)21);                   // 0x15
+constexpr auto PROTO_MESSAGE_SIGNATURE_CONTACT_POLL_ANSWER      = ((char)22);                   // 0x16
 constexpr auto PROTO_MESSAGE_SIGNATURE_CONTACT_FILE             = ((char)23);                   // 0x17
+constexpr auto PROTO_MESSAGE_SIGNATURE_CONTACT_SET_PHOTO        = ((char)24);                   // 0x18
+constexpr auto PROTO_MESSAGE_SIGNATURE_CONTACT_DELETE_PHOTO     = ((char)25);                   // 0x19
+constexpr auto PROTO_MESSAGE_SIGNATURE_CONTACT_REQUEST_PHOTO    = ((char)26);                   // 0x1A
+
 constexpr auto PROTO_MESSAGE_SIGNATURE_GROUP_TEXT               = ((char)65);                   // 0x41
 constexpr auto PROTO_MESSAGE_SIGNATURE_GROUP_LOCATION           = ((char)66);                   // 0x42
 constexpr auto PROTO_MESSAGE_SIGNATURE_GROUP_PICTURE            = ((char)67);                   // 0x43
@@ -64,10 +71,21 @@ constexpr auto PROTO_MESSAGE_SIGNATURE_GROUP_FILE               = ((char)70);   
 constexpr auto PROTO_MESSAGE_SIGNATURE_GROUP_CREATION           = ((char)74);                   // 0x4A
 constexpr auto PROTO_MESSAGE_SIGNATURE_GROUP_TITLE              = ((char)75);                   // 0x4B
 constexpr auto PROTO_MESSAGE_SIGNATURE_GROUP_LEAVE              = ((char)76);                   // 0x4C
+constexpr auto PROTO_MESSAGE_SIGNATURE_GROUP_ADD_MEMBER         = ((char)77);                   // 0x4D
+constexpr auto PROTO_MESSAGE_SIGNATURE_GROUP_REMOVE_MEMBER      = ((char)78);                   // 0x4E
+constexpr auto PROTO_MESSAGE_SIGNATURE_GROUP_DESTROY            = ((char)79);                   // 0x4F
 constexpr auto PROTO_MESSAGE_SIGNATURE_GROUP_PHOTO              = ((char)80);                   // 0x50
 constexpr auto PROTO_MESSAGE_SIGNATURE_GROUP_SYNC               = ((char)81);                   // 0x51
 constexpr auto PROTO_MESSAGE_SIGNATURE_GROUP_POLL_CREATIION     = ((char)82);                   // 0x52
 constexpr auto PROTO_MESSAGE_SIGNATURE_GROUP_POLL_ANSWER        = ((char)83);                   // 0x53
+constexpr auto PROTO_MESSAGE_SIGNATURE_GROUP_DELETE_PHOTO       = ((char)84);                   // 0x54
+
+constexpr auto PROTO_MESSAGE_SIGNATURE_VOIP_CALL_OFFER          = ((char)96);                   // 0x60
+constexpr auto PROTO_MESSAGE_SIGNATURE_VOIP_CALL_ANSWER         = ((char)97);                   // 0x61
+constexpr auto PROTO_MESSAGE_SIGNATURE_VOIP_ICE_CANDIDATES      = ((char)98);                   // 0x62
+constexpr auto PROTO_MESSAGE_SIGNATURE_VOIP_CALL_HANGUP         = ((char)99);                   // 0x63
+constexpr auto PROTO_MESSAGE_SIGNATURE_VOIP_CALL_RINGING        = ((char)100);                  // 0x64
+
 constexpr auto PROTO_MESSAGE_SIGNATURE_RECEIPT                  = ((char)-128);                 // 0x80
 constexpr auto PROTO_MESSAGE_SIGNATURE_TYPINGNOTIFICATION       = ((char)-112);                 // 0x90
 
