@@ -61,7 +61,7 @@ namespace openmittsu {
 						++position;
 					}
 				} else {
-					int const nextComma = s.indexOf(',', position);
+					int const nextComma = inQuoted ? -1 : s.indexOf(',', position);
 					int const nextBackslash = s.indexOf('\\', position);
 					int const nextQuotationMark = s.indexOf('"', position);
 
