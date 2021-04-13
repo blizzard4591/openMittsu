@@ -33,6 +33,7 @@ namespace openmittsu {
 			}
 			QMutexLocker lock(&m_mutex);
 			m_messageCount++;
+			LOGGER_DEBUG("Added message with ID {} to GroupContentMessageAcknowledgmentProcessor for group {}, now have a total of {} messages.", addedMessageId.toString(), m_groupId.toString(), m_messageCount);
 		}
 
 		void GroupContentMessageAcknowledgmentProcessor::sendFailedTimeout(openmittsu::network::ProtocolClient* protocolClient) {
@@ -52,6 +53,7 @@ namespace openmittsu {
 			if (m_messageCount > 0) {
 				m_hasFailedMessage = true;
 				m_messageCount--;
+				LOGGER_DEBUG("Send failed for message with ID {} in GroupContentMessageAcknowledgmentProcessor for group {}, now have a total of {} messages.", messageId.toString(), m_groupId.toString(), m_messageCount);
 				sendResultIfDone(protocolClient);
 			} else {
 				LOGGER()->warn("GroupContentMessageAcknowledgmentProcessor received a MESSAGE_FAILED notification for group {}, message ID {}, that was not recognized.", m_groupId.toString(), m_messageId.toString());
@@ -66,6 +68,7 @@ namespace openmittsu {
 			QMutexLocker lock(&m_mutex);
 			if (m_messageCount > 0) {
 				m_messageCount--;
+				LOGGER_DEBUG("Send success for message with ID {} in GroupContentMessageAcknowledgmentProcessor for group {}, now have a total of {} messages.", messageId.toString(), m_groupId.toString(), m_messageCount);
 				sendResultIfDone(protocolClient);
 			} else {
 				LOGGER()->warn("GroupContentMessageAcknowledgmentProcessor received a MESSAGE_SUCCESS notification for group {}, message ID {}, that was not recognized.", m_groupId.toString(), m_messageId.toString());
@@ -75,8 +78,10 @@ namespace openmittsu {
 		void GroupContentMessageAcknowledgmentProcessor::sendResultIfDone(openmittsu::network::ProtocolClient* protocolClient) {
 			if (m_messageCount == 0) {
 				if (m_hasFailedMessage) {
+					LOGGER_DEBUG("Group Message with message ID #{} to group {} has no ACKs outstanding, but we have failed sends.", m_messageId.toString(), m_groupId.toString());
 					groupMessageSendFailed(m_groupId, m_messageId, protocolClient);
 				} else {
+					LOGGER_DEBUG("Group Message with message ID #{} to group {} has no ACKs outstanding, done.", m_messageId.toString(), m_groupId.toString());
 					groupMessageSendSuccess(m_groupId, m_messageId, protocolClient);
 				}
 			} else {

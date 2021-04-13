@@ -955,8 +955,19 @@ namespace openmittsu {
 				return;
 			}
 
-			LOGGER_DEBUG("Received GROUP CREATION message from {} in group {} with ID {}.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString());
-			this->m_storage.storeReceivedGroupCreation(messageHeader.getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTimeSent(), messageHeader.getTimeReceived(), members);
+			LOGGER_DEBUG("Received GROUP CREATION message from {} in group {} with ID {} and members {}.", messageHeader.getSender().toString(), messageHeader.getGroupId().toString(), messageHeader.getMessageId().toString(), openmittsu::protocol::ContactIdList(members).toStringS().toStdString());
+
+			QSet<openmittsu::protocol::ContactId> membersLocal(members);
+			/*
+			* Okay, so there is a bug/feature in e.g. the iOS client - it will not include itself in the group members, even though it considers itself part of the group.
+			* Since the owner leaving the group is very uncommon, we will ignore this and just always add the owner...
+			*/
+			if (!membersLocal.contains(messageHeader.getGroupId().getOwner())) {
+				LOGGER()->warn("Group creation for {} did not contain the owner; because of the iOS anomaly, we are adding him anyway. This might cause desync when sending messages.", messageHeader.getGroupId().toString());
+				membersLocal.insert(messageHeader.getGroupId().getOwner());
+			}
+
+			this->m_storage.storeReceivedGroupCreation(messageHeader.getGroupId(), messageHeader.getSender(), messageHeader.getMessageId(), messageHeader.getTimeSent(), messageHeader.getTimeReceived(), membersLocal);
 			if (this->m_networkSentMessageAcceptor != nullptr) {
 				this->m_networkSentMessageAcceptor->sendMessageReceivedAcknowledgement(messageHeader.getSender(), messageHeader.getMessageId());
 			}
@@ -1358,6 +1369,9 @@ namespace openmittsu {
 						if (group.getOwner() == this->m_storage.getSelfContact()) {
 							LOGGER_DEBUG("checkAndFixGroupMembership for group {} with sender {}: sender not in group, we are the owner, rejecting.", group.toString(), sender.toString());
 							return false;
+						} else if (group.getOwner() == sender) {
+							LOGGER_DEBUG("checkAndFixGroupMembership for group {} with sender {}: sender not in group, but it is the owner, accepting.", group.toString(), sender.toString());
+							return true;
 						} else {
 							LOGGER_DEBUG("checkAndFixGroupMembership for group {} with sender {}: sender not in group, requesting sync if applicable.", group.toString(), sender.toString());
 							requestSyncForGroupIfApplicable(group);
