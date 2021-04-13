@@ -2,6 +2,8 @@
 
 #include "src/exceptions/IllegalArgumentException.h"
 
+#include "src/utility/Logging.h"
+
 namespace openmittsu {
 	namespace backup {
 
@@ -47,6 +49,15 @@ namespace openmittsu {
 			if (!hasRequiredFields(requiredFields, headerOffsets)) {
 				throw openmittsu::exceptions::IllegalArgumentException() << "Could not parse data to Contact, not all required fields are present!";
 			} else {
+				LOGGER_DEBUG("Trying to parse contact from data '{}', '{}', '{}', '{}', '{}', '{}', '{}'.", 
+					splittedLines.getColumn(headerOffsets.value(QStringLiteral("identity"))).toStdString(),
+					splittedLines.getColumn(headerOffsets.value(QStringLiteral("publickey"))).toStdString(),
+					splittedLines.getColumn(headerOffsets.value(QStringLiteral("verification"))).toStdString(),
+					splittedLines.getColumn(headerOffsets.value(QStringLiteral("firstname"))).toStdString(),
+					splittedLines.getColumn(headerOffsets.value(QStringLiteral("lastname"))).toStdString(),
+					splittedLines.getColumn(headerOffsets.value(QStringLiteral("nick_name"))).toStdString(),
+					splittedLines.getColumn(headerOffsets.value(QStringLiteral("color"))).toStdString()
+				);
 				openmittsu::protocol::ContactId const id(openmittsu::protocol::ContactId(splittedLines.getColumn(headerOffsets.value(QStringLiteral("identity")))));
 				openmittsu::crypto::PublicKey const publicKey(openmittsu::crypto::PublicKey::fromHexString(splittedLines.getColumn(headerOffsets.value(QStringLiteral("publickey")))));
 				openmittsu::protocol::ContactIdVerificationStatus const verificationStatus(openmittsu::protocol::ContactIdVerificationStatusHelper::fromQString(splittedLines.getColumn(headerOffsets.value(QStringLiteral("verification")))));

@@ -41,6 +41,14 @@ namespace openmittsu {
 			if (!hasRequiredFields(requiredFields, headerOffsets)) {
 				throw openmittsu::exceptions::IllegalArgumentException() << "Could not parse data to Group, not all required fields are present!";
 			} else {
+				LOGGER_DEBUG("Trying to parse group from data '{}', '{}', '{}', '{}', '{}', '{}'.",
+					splittedLines.getColumn(headerOffsets.value(QStringLiteral("creator"))).toStdString(),
+					splittedLines.getColumn(headerOffsets.value(QStringLiteral("id"))).toStdString(),
+					splittedLines.getColumn(headerOffsets.value(QStringLiteral("groupname"))).toStdString(),
+					splittedLines.getColumn(headerOffsets.value(QStringLiteral("created_at"))).toStdString(),
+					splittedLines.getColumn(headerOffsets.value(QStringLiteral("members"))).toStdString(),
+					splittedLines.getColumn(headerOffsets.value(QStringLiteral("deleted"))).toStdString()
+				);
 				openmittsu::protocol::ContactId const owner(openmittsu::protocol::ContactId(splittedLines.getColumn(headerOffsets.value(QStringLiteral("creator")))));
 				openmittsu::protocol::GroupId const id(owner, splittedLines.getColumn(headerOffsets.value(QStringLiteral("id"))));
 				QString const name(splittedLines.getColumn(headerOffsets.value(QStringLiteral("groupname"))));

@@ -56,6 +56,7 @@ namespace openmittsu {
 				std::shared_ptr<openmittsu::database::SimpleDatabase> const database = std::make_shared<openmittsu::database::SimpleDatabase>(m_databaseFilename, identityBackup.getClientContactId(), identityBackup.getClientLongTermKeyPair(), m_databasePassword, m_mediaStorageLocation);
 
 				{
+					LOGGER_DEBUG("Will now read the contacts.csv...");
 					FileReader<ContactBackupObject> fileReader(m_backupFilePath, QStringLiteral("contacts.csv"));
 					QSet<openmittsu::protocol::ContactId> knownContacts;
 					QVector<openmittsu::database::NewContactData> newContacts;
@@ -78,6 +79,7 @@ namespace openmittsu {
 				}
 
 				{
+					LOGGER_DEBUG("Will now read the groups.csv...");
 					FileReader<GroupBackupObject> fileReader(m_backupFilePath, QStringLiteral("groups.csv"));
 					QSet<openmittsu::protocol::GroupId> knownGroups;
 					QVector<openmittsu::database::NewGroupData> newGroups;
@@ -100,6 +102,7 @@ namespace openmittsu {
 				}
 
 				{
+					LOGGER_DEBUG("Will now read the contact message files...");
 					QHash<openmittsu::protocol::ContactId, QString> const contactMessageFiles = ContactMessageBackupObject::getContactMessageFiles(m_backupFilePath);
 					LOGGER()->info("Found {} contacts message files.", contactMessageFiles.size());
 
@@ -122,6 +125,7 @@ namespace openmittsu {
 				}
 
 				{
+					LOGGER_DEBUG("Will now read the group message files...");
 					QHash<openmittsu::protocol::GroupId, QString> const groupMessageFiles = GroupMessageBackupObject::getGroupMessageFiles(m_backupFilePath);
 					LOGGER()->info("Found {} group message files.", groupMessageFiles.size());
 
@@ -147,6 +151,7 @@ namespace openmittsu {
 				// Media Items
 				//
 				{
+					LOGGER_DEBUG("Will now read the contact media files...");
 					QHash<QString, QString> const contactMediaItems = ContactMediaItemBackupObject::getContactMediaFiles(m_backupFilePath);
 					LOGGER()->info("Found {} contact media files.", contactMediaItems.size());
 
@@ -165,6 +170,7 @@ namespace openmittsu {
 				}
 
 				{
+					LOGGER_DEBUG("Will now read the group media files...");
 					QHash<QString, QString> const groupMediaItems = GroupMediaItemBackupObject::getGroupMediaFiles(m_backupFilePath);
 					LOGGER()->info("Found {} group media files.", groupMediaItems.size());
 
