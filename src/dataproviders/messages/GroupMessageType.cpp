@@ -50,7 +50,7 @@ namespace openmittsu {
 					return GroupMessageType::IMAGE;
 				} else if (messageTypeString == QStringLiteral("LOCATION")) {
 					return GroupMessageType::LOCATION;
-				} else if (messageTypeString == QStringLiteral("AUDIO")) {
+				} else if ((messageTypeString == QStringLiteral("AUDIO")) || (messageTypeString == QStringLiteral("VOICEMESSAGE"))) {
 					return GroupMessageType::AUDIO;
 				} else if (messageTypeString == QStringLiteral("VIDEO")) {
 					return GroupMessageType::VIDEO;

@@ -110,6 +110,7 @@ namespace openmittsu {
 					auto end = contactMessageFiles.constEnd();
 
 					for (; it != end; ++it) {
+						LOGGER()->info("Will now read contact message file {}.", it.value().toStdString());
 						FileReader<ContactMessageBackupObject> fileReader(m_backupFilePath, it.value());
 						while (fileReader.hasNext()) {
 							ContactMessageBackupObject const cmbo = fileReader.getNext();
@@ -132,6 +133,7 @@ namespace openmittsu {
 					auto it = groupMessageFiles.constBegin();
 					auto end = groupMessageFiles.constEnd();
 					for (; it != end; ++it) {
+						LOGGER()->info("Will now read group message file {}.", it.value().toStdString());
 						FileReader<GroupMessageBackupObject> fileReader(m_backupFilePath, it.value());
 						while (fileReader.hasNext()) {
 							GroupMessageBackupObject const gmbo = fileReader.getNext();
@@ -158,7 +160,8 @@ namespace openmittsu {
 					auto it = contactMediaItems.constBegin();
 					auto end = contactMediaItems.constEnd();
 					for (; it != end; ++it) {
-						ContactMediaItemBackupObject const cmibo = ContactMediaItemBackupObject::fromFile(m_backupFilePath, *it);
+						LOGGER()->info("Will now read contact media file {}.", it.value().toStdString());
+						ContactMediaItemBackupObject const cmibo = ContactMediaItemBackupObject::fromFile(m_backupFilePath, it.value());
 						contactMediaFiles.append(cmibo);
 					}
 					LOGGER()->info("Parsed {} contact media files.", contactMediaFiles.size());
@@ -177,7 +180,8 @@ namespace openmittsu {
 					auto it = groupMediaItems.constBegin();
 					auto end = groupMediaItems.constEnd();
 					for (; it != end; ++it) {
-						groupMediaFiles.append(GroupMediaItemBackupObject::fromFile(m_backupFilePath, *it));
+						LOGGER()->info("Will now read group media file {}.", it.value().toStdString());
+						groupMediaFiles.append(GroupMediaItemBackupObject::fromFile(m_backupFilePath, it.value()));
 					}
 					LOGGER()->info("Parsed {} group media files.", groupMediaFiles.size());
 					emit progressUpdated(92);

@@ -40,7 +40,7 @@ namespace openmittsu {
 					return ContactMessageType::IMAGE;
 				} else if (messageTypeString == QStringLiteral("LOCATION")) {
 					return ContactMessageType::LOCATION;
-				} else if (messageTypeString == QStringLiteral("AUDIO")) {
+				} else if ((messageTypeString == QStringLiteral("AUDIO")) || (messageTypeString == QStringLiteral("VOICEMESSAGE"))) {
 					return ContactMessageType::AUDIO;
 				} else if (messageTypeString == QStringLiteral("VIDEO")) {
 					return ContactMessageType::VIDEO;
