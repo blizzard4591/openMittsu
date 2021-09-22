@@ -1014,17 +1014,17 @@ namespace openmittsu {
 			}
 			m_socket->flush();
 
-			if (!waitForData(PROTO_AUTHENTICATION_REPLY_LENGTH_BYTES)) {
-				LOGGER()->critical("Got no reply from server for AuthAck, we have {} of {} bytes available.", m_socket->bytesAvailable(), PROTO_AUTHENTICATION_REPLY_LENGTH_BYTES);
+			if (!waitForData(PROTO_AUTHENTICATION_REPLY_LENGTH_BYTES + crypto_box_MACBYTES)) {
+				LOGGER()->critical("Got no reply from server for AuthAck, we have {} of {} bytes available.", m_socket->bytesAvailable(), PROTO_AUTHENTICATION_REPLY_LENGTH_BYTES + crypto_box_MACBYTES);
 				++failedReconnectAttempts;
 				emit connectToFinished(-17, "Server did not reply after sending client authentication (invalid identity?).");
 				return;
 			}
-			LOGGER_DEBUG("The AuthAck package is {} bytes long (expecting {} bytes).", m_socket->bytesAvailable(), PROTO_AUTHENTICATION_REPLY_LENGTH_BYTES);
+			LOGGER_DEBUG("The AuthAck package is {} bytes long (expecting {} bytes).", m_socket->bytesAvailable(), PROTO_AUTHENTICATION_REPLY_LENGTH_BYTES + crypto_box_MACBYTES);
 
 			// Decrypt Authentication acknowledgment
-			QByteArray authenticationAcknowledgment = m_socket->read(PROTO_AUTHENTICATION_REPLY_LENGTH_BYTES);
-			if (authenticationAcknowledgment.size() != (PROTO_AUTHENTICATION_REPLY_LENGTH_BYTES)) {
+			QByteArray authenticationAcknowledgment = m_socket->read(PROTO_AUTHENTICATION_REPLY_LENGTH_BYTES + crypto_box_MACBYTES);
+			if (authenticationAcknowledgment.size() != (PROTO_AUTHENTICATION_REPLY_LENGTH_BYTES + crypto_box_MACBYTES)) {
 				LOGGER()->critical("Could not read authentication acknowledgment data from Server, even though it should be available.");
 				++failedReconnectAttempts;
 				emit connectToFinished(-18, "Could not read authentication acknowledgment data from Server, even though it should be available.");
@@ -1032,7 +1032,15 @@ namespace openmittsu {
 			}
 			LOGGER_DEBUG("Data (server authAck): {}", QString(authenticationAcknowledgment.toHex()).toStdString());
 
-			QByteArray authenticationAcknowledgmentDecrypted = m_cryptoBox->decryptFromServer(authenticationAcknowledgment);
+			// Needs to be all zeros
+			QByteArray const authenticationAcknowledgmentDecrypted = m_cryptoBox->decryptFromServer(authenticationAcknowledgment);
+			QByteArray const authAllZeroes(PROTO_AUTHENTICATION_REPLY_LENGTH_BYTES, '\0');
+			if ((authenticationAcknowledgmentDecrypted.size() != PROTO_AUTHENTICATION_REPLY_LENGTH_BYTES) || (authenticationAcknowledgmentDecrypted != authAllZeroes)) {
+				LOGGER()->critical("Authentication acknowledgment has invalid size or is not all zero: {}", QString(authenticationAcknowledgmentDecrypted.toHex()).toStdString());
+				++failedReconnectAttempts;
+				emit connectToFinished(-19, "Authentication acknowledgment has invalid size or is not all zero.");
+				return;
+			}
 
 			LOGGER_DEBUG("Handshake finished!");
 			failedReconnectAttempts = 0;

@@ -14,7 +14,7 @@ constexpr auto PROTO_NONCE_PREFIX_LENGTH_BYTES                  = (16);
 constexpr auto PROTO_AUTHENTICATION_UNENCRYPTED_LENGTH_BYTES    = (128);
 constexpr auto PROTO_AUTHENTICATION_VERSION_BYTES               = (32);
 constexpr auto PROTO_AUTHENTICATION_RANDOMNONCE_BYTES           = (24);
-constexpr auto PROTO_AUTHENTICATION_REPLY_LENGTH_BYTES          = (32);
+constexpr auto PROTO_AUTHENTICATION_REPLY_LENGTH_BYTES          = (16);
 
 constexpr auto PROTO_DATA_HEADER_SIZE_LENGTH_BYTES              = (2);
 constexpr auto PROTO_DATA_HEADER_TYPE_LENGTH_BYTES              = (4);
