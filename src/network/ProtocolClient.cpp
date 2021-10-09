@@ -84,8 +84,9 @@ namespace openmittsu {
 			//acknowledgmentWaitingMessages.clear();
 			//acknowledgmentWaitingMutex.unlock();
 
-			LOGGER()->info("Now connecting to {} on port {}.", m_serverConfiguration->getServerHost().toStdString(), m_serverConfiguration->getServerPort());
-			m_socket->connectToHost(m_serverConfiguration->getServerHost(), m_serverConfiguration->getServerPort());
+			QString const serverGroup = m_databaseWrapperFactory.getDatabaseWrapper().getServerGroup();
+			LOGGER()->info("Now connecting to {} on port {}.", m_serverConfiguration->getServerHost().arg(serverGroup).toStdString(), m_serverConfiguration->getServerPort());
+			m_socket->connectToHost(m_serverConfiguration->getServerHost().arg(serverGroup), m_serverConfiguration->getServerPort());
 		}
 
 		void ProtocolClient::socketDisconnected(bool emitSignal) {

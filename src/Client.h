@@ -84,6 +84,7 @@ public slots:
 	void contactRegistryOnIdentitiesChanged();
 	void connectionTimerOnTimer();
 	void unreadMessagesIconBlinkTimerOnTimer();
+	bool checkServerGroupInformationForId();
 
 	void onDatabaseUpdated();
 	void onDatabaseContactChanged(openmittsu::protocol::ContactId const& contact);

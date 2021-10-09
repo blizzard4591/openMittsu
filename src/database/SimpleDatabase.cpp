@@ -1372,6 +1372,33 @@ namespace openmittsu {
 			return std::make_shared<openmittsu::backup::IdentityBackup>(*m_identityBackup);
 		}
 
+		bool SimpleDatabase::isServerGroupKnownAndNotOutdated(int maximalAgeInSeconds) {
+			if (!hasOptionInternal(QStringLiteral("serverGroupLastFetched"), true)) {
+				return false;
+			}
+			QString const serverGroupLastFetchedString = getOptionValueInternal(QStringLiteral("serverGroupLastFetched"), true);
+			bool ok = false;
+			qint64 const serverGroupLastFetched = serverGroupLastFetchedString.toLongLong(&ok);
+			if (!ok) {
+				LOGGER()->error("Failed to parse 'serverGroupLastFetched' from value '{}'!", serverGroupLastFetchedString.toStdString());
+				return false;
+			}
+
+			return (QDateTime::currentDateTime().toSecsSinceEpoch() - serverGroupLastFetched) <= maximalAgeInSeconds;
+		}
+		
+		void SimpleDatabase::setServerGroup(QString const& serverGroup) {
+			setOptionInternal(QStringLiteral("serverGroup"), serverGroup, true);
+			setOptionInternal(QStringLiteral("serverGroupLastFetched"), QString::number(QDateTime::currentDateTime().toSecsSinceEpoch()), true);
+		}
+		
+		QString SimpleDatabase::getServerGroup() {
+			if (!hasOptionInternal(QStringLiteral("serverGroup"), true)) {
+				return QString::null;
+			}
+			return getOptionValueInternal(QStringLiteral("serverGroup"), true);
+		}
+
 		void SimpleDatabase::updateCachedIdentityBackup() {
 			QString const identityBackup = getOptionValueInternal(QStringLiteral("identity"), true);
 			m_identityBackup = std::make_unique<openmittsu::backup::IdentityBackup>(openmittsu::backup::IdentityBackup::fromBackupString(identityBackup, m_password));

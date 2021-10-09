@@ -9,7 +9,7 @@
 namespace openmittsu {
 	namespace crypto {
 
-		NonceGenerator::NonceGenerator() : m_mutex(), m_prefix(PROTO_NONCE_PREFIX_LENGTH_BYTES, 0x00), m_counter(0) {
+		NonceGenerator::NonceGenerator() : m_mutex(), m_prefix(PROTO_NONCE_PREFIX_LENGTH_BYTES, 0x00), m_counter(1) {
 			// Generate a random Prefix
 			randombytes_buf(m_prefix.data(), PROTO_NONCE_PREFIX_LENGTH_BYTES);
 		}
@@ -20,7 +20,7 @@ namespace openmittsu {
 			m_counter = std::move(other.m_counter);
 		}
 
-		NonceGenerator::NonceGenerator(QByteArray const& noncePrefix) : m_mutex(), m_prefix(noncePrefix), m_counter(0) {
+		NonceGenerator::NonceGenerator(QByteArray const& noncePrefix) : m_mutex(), m_prefix(noncePrefix), m_counter(1) {
 			if (m_prefix.size() != (PROTO_NONCE_PREFIX_LENGTH_BYTES)) {
 				throw openmittsu::exceptions::IllegalArgumentException() << "Invalid nonce prefix with size of " << m_prefix.size() << " instead of " << (PROTO_NONCE_PREFIX_LENGTH_BYTES) << " Bytes.";
 			}

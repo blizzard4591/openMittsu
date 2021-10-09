@@ -149,6 +149,9 @@ namespace openmittsu {
 			virtual openmittsu::protocol::MessageTime getGroupLastSyncRequestTime(openmittsu::protocol::GroupId const& group) override;
 
 			virtual std::shared_ptr<openmittsu::backup::IdentityBackup> getBackup() const override;
+			virtual bool isServerGroupKnownAndNotOutdated(int maximalAgeInSeconds) override;
+			virtual void setServerGroup(QString const& serverGroup) override;
+			virtual QString getServerGroup() override;
 
 			virtual void enableTimers() override;
 			virtual void sendAllWaitingMessages(std::shared_ptr<openmittsu::dataproviders::SentMessageAcceptor> messageAcceptor) override;

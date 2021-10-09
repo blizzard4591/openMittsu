@@ -433,6 +433,18 @@ namespace openmittsu {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN_NOARGS(getBackup, std::shared_ptr<openmittsu::backup::IdentityBackup>);
 		}
 
+		bool DatabaseWrapper::isServerGroupKnownAndNotOutdated(int maximalAgeInSeconds) {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(isServerGroupKnownAndNotOutdated, bool, Q_ARG(int, maximalAgeInSeconds));
+		}
+
+		void DatabaseWrapper::setServerGroup(QString const& serverGroup) {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_VOID(setServerGroup, Q_ARG(QString const&, serverGroup));
+		}
+
+		QString DatabaseWrapper::getServerGroup() {
+			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN_NOARGS(getServerGroup, QString);
+		}
+
 		QSet<openmittsu::protocol::ContactId> DatabaseWrapper::getContactsRequiringFeatureLevelCheck(int maximalAgeInSeconds) const {
 			OPENMITTSU_DATABASEWRAPPER_WRAP_RETURN(getContactsRequiringFeatureLevelCheck, QSet<openmittsu::protocol::ContactId>, Q_ARG(int, maximalAgeInSeconds));
 		}

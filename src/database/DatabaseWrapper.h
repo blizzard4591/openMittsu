@@ -132,6 +132,9 @@ namespace openmittsu {
 			virtual std::shared_ptr<DatabaseReadonlyGroupMessage> getGroupMessage(openmittsu::protocol::GroupId const& group, QString const& uuid) override;
 			// Mass Data, checks
 			virtual std::shared_ptr<openmittsu::backup::IdentityBackup> getBackup() const override;
+			virtual bool isServerGroupKnownAndNotOutdated(int maximalAgeInSeconds) override;
+			virtual void setServerGroup(QString const& serverGroup) override;
+			virtual QString getServerGroup() override;
 			virtual QSet<openmittsu::protocol::ContactId> getContactsRequiringFeatureLevelCheck(int maximalAgeInSeconds) const override;
 			virtual QSet<openmittsu::protocol::ContactId> getContactsRequiringAccountStatusCheck(int maximalAgeInSeconds) const override;
 			virtual void setContactAccountStatusBatch(ContactToAccountStatusMap const& status) override;

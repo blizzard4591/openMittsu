@@ -53,6 +53,7 @@
 #include "src/tasks/IdentityReceiverCallbackTask.h"
 #include "src/tasks/CheckFeatureLevelCallbackTask.h"
 #include "src/tasks/CheckContactActivityStatusCallbackTask.h"
+#include "src/tasks/FetchPrivateInformationCallbackTask.h"
 #include "src/tasks/SetFeatureLevelCallbackTask.h"
 
 #include "src/widgets/SimpleContactChatTab.h"
@@ -462,6 +463,11 @@ void Client::btnConnectOnClick() {
 			return;
 		}
 
+		if (!checkServerGroupInformationForId()) {
+			QMessageBox::warning(this, "Can not connect", "Please wait for your ServerGroup information to be updated.\nThis tells openMittsu which Threema server it needs to connect to for your specific ID and this info needs to be updated periodically.");
+			return;
+		}
+
 		m_ui->btnConnect->setEnabled(false);
 		m_ui->btnConnect->setText(tr("Connecting..."));
 
@@ -575,6 +581,8 @@ void Client::openDatabaseFile(QString const& fileName) {
 				updateDatabaseInfo(fileName);
 
 				contactRegistryOnIdentitiesChanged();
+
+				checkServerGroupInformationForId();
 				break;
 			}
 		} else {
@@ -591,6 +599,24 @@ void Client::askForDatabaseRemovalFromConfig(QString const& databaseLocation) {
 		LOGGER_DEBUG("Removing key \"FILEPATH_DATABASE\" from stored settings as the file+password was invalid.");
 		m_optionMaster->setOption(openmittsu::options::Options::FILEPATH_DATABASE, "");
 	}
+}
+
+bool Client::checkServerGroupInformationForId() {
+	if (m_databaseWrapper.hasDatabase()) {
+		bool const isServerGroupKnownAndNotOutdated = m_databaseWrapper.isServerGroupKnownAndNotOutdated(7 * 24 * 60 * 60); // Max age: 7 days.
+		if (!isServerGroupKnownAndNotOutdated) {
+			LOGGER()->info("ServerGroup information for client identity unknown or possibly outdated, updating...");
+
+			std::shared_ptr<openmittsu::backup::IdentityBackup> const backupData = m_databaseWrapper.getBackup();
+			openmittsu::crypto::BasicCryptoBox basicCryptoBox(backupData->getClientLongTermKeyPair(), m_serverConfiguration->getServerLongTermPublicKey());
+			openmittsu::tasks::FetchPrivateInformationCallbackTask* task = new openmittsu::tasks::FetchPrivateInformationCallbackTask(m_serverConfiguration, basicCryptoBox, backupData->getClientContactId());
+			OPENMITTSU_CONNECT(task, finished(openmittsu::tasks::CallbackTask*), this, callbackTaskFinished(openmittsu::tasks::CallbackTask*));
+			task->start();
+			return false;
+		}
+		return true;
+	}
+	return false;
 }
 
 void Client::contactRegistryOnIdentitiesChanged() {
@@ -1401,6 +1427,20 @@ void Client::callbackTaskFinished(openmittsu::tasks::CallbackTask* callbackTask)
 			LOGGER()->info("Updated feature level for used Client ID to latest support version {}.", openmittsu::protocol::FeatureLevelHelper::toInt(openmittsu::protocol::FeatureLevelHelper::latestSupported()));
 		} else {
 			LOGGER()->error("Updating the feature level for used Client ID to latest support version {} failed: {}", openmittsu::protocol::FeatureLevelHelper::toInt(openmittsu::protocol::FeatureLevelHelper::latestSupported()), setFeatureLevelTask->getErrorMessage().toStdString());
+		}
+	} else if (dynamic_cast<openmittsu::tasks::FetchPrivateInformationCallbackTask*>(callbackTask) != nullptr) {
+		openmittsu::utility::UniquePtrWithDelayedThreadDeletion<openmittsu::tasks::FetchPrivateInformationCallbackTask> fetchPrivateInformationTask(dynamic_cast<openmittsu::tasks::FetchPrivateInformationCallbackTask*>(callbackTask));
+		if (fetchPrivateInformationTask->hasFinishedSuccessfully()) {
+			LOGGER()->info("Received server group {} for client identity.", fetchPrivateInformationTask->getServerGroup().toStdString());
+			if (!m_databaseWrapper.hasDatabase()) {
+				LOGGER()->error("Wanted to update server group, but the database is null!");
+				return;
+			}
+
+			m_databaseWrapper.setServerGroup(fetchPrivateInformationTask->getServerGroup());
+		} else {
+			LOGGER()->error("Receiving the server group for the client identity failed: {}", fetchPrivateInformationTask->getErrorMessage().toStdString());
+			QMessageBox::warning(this, "Failed to retrieve ServerGroup", QString("openMittsu was unable to fetch needed server information from the Threema servers. This will automatically be retried later, but a connection will not be possible until this update succeeds.\nThe error was: ").append(fetchPrivateInformationTask->getErrorMessage()));
 		}
 	}
 }

@@ -31,18 +31,18 @@ namespace openmittsu {
 				throw openmittsu::exceptions::InternalErrorException() << "Size constraint failed: Authentication Package Size invalid for Field #2";
 			}
 
+			// Server Nonce Prefix is saved in the Connection Context.
+			result.append(m_cryptoBox->getServerNonceGenerator().getNoncePrefix());
+
+			if (result.size() != (ContactId::getSizeOfContactIdInBytes() + (PROTO_AUTHENTICATION_VERSION_BYTES) + openmittsu::crypto::NonceGenerator::getNoncePrefixLength())) {
+				throw openmittsu::exceptions::InternalErrorException() << "Size constraint failed: Authentication Package Size invalid for Field #3";
+			}
+
 			// A 24-Byte random nonce string
 			openmittsu::crypto::Nonce const nonce;
 			result.append(nonce.getNonce());
 
-			if (result.size() != (ContactId::getSizeOfContactIdInBytes() + (PROTO_AUTHENTICATION_VERSION_BYTES) + openmittsu::crypto::Nonce::getNonceLength())) {
-				throw openmittsu::exceptions::InternalErrorException() << "Size constraint failed: Authentication Package Size invalid for Field #3";
-			}
-
-			// Server Nonce Prefix is saved in the Connection Context.
-			result.append(m_cryptoBox->getServerNonceGenerator().getNoncePrefix());
-
-			if (result.size() != (ContactId::getSizeOfContactIdInBytes() + (PROTO_AUTHENTICATION_VERSION_BYTES) + openmittsu::crypto::NonceGenerator::getNoncePrefixLength() + openmittsu::crypto::Nonce::getNonceLength())) {
+			if (result.size() != (ContactId::getSizeOfContactIdInBytes() + (PROTO_AUTHENTICATION_VERSION_BYTES)  + openmittsu::crypto::NonceGenerator::getNoncePrefixLength() + openmittsu::crypto::Nonce::getNonceLength())) {
 				throw openmittsu::exceptions::InternalErrorException() << "Size constraint failed: Authentication Package Size invalid for Field #4";
 			}
 

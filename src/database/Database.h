@@ -173,6 +173,9 @@ namespace openmittsu {
 
 			// Mass Data, checks
 			virtual std::shared_ptr<openmittsu::backup::IdentityBackup> getBackup() const = 0;
+			virtual bool isServerGroupKnownAndNotOutdated(int maximalAgeInSeconds) = 0;
+			virtual void setServerGroup(QString const& serverGroup) = 0;
+			virtual QString getServerGroup() = 0;
 			virtual QSet<openmittsu::protocol::ContactId> getContactsRequiringFeatureLevelCheck(int maximalAgeInSeconds) const = 0;
 			virtual QSet<openmittsu::protocol::ContactId> getContactsRequiringAccountStatusCheck(int maximalAgeInSeconds) const = 0;
 			virtual void setContactAccountStatusBatch(ContactToAccountStatusMap const& status) = 0;
