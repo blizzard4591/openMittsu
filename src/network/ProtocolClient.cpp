@@ -354,10 +354,8 @@ namespace openmittsu {
 				} else if (packetTypeByte == (PROTO_PACKET_SIGNATURE_CLIENT_ACK)) {
 					LOGGER()->warn("Received a CLIENT_ACKNOWLEDGE packet: {}", QString(packetContents.toHex()).toStdString());
 				} else if (packetTypeByte == (PROTO_PACKET_SIGNATURE_CONNECTION_ESTABLISHED)) {
+					// Not used for us currently.
 					LOGGER()->info("Received a CONNECTION_ESTABLISHED packet.");
-					m_isAllowedToSend = true;
-					keepAliveCounter = 1;
-					keepAliveTimer->start();
 				} else if (packetTypeByte == (PROTO_PACKET_SIGNATURE_CONNECTION_DUPLICATE)) {
 					LOGGER()->warn("Received a CONNECTION_DUPLICATE warning, we will be forcefully disconnected after this. Message from Server: {}", QString::fromUtf8(packetContents).toStdString());
 					failedReconnectAttempts = std::numeric_limits<decltype(failedReconnectAttempts)>::max();
@@ -1047,8 +1045,11 @@ namespace openmittsu {
 			failedReconnectAttempts = 0;
 			connectionStart = QDateTime::currentDateTime();
 			m_isConnected = true;
-			m_isAllowedToSend = false;
+			m_isAllowedToSend = true;
 			m_readyReadRemainingData.clear();
+
+			keepAliveCounter = 1;
+			keepAliveTimer->start();
 
 			// Test if the server already sent a first data package
 			if (m_socket->bytesAvailable() > 0) {
