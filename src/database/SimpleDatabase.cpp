@@ -1394,7 +1394,7 @@ namespace openmittsu {
 		
 		QString SimpleDatabase::getServerGroup() {
 			if (!hasOptionInternal(QStringLiteral("serverGroup"), true)) {
-				return QString::null;
+				return QString();
 			}
 			return getOptionValueInternal(QStringLiteral("serverGroup"), true);
 		}
