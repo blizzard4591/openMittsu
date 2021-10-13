@@ -1384,14 +1384,14 @@ namespace openmittsu {
 				return false;
 			}
 
-			return (QDateTime::currentDateTime().toSecsSinceEpoch() - serverGroupLastFetched) <= maximalAgeInSeconds;
+			return ((QDateTime::currentDateTime().toMSecsSinceEpoch() / 1000) - serverGroupLastFetched) <= maximalAgeInSeconds;
 		}
-		
+
 		void SimpleDatabase::setServerGroup(QString const& serverGroup) {
 			setOptionInternal(QStringLiteral("serverGroup"), serverGroup, true);
-			setOptionInternal(QStringLiteral("serverGroupLastFetched"), QString::number(QDateTime::currentDateTime().toSecsSinceEpoch()), true);
+			setOptionInternal(QStringLiteral("serverGroupLastFetched"), QString::number((QDateTime::currentDateTime().toMSecsSinceEpoch() / 1000)), true);
 		}
-		
+
 		QString SimpleDatabase::getServerGroup() {
 			if (!hasOptionInternal(QStringLiteral("serverGroup"), true)) {
 				return QString();
