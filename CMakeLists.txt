@@ -181,23 +181,23 @@ if(CMAKE_COMPILER_IS_GNUCC)
 	set(CMAKE_CXX_STANDARD_REQUIRED ON)
 elseif(MSVC)
 	set(OPENMITTSU_COMPILED_BY "MSVC")
-	
+
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /GL")
 	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG")
-	
+
 	add_definitions(/DSODIUM_STATIC)
 	add_definitions(/DNOMINMAX)
 	add_definitions(/DWIN32_LEAN_AND_MEAN)
-	
+
 	# Disable "C:\Program Files (x86)\Windows Kits\8.1\Include\um\DbgHelp.h(1544): warning C4091: 'typedef ': ignored on left of '' when no variable is declared"
 	add_definitions(/wd4091)
 	add_definitions(/wd4250)
 	# Warns if a switch does not cover all cases
 	#add_definitions(/we4061) # Disabled because it blows out in the std library
-	
+
 	# Because Google is not merging the fix
 	add_definitions(/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
-	
+
 	# Enable Multi-Processor Compilation by default
 	add_definitions(/MP)
 else(CLANG)
@@ -288,10 +288,10 @@ endif()
 try_run(OPENMITTSU_MAKE_UNIQUE_TEST_RUN_RESULT OPENMITTSU_MAKE_UNIQUE_TEST_COMPILE_RESULT "${PROJECT_BINARY_DIR}/testMakeUnique" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_make_unique.cpp" COMPILE_OUTPUT_VARIABLE OPENMITTSU_MAKE_UNIQUE_TEST_COMPILE_OUTPUT RUN_OUTPUT_VARIABLE OPENMITTSU_MAKE_UNIQUE_TEST_RUN_OUTPUT)
 if (NOT ${OPENMITTSU_MAKE_UNIQUE_TEST_COMPILE_RESULT})
 	set(OPENMITTSU_CONFIG_HAVE_MAKE_UNIQUE OFF)
-	message(STATUS "Compiler does NOT support std::make_unique, using replacement. ${OPENMITTSU_MAKE_UNIQUE_TEST_COMPILE_OUTPUT}") 
+	message(STATUS "Compiler does NOT support std::make_unique, using replacement. ${OPENMITTSU_MAKE_UNIQUE_TEST_COMPILE_OUTPUT}")
 elseif(${OPENMITTSU_MAKE_UNIQUE_TEST_RUN_RESULT} EQUAL 0)
 	set(OPENMITTSU_CONFIG_HAVE_MAKE_UNIQUE ON)
-	message(STATUS "Compiler does support std::make_unique.") 
+	message(STATUS "Compiler does support std::make_unique.")
 else()
 	set(OPENMITTSU_CONFIG_HAVE_MAKE_UNIQUE OFF)
 	message(FATAL_ERROR "Failed to run std::make_unique testing program, please contact a developer! Extended Information: ${OPENMITTSU_MAKE_UNIQUE_TEST_RUN_RESULT} - ${OPENMITTSU_MAKE_UNIQUE_TEST_RUN_OUTPUT}") 
@@ -640,20 +640,20 @@ if (MSVC)
 	endif()
 
 	set(OPENMITTSU_WINDEPLOYQT_EXE "${Qt5Core_DIR}/../../../bin/windeployqt.exe")
-	
+
 	if ("$ENV{VCINSTALLDIR}" STREQUAL "")
 		get_filename_component(OPENMITTSU_VCINSTALLDIR "${CMAKE_LINKER}" DIRECTORY)
 		file(TO_NATIVE_PATH "${OPENMITTSU_VCINSTALLDIR}/../../" VCINSTALLDIR_NATIVEPATH)
-		
+
 		STRING(REGEX REPLACE "^(.+)\\\\VC\\\\.+" "\\1\\\\VC" VCINSTALLDIR_NATIVEPATH ${VCINSTALLDIR_NATIVEPATH})
-		
+
 		set(ENV{VCINSTALLDIR} "${VCINSTALLDIR_NATIVEPATH}")
 	endif()
-	
+
 	add_custom_command(TARGET openMittsu POST_BUILD COMMAND "${CMAKE_SOURCE_DIR}/cmake/callwindeployqt.bat" "${OPENMITTSU_WINDEPLOYQT_EXE}" --dir "${PROJECT_BINARY_DIR}/windeployqt" "$<TARGET_FILE:openMittsu>" "$ENV{VCINSTALLDIR}" COMMENT "Preparing Qt runtime dependencies")
 	install(DIRECTORY "${PROJECT_BINARY_DIR}/windeployqt/" DESTINATION bin COMPONENT OpenMittsu)
 endif(MSVC)
-   
+
 if (NOT "${OPENMITTSU_ADDITIONAL_INSTALL_FILES}" STREQUAL "")
 	foreach(ADD_INST_FILE IN LISTS OPENMITTSU_ADDITIONAL_INSTALL_FILES)
 		if(IS_DIRECTORY "${ADD_INST_FILE}")
@@ -722,11 +722,6 @@ if (LSB_RELEASE_CMD)
 			OUTPUT_VARIABLE DISTRO_CODENAME
 			OUTPUT_STRIP_TRAILING_WHITESPACE)
 endif ()
-if (DISTRO_CODENAME)
-	set(CPACK_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION}~${DISTRO_CODENAME})
-else ()
-	message(STATUS "Could not find lsb_release nor is DISTRO_CODENAME set.")
-endif ()
 
 # libqrencode4 for everything but stretch
 set(LIBQRENCODE_PACKAGE_NAME "libqrencode4")
@@ -742,6 +737,12 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A chat client for Threema-style chat netw
 set(CPACK_DEBIAN_PACKAGE_SECTION "net")
 set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "")
 set(DEBIAN_PACKAGE_BUILDS_DEPENDS "debhelper (>= 9), cmake (>= 3), qt5-qmake, qtbase5-dev, qtbase5-dev-tools, qtmultimedia5-dev, libsodium-dev, libqrencode-dev, gcc, g++")
+
+if (DISTRO_CODENAME)
+	set(CPACK_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION}~${DISTRO_CODENAME})
+else ()
+	message(STATUS "Could not find lsb_release nor is DISTRO_CODENAME set.")
+endif ()
 
 find_program(DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
 if (DPKG_PROGRAM)
