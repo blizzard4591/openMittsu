@@ -17,7 +17,14 @@ namespace openmittsu {
 			// Intentionally left empty.
 		}
 
-		MessageTime::MessageTime(QByteArray const& messageTimeBytes) : messageTime(QDateTime::fromTime_t(openmittsu::utility::Endian::uint32FromLittleEndianToHostEndian(openmittsu::utility::ByteArrayConversions::convert4ByteQByteArrayToQuint32(messageTimeBytes)))), null(false) {
+		MessageTime::MessageTime(QByteArray const& messageTimeBytes) : messageTime(
+#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
+			QDateTime::fromSecsSinceEpoch(
+#else
+			QDateTime::fromMSecsSinceEpoch(1000 *
+#endif
+			
+			openmittsu::utility::Endian::uint32FromLittleEndianToHostEndian(openmittsu::utility::ByteArrayConversions::convert4ByteQByteArrayToQuint32(messageTimeBytes)))), null(false) {
 			// Intentionally left empty.
 		}
 
@@ -54,7 +61,13 @@ namespace openmittsu {
 		}
 
 		QByteArray MessageTime::getMessageTimeAsByteArray() const {
-			return openmittsu::utility::ByteArrayConversions::convertQuint32toQByteArray(openmittsu::utility::Endian::uint32FromHostEndianToLittleEndian(static_cast<quint32>(messageTime.toTime_t())));
+			return openmittsu::utility::ByteArrayConversions::convertQuint32toQByteArray(openmittsu::utility::Endian::uint32FromHostEndianToLittleEndian(static_cast<quint32>(
+#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
+				messageTime.toSecsSinceEpoch()
+#else
+				(messageTime.toMSecsSinceEpoch() / 1000)
+#endif
+				)));
 		}
 
 		int MessageTime::getSizeOfMessageTimeInBytes() {

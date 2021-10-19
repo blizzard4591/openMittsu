@@ -90,7 +90,7 @@ namespace openmittsu {
 			OPENMITTSU_CONNECT(m_volumeSlider, valueChanged(int), this, onVolumeSliderValueChanged());
 
 			QBoxLayout *layout = new QHBoxLayout;
-			layout->setMargin(0);
+			layout->setContentsMargins(0, 0, 0, 0);
 			layout->addWidget(m_stopButton);
 			layout->addWidget(m_playButton);
 			layout->addWidget(m_muteButton);
