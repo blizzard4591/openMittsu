@@ -913,19 +913,19 @@ namespace openmittsu {
 			switch (socketError) {
 			case QAbstractSocket::RemoteHostClosedError:
 				LOGGER_DEBUG("SocketError: RemoteHostClosedError");
-				emit connectToFinished(-1, tr("Remote Host Closed Connection."));
+				emit connectToFinished(-1, tr("Remote Host (%1:%2) closed connection.").arg(m_socket->peerName()).arg(m_socket->peerPort()));
 				break;
 			case QAbstractSocket::HostNotFoundError:
 				LOGGER_DEBUG("SocketError: HostNotFoundError");
-				emit connectToFinished(-2, tr("The host was not found. Please check the host name and port settings."));
+				emit connectToFinished(-2, tr("The host '%1:%2' was not found. Please check the host name and port settings.").arg(m_socket->peerName()).arg(m_socket->peerPort()));
 				break;
 			case QAbstractSocket::ConnectionRefusedError:
 				LOGGER_DEBUG("SocketError: ConnectionRefusedError");
-				emit connectToFinished(-3, tr("The connection was refused by the peer. Make sure the server is running, and check that the host name and port settings are correct."));
+				emit connectToFinished(-3, tr("The connection to %1:%2 was refused by the peer. Make sure the server is running, and check that the host name and port settings are correct.").arg(m_socket->peerName()).arg(m_socket->peerPort()));
 				break;
 			default:
 				LOGGER_DEBUG("SocketError: {}", m_socket->errorString().toStdString());
-				emit connectToFinished(-4, tr("The following error occurred: %1.").arg(m_socket->errorString()));
+				emit connectToFinished(-4, tr("The following error occurred while connecting to %1:%2: %3.").arg(m_socket->peerName()).arg(m_socket->peerPort()).arg(m_socket->errorString()));
 			}
 		}
 
