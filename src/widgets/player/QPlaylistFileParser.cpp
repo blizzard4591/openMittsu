@@ -620,6 +620,6 @@ void QPlaylistFileParser::handleError()
 
 QT_END_NAMESPACE
 
-#include "moc_qplaylistfileparser.cpp"
+#include "moc_QPlaylistFileParser.cpp"
 
 #endif
