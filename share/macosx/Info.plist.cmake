@@ -29,6 +29,6 @@
   <key>CFBundleVersion</key>
   <string>${OPENMITTSU_VERSION_NUM}</string>
   <key>NSHumanReadableCopyright</key>
-  <string>Copyright 2015-2020 Philipp Berger</string>
+  <string>Copyright 2015-2025 Jana Berger</string>
   </dict>
 </plist>

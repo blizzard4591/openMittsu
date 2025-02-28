@@ -15,7 +15,7 @@
 **     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
 **
-** This file was modified by Philipp Berger for the openMittsu project.
+** This file was modified by Jana Berger for the openMittsu project.
 ** 2016/12: Bug fixes and refactoring.
 **
 **

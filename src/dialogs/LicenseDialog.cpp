@@ -19,7 +19,7 @@ namespace openmittsu {
 			QString const licenseText = QString("<h2>OpenMittsu</h2><br><br>")
 				.append(tr("An open source chat client for Threema-style end-to-end encrypted chat networks."))
 				.append(QStringLiteral("<br><br>"))
-				.append(tr("Copyright (C) 2015-18 <a href=\"https://www.philippberger.de/\">Philipp Berger</a>"))
+				.append(tr("Copyright (C) 2015-25 <a href=\"https://www.janaberger.de/\">Jana Berger</a>"))
 				.append(QStringLiteral("<br>"))
 				.append(tr("This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version."))
 				.append(QStringLiteral("<br><br>"))
