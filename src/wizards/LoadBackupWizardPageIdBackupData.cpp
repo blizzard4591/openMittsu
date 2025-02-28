@@ -1,7 +1,7 @@
 #include "src/wizards/LoadBackupWizardPageIdBackupData.h"
 #include "ui_LoadBackupWizardPageIdBackupData.h"
 
-#include <QRegExp>
+#include <QRegularExpression>
 
 #include "src/exceptions/IllegalArgumentException.h"
 #include "src/utility/MakeUnique.h"

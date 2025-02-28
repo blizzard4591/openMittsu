@@ -4,6 +4,7 @@
 #include <QtGlobal>
 #include <QMetaType>
 #include <QString>
+#include <QVariant>
 
 namespace QtPrivate {
 	template <typename T> struct QVariantValueHelper;
@@ -14,6 +15,9 @@ namespace openmittsu {
 
 		class Location {
 		public:
+			// For QVariant
+			Location();
+
 			Location(double latitude, double longitude, double height, QString const& address, QString const& description);
 
 			QString toDatabaseString() const;
@@ -31,16 +35,18 @@ namespace openmittsu {
 			bool operator ==(Location const& other) const;
 			bool operator !=(Location const& other) const;
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 			friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<Location, true>;
+#else
+			friend class QVariant;
+#endif
 			friend struct QtPrivate::QVariantValueHelper<Location>;
 		private:
-			const double m_latitude;
-			const double m_longitude;
-			const double m_height;
-			QString const m_address;
-			QString const m_description;
-
-			Location();
+			double m_latitude;
+			double m_longitude;
+			double m_height;
+			QString m_address;
+			QString m_description;
 		};
 
 	}

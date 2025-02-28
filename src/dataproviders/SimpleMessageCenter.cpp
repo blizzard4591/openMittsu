@@ -14,7 +14,7 @@
 #include <QBuffer>
 #include <QFile>
 #include <QTextStream>
-#include <QRegExp>
+#include <QRegularExpression>
 
 #include <memory>
 

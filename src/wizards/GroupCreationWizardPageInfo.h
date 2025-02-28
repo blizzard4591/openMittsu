@@ -3,7 +3,7 @@
 
 #include <QWizardPage>
 #include <QListWidget>
-#include <QRegExpValidator>
+#include <QRegularExpressionValidator>
 
 #include <QSet>
 
@@ -34,7 +34,7 @@ namespace openmittsu {
 			QHash<openmittsu::protocol::ContactId, openmittsu::database::ContactData> const m_knownIdentities;
 			std::unique_ptr<openmittsu::dataproviders::GroupCreationProcessor> const m_groupCreationProcessor;
 
-			QRegExpValidator* m_nameValidator;
+			QRegularExpressionValidator* m_nameValidator;
 			bool m_isSelectionOkay;
 		};
 	}

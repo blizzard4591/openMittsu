@@ -53,7 +53,11 @@
 
 #include <QWidget>
 #include <QMediaPlayer>
+#if defined(QT_VERSION) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 #include <QMediaPlaylist>
+#else
+#include "src/widgets/player/QMediaPlaylist.h"
+#endif
 
 #include <QString>
 #include <QTemporaryFile>
@@ -70,6 +74,7 @@ class QSlider;
 class QVideoProbe;
 class QVideoWidget;
 class QAudioProbe;
+class QAudioOutput;
 QT_END_NAMESPACE
 
 namespace Ui {
@@ -108,7 +113,11 @@ namespace openmittsu {
 			void playlistPositionChanged(int);
 
 			void statusChanged(QMediaPlayer::MediaStatus status);
+#if defined(QT_VERSION) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 			void stateChanged(QMediaPlayer::State state);
+#else
+			void stateChanged(QMediaPlayer::PlaybackState state);
+#endif
 			void bufferingProgress(int progress);
 			void videoAvailableChanged(bool available);
 
@@ -123,6 +132,9 @@ namespace openmittsu {
 			bool m_useVideoWidget;
 
 			QMediaPlayer *m_player = nullptr;
+#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+			QAudioOutput* m_audioOutput = nullptr;
+#endif
 			QMediaPlaylist *m_playlist = nullptr;
 			QVideoWidget *m_videoWidget = nullptr;
 			QLabel *m_coverLabel = nullptr;

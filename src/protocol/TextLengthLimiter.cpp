@@ -16,15 +16,15 @@ namespace openmittsu {
 					int currentLength = maxLengthInBytes;
 
 					// Check if the remainder fits
-					if (text.midRef(startPosition).toUtf8().size() <= maxLengthInBytes) {
+					if (text.mid(startPosition).toUtf8().size() <= maxLengthInBytes) {
 						result.append(text.mid(startPosition));
 						break;
 					}
 
-					QStringRef currentSubstring = text.midRef(startPosition, maxLengthInBytes);
+					QString currentSubstring = text.mid(startPosition, maxLengthInBytes);
 					while (currentSubstring.toUtf8().size() > maxLengthInBytes) {
 						--currentLength;
-						currentSubstring = text.midRef(startPosition, currentLength);
+						currentSubstring = text.mid(startPosition, currentLength);
 					}
 
 					int const splitPositionSpace = currentSubstring.lastIndexOf(' ');
@@ -36,13 +36,13 @@ namespace openmittsu {
 
 					// -1: failed, 0: first character. Does not help when splitting.
 					if (splitPosition <= 0) {
-						result.append(currentSubstring.toString());
+						result.append(currentSubstring);
 						startPosition += currentLength;
 					} else {
 						++splitPosition;
 						currentLength = splitPosition - startPosition;
-						currentSubstring = text.midRef(startPosition, currentLength);
-						result.append(currentSubstring.toString());
+						currentSubstring = text.mid(startPosition, currentLength);
+						result.append(currentSubstring);
 						startPosition = splitPosition;
 					}
 				}

@@ -6,10 +6,6 @@
 #include <QMenu>
 #include <QMimeData>
 
-#include <QMediaService>
-#include <QMediaPlaylist>
-#include <QVideoProbe>
-#include <QAudioProbe>
 #include <QMediaMetaData>
 #include <QtWidgets>
 

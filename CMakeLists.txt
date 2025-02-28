@@ -99,24 +99,13 @@ endif(OPENMITTSU_DISABLE_VERSION_UPDATE_CHECK)
 set(OPENMITTSU_CPP_TESTS_BASE_PATH "${PROJECT_SOURCE_DIR}/test")
 
 # Find the Qt library
-if (NOT APPLE)
-	find_package(Qt5Core REQUIRED)
-	find_package(Qt5Gui REQUIRED)
-	find_package(Qt5Widgets REQUIRED)
-	find_package(Qt5Network REQUIRED)
-	find_package(Qt5Multimedia REQUIRED)
-	find_package(Qt5MultimediaWidgets REQUIRED)
-	find_package(Qt5Sql REQUIRED)
-else()
-	find_package(Qt5Core REQUIRED HINTS /usr/local/Cellar/qt/*/lib/cmake ENV PATH)
-	find_package(Qt5Gui REQUIRED HINTS /usr/local/Cellar/qt/*/lib/cmake ENV PATH)
-	find_package(Qt5Widgets REQUIRED HINTS /usr/local/Cellar/qt/*/lib/cmake ENV PATH)
-	find_package(Qt5Network REQUIRED HINTS /usr/local/Cellar/qt/*/lib/cmake ENV PATH)
-	find_package(Qt5Multimedia REQUIRED HINTS /usr/local/Cellar/qt/*/lib/cmake ENV PATH)
-	find_package(Qt5MultimediaWidgets REQUIRED HINTS /usr/local/Cellar/qt/*/lib/cmake ENV PATH)
-	find_package(Qt5Sql REQUIRED HINTS /usr/local/Cellar/qt/*/lib/cmake ENV PATH)
-	find_package(Qt5MacExtras REQUIRED HINTS /usr/local/Cellar/qt/*/lib/cmake ENV PATH)
+set(OPENMITTSU_QT_COMPONENTS "Core Gui Widgets Network Multimedia MultimediaWidgets Sql")
+if (APPLE)
+	set(OPENMITTSU_QT_COMPONENTS "${OPENMITTSU_QT_COMPONENTS} MacExtras")
 endif()
+
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Gui Widgets Network Multimedia MultimediaWidgets Sql)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui Widgets Network Multimedia MultimediaWidgets Sql)
 
 if (NOT WIN32)
 	find_package(PkgConfig REQUIRED)
@@ -135,7 +124,7 @@ find_package(Threads REQUIRED)
 
 if(APPLE)
 	set(CMAKE_MACOSX_RPATH TRUE)
-	find_program(MACDEPLOYQT_EXE macdeployqt HINTS /usr/local/opt/qt5/bin ENV PATH)
+	find_program(MACDEPLOYQT_EXE macdeployqt HINTS /usr/local/opt/qt5/bin /usr/local/opt/qt6/bin ENV PATH)
 	if(NOT MACDEPLOYQT_EXE)
 		message(FATAL_ERROR "macdeployqt is required to build in macOS")
 	else()
@@ -465,14 +454,25 @@ file(GLOB_RECURSE OPENMITTSU_SOURCES_C ${PROJECT_SOURCE_DIR}/src/*.c)
 file(GLOB_RECURSE OPENMITTSU_FORMS ${PROJECT_SOURCE_DIR}/src/*.ui)
 file(GLOB_RECURSE OPENMITTSU_RESOURCES ${PROJECT_SOURCE_DIR}/resources/*.qrc)
 
-QT5_WRAP_UI(OPENMITTSU_FORMS_HEADERS ${OPENMITTSU_FORMS})
-QT5_WRAP_UI(OPENMITTSU_FORMS_HEADERS_WIZARDS ${OPENMITTSU_FORMS_WIZARDS})
-QT5_WRAP_UI(OPENMITTSU_FORMS_HEADERS_WIDGETS_CHAT ${OPENMITTSU_FORMS_WIDGETS_CHAT})
-QT5_WRAP_UI(OPENMITTSU_FORMS_HEADERS_WIDGETS_PLAYER ${OPENMITTSU_FORMS_WIDGETS_PLAYER})
-QT5_WRAP_UI(OPENMITTSU_FORMS_HEADERS_WIDGETS ${OPENMITTSU_FORMS_WIDGETS})
-QT5_WRAP_UI(OPENMITTSU_FORMS_HEADERS_DIALOGS ${OPENMITTSU_FORMS_DIALOGS})
-QT5_WRAP_UI(OPENMITTSU_FORMS_HEADERS_UPDATER ${OPENMITTSU_FORMS_UPDATER})
-QT5_ADD_RESOURCES(OPENMITTSU_RESOURCESOURCES ${OPENMITTSU_RESOURCES})
+if ("${QT_VERSION_MAJOR}" STREQUAL "5")
+	QT5_WRAP_UI(OPENMITTSU_FORMS_HEADERS ${OPENMITTSU_FORMS})
+	QT5_WRAP_UI(OPENMITTSU_FORMS_HEADERS_WIZARDS ${OPENMITTSU_FORMS_WIZARDS})
+	QT5_WRAP_UI(OPENMITTSU_FORMS_HEADERS_WIDGETS_CHAT ${OPENMITTSU_FORMS_WIDGETS_CHAT})
+	QT5_WRAP_UI(OPENMITTSU_FORMS_HEADERS_WIDGETS_PLAYER ${OPENMITTSU_FORMS_WIDGETS_PLAYER})
+	QT5_WRAP_UI(OPENMITTSU_FORMS_HEADERS_WIDGETS ${OPENMITTSU_FORMS_WIDGETS})
+	QT5_WRAP_UI(OPENMITTSU_FORMS_HEADERS_DIALOGS ${OPENMITTSU_FORMS_DIALOGS})
+	QT5_WRAP_UI(OPENMITTSU_FORMS_HEADERS_UPDATER ${OPENMITTSU_FORMS_UPDATER})
+	QT5_ADD_RESOURCES(OPENMITTSU_RESOURCESOURCES ${OPENMITTSU_RESOURCES})
+else()
+	qt_wrap_ui(OPENMITTSU_FORMS_HEADERS ${OPENMITTSU_FORMS})
+	qt_wrap_ui(OPENMITTSU_FORMS_HEADERS_WIZARDS ${OPENMITTSU_FORMS_WIZARDS})
+	qt_wrap_ui(OPENMITTSU_FORMS_HEADERS_WIDGETS_CHAT ${OPENMITTSU_FORMS_WIDGETS_CHAT})
+	qt_wrap_ui(OPENMITTSU_FORMS_HEADERS_WIDGETS_PLAYER ${OPENMITTSU_FORMS_WIDGETS_PLAYER})
+	qt_wrap_ui(OPENMITTSU_FORMS_HEADERS_WIDGETS ${OPENMITTSU_FORMS_WIDGETS})
+	qt_wrap_ui(OPENMITTSU_FORMS_HEADERS_DIALOGS ${OPENMITTSU_FORMS_DIALOGS})
+	qt_wrap_ui(OPENMITTSU_FORMS_HEADERS_UPDATER ${OPENMITTSU_FORMS_UPDATER})
+	qt_add_resources(OPENMITTSU_RESOURCESOURCES ${OPENMITTSU_RESOURCES})
+endif()
 
 # Sources of Build Tools
 file(GLOB_RECURSE OPENMITTSU_BUILDTOOLS_VERSIONINFO_HEADERS ${PROJECT_SOURCE_DIR}/buildTools/versionInfo/*.h)
@@ -598,12 +598,12 @@ if (OPENMITTSU_ENABLE_TESTS AND NOT CMAKE_BUILD_TYPE MATCHES "^Gentoo")
 	add_dependencies(openMittsuTests gmock gtest)
 endif()
 
-# Use the required modules from Qt 5.
-target_link_libraries(openMittsuCore Qt5::Core Qt5::Network Qt5::Multimedia Qt5::Sql)
-target_link_libraries(openMittsu openMittsuCore Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network Qt5::Multimedia Qt5::MultimediaWidgets Qt5::Sql)
-target_link_libraries(openMittsuVersionInfo Qt5::Core)
+# Use the required modules from Qt 5/Qt 6.
+target_link_libraries(openMittsuCore Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Multimedia Qt${QT_VERSION_MAJOR}::Sql)
+target_link_libraries(openMittsu openMittsuCore Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Multimedia Qt${QT_VERSION_MAJOR}::MultimediaWidgets Qt${QT_VERSION_MAJOR}::Sql)
+target_link_libraries(openMittsuVersionInfo Qt${QT_VERSION_MAJOR}::Core)
 if (OPENMITTSU_ENABLE_TESTS)
-	target_link_libraries(openMittsuTests openMittsuCore Qt5::Core Qt5::Network Qt5::Multimedia Qt5::MultimediaWidgets Qt5::Sql gmock gtest Threads::Threads)
+	target_link_libraries(openMittsuTests openMittsuCore Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Multimedia Qt${QT_VERSION_MAJOR}::MultimediaWidgets Qt${QT_VERSION_MAJOR}::Sql gmock gtest Threads::Threads)
 endif (OPENMITTSU_ENABLE_TESTS)
 
 # Link against libc++abi if requested.
@@ -635,6 +635,16 @@ if (OPENMITTSU_ENABLE_TESTS)
 		COMPONENT OpenMittsu)
 endif (OPENMITTSU_ENABLE_TESTS)
 
+# Only available starting from Qt6.3
+if (("${QT_VERSION_MAJOR}" STREQUAL "6") AND (DEFINED Qt6Core_FOUND) AND (DEFINED Qt6Core_VERSION) AND (Qt6Core_VERSION VERSION_GREATER 6.3.0))
+	message(STATUS "Using Qt6.3+ way of deploying...")
+	qt_generate_deploy_app_script(
+		TARGET openMittsu
+		OUTPUT_SCRIPT deploy_script
+		NO_UNSUPPORTED_PLATFORM_ERROR
+	)
+endif()
+
 if (MSVC)
 	# Custom target for packaging.
 	if(OPENMITTSU_USE_NSIS)
@@ -643,7 +653,7 @@ if (MSVC)
 		set(CPACK_GENERATOR "ZIP")
 	endif()
 
-	set(OPENMITTSU_WINDEPLOYQT_EXE "${Qt5Core_DIR}/../../../bin/windeployqt.exe")
+	set(OPENMITTSU_WINDEPLOYQT_EXE "${Qt${QT_VERSION_MAJOR}Core_DIR}/../../../bin/windeployqt.exe")
 
 	if ("$ENV{VCINSTALLDIR}" STREQUAL "")
 		get_filename_component(OPENMITTSU_VCINSTALLDIR "${CMAKE_LINKER}" DIRECTORY)
@@ -653,7 +663,6 @@ if (MSVC)
 
 		set(ENV{VCINSTALLDIR} "${VCINSTALLDIR_NATIVEPATH}")
 	endif()
-
 	add_custom_command(TARGET openMittsu POST_BUILD COMMAND "${CMAKE_SOURCE_DIR}/cmake/callwindeployqt.bat" "${OPENMITTSU_WINDEPLOYQT_EXE}" --dir "${PROJECT_BINARY_DIR}/windeployqt" "$<TARGET_FILE:openMittsu>" "$ENV{VCINSTALLDIR}" COMMENT "Preparing Qt runtime dependencies")
 	install(DIRECTORY "${PROJECT_BINARY_DIR}/windeployqt/" DESTINATION bin COMPONENT OpenMittsu)
 endif(MSVC)

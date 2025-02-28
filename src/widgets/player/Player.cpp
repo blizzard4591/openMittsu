@@ -54,10 +54,15 @@
 #include "src/widgets/player/PlaylistModel.h"
 #include "src/widgets/player/VideoWidget.h"
 
+#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+#include <QAudioOutput>
+#else
 #include <QMediaService>
 #include <QMediaPlaylist>
 #include <QVideoProbe>
 #include <QAudioProbe>
+#endif
+
 #include <QMediaMetaData>
 #include <QtWidgets>
 
@@ -75,7 +80,13 @@ namespace openmittsu {
 		Player::Player(bool useVideoWidget, QWidget *parent) : QWidget(parent), m_ui(std::make_unique<Ui::Player>()), m_useVideoWidget(useVideoWidget), m_tempFile(QDir::tempPath().append(QStringLiteral("/openmittsu_player_temp_XXXXXX.mp4"))) {
 			m_ui->setupUi(this);
 			m_player = new QMediaPlayer(this);
-#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
+
+#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+			m_audioOutput = new QAudioOutput(this);
+			m_player->setAudioOutput(m_audioOutput);
+#endif
+
+#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 			if (m_useVideoWidget) {
 				m_player->setAudioRole(QAudio::VideoRole);
 			} else {
@@ -85,7 +96,9 @@ namespace openmittsu {
 
 			// owned by PlaylistModel
 			m_playlist = new QMediaPlaylist();
+#if defined(QT_VERSION) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 			m_player->setPlaylist(m_playlist);
+#endif
 
 			OPENMITTSU_CONNECT(m_player, durationChanged(qint64), this, durationChanged(qint64));
 			OPENMITTSU_CONNECT(m_player, positionChanged(qint64), this, positionChanged(qint64));
@@ -118,8 +131,13 @@ namespace openmittsu {
 			OPENMITTSU_CONNECT(m_slider, sliderMoved(int), this, seek(int));
 
 			PlayerControls *controls = m_ui->playerControls;
+#if defined(QT_VERSION) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 			controls->setState(m_player->state());
 			controls->setVolume(m_player->volume());
+#else
+			controls->setState(m_player->playbackState());
+			controls->setVolume(m_audioOutput->volume());
+#endif
 			controls->setMuted(controls->isMuted());
 
 			OPENMITTSU_CONNECT(controls, play(), m_player, play());
@@ -168,7 +186,11 @@ namespace openmittsu {
 
 		void Player::paintEvent(QPaintEvent* event) {
 			QStyleOption opt;
+#if defined(QT_VERSION) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 			opt.init(this);
+#else
+			opt.initFrom(this);
+#endif
 			QPainter p(this);
 			style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 
@@ -181,12 +203,14 @@ namespace openmittsu {
 
 		void Player::addToPlaylist(const QList<QUrl> &urls) {
 			for (auto &url : urls) {
+#if defined(QT_VERSION) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 				m_playlist->addMedia(url);
+#endif
 			}
 		}
 
 		void Player::setCustomAudioRole(const QString &role) {
-#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 11, 0))
+#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 			m_player->setCustomAudioRole(role);
 #endif
 		}
@@ -204,6 +228,7 @@ namespace openmittsu {
 		}
 
 		void Player::metaDataChanged() {
+#if defined(QT_VERSION) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 			if (m_player->isMetaDataAvailable()) {
 				setTrackInfo(QString("%1 - %2")
 							 .arg(m_player->metaData(QMediaMetaData::AlbumArtist).toString())
@@ -217,6 +242,7 @@ namespace openmittsu {
 											: QPixmap());
 				}
 			}
+#endif
 		}
 
 		void Player::previousClicked() {
@@ -248,7 +274,9 @@ namespace openmittsu {
 
 			// handle status message
 			switch (status) {
+#if defined(QT_VERSION) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 				case QMediaPlayer::UnknownMediaStatus:
+#endif
 				case QMediaPlayer::NoMedia:
 				case QMediaPlayer::LoadedMedia:
 					setStatusInfo(QString());
@@ -258,10 +286,18 @@ namespace openmittsu {
 					break;
 				case QMediaPlayer::BufferingMedia:
 				case QMediaPlayer::BufferedMedia:
+#if defined(QT_VERSION) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 					setStatusInfo(tr("Buffering %1%").arg(m_player->bufferStatus()));
+#else
+					setStatusInfo(tr("Buffering %1%").arg(m_player->bufferProgress() * 100.0));
+#endif
 					break;
 				case QMediaPlayer::StalledMedia:
+#if defined(QT_VERSION) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 					setStatusInfo(tr("Stalled %1%").arg(m_player->bufferStatus()));
+#else
+					setStatusInfo(tr("Stalled %1%").arg(m_player->bufferProgress() * 100.0));
+#endif
 					break;
 				case QMediaPlayer::EndOfMedia:
 					QApplication::alert(this);
@@ -272,12 +308,21 @@ namespace openmittsu {
 			}
 		}
 
+#if defined(QT_VERSION) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 		void Player::stateChanged(QMediaPlayer::State state) {
 			if (state == QMediaPlayer::StoppedState) {
 
 			}
 			//
 		}
+#else
+		void Player::stateChanged(QMediaPlayer::PlaybackState state) {
+			if (state == QMediaPlayer::StoppedState) {
+
+			}
+			//
+		}
+#endif
 
 		void Player::play(QByteArray const& mp4Data) {
 			if (m_tempFile.open()) {

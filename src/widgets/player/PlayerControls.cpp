@@ -98,11 +98,11 @@ namespace openmittsu {
 			setLayout(layout);
 		}
 
-		QMediaPlayer::State PlayerControls::state() const {
+		OPENMITTSU_QT_SHIM_PLAYERSTATE PlayerControls::state() const {
 			return m_playerState;
 		}
 
-		void PlayerControls::setState(QMediaPlayer::State state) {
+		void PlayerControls::setState(OPENMITTSU_QT_SHIM_PLAYERSTATE state) {
 			if (state != m_playerState) {
 				m_playerState = state;
 

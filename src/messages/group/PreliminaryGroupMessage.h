@@ -24,7 +24,9 @@ namespace openmittsu {
 				GroupMessageContent const* getPreliminaryMessageContent() const;
 				QSet<openmittsu::protocol::ContactId> const& getRecipients() const;
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 				friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<PreliminaryGroupMessage, true>;
+#endif
 			private:
 				std::unique_ptr<PreliminaryGroupMessageHeader const> const m_preliminaryMessageHeader;
 				std::unique_ptr<GroupMessageContent const> const m_messageContent;

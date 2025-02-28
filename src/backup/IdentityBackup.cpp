@@ -140,11 +140,11 @@ namespace openmittsu {
 				randombytes_buf(&value, sizeof(uint32_t));
 				value = value % (26 + 26 + 10); // a-z, A-Z, 0-9
 				if (value < 26) {
-					result.append('A' + value);
+					result.append(QChar('A' + value));
 				} else if (value < 52) {
-					result.append('a' + (value - 26));
+					result.append(QChar('a' + (value - 26)));
 				} else {
-					result.append('0' + (value - 52));
+					result.append(QChar('0' + (value - 52)));
 				}
 			}
 

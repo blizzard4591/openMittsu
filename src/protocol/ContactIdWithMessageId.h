@@ -21,7 +21,9 @@ namespace openmittsu {
 
 			bool operator ==(ContactIdWithMessageId const& other) const;
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 			friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<ContactIdWithMessageId, true>;
+#endif
 		private:
 			ContactId const contact;
 			MessageId const messageId;

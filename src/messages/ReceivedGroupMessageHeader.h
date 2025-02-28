@@ -15,7 +15,9 @@ namespace openmittsu {
 
 			virtual openmittsu::protocol::GroupId const& getGroupId() const;
 			
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 			friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<ReceivedGroupMessageHeader, true>;
+#endif
 		private:
 			openmittsu::protocol::GroupId group;
 		};

@@ -3,7 +3,7 @@
 
 #include <QWizardPage>
 #include <QListWidget>
-#include <QRegExpValidator>
+#include <QRegularExpressionValidator>
 
 #include <memory>
 
@@ -30,7 +30,7 @@ namespace openmittsu {
 			std::unique_ptr<Ui::ContactEditWizardPageSelectContact> m_ui;
 			std::shared_ptr<openmittsu::dataproviders::ContactDataProvider> const m_contactDataProvider;
 
-			QRegExpValidator* m_nameValidator;
+			QRegularExpressionValidator* m_nameValidator;
 			bool m_isSelectionOkay;
 		};
 

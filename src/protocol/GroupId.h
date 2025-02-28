@@ -38,7 +38,9 @@ namespace openmittsu {
 			static GroupId fromData(QByteArray const& data);
 			static GroupId createRandomGroupId(ContactId const& owner);
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 			friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<GroupId, true>;
+#endif
 			friend class QHash<MessageId, GroupId>;
 		private:
 			ContactId owner;

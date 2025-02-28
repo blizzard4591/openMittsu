@@ -28,7 +28,11 @@
 #include <QBuffer>
 #include <QDateTime>
 #include <QtDebug>
+#if defined(QT_VERSION) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 #include <QTextCodec>
+#else
+#include <QStringConverter>
+#endif
 
 /*!
     \typedef QExifSRational
@@ -276,16 +280,24 @@ QExifValue::QExifValue( const QString &value, TextEncoding encoding )
         break;
     case JisEncoding:
         {
+#if defined(QT_VERSION) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
             QTextCodec *codec = QTextCodec::codecForName( "JIS X 0208" );
             if( codec )
                 d = new QExifUndefinedValuePrivate( QByteArray::fromRawData( "JIS\0\0\0\0\0", 8 ) + codec->fromUnicode( value ) );
+#else
+		throw;
+#endif
         }
         break;
     case UnicodeEncoding:
         {
-            QTextCodec *codec = QTextCodec::codecForName( "UTF-16" );
-            if( codec )
-                d = new QExifUndefinedValuePrivate( QByteArray::fromRawData( "UNICODE\0", 8 ) + codec->fromUnicode( value ) );
+#if defined(QT_VERSION) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+		QTextCodec* codec = QTextCodec::codecForName("UTF-16");
+		if (codec)
+			d = new QExifUndefinedValuePrivate(QByteArray::fromRawData("UNICODE\0", 8) + codec->fromUnicode(value));
+#else
+		throw;
+#endif
         }
         break;
     case UndefinedEncoding:
@@ -512,16 +524,24 @@ QString QExifValue::toString() const
                 return QString::fromUtf8( string.constData(), string.length() );
             case JisEncoding:
                 {
+#if defined(QT_VERSION) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
                     QTextCodec *codec = QTextCodec::codecForName( "JIS X 0208" );
                     if( codec )
                         return codec->toUnicode( string );
+#else
+				throw;
+#endif
                 }
             break;
             case UnicodeEncoding:
                 {
+#if defined(QT_VERSION) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
                     QTextCodec *codec = QTextCodec::codecForName( "UTF-16" );
                     if( codec )
                         return codec->toUnicode( string );
+#else
+				throw;
+#endif
                 }
             case UndefinedEncoding:
                 return QString::fromLocal8Bit( string.constData(), string.length() );

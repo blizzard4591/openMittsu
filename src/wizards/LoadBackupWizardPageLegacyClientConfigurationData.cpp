@@ -3,7 +3,7 @@
 
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QString>
 
 #include "src/exceptions/IllegalArgumentException.h"

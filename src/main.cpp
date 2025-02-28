@@ -13,16 +13,19 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Activate Scaling on High-DPI Devices.
-#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
+#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 	qputenv("QT_AUTO_SCREEN_SCALE_FACTOR", "1");
 	QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
 #else
 	qputenv("QT_DEVICE_PIXEL_RATIO", "auto");
 #endif
+
+#if defined(QT_VERSION) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 	QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps, true);
-	
+
 	// Set encoding
 	QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
+#endif
 
 	// Check for MacOSX Plugin directories
 	QDirIterator pluginDirIt("/usr/local/Cellar/qt5-sqlcipher");

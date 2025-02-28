@@ -33,7 +33,9 @@ namespace openmittsu {
 			static MessageTime now();
 			static MessageTime fromDatabase(qint64 msecs);
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 			friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<MessageTime, true>;
+#endif
 		private:
 			QDateTime messageTime;
 

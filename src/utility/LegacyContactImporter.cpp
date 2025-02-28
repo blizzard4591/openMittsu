@@ -8,7 +8,7 @@
 #include <QFile>
 #include <QSet>
 #include <QTextStream>
-#include <QRegExp>
+#include <QRegularExpression>
 
 namespace openmittsu {
 	namespace utility {
@@ -47,29 +47,34 @@ namespace openmittsu {
 				throw openmittsu::exceptions::IllegalArgumentException() << QString("Could not open the specified contacts file for reading: %1").arg(filename).toStdString();
 			}
 
-			QRegExp commentRegExp("^\\s*#.*$", Qt::CaseInsensitive, QRegExp::RegExp2);
-			QRegExp identityRegExp("^\\s*([A-Z0-9*][A-Z0-9]{7})\\s*:\\s*([a-fA-F0-9]{64})\\s*(?::\\s*(.*)\\s*)?$", Qt::CaseInsensitive, QRegExp::RegExp2);
-			QRegExp groupRegExp("^\\s*([a-fA-F0-9]{16})\\s*:\\s*([A-Z0-9*][A-Z0-9]{7})\\s*:\\s*([A-Z0-9*][A-Z0-9]{7}(?:\\s*,\\s*[A-Z0-9*][A-Z0-9]{7})*)\\s*:\\s*(.*)\\s*$", Qt::CaseInsensitive, QRegExp::RegExp2);
+			QRegularExpression commentRegExp("^\\s*#.*$", QRegularExpression::CaseInsensitiveOption);
+			QRegularExpression identityRegExp("^\\s*([A-Z0-9*][A-Z0-9]{7})\\s*:\\s*([a-fA-F0-9]{64})\\s*(?::\\s*(.*)\\s*)?$", QRegularExpression::CaseInsensitiveOption);
+			QRegularExpression groupRegExp("^\\s*([a-fA-F0-9]{16})\\s*:\\s*([A-Z0-9*][A-Z0-9]{7})\\s*:\\s*([A-Z0-9*][A-Z0-9]{7}(?:\\s*,\\s*[A-Z0-9*][A-Z0-9]{7})*)\\s*:\\s*(.*)\\s*$", QRegularExpression::CaseInsensitiveOption);
 
 			QTextStream in(&inputFile);
+#if defined(QT_VERSION) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 			in.setCodec("UTF-8"); // change the file codec to UTF-8.
+#endif
 			while (!in.atEnd()) {
 				QString line = in.readLine().trimmed();
-				if (line.isEmpty() || commentRegExp.exactMatch(line)) {
+				if (line.isEmpty() || commentRegExp.match(line).hasMatch()) {
 					continue;
-				} else if (identityRegExp.exactMatch(line)) {
-					openmittsu::protocol::ContactId const contactId(identityRegExp.cap(1));
-					openmittsu::crypto::PublicKey const publicKey = openmittsu::crypto::PublicKey::fromHexString(identityRegExp.cap(2));
-					QString const trimmedNickname = identityRegExp.cap(3).trimmed();
+				}
+				auto const identityRegExpMatch = identityRegExp.match(line);
+				auto const groupRegExpMatch = groupRegExp.match(line);
+				if (identityRegExpMatch.hasMatch()) {
+					openmittsu::protocol::ContactId const contactId(identityRegExpMatch.captured(1));
+					openmittsu::crypto::PublicKey const publicKey = openmittsu::crypto::PublicKey::fromHexString(identityRegExpMatch.captured(2));
+					QString const trimmedNickname = identityRegExpMatch.captured(3).trimmed();
 					contacts.insert(contactId, std::make_pair(publicKey, trimmedNickname));
-				} else if (groupRegExp.exactMatch(line)) {
-					openmittsu::protocol::ContactId const groupOwner(groupRegExp.cap(2));
-					QString const groupIdHexString(groupRegExp.cap(1));
+				} else if (groupRegExpMatch.hasMatch()) {
+					openmittsu::protocol::ContactId const groupOwner(groupRegExpMatch.captured(2));
+					QString const groupIdHexString(groupRegExpMatch.captured(1));
 					openmittsu::protocol::GroupId const groupId(groupOwner, groupIdHexString);
 #if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(5, 14, 0))
-					QStringList ids = groupRegExp.cap(3).split(',', Qt::SkipEmptyParts);
+					QStringList ids = groupRegExpMatch.captured(3).split(',', Qt::SkipEmptyParts);
 #else
-					QStringList ids = groupRegExp.cap(3).split(',', QString::SkipEmptyParts);
+					QStringList ids = groupRegExpMatch.captured(3).split(',', QString::SkipEmptyParts);
 #endif
 					QSet<openmittsu::protocol::ContactId> groupMembers;
 					QStringList::const_iterator it = ids.constBegin();
@@ -79,7 +84,7 @@ namespace openmittsu {
 						openmittsu::protocol::ContactId const memberId(trimmedId);
 						groupMembers.insert(memberId);
 					}
-					QString const groupName = groupRegExp.cap(4).trimmed();
+					QString const groupName = groupRegExpMatch.captured(4).trimmed();
 
 					groups.insert(groupId, std::make_pair(groupMembers, groupName));
 				}

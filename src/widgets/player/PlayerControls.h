@@ -51,6 +51,13 @@
 #ifndef OPENMITTSU_WIDGETS_PLAYER_PLAYERCONTROLS_H_
 #define OPENMITTSU_WIDGETS_PLAYER_PLAYERCONTROLS_H_
 
+#include <QtGlobal>
+#if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+#define OPENMITTSU_QT_SHIM_PLAYERSTATE QMediaPlayer::PlaybackState
+#else
+#define OPENMITTSU_QT_SHIM_PLAYERSTATE QMediaPlayer::State
+#endif
+
 #include <QMediaPlayer>
 #include <QWidget>
 
@@ -68,12 +75,12 @@ namespace openmittsu {
 		public:
 			explicit PlayerControls(QWidget* parent = nullptr);
 
-			QMediaPlayer::State state() const;
+			OPENMITTSU_QT_SHIM_PLAYERSTATE state() const;
 			int volume() const;
 			bool isMuted() const;
 
 		public slots:
-			void setState(QMediaPlayer::State state);
+			void setState(OPENMITTSU_QT_SHIM_PLAYERSTATE state);
 			void setVolume(int volume);
 			void setMuted(bool muted);
 
@@ -91,7 +98,7 @@ namespace openmittsu {
 			void onVolumeSliderValueChanged();
 
 		private:
-			QMediaPlayer::State m_playerState = QMediaPlayer::StoppedState;
+			OPENMITTSU_QT_SHIM_PLAYERSTATE m_playerState = QMediaPlayer::StoppedState;
 			bool m_playerMuted = false;
 			QAbstractButton *m_playButton = nullptr;
 			QAbstractButton *m_stopButton = nullptr;

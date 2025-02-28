@@ -34,7 +34,9 @@ namespace openmittsu {
 			bool operator !=(ContactId const& other) const;
 			bool operator <(ContactId const& other) const;
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 			friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<ContactId, true>;
+#endif
 		private:
 			quint64 contactId;
 		};

@@ -37,8 +37,12 @@ namespace openmittsu {
 
 			static MessageId random();
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 			friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<MessageId, true>;
 			friend class QVector<MessageId>;
+#else
+			friend class QList<MessageId>;
+#endif
 			friend class openmittsu::database::DatabaseWrapper;
 		private:
 			quint64 messageId;

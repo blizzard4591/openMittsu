@@ -45,7 +45,9 @@ namespace openmittsu {
 
 			virtual QByteArray toPacket() const;
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 			friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<FullMessageHeader, true>;
+#endif
 		private:
 			openmittsu::protocol::ContactId const sender;
 			openmittsu::protocol::ContactId const receiver;

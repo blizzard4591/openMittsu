@@ -21,7 +21,9 @@ namespace openmittsu {
 
 			static ContactIdList fromString(QString const& contactIdsString, QChar const& separator = QChar(';'));
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 			friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<ContactIdList, true>;
+#endif
 		private:
 			QSet<ContactId> const m_contactIds;
 

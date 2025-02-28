@@ -27,7 +27,9 @@ namespace openmittsu {
 			}
 
 			m_inputStream.setDevice(&m_inputFile);
+#if defined(QT_VERSION) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 			m_inputStream.setCodec("UTF-8");
+#endif
 
 			// parse header
 			m_headerOffsets = parseOffsets(m_inputStream.readLine());

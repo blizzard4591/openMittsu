@@ -21,7 +21,9 @@ namespace openmittsu {
 				PreliminaryContactMessageHeader const* getPreliminaryMessageHeader() const;
 				ContactMessageContent const* getPreliminaryMessageContent() const;
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 				friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<PreliminaryContactMessage, true>;
+#endif
 			private:
 				std::unique_ptr<PreliminaryContactMessageHeader const> const preliminaryMessageHeader;
 				std::unique_ptr<ContactMessageContent const> const messageContent;

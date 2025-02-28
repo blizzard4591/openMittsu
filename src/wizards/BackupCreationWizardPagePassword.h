@@ -2,7 +2,7 @@
 #define OPENMITTSU_WIZARDS_BACKUPCREATIONWIZARDPAGEPASSWORD_H_
 
 #include <QWizardPage>
-#include <QRegExpValidator>
+#include <QRegularExpressionValidator>
 
 #include <memory>
 
@@ -22,7 +22,7 @@ namespace openmittsu {
 			//bool isComplete() const override;
 		private:
 			std::unique_ptr<Ui::BackupCreationWizardPagePassword> m_ui;
-			QRegExpValidator* m_passwordValidator;
+			QRegularExpressionValidator* m_passwordValidator;
 		};
 
 	}

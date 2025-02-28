@@ -25,7 +25,9 @@ namespace openmittsu {
 			virtual MessageFlags const& getFlags() const;
 			virtual openmittsu::protocol::PushFromId const& getPushFromName() const;
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 			friend struct QtMetaTypePrivate::QMetaTypeFunctionHelper<ReceivedMessageHeader, true>;
+#endif
 		private:
 			openmittsu::protocol::ContactId sender;
 			openmittsu::protocol::ContactId receiver;

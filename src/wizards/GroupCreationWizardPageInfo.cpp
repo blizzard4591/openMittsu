@@ -15,7 +15,7 @@ namespace openmittsu {
 		GroupCreationWizardPageInfo::GroupCreationWizardPageInfo(QHash<openmittsu::protocol::ContactId, openmittsu::database::ContactData> const& knownIdentitiesWithNicknamesExcludingSelfContactId, std::unique_ptr<openmittsu::dataproviders::GroupCreationProcessor> groupCreationProcessor, QWidget* parent) : QWizardPage(parent), m_ui(std::make_unique<Ui::GroupCreationWizardPageInfo>()), m_knownIdentities(knownIdentitiesWithNicknamesExcludingSelfContactId), m_groupCreationProcessor(std::move(groupCreationProcessor)) {
 			m_ui->setupUi(this);
 
-			m_nameValidator = new QRegExpValidator(QRegExp(".+", Qt::CaseInsensitive, QRegExp::RegExp2), m_ui->edtName);
+			m_nameValidator = new QRegularExpressionValidator(QRegularExpression(".+", QRegularExpression::CaseInsensitiveOption), m_ui->edtName);
 			m_ui->edtName->setValidator(m_nameValidator);
 
 			m_ui->listWidget->clear();
