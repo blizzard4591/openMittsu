@@ -57,7 +57,7 @@ namespace openmittsu {
 					// Stopped for other reasons
 					receivedMessageAudioFile.reset();
 					if (audioOutput->error() != QAudio::NoError) {
-						LOGGER()->warn("Error while playing sound: {}", audioOutput->error());
+						LOGGER()->warn("Error while playing sound: {}", static_cast<int>(audioOutput->error()));
 					}
 					break;
 				default:
