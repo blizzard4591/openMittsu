@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1.0)
+cmake_minimum_required (VERSION 3.16.0)
 
 if(POLICY CMP0071)
 	cmake_policy(SET CMP0071 NEW)
@@ -172,12 +172,16 @@ include_directories("${PROJECT_SOURCE_DIR}/src")
 # Add SpgLog Includes
 include_directories("${SPDLOG_MODULE_BASEPATH}/include")
 
+# Force reading files as UTF-8 encoded in MSVC
+add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+
 if(CMAKE_COMPILER_IS_GNUCC)
 	set(OPENMITTSU_COMPILED_BY "GCC")
 	# Set standard flags for GCC
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -funroll-loops")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -pedantic")
-	set(CMAKE_CXX_STANDARD 14)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -pedantic")
+	set(CMAKE_CXX_STANDARD 17)
 	set(CMAKE_CXX_STANDARD_REQUIRED ON)
 elseif(MSVC)
 	set(OPENMITTSU_COMPILED_BY "MSVC")
@@ -211,11 +215,11 @@ else(CLANG)
 	else()
 		set(CLANG_STDLIB libc++)
 		# Set up some Xcode specific settings
-		set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++14")
+		set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++17")
 		set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
 	endif()
-	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -stdlib=${CLANG_STDLIB} -Wall -pedantic -Wno-unused-variable -ftemplate-depth=1024")
-	set(CMAKE_CXX_STANDARD 14)
+	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -stdlib=${CLANG_STDLIB} -Wall -pedantic -Wno-unused-variable -ftemplate-depth=1024")
+	set(CMAKE_CXX_STANDARD 17)
 	set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
