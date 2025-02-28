@@ -1,9 +1,0 @@
-[Desktop Entry]
-Name=OpenMittsu
-Comment=Instant messaging for Threema
-GenericName=Threema Instant Messenger
-Categories=Network;Chat;InstantMessaging;
-Type=Application
-Terminal=false
-Icon=openmittsu
-Exec=openmittsu
