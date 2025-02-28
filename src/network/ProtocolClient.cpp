@@ -1,5 +1,6 @@
 #include "src/network/ProtocolClient.h"
 
+#include <QtEndian>
 #include <QMutex>
 #include <QByteArray>
 
@@ -1033,13 +1034,31 @@ namespace openmittsu {
 
 			// Needs to be all zeros
 			QByteArray const authenticationAcknowledgmentDecrypted = m_cryptoBox->decryptFromServer(authenticationAcknowledgment);
-			QByteArray const authAllZeroes(PROTO_AUTHENTICATION_REPLY_LENGTH_BYTES, '\0');
-			if ((authenticationAcknowledgmentDecrypted.size() != PROTO_AUTHENTICATION_REPLY_LENGTH_BYTES) || (authenticationAcknowledgmentDecrypted != authAllZeroes)) {
-				LOGGER()->critical("Authentication acknowledgment has invalid size or is not all zero: {}", QString(authenticationAcknowledgmentDecrypted.toHex()).toStdString());
+			QByteArray const authReservedZeros(PROTO_AUTHENTICATION_REPLY_LENGTH_RESERVED_ZERO_BYTES, '\0');
+			if (authenticationAcknowledgmentDecrypted.size() != PROTO_AUTHENTICATION_REPLY_LENGTH_BYTES) {
+				LOGGER()->critical("Authentication acknowledgment has invalid size: {}", QString(authenticationAcknowledgmentDecrypted.toHex()).toStdString());
 				++failedReconnectAttempts;
-				emit connectToFinished(-19, "Authentication acknowledgment has invalid size or is not all zero.");
+				emit connectToFinished(-19, "Authentication acknowledgment has invalid size.");
 				return;
 			}
+
+			// Structure:
+			// 4 reserved zero bytes
+			// uint64_t little endian timestamp in milliseconds
+			// uint32_t little endian message queue length
+			if (authenticationAcknowledgmentDecrypted.left(PROTO_AUTHENTICATION_REPLY_LENGTH_RESERVED_ZERO_BYTES) != authReservedZeros) {
+				LOGGER()->critical("Authentication acknowledgment is missing the reserved zeros: {}", QString(authenticationAcknowledgmentDecrypted.toHex()).toStdString());
+				++failedReconnectAttempts;
+				emit connectToFinished(-19, "Authentication acknowledgment is missing the reserved zeros.");
+				return;
+			}
+
+			QByteArray const timestampData = authenticationAcknowledgmentDecrypted.mid(PROTO_AUTHENTICATION_REPLY_LENGTH_RESERVED_ZERO_BYTES, sizeof(quint64));
+			quint64 const timestampInMilliseconds = qFromLittleEndian<quint64>(reinterpret_cast<quint64 const*>(timestampData.data()));
+
+			QByteArray const messageQueueLengthData = authenticationAcknowledgmentDecrypted.mid(PROTO_AUTHENTICATION_REPLY_LENGTH_RESERVED_ZERO_BYTES + sizeof(quint64), sizeof(quint32));
+			quint32 const messageQueueLength = qFromLittleEndian<quint32>(reinterpret_cast<quint32 const*>(messageQueueLengthData.data()));
+			LOGGER()->info("Timestamp is {} (raw: {}), message queue length: {}", QDateTime::fromMSecsSinceEpoch(timestampInMilliseconds).toString(Qt::DateFormat::ISODateWithMs).toStdString(), timestampInMilliseconds, messageQueueLength);
 
 			LOGGER_DEBUG("Handshake finished!");
 			failedReconnectAttempts = 0;
