@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+	<id>openMittsu</id>
+	<metadata_license>GPL-2.0</metadata_license>
+	<project_license>GPL-2.0+</project_license>
+	<name>OpenMittsu</name>
+	<summary>Instant messaging for Threema</summary>
+	<description>
+		<p>A cross-platform open source implementation and desktop client for the Threema Messenger App.</p>
+	</description>
+	<launchable type="desktop-id">openMittsu.desktop</launchable>
+	<url type="homepage">https://github.com/blizzard4591/openMittsu</url>
+	<screenshots>
+		<screenshot type="default">
+			<image>https://github.com/blizzard4591/openMittsu/raw/master/screenshot1.jpg?raw=true</image>
+		</screenshot>
+	</screenshots>
+	<provides>
+		<id>openMittsu.desktop</id>
+	</provides>
+</component>

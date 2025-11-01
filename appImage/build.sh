@@ -12,20 +12,20 @@ cp ./build/openMittsu ./build/openMittsu.AppDir/usr/bin
 cp ./build/openMittsuTests ./build/openMittsu.AppDir/usr/bin
 cp ./build/openMittsuVersionInfo ./build/openMittsu.AppDir/usr/bin
 cp ./resources/icon.svg ./build/openMittsu.AppDir/openmittsu.svg
-cp ./appImage/openmittsu.desktop ./build/openMittsu.AppDir/openmittsu.desktop
+cp ./appImage/openmittsu.desktop ./build/openMittsu.AppDir/openMittsu.desktop
 
 echo "Directoy for qt5-sqlcipher in AppImage creation is $QSQLCIPHER_DIR"
 cp $QSQLCIPHER_DIR/libqsqlcipher.so ./build/openMittsu.AppDir/usr/lib/x86_64-linux-gnu/qt5/plugins/sqldrivers
 cp $QSQLCIPHER_DIR/libqsqlcipher.so ./build/openMittsu.AppDir/usr/plugins/sqldrivers
 
-wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
+wget -c https://github.com/$(wget -q https://github.com/probonopd/go-appimage/releases/expanded_assets/continuous -O - | grep "appimagetool-.*-x86_64.AppImage" | head -n 1 | cut -d '"' -f 2)
 
-if [ -f "linuxdeployqt" ] ; then
-    rm "linuxdeployqt"
+if [ -f "appimagetool" ] ; then
+    rm "appimagetool"
 fi
-mv linuxdeployqt-continuous-x86_64.AppImage linuxdeployqt
-chmod +x linuxdeployqt
+mv appimagetool-*.AppImage appimagetool
+chmod +x appimagetool
 
-LD_LIBRARY_PATH="" ./linuxdeployqt ./build/openMittsu.AppDir/usr/bin/openMittsu -appimage
+LD_LIBRARY_PATH="" ./appimagetool-*.AppImage -s deploy /build/openMittsu.AppDir/usr/share/applications/*.desktop # Bundle EVERYTHING
 echo "AppImages:"
 find . -type f -name '*.AppImage'
