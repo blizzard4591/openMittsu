@@ -55,7 +55,7 @@ namespace openmittsu {
 			QImageWriter writer(fileName);
 
 			if (!writer.write(m_image)) {
-				QMessageBox::information(this, QGuiApplication::applicationDisplayName(), tr("Error while saving image.\nCannot write file \"%1\": %2").arg(QDir::toNativeSeparators(fileName)), writer.errorString());
+				QMessageBox::information(this, QGuiApplication::applicationDisplayName(), tr("Error while saving image.\nCannot write file \"%1\": %2").arg(QDir::toNativeSeparators(fileName).arg(writer.errorString())));
 				return false;
 			}
 			return true;
