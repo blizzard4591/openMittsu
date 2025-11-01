@@ -79,7 +79,7 @@ namespace openmittsu {
 			return true;
 		}
 
-		uint qHash(ContactId const& key, uint seed) {
+		utility::QtHashSizeType qHash(ContactId const& key, utility::QtHashSizeType seed) {
 			return ::qHash(key.getContactId(), seed);
 		}
 

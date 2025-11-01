@@ -31,7 +31,7 @@ namespace openmittsu {
 			return (contact == other.contact) && (messageId == other.messageId);
 		}
 
-		uint qHash(ContactIdWithMessageId const& key, uint seed) {
+		utility::QtHashSizeType qHash(ContactIdWithMessageId const& key, utility::QtHashSizeType seed) {
 			return qHash(key.getMessageId(), seed) ^ qHash(key.getContactId(), seed);
 		}
 	}

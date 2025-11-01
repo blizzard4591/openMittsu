@@ -8,6 +8,7 @@
 #include <QString>
 
 #include "src/protocol/ProtocolSpecs.h"
+#include "src/utility/QtVersions.h"
 
 namespace openmittsu {
 	namespace protocol {
@@ -41,7 +42,7 @@ namespace openmittsu {
 			quint64 contactId;
 		};
 
-		uint qHash(ContactId const& key, uint seed);
+		utility::QtHashSizeType qHash(ContactId const& key, utility::QtHashSizeType seed);
 	}
 }
 

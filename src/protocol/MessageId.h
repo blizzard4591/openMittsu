@@ -9,6 +9,7 @@
 #include <QString>
 
 #include "src/protocol/ProtocolSpecs.h"
+#include "src/utility/QtVersions.h"
 
 namespace openmittsu {
 	namespace database {
@@ -52,7 +53,7 @@ namespace openmittsu {
 			MessageId();
 		};
 
-		uint qHash(MessageId const& key, uint seed);
+		utility::QtHashSizeType qHash(MessageId const& key, utility::QtHashSizeType seed);
 	}
 }
 

@@ -3,6 +3,7 @@
 #include "src/protocol/ProtocolSpecs.h"
 #include "src/utility/ByteArrayConversions.h"
 #include "src/utility/Endian.h"
+#include "src/utility/QtVersions.h"
 
 #include <QHash>
 
@@ -90,7 +91,7 @@ namespace openmittsu {
 			return null;
 		}
 
-		uint qHash(MessageTime const& key, uint seed) {
+		utility::QtHashSizeType qHash(MessageTime const& key, utility::QtHashSizeType seed) {
 			return qHash(key.getTime(), seed);
 		}
 	}

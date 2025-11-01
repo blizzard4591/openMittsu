@@ -4,6 +4,8 @@
 #include <QMetaType>
 #include <QHash>
 
+#include "src/utility/QtVersions.h"
+
 namespace openmittsu {
 	namespace options {
 		enum class Options {
@@ -25,7 +27,7 @@ namespace openmittsu {
 			BINARY_MAINWINDOW_STATE
 		};
 
-		uint qHash(openmittsu::options::Options const& key, uint seed);
+		utility::QtHashSizeType qHash(openmittsu::options::Options const& key, utility::QtHashSizeType seed);
 	}
 }
 

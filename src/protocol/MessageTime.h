@@ -1,6 +1,8 @@
 #ifndef OPENMITTSU_PROTOCOL_MESSAGETIME_H_
 #define OPENMITTSU_PROTOCOL_MESSAGETIME_H_
 
+#include "src/utility/QtVersions.h"
+
 #include <cstdint>
 #include <QtGlobal>
 #include <QDateTime>
@@ -42,7 +44,7 @@ namespace openmittsu {
 			bool null;
 		};
 
-		uint qHash(MessageTime const& key, uint seed);
+		utility::QtHashSizeType qHash(MessageTime const& key, utility::QtHashSizeType seed);
 	}
 }
 

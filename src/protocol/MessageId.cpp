@@ -83,7 +83,7 @@ namespace openmittsu {
 		}
 
 
-		uint qHash(MessageId const& key, uint seed) {
+		utility::QtHashSizeType qHash(MessageId const& key, utility::QtHashSizeType seed) {
 			return ::qHash(key.getMessageId(), seed);
 		}
 

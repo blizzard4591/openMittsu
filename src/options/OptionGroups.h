@@ -1,6 +1,8 @@
 #ifndef OPENMITTSU_OPTIONS_OPTIONGROUPS_H_
 #define OPENMITTSU_OPTIONS_OPTIONGROUPS_H_
 
+#include "src/utility/QtVersions.h"
+
 #include <QHash>
 #include <QMetaType>
 
@@ -13,7 +15,7 @@ namespace openmittsu {
 			GROUP_INTERNAL
 		};
 
-		uint qHash(openmittsu::options::OptionGroups const& key, uint seed);
+		utility::QtHashSizeType qHash(openmittsu::options::OptionGroups const& key, utility::QtHashSizeType seed);
 	}
 }
 

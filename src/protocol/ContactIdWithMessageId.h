@@ -3,6 +3,8 @@
 
 #include "src/protocol/ContactId.h"
 #include "src/protocol/MessageId.h"
+#include "src/utility/QtVersions.h"
+
 #include <QtGlobal>
 #include <QByteArray>
 #include <QMetaType>
@@ -31,7 +33,7 @@ namespace openmittsu {
 			ContactIdWithMessageId();
 		};
 
-		uint qHash(ContactIdWithMessageId const& key, uint seed);
+		utility::QtHashSizeType qHash(ContactIdWithMessageId const& key, utility::QtHashSizeType seed);
 	}
 }
 

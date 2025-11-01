@@ -3,6 +3,7 @@
 #include "src/exceptions/IllegalArgumentException.h"
 #include "src/protocol/ProtocolSpecs.h"
 #include "src/utility/ByteArrayConversions.h"
+#include "src/utility/QtVersions.h"
 #include "sodium.h"
 
 #include <QHash>
@@ -96,7 +97,7 @@ namespace openmittsu {
 			return QString("%1 : %2").arg(QString(openmittsu::utility::ByteArrayConversions::convertQuint64toQByteArray(groupId).toHex())).arg(owner.toQString());
 		}
 
-		uint qHash(GroupId const& key, uint seed) {
+		utility::QtHashSizeType qHash(GroupId const& key, utility::QtHashSizeType seed) {
 			return ::qHash(key.getGroupId(), seed) ^ ::qHash(key.getOwner().getContactId(), seed);
 		}
 	}
