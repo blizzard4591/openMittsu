@@ -9,6 +9,7 @@
 #include <QByteArray>
 #include <QHash>
 #include <QMultiHash>
+#include <QtVersionChecks>
 
 #include <memory>
 
@@ -53,7 +54,12 @@ namespace openmittsu {
 			QString getOptionKeyForOption(Options const& option) const;
 			OptionTypes getOptionTypeForOption(Options const& option) const;
 
-			QMetaType::Type optionTypeToMetaType(OptionTypes const& type) const;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+			QMetaType
+#else
+			int
+#endif
+			optionTypeToMetaType(OptionTypes const& type) const;
 
 			openmittsu::database::DatabaseWrapper m_database;
 			QHash<QString, QString> m_databaseCache;

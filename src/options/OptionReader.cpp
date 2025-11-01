@@ -98,13 +98,30 @@ namespace openmittsu {
 			target->registerOption(OptionGroups::GROUP_INTERNAL, Options::FILEPATH_LEGACY_CLIENT_CONFIGURATION, QStringLiteral("options/database/clientConfigurationFile"), "", "", OptionTypes::TYPE_FILEPATH, OptionStorage::STORAGE_SIMPLE);
 		}
 
-		QMetaType::Type OptionReader::optionTypeToMetaType(OptionTypes const& type) const {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+		QMetaType
+#else
+		int
+#endif
+			OptionReader::optionTypeToMetaType(OptionTypes const& type) const {
 			if (type == OptionTypes::TYPE_BINARY) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+				return QMetaType(QMetaType::QByteArray);
+#else
 				return QMetaType::Type::QByteArray;
+#endif
 			} else if (type == OptionTypes::TYPE_BOOL) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+				return QMetaType(QMetaType::Bool);
+#else
 				return QMetaType::Type::Bool;
+#endif
 			} else if (type == OptionTypes::TYPE_FILEPATH) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+				return QMetaType(QMetaType::QString);
+#else
 				return QMetaType::Type::QString;
+#endif
 			} else {
 				throw openmittsu::exceptions::InternalErrorException() << "Unknown OptionReader::OptionTypes Key with value " << static_cast<int>(type) << "!";
 			}
@@ -232,7 +249,12 @@ namespace openmittsu {
 				QSettings* settings = getSettings();
 				if (settings->contains(optionName)) {
 					QVariant const v = settings->value(optionName);
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+					if (v.canConvert(QMetaType(QMetaType::Bool))) {
+#else
 					if (v.canConvert(QMetaType::Type::Bool)) {
+#endif
 						return v.toBool();
 					} else {
 						throw openmittsu::exceptions::InternalErrorException() << "Can not convert requested option " << static_cast<int>(option) << " to bool!";
@@ -273,7 +295,11 @@ namespace openmittsu {
 				QSettings* settings = getSettings();
 				if (settings->contains(optionName)) {
 					QVariant const v = settings->value(optionName);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+					if (v.canConvert(QMetaType(QMetaType::QString))) {
+#else
 					if (v.canConvert(QMetaType::Type::QString)) {
+#endif
 						return v.toString();
 					} else {
 						throw openmittsu::exceptions::InternalErrorException() << "Can not convert requested option " << static_cast<int>(option) << " to QString!";
@@ -315,7 +341,11 @@ namespace openmittsu {
 				QSettings* settings = getSettings();
 				if (settings->contains(optionName)) {
 					QVariant const v = settings->value(optionName);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+					if (v.canConvert(QMetaType(QMetaType::QByteArray))) {
+#else
 					if (v.canConvert(QMetaType::Type::QByteArray)) {
+#endif
 						return v.toByteArray();
 					} else {
 						throw openmittsu::exceptions::InternalErrorException() << "Can not convert requested option " << static_cast<int>(option) << " to QByteArray!";
