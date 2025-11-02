@@ -40,6 +40,7 @@ option(OPENMITTSU_USE_LIBCXX "Sets whether the standard library is libc++." OFF)
 option(OPENMITTSU_DEBUG "Sets whether debug checks, assertions and logging should be turned on. Has no effect on builds under MSVC besides turning on debug logging level." OFF)
 option(OPENMITTSU_DISABLE_VERSION_UPDATE_CHECK "Disables the version check on start-up. Useful for custom builds or added privacy." OFF)
 option(OPENMITTSU_ENABLE_TESTS "Enables tests." ON)
+option(OPENMITTSU_SYSTEM_GTEST "Use system provided googletest libs instead of bundled" OFF)
 option(OPENMITTSU_USE_NSIS "Use NSIS generator to produce a Windows installer." OFF)
 option(OPENMITTSU_WITH_APP_BUNDLE "Enable Application Bundle for macOS" ON)
 
@@ -312,8 +313,7 @@ include_directories("${PROJECT_BINARY_DIR}/include")
 # Google Testing Framework
 #
 ##########################################################
-# In Gentoo Linux, googletest libs are installed as dependency (dev-cpp/gtest)
-if (OPENMITTSU_ENABLE_TESTS AND NOT CMAKE_BUILD_TYPE MATCHES "^Gentoo")
+if (OPENMITTSU_ENABLE_TESTS AND NOT OPENMITTSU_SYSTEM_GTEST)
 	# Download and unpack googletest at configure time
 	configure_file("${PROJECT_SOURCE_DIR}/cmake/GoogleTest.cmake.in" googletest-download/CMakeLists.txt)
 	execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
@@ -593,7 +593,7 @@ if (OPENMITTSU_CONFIG_HAVE_LIBQRENCODE)
 	target_link_libraries(openMittsu ${Libqrencode_LIBRARIES})
 endif()
 
-if (OPENMITTSU_ENABLE_TESTS AND NOT CMAKE_BUILD_TYPE MATCHES "^Gentoo")
+if (OPENMITTSU_ENABLE_TESTS AND NOT OPENMITTSU_SYSTEM_GTEST)
 	add_dependencies(openMittsuTests gmock gtest)
 endif()
 
