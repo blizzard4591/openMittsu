@@ -1,9 +1,5 @@
 cmake_minimum_required (VERSION 3.16.0)
 
-if(POLICY CMP0071)
-	cmake_policy(SET CMP0071 NEW)
-endif()
-
 # Set project name
 project (openMittsu CXX C)
 
