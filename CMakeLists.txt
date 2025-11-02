@@ -474,8 +474,8 @@ else()
 	qt_add_resources(OPENMITTSU_RESOURCESOURCES ${OPENMITTSU_RESOURCES})
 endif()
 
-set_property(SOURCE ${PROJECT_SOURCE_DIR}/src/widgets/player/qmediaplaylist_p.h PROPERTY SKIP_AUTOMOC ON)
-set_property(SOURCE ${PROJECT_SOURCE_DIR}/src/widgets/player/QMediaPlaylist.h PROPERTY SKIP_AUTOMOC ON)
+#set_property(SOURCE ${PROJECT_SOURCE_DIR}/src/widgets/player/QMediaPlaylist_p.h PROPERTY SKIP_AUTOMOC ON)
+#set_property(SOURCE ${PROJECT_SOURCE_DIR}/src/widgets/player/QMediaPlaylist.h PROPERTY SKIP_AUTOMOC ON)
 
 # Sources of Build Tools
 file(GLOB_RECURSE OPENMITTSU_BUILDTOOLS_VERSIONINFO_HEADERS ${PROJECT_SOURCE_DIR}/buildTools/versionInfo/*.h)

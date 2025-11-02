@@ -5,7 +5,7 @@
 
 #if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
 
-#include "src/widgets/player/qmediaplaylist_p.h"
+#include "src/widgets/player/QMediaPlaylist_p.h"
 #include "src/widgets/player/QPlaylistFileParser.h"
 
 #include <QCoreApplication>
@@ -609,5 +609,5 @@ void QMediaPlaylist::setCurrentIndex(int playlistPosition) {
 
 QT_END_NAMESPACE
 
-#include "moc_qmediaplaylist.cpp"
+#include "moc_QMediaPlaylist.cpp"
 #endif
