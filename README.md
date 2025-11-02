@@ -8,7 +8,7 @@ openMittsu is governed by the GNU GPL v2.0 license, but includes works from diff
 
 ## Requirements
  - [CMake](https://cmake.org/)
- - [Qt 5](https://www.qt.io/)
+ - [Qt 5 or 6](https://www.qt.io/)
  - [LibSodium >= 1.0.12](https://download.libsodium.org/doc/)
  - [LibQrEncode](https://fukuchi.org/works/qrencode/) or [LibQrEncode-win32](https://github.com/blizzard4591/qrencode-win32)
  - [LibSqlCipher >= 3.4.1](https://github.com/blizzard4591/sqlcipher)
@@ -16,11 +16,15 @@ openMittsu is governed by the GNU GPL v2.0 license, but includes works from diff
  
 ## Supported Platforms
 Currently, the application has been built and tested on:
- - Windows 10 using Visual Studio 2019
- - Debian 11 using GCC 10 (AMD64)
+ - Windows 11 using Visual Studio 2022
+ - Debian 13 using GCC 14 (AMD64)
  - Raspian 11 using GCC 10 (ARMv7)
  
 Other platforms should work with no or minimal changes.
+
+## Project Status
+Since the official Threema Desktop and web clients support perfect forward secrecy and a lot more features than this client in general, this project is in maintenance-only mode.
+Bugs will be fixed, but no new features will be implemented.
 
 ## Binaries
 Currently we only provide binaries for  the following platforms:
