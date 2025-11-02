@@ -5,8 +5,8 @@
 
 #if defined(QT_VERSION) && (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
 
-#include "QMediaPlaylist_p.h"
-#include "qplaylistfileparser.h"
+#include "src/widgets/player/qmediaplaylist_p.h"
+#include "src/widgets/player/QPlaylistFileParser.h"
 
 #include <QCoreApplication>
 #include <QFile>

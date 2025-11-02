@@ -18,8 +18,8 @@
 // We mean it.
 //
 
-#include "qmediaplaylist.h"
-#include "qplaylistfileparser.h"
+#include "src/widgets/player/QMediaPlaylist.h"
+#include "src/widgets/player/QPlaylistFileParser.h"
 
 #include <QUrl>
 

@@ -18,7 +18,7 @@
 // We mean it.
 //
 
-#include "qmediaplaylist.h"
+#include "src/widgets/player/QMediaPlaylist.h"
 #include "qtmultimediaglobal.h"
 
 #include <QObject>

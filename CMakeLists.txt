@@ -47,7 +47,7 @@ option(OPENMITTSU_ENABLE_TESTS "Enables tests." ON)
 option(OPENMITTSU_USE_NSIS "Use NSIS generator to produce a Windows installer." OFF)
 option(OPENMITTSU_WITH_APP_BUNDLE "Enable Application Bundle for macOS" ON)
 
-SET(OPENMITTSU_CMAKE_SEARCH_PATH "C:/Qt/5.15.2/msvc2019_64" CACHE PATH "Additional Qt5 search path" )
+SET(OPENMITTSU_CMAKE_SEARCH_PATH "C:/Qt/6.10.0/msvc2022_64" CACHE PATH "Additional Qt5 search path" )
 set(OPENMITTSU_CUSTOM_VERSION_STRING "" CACHE STRING "Disables Git version number checking and uses the custom string instead. Should be of the form 0.1.2-34-567890ab, i.e. major.minor.patch-commitsSinceTag-shortHash")
 
 SET(CMAKE_PREFIX_PATH "${OPENMITTSU_CMAKE_SEARCH_PATH}/lib/cmake/")
@@ -473,6 +473,9 @@ else()
 	qt_wrap_ui(OPENMITTSU_FORMS_HEADERS_UPDATER ${OPENMITTSU_FORMS_UPDATER})
 	qt_add_resources(OPENMITTSU_RESOURCESOURCES ${OPENMITTSU_RESOURCES})
 endif()
+
+set_property(SOURCE ${PROJECT_SOURCE_DIR}/src/widgets/player/qmediaplaylist_p.h PROPERTY SKIP_AUTOMOC ON)
+set_property(SOURCE ${PROJECT_SOURCE_DIR}/src/widgets/player/QMediaPlaylist.h PROPERTY SKIP_AUTOMOC ON)
 
 # Sources of Build Tools
 file(GLOB_RECURSE OPENMITTSU_BUILDTOOLS_VERSIONINFO_HEADERS ${PROJECT_SOURCE_DIR}/buildTools/versionInfo/*.h)

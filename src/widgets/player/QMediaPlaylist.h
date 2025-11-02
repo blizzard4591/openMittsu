@@ -1,8 +1,7 @@
 // Copyright (C) 2016 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
-#ifndef QMEDIAPLAYLIST_H
-#define QMEDIAPLAYLIST_H
+#pragma once
 
 #include <QtGlobal>
 
@@ -89,6 +88,6 @@ private:
 };
 
 QT_END_NAMESPACE
+#else
+#include <QMediaPlaylist>
 #endif
-
-#endif // QMEDIAPLAYLIST_H

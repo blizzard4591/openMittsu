@@ -1,6 +1,7 @@
 #include "src/network/ProtocolClient.h"
 
 #include <QtEndian>
+#include <QtVersionChecks>
 #include <QMutex>
 #include <QByteArray>
 
@@ -144,7 +145,11 @@ namespace openmittsu {
 				}
 
 				OPENMITTSU_CONNECT(m_socket.get(), readyRead(), this, socketOnReadyRead());
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+				OPENMITTSU_CONNECT(m_socket.get(), errorOccurred(QAbstractSocket::SocketError), this, socketOnError(QAbstractSocket::SocketError));
+#else
 				OPENMITTSU_CONNECT(m_socket.get(), error(QAbstractSocket::SocketError), this, socketOnError(QAbstractSocket::SocketError));
+#endif
 				OPENMITTSU_CONNECT(m_socket.get(), connected(), this, socketConnected());
 				OPENMITTSU_CONNECT(m_socket.get(), disconnected(), this, socketDisconnected());
 
@@ -172,7 +177,11 @@ namespace openmittsu {
 		void ProtocolClient::teardown() {
 			if (m_isSetupDone) {
 				OPENMITTSU_DISCONNECT(m_socket.get(), readyRead(), this, socketOnReadyRead());
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+				OPENMITTSU_DISCONNECT(m_socket.get(), errorOccurred(QAbstractSocket::SocketError), this, socketOnError(QAbstractSocket::SocketError));
+#else
 				OPENMITTSU_DISCONNECT(m_socket.get(), error(QAbstractSocket::SocketError), this, socketOnError(QAbstractSocket::SocketError));
+#endif
 				OPENMITTSU_DISCONNECT(m_socket.get(), connected(), this, socketConnected());
 				OPENMITTSU_DISCONNECT(m_socket.get(), disconnected(), this, socketDisconnected());
 

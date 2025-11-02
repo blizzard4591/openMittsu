@@ -23,12 +23,14 @@ namespace openmittsu {
 			format.setByteOrder(QAudioFormat::LittleEndian);
 			format.setSampleType(QAudioFormat::SignedInt);
 			audioOutput = std::make_unique<QAudioOutput>(format, this);
-#else
-			format.setSampleFormat(QAudioFormat::Int16);
-			audioOutput = std::make_unique<QAudioOutput>(this);
-#endif
 
 			OPENMITTSU_CONNECT(audioOutput.get(), stateChanged(QAudio::State), this, audioOutputOnStateChanged(QAudio::State));
+#else
+			format.setSampleFormat(QAudioFormat::Int16);
+			audioSink = std::make_unique<QAudioSink>(format, this);
+
+			OPENMITTSU_CONNECT(audioSink.get(), stateChanged(QAudio::State), this, audioOutputOnStateChanged(QAudio::State));
+#endif
 
 			receivedMessageAudioFile.setFileName(":/audio/ReceivedMessage.wav");
 			if (!receivedMessageAudioFile.open(QFile::ReadOnly)) {
@@ -39,6 +41,8 @@ namespace openmittsu {
 		AudioNotification::~AudioNotification() {
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 			audioOutput->stop();
+#else
+			audioSink->stop();
 #endif
 			if (receivedMessageAudioFile.isOpen()) {
 				receivedMessageAudioFile.close();
@@ -46,18 +50,22 @@ namespace openmittsu {
 		}
 
 		void AudioNotification::playNotification() {
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 			// Do not restart audio, let it play.
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 			if (audioOutput->state() == QAudio::State::ActiveState) {
+#else
+			if (audioSink->state() == QAudio::State::ActiveState) {
+#endif
 				LOGGER_DEBUG("Wanted to play audio for new message, but it was already active.");
 				return;
 			}
-#endif
 
 			// Play audio for incoming and unseen message.
 			receivedMessageAudioFile.reset();
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 			audioOutput->start(&receivedMessageAudioFile);
+#else
+			audioSink->start(&receivedMessageAudioFile);
 #endif
 		}
 
@@ -67,6 +75,8 @@ namespace openmittsu {
 					// Finished playing (no more data)
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 					audioOutput->stop();
+#else
+					audioSink->stop();
 #endif
 					receivedMessageAudioFile.reset();
 					break;
@@ -76,6 +86,10 @@ namespace openmittsu {
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 					if (audioOutput->error() != QAudio::NoError) {
 						LOGGER()->warn("Error while playing sound: {}", static_cast<int>(audioOutput->error()));
+					}
+#else
+					if (audioSink->error() != QAudio::NoError) {
+						LOGGER()->warn("Error while playing sound: {}", static_cast<int>(audioSink->error()));
 					}
 #endif
 					break;
