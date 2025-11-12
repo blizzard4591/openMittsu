@@ -8,7 +8,7 @@ openMittsu is governed by the GNU GPL v2.0 license, but includes works from diff
 
 ## Requirements
  - [CMake](https://cmake.org/)
- - [Qt 5 or 6](https://www.qt.io/)
+ - [Qt 6](https://www.qt.io/)
  - [LibSodium >= 1.0.12](https://download.libsodium.org/doc/)
  - [LibQrEncode](https://fukuchi.org/works/qrencode/) or [LibQrEncode-win32](https://github.com/blizzard4591/qrencode-win32)
  - [LibSqlCipher >= 3.4.1](https://github.com/blizzard4591/sqlcipher)
@@ -25,21 +25,6 @@ Other platforms should work with no or minimal changes.
 ## Project Status
 Since the official Threema Desktop and web clients support perfect forward secrecy and a lot more features than this client in general, this project is in maintenance-only mode.
 Bugs will be fixed, but no new features will be implemented.
-
-## Binaries
-Currently we only provide binaries for  the following platforms:
- - [Windows 32bit (x86) and 64bit (x64)](https://downloads.openmittsu.de/) – Scroll down to find the latest build. Do not forget to install the Visual Studio Redistributable (`vcredist_x64.exe`).
- - Linux-bases systems using an [AppImage](https://appimage.org/): Download from [Downloads.OpenMittsu.de](https://downloads.openmittsu.de/AppImage/OpenMittsu-x86_64.AppImage). 
-	Do not forget to update the AppImage every now and then!
- - Debian 11 (on amd64 and armhf) using our APT repository:
-
-	1. First, add the GPG key for the repository:
-		```wget -O - https://packages.openmittsu.de/openmittsu.packages.gpg.key | sudo apt-key add -```
-	2. Now, add the repository. As root or using sudo, create a file called "openmittsu.list" in `/etc/apt/sources.list.d/` with the following contents:
-		```deb https://packages.openmittsu.de/apt/debian bullseye main```
-	3. You can now install (or update) openMittsu using:
-		```sudo apt-get update```
-		```sudo apt-get install openmittsu```
 
 ## How to use
 The application stores your ID, contacts and messages in a database.
